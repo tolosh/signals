@@ -1,7 +1,7 @@
 // Mock of openapi.yaml for the Lovable front ends (SIG-11). Routes come from the contract and
 // responses from fixtures.ts. It is stateless: writes return a fixture and change nothing.
 import { readFileSync } from "node:fs";
-import { createServer, type Server, type ServerResponse } from "node:http";
+import { createServer, type Server } from "node:http";
 import { pathToFileURL } from "node:url";
 import { parse } from "yaml";
 import { fixtures, IDS, variants } from "./fixtures.js";
@@ -15,6 +15,8 @@ type Route = {
   literal: boolean;
   operations: Record<string, Operation>;
 };
+export type MockResponse = { status: number; headers: Record<string, string>; body: string };
+export type MockHandler = (method: string, path: string, prefer?: string) => MockResponse;
 
 function loadRoutes(): Route[] {
   const doc = parse(readFileSync("openapi.yaml", "utf8")) as {
@@ -36,31 +38,28 @@ function loadRoutes(): Route[] {
   return routes.sort((a, b) => Number(b.literal) - Number(a.literal));
 }
 
-function sendError(res: ServerResponse, status: number, code: string, message: string) {
-  res.writeHead(status, { "content-type": "application/json" });
-  res.end(JSON.stringify({ error: { code, message } }));
-}
+const CORS = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-headers": "authorization,content-type,idempotency-key,prefer",
+  "access-control-allow-methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+};
+const JSON_TYPE = { "content-type": "application/json" };
+
+const error = (status: number, code: string, message: string): MockResponse => ({
+  status,
+  headers: { ...CORS, ...JSON_TYPE },
+  body: JSON.stringify({ error: { code, message } }),
+});
 
 const successStatus = (op: Operation) =>
   Number(Object.keys(op.responses).find((code) => /^[23]/.test(code)));
 
-export function createMockServer(): Server {
+export function createMockHandler(): MockHandler {
   const routes = loadRoutes();
-  return createServer((req, res) => {
-    res.setHeader("access-control-allow-origin", "*");
-    res.setHeader(
-      "access-control-allow-headers",
-      "authorization,content-type,idempotency-key,prefer",
-    );
-    res.setHeader("access-control-allow-methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
-    if (req.method === "OPTIONS") {
-      res.writeHead(204);
-      res.end();
-      return;
-    }
+  return (rawMethod, path, prefer) => {
+    const method = rawMethod.toLowerCase();
+    if (method === "options") return { status: 204, headers: CORS, body: "" };
 
-    const path = new URL(req.url ?? "/", "http://mock").pathname;
-    const method = (req.method ?? "GET").toLowerCase();
     let route: Route | undefined;
     let match: RegExpExecArray | null = null;
     for (const candidate of routes) {
@@ -70,10 +69,10 @@ export function createMockServer(): Server {
         break;
       }
     }
-    if (!route || !match) return sendError(res, 404, "not_found", "No such path");
+    if (!route || !match) return error(404, "not_found", "No such path");
 
     const op = route.operations[method];
-    if (!op) return sendError(res, 405, "method_not_allowed", "Method not allowed");
+    if (!op) return error(405, "method_not_allowed", "Method not allowed");
 
     const key = `${method} ${route.template}`;
     const params = { ...match.groups };
@@ -83,28 +82,36 @@ export function createMockServer(): Server {
     // A plain fixture is keyed by template, so its path IDs are checked against the known set.
     const unknownId =
       typeof fixture !== "function" && Object.values(params).some((value) => !IDS.has(value));
-    if (body === undefined || unknownId) return sendError(res, 404, "not_found", "No such record");
+    if (body === undefined || unknownId) return error(404, "not_found", "No such record");
 
-    const prefer = /example=(\w+)/.exec(String(req.headers.prefer ?? ""))?.[1];
-    if (prefer && variants[key]?.[prefer]) body = variants[key][prefer];
+    const variant = /example=(\w+)/.exec(prefer ?? "")?.[1];
+    if (variant && variants[key]?.[variant]) body = variants[key][variant];
 
     const status = successStatus(op);
-    if (status === 204) {
-      res.writeHead(204);
-      res.end();
-    } else if (status === 302) {
-      res.writeHead(302, { location: (body as { redirect: string }).redirect });
-      res.end();
-    } else if (path.endsWith(".pdf")) {
-      res.writeHead(status, { "content-type": "application/pdf" });
-      res.end("%PDF-1.7\n% Mock credit file\n");
-    } else if (path.endsWith(".csv")) {
-      res.writeHead(status, { "content-type": "text/csv" });
-      res.end((body as { csv: string }).csv);
-    } else {
-      res.writeHead(status, { "content-type": "application/json" });
-      res.end(JSON.stringify(body));
+    if (status === 204) return { status, headers: CORS, body: "" };
+    if (status === 302) {
+      const location = (body as { redirect: string }).redirect;
+      return { status, headers: { ...CORS, location }, body: "" };
     }
+    if (path.endsWith(".pdf")) {
+      const headers = { ...CORS, "content-type": "application/pdf" };
+      return { status, headers, body: "%PDF-1.7\n% Mock credit file\n" };
+    }
+    if (path.endsWith(".csv")) {
+      const headers = { ...CORS, "content-type": "text/csv" };
+      return { status, headers, body: (body as { csv: string }).csv };
+    }
+    return { status, headers: { ...CORS, ...JSON_TYPE }, body: JSON.stringify(body) };
+  };
+}
+
+export function createMockServer(): Server {
+  const handle = createMockHandler();
+  return createServer((req, res) => {
+    const path = new URL(req.url ?? "/", "http://mock").pathname;
+    const out = handle(req.method ?? "GET", path, String(req.headers.prefer ?? ""));
+    res.writeHead(out.status, out.headers);
+    res.end(out.body);
   });
 }
 

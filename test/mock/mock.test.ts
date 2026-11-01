@@ -13,16 +13,22 @@ const ajv = new Ajv2020({ strict: false, allErrors: true });
 addFormats.default(ajv);
 ajv.addSchema(doc as object, "openapi");
 
-let server: Server;
+let server: Server | undefined;
 let base: string;
 beforeAll(async () => {
+  // MOCK_BASE_URL runs the same tests against the hosted mock.
+  if (process.env.MOCK_BASE_URL) {
+    base = process.env.MOCK_BASE_URL;
+    return;
+  }
   server = createMockServer();
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-  base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  const local = server;
+  await new Promise<void>((resolve) => local.listen(0, "127.0.0.1", resolve));
+  base = `http://127.0.0.1:${(local.address() as AddressInfo).port}`;
 });
 afterAll(() => {
-  server.close();
-  server.closeAllConnections();
+  server?.close();
+  server?.closeAllConnections();
 });
 
 const readJson = (path: string) =>
