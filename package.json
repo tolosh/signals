@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "check:pr-title": "node scripts/check-pr-title.mjs"
+    "check:pr-title": "node scripts/check-pr-title.mjs",
+    "mock": "tsx src/mock/server.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -21,6 +22,7 @@
     "ajv-formats": "3.0.1",
     "eslint": "10.14.0",
     "prettier": "3.9.10",
+    "tsx": "4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1",
     "vitest": "5.0.5",
