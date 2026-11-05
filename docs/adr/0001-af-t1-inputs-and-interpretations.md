@@ -1,6 +1,6 @@
 # ADR 0001: AF-T1 inputs and ratio interpretations
 
-Status: proposed for review on SIG-15 · 5 November 2026
+Status: I-1 accepted (Colin, 5 November 2026); I-2 to I-7 proposed for review on SIG-15
 
 Product Specification 6.1 and 6.5 define the ratios and publish AF-T1's outputs. The
 specification is the source of truth; this record only lists where the engine had to interpret
@@ -24,7 +24,8 @@ figure; other inputs could too, so AF-T1 tests the arithmetic, not how inputs ar
 
 ## Interpretations
 
-- **I-1 Repayments are whole dollars.** No two-decimal assessment rate gives a repayment of
+- **I-1 Repayments are whole dollars.** Accepted by Colin on 5 November 2026 (ruling on
+  SIG-15). No two-decimal assessment rate gives a repayment of
   exactly $7,511. At 8.69% over 30 years it is $7,511.22, which makes total expenses $136,035,
   not the published $136,032. Taking each monthly commitment and the proposed repayment to the
   whole dollar reproduces every published figure. Build Specification 3.1 says amounts are
