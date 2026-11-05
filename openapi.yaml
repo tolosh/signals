@@ -1,0 +1,1829 @@
+openapi: 3.1.0
+info:
+  title: Moroku Signals API
+  version: 1.0.0
+  description: >-
+    Canonical contract between the Lovable front ends and the Signals backend. Behaviour is
+    specified in Confluence (Build Specification section 3, Product Specification and Amendment 1).
+    The UI colours by `state` only and never compares values to thresholds.
+servers:
+  - url: http://localhost:4010
+    description: Local mock server (SIG-11)
+security:
+  - session: []
+tags:
+  - name: app
+    description: Lender app, /v1/app (Build Specification 3.2)
+  - name: portal
+    description: Applicant portal, /v1/portal (Build Specification 3.3)
+  - name: admin
+    description: Admin console, /v1/admin (Build Specification 3.3a)
+  - name: watch
+    description: The Watch (Amendment 1)
+paths:
+  /v1/app/me:
+    get:
+      tags: [app]
+      operationId: getMe
+      summary: User, workspace, role, credit balance and banners
+      responses:
+        "200": { $ref: "#/components/responses/Me" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/workspaces:
+    post:
+      tags: [app]
+      operationId: createWorkspace
+      summary: Create the workspace after email verification (FR-A1)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WorkspaceInput" }
+      responses:
+        "201": { $ref: "#/components/responses/Workspace" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/packs:
+    get:
+      tags: [app]
+      operationId: listPacks
+      summary: Packs on sale, with launch-offer eligibility and places left (BL-1)
+      responses:
+        "200":
+          description: Packs
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [packs]
+                properties:
+                  packs:
+                    type: array
+                    items: { $ref: "#/components/schemas/Pack" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/checkout:
+    post:
+      tags: [app]
+      operationId: startCheckout
+      summary: Start a pack purchase; returns the Stripe Checkout URL (BL-2)
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pack_id]
+              properties:
+                pack_id: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/RedirectUrl" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/billing/portal:
+    post:
+      tags: [app]
+      operationId: openBillingPortal
+      summary: Returns the Stripe customer portal URL (BL-2)
+      responses:
+        "200": { $ref: "#/components/responses/RedirectUrl" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/credits:
+    get:
+      tags: [app]
+      operationId: getCredits
+      summary: Balance, reserved credits and ledger entries (BL-6)
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Credits
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Credits" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/billing/auto-topup:
+    patch:
+      tags: [app]
+      operationId: updateAutoTopup
+      summary: Turn auto top-up on or off, choose the pack (BL-2)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AutoTopup" }
+      responses:
+        "200":
+          description: Updated setting
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AutoTopup" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/workspace:
+    patch:
+      tags: [app]
+      operationId: updateWorkspace
+      summary: Name and website (FR-A5)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WorkspaceInput" }
+      responses:
+        "200": { $ref: "#/components/responses/Workspace" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/workspace/logo:
+    post:
+      tags: [app]
+      operationId: createLogoUpload
+      summary: Returns an upload URL for the workspace logo (FR-A5)
+      responses:
+        "200": { $ref: "#/components/responses/RedirectUrl" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/members:
+    get:
+      tags: [app]
+      operationId: listMembers
+      summary: Workspace members
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Members
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page"
+                  - type: object
+                    required: [items]
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: "#/components/schemas/Member" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      tags: [app]
+      operationId: inviteMember
+      summary: Invite a member
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email: { type: string, format: email }
+                role: { $ref: "#/components/schemas/Role" }
+      responses:
+        "201": { $ref: "#/components/responses/Member" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/members/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    patch:
+      tags: [app]
+      operationId: updateMember
+      summary: Change a member's role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { $ref: "#/components/schemas/Role" }
+      responses:
+        "200": { $ref: "#/components/responses/Member" }
+        default: { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [app]
+      operationId: removeMember
+      summary: Remove a member
+      responses:
+        "204": { description: Removed }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/applicants:
+    get:
+      tags: [app]
+      operationId: listApplicants
+      summary: Applicants with status and roll-up state
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/ApplicantStatus" }
+      responses:
+        "200":
+          description: Applicants
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page"
+                  - type: object
+                    required: [items]
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: "#/components/schemas/Applicant" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      tags: [app]
+      operationId: createApplicant
+      summary: Create an applicant with a loan request (FR-B1)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ApplicantInput" }
+      responses:
+        "201": { $ref: "#/components/responses/Applicant" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/applicants/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [app]
+      operationId: getApplicant
+      summary: Detail and status; polled every 5 seconds while connecting or syncing (FR-B3)
+      responses:
+        "200": { $ref: "#/components/responses/Applicant" }
+        default: { $ref: "#/components/responses/Error" }
+    patch:
+      tags: [app]
+      operationId: updateApplicant
+      summary: Edit the loan request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoanRequest" }
+      responses:
+        "200": { $ref: "#/components/responses/Applicant" }
+        default: { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [app]
+      operationId: closeApplicant
+      summary: Close the applicant; revokes the grant
+      responses:
+        "200": { $ref: "#/components/responses/Applicant" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/applicants/{id}/invites:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    post:
+      tags: [app]
+      operationId: sendInvite
+      summary: Send or resend an invite (FR-B2, BL-3)
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [channel]
+              properties:
+                channel: { $ref: "#/components/schemas/InviteChannel" }
+      responses:
+        "201":
+          description: Invite
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Invite" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/applicants/{id}/invites/{inviteId}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+      - name: inviteId
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [app]
+      operationId: cancelInvite
+      summary: Cancel an invite
+      responses:
+        "204": { description: Cancelled }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/applicants/{id}/request-accounts:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    post:
+      tags: [app]
+      operationId: requestAccounts
+      summary: Re-open the openfeed flow to add accounts (FR-D3)
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "201":
+          description: Invite for the new request
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Invite" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/applicants/{id}/assessments:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [app]
+      operationId: listAssessments
+      summary: List assessment versions (FR-D5)
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Assessment versions
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page"
+                  - type: object
+                    required: [items]
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: "#/components/schemas/AssessmentSummary" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      tags: [app]
+      operationId: runAssessment
+      summary: Run a new assessment version (FR-D5)
+      responses:
+        "202":
+          description: Assessment started
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssessmentSummary" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/assessments/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [app]
+      operationId: getAssessment
+      summary: Full assessment - roll-up, affordability and signals (FR-D2)
+      responses:
+        "200": { $ref: "#/components/responses/Assessment" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/assessments/{id}/signals/{signalId}/evidence:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+      - name: signalId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [app]
+      operationId: getSignalEvidence
+      summary: Evidence transactions for one signal, at most 50 (GR-4)
+      responses:
+        "200":
+          description: Evidence
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    maxItems: 50
+                    items: { $ref: "#/components/schemas/Evidence" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/assessments/{id}/affordability/trace:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [app]
+      operationId: getAffordabilityTrace
+      summary: Calculation trace and the income, expense and liability tables (6.7)
+      responses:
+        "200":
+          description: Trace
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AffordabilityTrace" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/assessments/{id}/notes:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    post:
+      tags: [app]
+      operationId: addNote
+      summary: Add an officer note, optionally on a signal (FR-D3)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NoteInput" }
+      responses:
+        "201": { $ref: "#/components/responses/Note" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/notes/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    patch:
+      tags: [app]
+      operationId: updateNote
+      summary: Edit a note or mark a signal explained (FR-D3)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/NoteInput" }
+      responses:
+        "200": { $ref: "#/components/responses/Note" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/assessments/{id}/overrides:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    post:
+      tags: [app]
+      operationId: createOverride
+      summary: Override an input with a reason; creates a new assessment version (AF-3)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OverrideInput" }
+      responses:
+        "201":
+          description: The new assessment version
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AssessmentSummary" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/assessments/{id}/report.pdf:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [app]
+      operationId: getReportPdf
+      summary: Credit-file PDF (FR-D4)
+      responses:
+        "200":
+          description: PDF
+          content:
+            application/pdf:
+              schema: { type: string, format: binary }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/settings/policy/{product}:
+    parameters:
+      - name: product
+        in: path
+        required: true
+        schema: { $ref: "#/components/schemas/ProductType" }
+    get:
+      tags: [app]
+      operationId: getPolicy
+      summary: Policy settings for a product (6.6)
+      responses:
+        "200": { $ref: "#/components/responses/Policy" }
+        default: { $ref: "#/components/responses/Error" }
+    put:
+      tags: [app]
+      operationId: putPolicy
+      summary: Save policy settings; creates a new version (6.6)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PolicyInput" }
+      responses:
+        "200": { $ref: "#/components/responses/Policy" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/benchmarks:
+    get:
+      tags: [app]
+      operationId: listBenchmarks
+      summary: Benchmark tables and versions (AF-E4)
+      responses:
+        "200":
+          description: Benchmarks
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Benchmark" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      tags: [app]
+      operationId: uploadBenchmark
+      summary: Upload a benchmark CSV; row-level errors come back in error.details (AF-E4)
+      requestBody:
+        required: true
+        content:
+          text/csv:
+            schema: { type: string }
+      responses:
+        "201":
+          description: New benchmark version
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Benchmark" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/benchmarks/template.csv:
+    get:
+      tags: [app]
+      operationId: getBenchmarkTemplate
+      summary: Download the benchmark CSV template (AF-E4)
+      responses:
+        "200":
+          description: CSV template
+          content:
+            text/csv:
+              schema: { type: string }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/audit:
+    get:
+      tags: [app]
+      operationId: listWorkspaceAudit
+      summary: Audit log, owners and admins only (GR-5)
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200": { $ref: "#/components/responses/AuditPage" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/watches:
+    post:
+      tags: [watch]
+      operationId: startWatch
+      summary: Start a portfolio or readiness watch; readiness needs the applicant's opt-in (FR-E10)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WatchInput" }
+      responses:
+        "201": { $ref: "#/components/responses/Watch" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/watches/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    delete:
+      tags: [watch]
+      operationId: stopWatch
+      summary: Stop a watch (FR-E6)
+      responses:
+        "200": { $ref: "#/components/responses/Watch" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/applicants/{id}/timeline:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [watch]
+      operationId: getTimeline
+      summary: Watch runs and transitions for one applicant (FR-E5)
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Timeline
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page"
+                  - type: object
+                    required: [items]
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: "#/components/schemas/WatchRun" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/portal/{token}:
+    parameters:
+      - $ref: "#/components/parameters/Token"
+    get:
+      tags: [portal]
+      operationId: getPortal
+      summary: Lender name and logo, what will be shared and why, current step
+      security: []
+      responses:
+        "200":
+          description: Portal state
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PortalSession" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/portal/{token}/connect:
+    parameters:
+      - $ref: "#/components/parameters/Token"
+    post:
+      tags: [portal]
+      operationId: connectPortal
+      summary: Returns the openfeed authorisation URL
+      security: []
+      responses:
+        "200": { $ref: "#/components/responses/RedirectUrl" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/openfeed/callback:
+    get:
+      tags: [portal]
+      operationId: openfeedCallback
+      summary: Backend-only redirect target; stores the grant, starts sync, redirects to the portal
+      security: []
+      parameters:
+        - name: code
+          in: query
+          schema: { type: string }
+        - name: state
+          in: query
+          schema: { type: string }
+      responses:
+        "302":
+          description: Redirect to the portal's progress page
+          headers:
+            Location:
+              schema: { type: string }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/portal/{token}/financial-position:
+    parameters:
+      - $ref: "#/components/parameters/Token"
+    get:
+      tags: [portal]
+      operationId: getFinancialPosition
+      summary: Pre-filled assets, liabilities, repayments, derived income and expenses (FR-C6 to FR-C10)
+      security: []
+      responses:
+        "200": { $ref: "#/components/responses/FinancialPosition" }
+        default: { $ref: "#/components/responses/Error" }
+    put:
+      tags: [portal]
+      operationId: putFinancialPosition
+      summary: The applicant's confirmations and additions (FR-C6 to FR-C10)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FinancialPosition" }
+      responses:
+        "200": { $ref: "#/components/responses/FinancialPosition" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/portal/{token}/withdraw:
+    parameters:
+      - $ref: "#/components/parameters/Token"
+    post:
+      tags: [portal]
+      operationId: withdrawConsent
+      summary: Withdraw consent; revokes the grant
+      security: []
+      responses:
+        "200":
+          description: Consent withdrawn
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PortalSession" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/portal/{token}/watch:
+    parameters:
+      - $ref: "#/components/parameters/Token"
+    get:
+      tags: [watch]
+      operationId: getPortalWatch
+      summary: The watch offered or running, with path to ready if the lender shares it (FR-E10, FR-E11)
+      security: []
+      responses:
+        "200": { $ref: "#/components/responses/PortalWatch" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      tags: [watch]
+      operationId: optInPortalWatch
+      summary: The applicant's explicit opt-in (FR-E10)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [agreed]
+              properties:
+                agreed: { const: true }
+      responses:
+        "200": { $ref: "#/components/responses/PortalWatch" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/portal/{token}/watch/stop:
+    parameters:
+      - $ref: "#/components/parameters/Token"
+    post:
+      tags: [watch]
+      operationId: stopPortalWatch
+      summary: One-click stop; revokes the grant (FR-E10)
+      security: []
+      responses:
+        "200": { $ref: "#/components/responses/PortalWatch" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/admin/workspaces:
+    get:
+      tags: [admin]
+      operationId: searchWorkspaces
+      summary: Search lender workspaces by name, email or domain
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string }
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Workspaces
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page"
+                  - type: object
+                    required: [items]
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: "#/components/schemas/AdminWorkspace" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/admin/workspaces/{id}:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [admin]
+      operationId: getAdminWorkspace
+      summary: Status, members, balance, usage, applicants by status
+      responses:
+        "200": { $ref: "#/components/responses/AdminWorkspace" }
+        default: { $ref: "#/components/responses/Error" }
+    patch:
+      tags: [admin]
+      operationId: updateAdminWorkspace
+      summary: Suspend or reactivate a workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status, reason]
+              properties:
+                status: { $ref: "#/components/schemas/WorkspaceStatus" }
+                reason: { type: string, minLength: 1 }
+      responses:
+        "200": { $ref: "#/components/responses/AdminWorkspace" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/admin/workspaces/{id}/credits:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    post:
+      tags: [admin]
+      operationId: adjustCredits
+      summary: Adjust credits with a reason; writes an adjustment ledger entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [delta, reason]
+              properties:
+                delta: { type: integer }
+                reason: { type: string, minLength: 1 }
+      responses:
+        "201":
+          description: Ledger entry
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CreditLedgerEntry" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/admin/launch-offer:
+    get:
+      tags: [admin]
+      operationId: getLaunchOffer
+      summary: Places used and remaining
+      responses:
+        "200": { $ref: "#/components/responses/LaunchOffer" }
+        default: { $ref: "#/components/responses/Error" }
+    patch:
+      tags: [admin]
+      operationId: updateLaunchOffer
+      summary: Change the cap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [cap, reason]
+              properties:
+                cap: { type: integer, minimum: 0 }
+                reason: { type: string, minLength: 1 }
+      responses:
+        "200": { $ref: "#/components/responses/LaunchOffer" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/admin/workspaces/{id}/support-access:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    post:
+      tags: [admin]
+      operationId: startSupportAccess
+      summary: Start time-boxed, read-only access; the lender's owner sees a notice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, minLength: 1 }
+                minutes: { type: integer, minimum: 1, default: 60 }
+      responses:
+        "201":
+          description: Support-access session
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SupportAccess" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/admin/operations:
+    get:
+      tags: [admin]
+      operationId: getOperations
+      summary: Integration health, failed jobs, webhook failures, credits held at openfeed
+      responses:
+        "200":
+          description: Operations
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Operations" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/admin/operations/retry/{jobId}:
+    parameters:
+      - name: jobId
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [admin]
+      operationId: retryJob
+      summary: Re-run a failed sync or assessment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReasonInput" }
+      responses:
+        "202":
+          description: Job queued
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OperationJob" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/admin/definitions:
+    get:
+      tags: [admin]
+      operationId: listDefinitions
+      summary: Signal definition versions
+      responses:
+        "200": { $ref: "#/components/responses/PublishedVersions" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      tags: [admin]
+      operationId: publishDefinitions
+      summary: Publish a new definition version (two-person sign-off)
+      requestBody: { $ref: "#/components/requestBodies/PublishVersion" }
+      responses:
+        "201": { $ref: "#/components/responses/PublishedVersion" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/admin/default-thresholds:
+    get:
+      tags: [admin]
+      operationId: listDefaultThresholds
+      summary: Default threshold versions
+      responses:
+        "200": { $ref: "#/components/responses/PublishedVersions" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      tags: [admin]
+      operationId: publishDefaultThresholds
+      summary: Publish a new default threshold version (two-person sign-off)
+      requestBody: { $ref: "#/components/requestBodies/PublishVersion" }
+      responses:
+        "201": { $ref: "#/components/responses/PublishedVersion" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/admin/seed-benchmark:
+    get:
+      tags: [admin]
+      operationId: listSeedBenchmark
+      summary: Versions of the Moroku seed benchmark table
+      responses:
+        "200": { $ref: "#/components/responses/PublishedVersions" }
+        default: { $ref: "#/components/responses/Error" }
+    post:
+      tags: [admin]
+      operationId: publishSeedBenchmark
+      summary: Publish a new seed benchmark version
+      requestBody: { $ref: "#/components/requestBodies/PublishVersion" }
+      responses:
+        "201": { $ref: "#/components/responses/PublishedVersion" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/admin/audit:
+    get:
+      tags: [admin]
+      operationId: listAdminAudit
+      summary: Audit across all workspaces, including every staff action
+      parameters:
+        - name: workspace_id
+          in: query
+          schema: { type: string }
+        - name: actor
+          in: query
+          schema: { type: string }
+        - name: action
+          in: query
+          schema: { type: string }
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200": { $ref: "#/components/responses/AuditPage" }
+        default: { $ref: "#/components/responses/Error" }
+components:
+  securitySchemes:
+    session:
+      type: http
+      scheme: bearer
+      description: Supabase access token. /v1/admin also needs the moroku_staff role.
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+    Token:
+      name: token
+      in: path
+      required: true
+      description: Signed, single-use invite token
+      schema: { type: string }
+    Cursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200 }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      schema: { type: string }
+  requestBodies:
+    PublishVersion:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [reason, content]
+            properties:
+              reason: { type: string, minLength: 1 }
+              content: { type: object }
+  responses:
+    Error:
+      description: Error with a stable code
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    RedirectUrl:
+      description: URL for the browser to go to
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [url]
+            properties:
+              url: { type: string, format: uri }
+    Me:
+      description: Current user
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Me" }
+    Workspace:
+      description: Workspace
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Workspace" }
+    Member:
+      description: Member
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Member" }
+    Applicant:
+      description: Applicant
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Applicant" }
+    Assessment:
+      description: Assessment
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Assessment" }
+          examples:
+            af_t1:
+              summary: AF-T1 assessment
+              externalValue: test/fixtures/af-t1-assessment.json
+    Note:
+      description: Note
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Note" }
+    Policy:
+      description: Policy version
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Policy" }
+    AuditPage:
+      description: Audit events
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/Page"
+              - type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/AuditEvent" }
+    Watch:
+      description: Watch
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Watch" }
+    PortalWatch:
+      description: The watch as the applicant sees it
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/PortalWatch" }
+    FinancialPosition:
+      description: Financial position
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/FinancialPosition" }
+    AdminWorkspace:
+      description: Workspace, admin view
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/AdminWorkspace" }
+    LaunchOffer:
+      description: Launch offer
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/LaunchOffer" }
+    PublishedVersions:
+      description: Published versions
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [items]
+            properties:
+              items:
+                type: array
+                items: { $ref: "#/components/schemas/PublishedVersion" }
+    PublishedVersion:
+      description: Published version
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/PublishedVersion" }
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Stable code, for example insufficient_credits, invite_expired, grant_revoked
+            message: { type: string }
+            details: {}
+    Page:
+      type: object
+      required: [next_cursor]
+      properties:
+        next_cursor: { type: [string, "null"] }
+    ReasonInput:
+      type: object
+      required: [reason]
+      properties:
+        reason: { type: string, minLength: 1 }
+    Role:
+      type: string
+      enum: [owner, admin, credit_officer]
+    ProductType:
+      type: string
+      enum: [personal, home, car, business]
+    WorkspaceStatus:
+      type: string
+      enum: [active, suspended, closed]
+    WorkspaceInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1 }
+        website: { type: [string, "null"] }
+    Workspace:
+      type: object
+      required: [id, name, status, credit_balance, on_seed_benchmark]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        website: { type: [string, "null"] }
+        logo_url: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/WorkspaceStatus" }
+        lookback_months: { type: integer }
+        credit_balance: { type: integer }
+        on_seed_benchmark: { type: boolean }
+    Banner:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: For example seed_benchmark, low_credits, zero_credits
+        message: { type: string }
+    Me:
+      type: object
+      required: [user, workspace, role, credit_balance, banners]
+      properties:
+        user:
+          type: object
+          required: [id, email]
+          properties:
+            id: { type: string }
+            email: { type: string, format: email }
+            name: { type: [string, "null"] }
+        workspace:
+          oneOf:
+            - $ref: "#/components/schemas/Workspace"
+            - type: "null"
+        role:
+          oneOf:
+            - $ref: "#/components/schemas/Role"
+            - type: "null"
+        credit_balance: { type: integer }
+        banners:
+          type: array
+          items: { $ref: "#/components/schemas/Banner" }
+    Pack:
+      type: object
+      required: [id, name, credits, price_aud, is_launch_offer]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        credits: { type: integer }
+        price_aud: { type: number }
+        is_launch_offer: { type: boolean }
+        eligible: { type: boolean }
+        places_left: { type: [integer, "null"] }
+    CreditLedgerEntry:
+      type: object
+      required: [id, delta, reason, at]
+      properties:
+        id: { type: string }
+        delta: { type: integer }
+        reason:
+          type: string
+          enum: [pack_purchase, reservation, release, assessment, refund, adjustment]
+        applicant_id: { type: [string, "null"] }
+        stripe_payment_intent_id: { type: [string, "null"] }
+        at: { type: string, format: date-time }
+    Credits:
+      type: object
+      required: [balance, reserved, entries, next_cursor]
+      properties:
+        balance: { type: integer }
+        reserved: { type: integer }
+        entries:
+          type: array
+          items: { $ref: "#/components/schemas/CreditLedgerEntry" }
+        next_cursor: { type: [string, "null"] }
+    AutoTopup:
+      type: object
+      required: [enabled]
+      properties:
+        enabled: { type: boolean }
+        pack_id: { type: [string, "null"] }
+    Member:
+      type: object
+      required: [id, email, role]
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        name: { type: [string, "null"] }
+        role: { $ref: "#/components/schemas/Role" }
+        invited_at: { type: [string, "null"], format: date-time }
+    ApplicantStatus:
+      type: string
+      description: >-
+        invited: invite sent. connecting: the applicant is in the openfeed flow. connected: the
+        grant is stored and sync has not started. syncing: sync is running. assessed: an assessment
+        is complete. watching: on an active watch. closed: closed by the lender or consent withdrawn.
+      enum: [invited, connecting, syncing, connected, assessed, watching, closed]
+    RollupState:
+      type: string
+      description: Product Specification 7.5
+      enum: [green, amber, red_refer, red_knockout, unverified]
+    LoanRequest:
+      type: object
+      properties:
+        loan_amount: { type: number }
+        term_months: { type: integer }
+        purpose: { type: [string, "null"] }
+        security_value: { type: [number, "null"] }
+    ApplicantInput:
+      type: object
+      required: [name, product_type]
+      properties:
+        name: { type: string, minLength: 1 }
+        email: { type: [string, "null"], format: email }
+        mobile: { type: [string, "null"] }
+        product_type: { $ref: "#/components/schemas/ProductType" }
+        loan_request: { $ref: "#/components/schemas/LoanRequest" }
+    Applicant:
+      type: object
+      required: [id, name, product_type, status, rollup_state, grant_revoked, updated_at]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: [string, "null"], format: email }
+        mobile: { type: [string, "null"] }
+        product_type: { $ref: "#/components/schemas/ProductType" }
+        status: { $ref: "#/components/schemas/ApplicantStatus" }
+        rollup_state:
+          oneOf:
+            - $ref: "#/components/schemas/RollupState"
+            - type: "null"
+        grant_revoked: { type: boolean }
+        loan_request: { $ref: "#/components/schemas/LoanRequest" }
+        invites:
+          type: array
+          items: { $ref: "#/components/schemas/Invite" }
+        latest_assessment_id: { type: [string, "null"] }
+        updated_at: { type: string, format: date-time }
+    InviteChannel:
+      type: string
+      enum: [email, sms]
+    Invite:
+      type: object
+      required: [id, channel, status, expires_at]
+      properties:
+        id: { type: string }
+        channel: { $ref: "#/components/schemas/InviteChannel" }
+        status:
+          type: string
+          enum: [sent, opened, used, expired, cancelled]
+        expires_at: { type: string, format: date-time }
+    AssessmentStatus:
+      type: string
+      enum: [running, complete, data_incomplete]
+    AssessmentSummary:
+      type: object
+      required: [id, applicant_id, version, status]
+      properties:
+        id: { type: string }
+        applicant_id: { type: string }
+        version: { type: integer, minimum: 1 }
+        status: { $ref: "#/components/schemas/AssessmentStatus" }
+        rollup_state:
+          oneOf:
+            - $ref: "#/components/schemas/RollupState"
+            - type: "null"
+        data_as_of: { type: [string, "null"], format: date-time }
+    RollupReason:
+      type: object
+      required: [signal_id, reason]
+      properties:
+        signal_id:
+          type: [string, "null"]
+          description: Null when the reason comes from the evidence-quality layer (D13)
+        state:
+          oneOf:
+            - $ref: "#/components/schemas/SignalState"
+            - type: "null"
+        reason: { type: string }
+    Rollup:
+      type: object
+      required: [state, top_reasons, reasons_to_say_yes]
+      properties:
+        state: { $ref: "#/components/schemas/RollupState" }
+        top_reasons:
+          type: array
+          maxItems: 3
+          items: { $ref: "#/components/schemas/RollupReason" }
+        reasons_to_say_yes:
+          type: array
+          items: { $ref: "#/components/schemas/RollupReason" }
+    RatioState:
+      type: [string, "null"]
+      enum: [green, amber, red, unverified, null]
+    Ratio:
+      type: object
+      required: [key, label, state]
+      properties:
+        key:
+          type: string
+          enum: [dsr, ndi, ara, lvr, benchmark_gle, lti, dti]
+        label: { type: string }
+        value: { type: number }
+        unit: { type: string, enum: [aud] }
+        numerator: { type: number }
+        denominator: { type: number }
+        gross: { type: number }
+        net: { type: number }
+        state: { $ref: "#/components/schemas/RatioState" }
+    Affordability:
+      type: object
+      required: [status, serviceability, ratios, benchmark]
+      properties:
+        status: { type: string, enum: [complete, unverified] }
+        serviceability:
+          type: object
+          required:
+            [
+              monthly_income,
+              monthly_expenses_gle,
+              monthly_repayments,
+              proposed_repayment,
+              total_expenses_annual,
+            ]
+          properties:
+            monthly_income: { type: number }
+            monthly_expenses_gle: { type: number }
+            monthly_repayments: { type: number }
+            proposed_repayment: { type: number }
+            total_expenses_annual: { type: number }
+        ratios:
+          type: array
+          items: { $ref: "#/components/schemas/Ratio" }
+        benchmark:
+          type: object
+          required: [name, version, is_seed]
+          properties:
+            name: { type: string }
+            version: { type: integer }
+            is_seed: { type: boolean }
+    SignalState:
+      type: string
+      description: evidenced and not_observed are for family 10 only; positive signals are never amber or red (D13).
+      enum: [green, amber, red, unverified, evidenced, not_observed]
+    EvidenceQuality:
+      type: object
+      description: Decision Record D12 and D13; SIG-10 scope note of 28 October 2026.
+      required:
+        [observed, completeness, reliability, basis, resolve_with, review_required, review_reason]
+      properties:
+        observed:
+          type: object
+          required: [period_start, period_end, account_ids, transaction_count]
+          properties:
+            period_start: { type: string, format: date }
+            period_end: { type: string, format: date }
+            account_ids:
+              type: array
+              items: { type: string }
+            transaction_count: { type: integer, minimum: 0 }
+        completeness:
+          type: object
+          required:
+            [
+              primary_income_account_shared,
+              unshared_own_account_transfers,
+              history_months_available,
+              history_months_required,
+            ]
+          properties:
+            primary_income_account_shared: { type: boolean }
+            unshared_own_account_transfers: { type: integer, minimum: 0 }
+            history_months_available: { type: number, minimum: 0 }
+            history_months_required: { type: number, minimum: 0 }
+        reliability:
+          type: object
+          required: [feed_type, enrich_confident_pct, field_population_pct]
+          properties:
+            feed_type: { type: string, enum: [cdr, uploaded_statement] }
+            enrich_confident_pct: { type: [number, "null"], minimum: 0, maximum: 100 }
+            field_population_pct: { type: [number, "null"], minimum: 0, maximum: 100 }
+        basis: { type: string, enum: [observed, inferred, declared] }
+        resolve_with:
+          type: array
+          description: Further evidence that would remove the doubt
+          items: { type: string }
+        review_required: { type: boolean }
+        review_reason: { type: [string, "null"] }
+    Signal:
+      type: object
+      required:
+        [id, family, name, state, value, reason, confidence, evidence_count, evidence_quality]
+      properties:
+        id: { type: string }
+        family:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Family number from research record v2, section 4
+        family_code:
+          type: [string, "null"]
+          pattern: "^[A-Z]{2,5}$"
+          description: Prefix of the signal id. Codes for families 7 to 10 are not yet assigned.
+        name: { type: string }
+        state: { $ref: "#/components/schemas/SignalState" }
+        value: { type: [string, "null"] }
+        reason: { type: string }
+        confidence: { type: string, enum: [high, medium, low] }
+        evidence_count: { type: integer, minimum: 0 }
+        evidence_quality: { $ref: "#/components/schemas/EvidenceQuality" }
+    Assessment:
+      type: object
+      required:
+        [
+          id,
+          applicant_id,
+          version,
+          status,
+          product_type,
+          data_as_of,
+          rollup,
+          affordability,
+          signals,
+          pins,
+        ]
+      properties:
+        id: { type: string }
+        applicant_id: { type: string }
+        version: { type: integer, minimum: 1 }
+        status: { $ref: "#/components/schemas/AssessmentStatus" }
+        status_reason: { type: [string, "null"] }
+        product_type: { $ref: "#/components/schemas/ProductType" }
+        data_as_of: { type: string, format: date-time }
+        rollup: { $ref: "#/components/schemas/Rollup" }
+        affordability:
+          oneOf:
+            - $ref: "#/components/schemas/Affordability"
+            - type: "null"
+        signals:
+          type: array
+          items: { $ref: "#/components/schemas/Signal" }
+        pins:
+          type: object
+          required: [definitions_version, thresholds_version, taxonomy_version]
+          properties:
+            definitions_version: { type: integer }
+            thresholds_version: { type: integer }
+            taxonomy_version: { type: string }
+    Evidence:
+      type: object
+      required: [transaction_id, date, description, amount, category, source, confidence]
+      properties:
+        transaction_id: { type: string }
+        date: { type: string, format: date }
+        description: { type: string }
+        amount: { type: number }
+        category: { type: [string, "null"] }
+        source: { type: string }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+    AffordabilityTrace:
+      type: object
+      required: [income, expenses, liabilities, trace, overrides]
+      properties:
+        income:
+          type: array
+          items:
+            type: object
+            required: [payer, cadence, observed_amount, type, shading, assessed_amount]
+            properties:
+              payer: { type: string }
+              cadence: { type: string }
+              observed_amount: { type: number }
+              type: { type: string }
+              shading: { type: number }
+              assessed_amount: { type: number }
+        expenses:
+          type: array
+          items:
+            type: object
+            required: [group, declared, benchmark, observed, used, why]
+            properties:
+              group: { type: string }
+              declared: { type: [number, "null"] }
+              benchmark: { type: [number, "null"] }
+              observed: { type: [number, "null"] }
+              used: { type: number }
+              why: { type: string }
+        liabilities:
+          type: array
+          items:
+            type: object
+            required: [type, source, monthly_commitment, rule]
+            properties:
+              type: { type: string }
+              source: { type: string, enum: [declared, found, inferred] }
+              monthly_commitment: { type: number }
+              rule: { type: string }
+        trace:
+          type: array
+          items:
+            type: object
+            required: [step, value]
+            properties:
+              step: { type: string }
+              value: { type: number }
+              inputs: { type: object }
+        overrides:
+          type: array
+          items: { $ref: "#/components/schemas/Override" }
+    NoteInput:
+      type: object
+      properties:
+        signal_id: { type: [string, "null"] }
+        body: { type: string }
+        explained: { type: boolean }
+    Note:
+      type: object
+      required: [id, assessment_id, author, body, explained, created_at]
+      properties:
+        id: { type: string }
+        assessment_id: { type: string }
+        signal_id: { type: [string, "null"] }
+        author: { type: string }
+        body: { type: string }
+        explained: { type: boolean }
+        created_at: { type: string, format: date-time }
+    OverrideInput:
+      type: object
+      required: [kind, target, reason]
+      properties:
+        kind:
+          type: string
+          enum:
+            [
+              include_income_stream,
+              exclude_income_stream,
+              exclude_one_off_expense,
+              correct_stated_figure,
+            ]
+        target: { type: string }
+        value: { type: [number, "null"] }
+        reason: { type: string, minLength: 1 }
+    Override:
+      allOf:
+        - $ref: "#/components/schemas/OverrideInput"
+        - type: object
+          required: [author, at]
+          properties:
+            author: { type: string }
+            at: { type: string, format: date-time }
+    PolicyInput:
+      type: object
+      required: [buffer, floor_rate, income_shading, card_factor, expense_method, ratio_thresholds]
+      properties:
+        buffer: { type: number }
+        floor_rate: { type: number }
+        income_shading:
+          type: object
+          additionalProperties: { type: number }
+        card_factor: { type: number }
+        expense_method: { type: string }
+        ratio_thresholds:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              amber: { type: number }
+              red: { type: number }
+    Policy:
+      allOf:
+        - $ref: "#/components/schemas/PolicyInput"
+        - type: object
+          required: [product, version]
+          properties:
+            product: { $ref: "#/components/schemas/ProductType" }
+            version: { type: integer }
+    Benchmark:
+      type: object
+      required: [id, name, version, source, is_seed, effective_from]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        version: { type: integer }
+        source: { type: string, enum: [seed, lender_upload] }
+        is_seed: { type: boolean }
+        effective_from: { type: string, format: date }
+    AuditEvent:
+      type: object
+      required: [id, actor, action, target, at]
+      properties:
+        id: { type: string }
+        workspace_id: { type: [string, "null"] }
+        actor: { type: string }
+        action: { type: string }
+        target: { type: string }
+        reason: { type: [string, "null"] }
+        at: { type: string, format: date-time }
+        ip: { type: [string, "null"] }
+    WatchMode:
+      type: string
+      enum: [portfolio, readiness]
+    WatchInput:
+      type: object
+      required: [applicant_id, mode]
+      properties:
+        applicant_id: { type: string }
+        mode: { $ref: "#/components/schemas/WatchMode" }
+        cadence: { type: string, enum: [weekly, fortnightly, monthly], default: weekly }
+        hold_runs: { type: integer, minimum: 1, default: 2 }
+        period_months: { type: integer, minimum: 1, maximum: 12, default: 6 }
+        share_path_to_ready: { type: boolean, default: false }
+    Watch:
+      type: object
+      required: [id, applicant_id, mode, cadence, hold_runs, status]
+      properties:
+        id: { type: string }
+        applicant_id: { type: string }
+        mode: { $ref: "#/components/schemas/WatchMode" }
+        cadence: { type: string, enum: [weekly, fortnightly, monthly] }
+        hold_runs: { type: integer }
+        starts_at: { type: [string, "null"], format: date-time }
+        ends_at: { type: [string, "null"], format: date-time }
+        consent_recorded_at: { type: [string, "null"], format: date-time }
+        share_path_to_ready: { type: boolean }
+        status: { type: string, enum: [offered, active, paused, stopped] }
+        stop_reason: { type: [string, "null"] }
+        last_run_at: { type: [string, "null"], format: date-time }
+    Transition:
+      type: object
+      required: [signal, from, to, held_runs, alerted]
+      properties:
+        signal: { type: string }
+        from: { type: [string, "null"] }
+        to: { type: [string, "null"] }
+        held_runs: { type: integer }
+        alerted: { type: boolean }
+    WatchRun:
+      type: object
+      required: [id, watch_id, run_at, assessment_id, pins, transitions]
+      properties:
+        id: { type: string }
+        watch_id: { type: string }
+        run_at: { type: string, format: date-time }
+        assessment_id: { type: string }
+        pins: { type: object }
+        transitions:
+          type: array
+          items: { $ref: "#/components/schemas/Transition" }
+    PortalWatch:
+      type: object
+      required: [watch, purpose, path_to_ready]
+      properties:
+        watch: { $ref: "#/components/schemas/Watch" }
+        purpose: { type: string }
+        path_to_ready:
+          description: Only the lender's thresholds and the applicant's own figures (FR-E11)
+          type: [array, "null"]
+          items:
+            type: object
+            required: [label, current, target, met]
+            properties:
+              label: { type: string }
+              current: { type: [number, "null"] }
+              target: { type: [number, "null"] }
+              met: { type: boolean }
+    PortalSession:
+      type: object
+      required: [lender_name, shared_data, purpose, step]
+      properties:
+        lender_name: { type: string }
+        lender_logo_url: { type: [string, "null"] }
+        shared_data:
+          type: array
+          items: { type: string }
+        purpose: { type: string }
+        step:
+          type: string
+          enum: [welcome, progress, finances, done, withdrawn]
+    FinancialRow:
+      type: object
+      required: [type, amount, source]
+      properties:
+        type: { type: string }
+        provider: { type: [string, "null"] }
+        amount: { type: number }
+        source: { type: string, enum: [bank, applicant] }
+    FinancialPosition:
+      type: object
+      required: [assets, liabilities, repayments, income, expenses]
+      properties:
+        assets:
+          type: array
+          items: { $ref: "#/components/schemas/FinancialRow" }
+        liabilities:
+          type: array
+          items: { $ref: "#/components/schemas/FinancialRow" }
+        repayments:
+          type: array
+          items: { $ref: "#/components/schemas/FinancialRow" }
+        income:
+          type: array
+          items: { $ref: "#/components/schemas/FinancialRow" }
+        expenses:
+          type: array
+          items: { $ref: "#/components/schemas/FinancialRow" }
+    AdminWorkspace:
+      allOf:
+        - $ref: "#/components/schemas/Workspace"
+        - type: object
+          required: [member_count, usage, applicants_by_status]
+          properties:
+            member_count: { type: integer }
+            usage:
+              type: object
+              properties:
+                assessments_this_month: { type: integer }
+            applicants_by_status:
+              type: object
+              additionalProperties: { type: integer }
+            last_activity_at: { type: [string, "null"], format: date-time }
+    LaunchOffer:
+      type: object
+      required: [cap, used, remaining, claims]
+      properties:
+        cap: { type: integer }
+        used: { type: integer }
+        remaining: { type: integer }
+        claims:
+          type: array
+          items:
+            type: object
+            required: [workspace_id, at]
+            properties:
+              workspace_id: { type: string }
+              at: { type: string, format: date-time }
+    SupportAccess:
+      type: object
+      required: [id, workspace_id, staff, expires_at]
+      properties:
+        id: { type: string }
+        workspace_id: { type: string }
+        staff: { type: string }
+        expires_at: { type: string, format: date-time }
+    OperationJob:
+      type: object
+      required: [id, kind, status]
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [sync, assessment] }
+        status: { type: string, enum: [failed, queued, running, stuck, complete] }
+        workspace_id: { type: [string, "null"] }
+    Operations:
+      type: object
+      required: [integrations, jobs, webhook_failures, openfeed_credits_held]
+      properties:
+        integrations:
+          type: array
+          items:
+            type: object
+            required: [name, healthy]
+            properties:
+              name: { type: string, enum: [openfeed, enrich, stripe, email] }
+              healthy: { type: boolean }
+        jobs:
+          type: array
+          items: { $ref: "#/components/schemas/OperationJob" }
+        webhook_failures: { type: integer }
+        openfeed_credits_held: { type: integer }
+    PublishedVersion:
+      type: object
+      description: Published versions are immutable; a correction is a new version.
+      required: [version, published_at, published_by]
+      properties:
+        version: { type: integer }
+        published_at: { type: string, format: date-time }
+        published_by: { type: string }
+        second_signatory: { type: [string, "null"] }
+        content: { type: object }
