@@ -1,0 +1,76 @@
+{
+  "fixture": "AF-T1",
+  "source": "Product Specification 6.1 and 6.5; expected values from Build Specification v3 section 3.4",
+  "note": "The specification publishes the outputs, not every input. Inputs marked in interpretations were chosen to reproduce the published figures and are recorded in docs/adr/0001-af-t1-inputs-and-interpretations.md.",
+  "input": {
+    "product_type": "home",
+    "loan": {
+      "amount": 960000,
+      "term_months": 360,
+      "product_rate_pct": 5.69,
+      "security_value": 1200000,
+      "other_secured_debt_on_security": 0
+    },
+    "policy": {
+      "buffer_pct": 3,
+      "floor_rate_pct": 5.5,
+      "card_commitment_factor": 0.03,
+      "shading": { "salary": 1 }
+    },
+    "income": {
+      "streams": [{ "type": "salary", "cadence": "fortnightly", "amount": 6996 }],
+      "stated_gross_annual": 248700
+    },
+    "expenses": {
+      "confirmed_monthly": 3000,
+      "benchmark_monthly": 1573,
+      "observed_committed_monthly": 1867,
+      "observed_basic_monthly": 1500
+    },
+    "liabilities": [
+      {
+        "type": "credit_card",
+        "source": "found",
+        "limit": 6000,
+        "balance": 2100,
+        "stated_repayment": null,
+        "observed_repayment": null
+      },
+      {
+        "type": "car_loan",
+        "source": "declared",
+        "balance": 41600,
+        "stated_repayment": 260,
+        "observed_repayment": 278
+      }
+    ],
+    "benchmark": { "name": "Moroku seed table", "version": 1, "is_seed": true }
+  },
+  "expected": {
+    "serviceability": {
+      "monthly_income": 15158,
+      "monthly_expenses_gle": 3367,
+      "monthly_repayments": 458,
+      "proposed_repayment": 7511,
+      "total_expenses_annual": 136032
+    },
+    "ratios": {
+      "dsr": 0.75,
+      "ndi": 1.48,
+      "ara": 11333,
+      "lvr": 0.8,
+      "benchmark_gle": 0.47,
+      "lti": { "gross": 3.86, "net": 5.28 },
+      "dti": { "gross": 4.05, "net": 5.54 }
+    },
+    "states": {
+      "dsr": "red",
+      "ndi": "green",
+      "ara": null,
+      "lvr": "amber",
+      "benchmark_gle": "green",
+      "lti": "amber",
+      "dti": "amber"
+    }
+  }
+}
