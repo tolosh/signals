@@ -18,3 +18,15 @@ npm run lint
 npm run typecheck
 npm test
 ```
+
+Local mock of the contract, for Lovable (SIG-11). See `src/mock/`; `Prefer: example=seed_benchmark` or `example=zero_credits` on `GET /v1/app/me` selects a workspace variant.
+
+```bash
+npm run mock
+```
+
+Local mock of the contract, for Lovable (SIG-11). `Prefer: example=seed_benchmark` or `example=zero_credits` on `GET /v1/app/me` selects a workspace variant.
+
+```bash
+npm run mock
+```
