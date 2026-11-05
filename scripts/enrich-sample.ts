@@ -35,7 +35,11 @@ const all = population(seed).flatMap((spec) =>
 );
 const rng = stream(seed, "sig12-t3-sample");
 const pool = [...all];
-const sample = Array.from({ length: 50 }, () => pool.splice(rng.int(0, pool.length - 1), 1)[0]!);
+const sample = Array.from({ length: 50 }, () => {
+  const [picked] = pool.splice(rng.int(0, pool.length - 1), 1);
+  if (!picked) throw new Error("sample larger than the population");
+  return picked;
+});
 
 const rows = sample.map((t) => {
   const r = engine.categorise(
