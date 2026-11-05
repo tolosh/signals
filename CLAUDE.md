@@ -64,8 +64,8 @@ At close (every ticket, no exceptions):
 ## Engineering rules
 - Contract first. Change openapi.yaml in the same PR as the code; responses must
   validate against it in tests. openapi.yaml here is the canonical contract.
-- The backend decides, the UI displays. Every ratio and signal returns `state`
-  and an `evidence_quality` block.
+- The backend decides, the UI displays. Every ratio and signal returns `state`;
+  every signal also returns an `evidence_quality` block.
 - Engines are pure functions of (data snapshot, definition version, threshold
   version, taxonomy version, scorecard version). Same inputs, same output (AF-1, EN-2).
 - No AI, LLM or ML inference anywhere in the engines (Decision Record D3). Engines

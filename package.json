@@ -11,15 +11,27 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "check:pr-title": "node scripts/check-pr-title.mjs"
+    "check:pr-title": "node scripts/check-pr-title.mjs",
+    "mock": "tsx src/mock/server.ts",
+    "build:mock": "node scripts/build-mock-lambda.mjs",
+    "test:hosted": "vitest run test/mock/mock.test.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@seriousme/openapi-schema-validator": "2.11.0",
     "@types/node": "22.20.5",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "aws-cdk": "2.1147.0",
+    "aws-cdk-lib": "2.275.0",
+    "constructs": "10.8.1",
+    "esbuild": "0.28.2",
     "eslint": "10.14.0",
     "prettier": "3.9.10",
+    "tsx": "4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1",
-    "vitest": "5.0.5"
+    "vitest": "5.0.5",
+    "yaml": "2.9.1"
   }
 }
