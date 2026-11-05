@@ -1,0 +1,483 @@
+// Synthetic fixtures for the mock server (SIG-11, Build Specification 3.4). No real data.
+import { readFileSync } from "node:fs";
+
+type Json = Record<string, unknown>;
+type SignalFixture = Json & { evidence_quality: Json };
+type AssessmentFixture = Json & { signals: SignalFixture[] };
+
+const AT = "2026-10-20T09:30:00+11:00";
+const afT1 = () =>
+  JSON.parse(readFileSync("test/fixtures/af-t1-assessment.json", "utf8")) as AssessmentFixture;
+
+const workspace = (over: Json = {}): Json => ({
+  id: "wks_01",
+  name: "Harbour Mutual",
+  website: "https://harbourmutual.example",
+  logo_url: null,
+  status: "active",
+  lookback_months: 6,
+  credit_balance: 120,
+  on_seed_benchmark: false,
+  ...over,
+});
+const seedWorkspace = workspace({ id: "wks_seed", name: "Seed Bank", on_seed_benchmark: true });
+const zeroWorkspace = workspace({ id: "wks_zero", name: "Empty Credit Union", credit_balance: 0 });
+
+const me = (wks: Json, banners: Json[]): Json => ({
+  user: { id: "usr_01", email: "officer@harbourmutual.example", name: "Sam Officer" },
+  workspace: wks,
+  role: "owner",
+  credit_balance: wks.credit_balance,
+  banners,
+});
+
+const loanRequest = {
+  loan_amount: 960000,
+  term_months: 360,
+  purpose: "Purchase",
+  security_value: 1200000,
+};
+const invite = {
+  id: "inv_01",
+  channel: "email",
+  status: "sent",
+  expires_at: "2026-10-27T09:30:00+11:00",
+};
+const applicant = (status: string, rollup: string | null = null, over: Json = {}): Json => ({
+  id: `apl_${status}`,
+  name: `Applicant ${status}`,
+  email: `${status}@applicant.example`,
+  mobile: null,
+  product_type: "home",
+  status,
+  rollup_state: rollup,
+  grant_revoked: false,
+  loan_request: loanRequest,
+  invites: [invite],
+  latest_assessment_id: null,
+  updated_at: AT,
+  ...over,
+});
+const applicants = [
+  applicant("invited"),
+  applicant("connecting"),
+  applicant("syncing"),
+  applicant("connected"),
+  applicant("assessed", "amber", { latest_assessment_id: "asm_01" }),
+  applicant("watching", "amber", { latest_assessment_id: "asm_01" }),
+  applicant("closed", null, { grant_revoked: true }),
+];
+
+const unverified = (): AssessmentFixture => {
+  const base = afT1();
+  const signal = base.signals[0] as SignalFixture;
+  return {
+    ...base,
+    id: "asm_unverified",
+    applicant_id: "apl_assessed",
+    rollup: {
+      state: "unverified",
+      top_reasons: [
+        { signal_id: null, state: "unverified", reason: "The salary account has not been shared" },
+      ],
+      reasons_to_say_yes: [],
+    },
+    affordability: null,
+    signals: [
+      {
+        ...signal,
+        state: "unverified",
+        value: null,
+        reason: "No recurring salary credit in the shared accounts",
+        confidence: "low",
+        evidence_count: 0,
+        evidence_quality: {
+          ...signal.evidence_quality,
+          completeness: {
+            primary_income_account_shared: false,
+            unshared_own_account_transfers: 3,
+            history_months_available: 6,
+            history_months_required: 6,
+          },
+          resolve_with: ["Connect the account the salary is paid into"],
+          review_required: true,
+          review_reason: "The primary income account is not shared",
+        },
+      },
+    ],
+  };
+};
+
+const incomplete = (): AssessmentFixture => ({
+  ...afT1(),
+  id: "asm_incomplete",
+  applicant_id: "apl_assessed",
+  status: "data_incomplete",
+  status_reason: "The sync failed three times, so partial data was not evaluated",
+  rollup: { state: "unverified", top_reasons: [], reasons_to_say_yes: [] },
+  affordability: null,
+  signals: [],
+});
+
+const evidenceAssessment = (): AssessmentFixture => {
+  const base = afT1();
+  const [inc, lia] = base.signals as [SignalFixture, SignalFixture];
+  return {
+    ...base,
+    id: "asm_evidence",
+    signals: [
+      { ...inc, id: "LIQ-02", family: 2, family_code: "LIQ", evidence_count: 0 },
+      lia,
+      { ...lia, id: "LIA-05", name: "BNPL", evidence_count: 50 },
+    ],
+  };
+};
+
+export const assessments: Record<string, Json> = {
+  asm_01: afT1(),
+  asm_unverified: unverified(),
+  asm_incomplete: incomplete(),
+  asm_evidence: evidenceAssessment(),
+};
+
+const evidenceRows = (count: number, prefix: string): Json[] =>
+  Array.from({ length: count }, (_, i) => ({
+    transaction_id: `txn_${prefix}_${i + 1}`,
+    date: `2026-${String(4 + (i % 6)).padStart(2, "0")}-${String(1 + (i % 28)).padStart(2, "0")}`,
+    description: `Synthetic ${prefix} transaction ${i + 1}`,
+    amount: -(25 + i),
+    category: "bnpl",
+    source: "rule",
+    confidence: 0.9,
+  }));
+
+// Keyed by "<assessment>/<signal>"; any other signal on a known assessment has no evidence file.
+const evidence: Record<string, Json[]> = {
+  "asm_01/INC-01": evidenceRows(13, "salary").map((row) => ({
+    ...row,
+    amount: 3200,
+    category: "income",
+  })),
+  "asm_01/LIA-01": evidenceRows(1, "card"),
+  "asm_evidence/LIQ-02": [],
+  "asm_evidence/LIA-01": evidenceRows(1, "card"),
+  "asm_evidence/LIA-05": evidenceRows(50, "bnpl"),
+};
+
+const member = {
+  id: "mem_01",
+  email: "officer@harbourmutual.example",
+  name: "Sam Officer",
+  role: "owner",
+  invited_at: null,
+};
+const summary = {
+  id: "asm_01",
+  applicant_id: "apl_assessed",
+  version: 1,
+  status: "complete",
+  rollup_state: "amber",
+  data_as_of: AT,
+};
+const ledger = {
+  id: "led_01",
+  delta: 120,
+  reason: "pack_purchase",
+  applicant_id: null,
+  stripe_payment_intent_id: null,
+  at: AT,
+};
+const note = {
+  id: "note_01",
+  assessment_id: "asm_01",
+  signal_id: "LIA-01",
+  author: "Sam Officer",
+  body: "Applicant confirmed the card was closed in September.",
+  explained: true,
+  created_at: AT,
+};
+const policy = {
+  product: "home",
+  version: 1,
+  buffer: 3,
+  floor_rate: 5.5,
+  income_shading: { salary: 1, overtime: 0.8 },
+  card_factor: 0.03,
+  expense_method: "highest_of_confirmed_benchmark_observed",
+  ratio_thresholds: { dsr: { amber: 0.5, red: 0.7 }, lvr: { amber: 0.7, red: 0.9 } },
+};
+const benchmark = {
+  id: "bmk_01",
+  name: "Moroku seed table",
+  version: 1,
+  source: "seed",
+  is_seed: true,
+  effective_from: "2026-07-01",
+};
+const audit = {
+  id: "aud_01",
+  workspace_id: "wks_01",
+  actor: "officer@harbourmutual.example",
+  action: "assessment.view",
+  target: "asm_01",
+  reason: null,
+  at: AT,
+  ip: null,
+};
+const watch = {
+  id: "wch_01",
+  applicant_id: "apl_watching",
+  mode: "readiness",
+  cadence: "weekly",
+  hold_runs: 2,
+  starts_at: AT,
+  ends_at: "2027-04-20T09:30:00+10:00",
+  consent_recorded_at: AT,
+  share_path_to_ready: true,
+  status: "active",
+  stop_reason: null,
+  last_run_at: AT,
+};
+const portalWatch = {
+  watch,
+  purpose: "Harbour Mutual will keep checking your shared accounts and contact you when ready.",
+  path_to_ready: [{ label: "Monthly surplus", current: 600, target: 1000, met: false }],
+};
+const portalSession = {
+  lender_name: "Harbour Mutual",
+  lender_logo_url: null,
+  shared_data: ["Account details", "Balances", "Transactions"],
+  purpose: "To assess your home loan application",
+  step: "welcome",
+};
+const financialPosition = {
+  assets: [{ type: "property", provider: null, amount: 1200000, source: "applicant" }],
+  liabilities: [{ type: "credit_card", provider: "Synthetic Bank", amount: 6000, source: "bank" }],
+  repayments: [{ type: "credit_card", provider: "Synthetic Bank", amount: 229, source: "bank" }],
+  income: [{ type: "salary", provider: "Synthetic Employer", amount: 15158, source: "bank" }],
+  expenses: [{ type: "living", provider: null, amount: 3367, source: "bank" }],
+};
+const adminWorkspace = (wks: Json): Json => ({
+  ...wks,
+  member_count: 3,
+  usage: { assessments_this_month: 14 },
+  applicants_by_status: { invited: 1, assessed: 5 },
+  last_activity_at: AT,
+});
+const launchOffer = {
+  cap: 10,
+  used: 1,
+  remaining: 9,
+  claims: [{ workspace_id: "wks_01", at: AT }],
+};
+const job = { id: "job_01", kind: "sync", status: "queued", workspace_id: "wks_01" };
+const published = {
+  version: 1,
+  published_at: AT,
+  published_by: "staff@moroku.example",
+  second_signatory: "staff2@moroku.example",
+  content: {},
+};
+const page = (items: unknown[]) => ({ items, next_cursor: null });
+const url = (target: string) => ({ url: target });
+
+// One response per "<method> <template>". Where the response depends on an ID, it is a function
+// of the path parameters and returns undefined for an unknown ID.
+type Params = Record<string, string>;
+type Fixture = unknown | ((params: Params) => unknown);
+
+export const IDS = new Set([
+  "mem_01",
+  "note_01",
+  "wch_01",
+  "inv_01",
+  "job_01",
+  "wks_01",
+  "wks_seed",
+  "wks_zero",
+  "tok_01",
+  "personal",
+  "home",
+  "car",
+  "business",
+]);
+
+const findApplicant = ({ id }: Params) => applicants.find((a) => a.id === id);
+const knownApplicant =
+  <T>(body: T) =>
+  (params: Params) =>
+    findApplicant(params) ? body : undefined;
+const knownAssessment =
+  <T>(body: T) =>
+  ({ id = "" }: Params) =>
+    assessments[id] ? body : undefined;
+const adminById = ({ id }: Params) =>
+  [workspace(), seedWorkspace, zeroWorkspace].map(adminWorkspace).find((w) => w.id === id);
+
+export const fixtures: Record<string, Fixture> = {
+  "get /v1/app/me": me(workspace(), []),
+  "post /v1/app/workspaces": workspace(),
+  "get /v1/app/packs": {
+    packs: [
+      {
+        id: "pack_launch",
+        name: "Launch pack",
+        credits: 500,
+        price_aud: 2500,
+        is_launch_offer: true,
+        eligible: true,
+        places_left: 9,
+      },
+      {
+        id: "pack_100",
+        name: "100 credits",
+        credits: 100,
+        price_aud: 1000,
+        is_launch_offer: false,
+        eligible: true,
+        places_left: null,
+      },
+    ],
+  },
+  "post /v1/app/checkout": url("https://checkout.stripe.example/session"),
+  "post /v1/app/billing/portal": url("https://billing.stripe.example/session"),
+  "get /v1/app/credits": { balance: 120, reserved: 2, entries: [ledger], next_cursor: null },
+  "patch /v1/app/billing/auto-topup": { enabled: false, pack_id: null },
+  "patch /v1/app/workspace": workspace(),
+  "post /v1/app/workspace/logo": url("https://uploads.moroku.example/logo"),
+  "get /v1/app/members": page([member]),
+  "post /v1/app/members": member,
+  "patch /v1/app/members/{id}": member,
+  "delete /v1/app/members/{id}": null,
+  "get /v1/app/applicants": page(applicants),
+  "post /v1/app/applicants": applicant("invited"),
+  "get /v1/app/applicants/{id}": findApplicant,
+  "patch /v1/app/applicants/{id}": findApplicant,
+  "delete /v1/app/applicants/{id}": (params: Params) =>
+    findApplicant(params) && { ...findApplicant(params), status: "closed", grant_revoked: true },
+  "post /v1/app/applicants/{id}/invites": knownApplicant(invite),
+  "delete /v1/app/applicants/{id}/invites/{inviteId}": knownApplicant(null),
+  "post /v1/app/applicants/{id}/request-accounts": knownApplicant(invite),
+  "get /v1/app/applicants/{id}/assessments": knownApplicant(page([summary])),
+  "post /v1/app/applicants/{id}/assessments": knownApplicant({ ...summary, status: "running" }),
+  "get /v1/app/applicants/{id}/timeline": knownApplicant(
+    page([
+      {
+        id: "run_01",
+        watch_id: "wch_01",
+        run_at: AT,
+        assessment_id: "asm_01",
+        pins: afT1().pins,
+        transitions: [
+          { signal: "LIA-05", from: "amber", to: "green", held_runs: 2, alerted: true },
+        ],
+      },
+    ]),
+  ),
+  "get /v1/app/assessments/{id}": ({ id = "" }: Params) => assessments[id],
+  "get /v1/app/assessments/{id}/signals/{signalId}/evidence": ({ id, signalId }: Params) => {
+    const items = evidence[`${id}/${signalId}`];
+    return items && { items };
+  },
+  "get /v1/app/assessments/{id}/affordability/trace": knownAssessment({
+    income: [
+      {
+        payer: "Synthetic Employer",
+        cadence: "fortnightly",
+        observed_amount: 6996,
+        type: "salary",
+        shading: 1,
+        assessed_amount: 15158,
+      },
+    ],
+    expenses: [
+      {
+        group: "living",
+        declared: 3000,
+        benchmark: 1573,
+        observed: 3367,
+        used: 3367,
+        why: "Highest of the three",
+      },
+    ],
+    liabilities: [
+      {
+        type: "credit_card",
+        source: "found",
+        monthly_commitment: 229,
+        rule: "Higher of stated repayment and 3% of limit",
+      },
+    ],
+    trace: [{ step: "ara", value: 11333, inputs: { income: 15158, gle: 3367, repayments: 458 } }],
+    overrides: [],
+  }),
+  "post /v1/app/assessments/{id}/notes": knownAssessment(note),
+  "patch /v1/app/notes/{id}": note,
+  "post /v1/app/assessments/{id}/overrides": knownAssessment({ ...summary, version: 2 }),
+  "get /v1/app/assessments/{id}/report.pdf": knownAssessment({ pdf: true }),
+  "get /v1/app/settings/policy/{product}": policy,
+  "put /v1/app/settings/policy/{product}": { ...policy, version: 2 },
+  "get /v1/app/benchmarks": { items: [benchmark] },
+  "post /v1/app/benchmarks": { ...benchmark, source: "lender_upload", is_seed: false, version: 2 },
+  "get /v1/app/benchmarks/template.csv": {
+    csv: "household_type,dependants,income_band,location,monthly_amount\n",
+  },
+  "get /v1/app/audit": page([audit]),
+  "post /v1/app/watches": watch,
+  "delete /v1/app/watches/{id}": { ...watch, status: "stopped", stop_reason: "officer" },
+  "get /v1/portal/{token}": portalSession,
+  "post /v1/portal/{token}/connect": url("https://openfeed.example/authorize"),
+  "get /v1/openfeed/callback": { redirect: "/connect/tok_01/progress" },
+  "get /v1/portal/{token}/financial-position": financialPosition,
+  "put /v1/portal/{token}/financial-position": financialPosition,
+  "post /v1/portal/{token}/withdraw": { ...portalSession, step: "withdrawn" },
+  "get /v1/portal/{token}/watch": portalWatch,
+  "post /v1/portal/{token}/watch": portalWatch,
+  "post /v1/portal/{token}/watch/stop": {
+    ...portalWatch,
+    watch: { ...watch, status: "stopped", stop_reason: "applicant" },
+  },
+  "get /v1/admin/workspaces": page([workspace(), seedWorkspace, zeroWorkspace].map(adminWorkspace)),
+  "get /v1/admin/workspaces/{id}": adminById,
+  "patch /v1/admin/workspaces/{id}": adminById,
+  "post /v1/admin/workspaces/{id}/credits": { ...ledger, reason: "adjustment" },
+  "get /v1/admin/launch-offer": launchOffer,
+  "patch /v1/admin/launch-offer": launchOffer,
+  "post /v1/admin/workspaces/{id}/support-access": ({ id = "" }: Params) => ({
+    id: "sup_01",
+    workspace_id: id,
+    staff: "staff@moroku.example",
+    expires_at: AT,
+  }),
+  "get /v1/admin/operations": {
+    integrations: [
+      { name: "openfeed", healthy: true },
+      { name: "enrich", healthy: true },
+      { name: "stripe", healthy: true },
+      { name: "email", healthy: true },
+    ],
+    jobs: [{ ...job, status: "failed" }],
+    webhook_failures: 0,
+    openfeed_credits_held: 100,
+  },
+  "post /v1/admin/operations/retry/{jobId}": job,
+  "get /v1/admin/definitions": { items: [published] },
+  "post /v1/admin/definitions": { ...published, version: 2 },
+  "get /v1/admin/default-thresholds": { items: [published] },
+  "post /v1/admin/default-thresholds": { ...published, version: 2 },
+  "get /v1/admin/seed-benchmark": { items: [published] },
+  "post /v1/admin/seed-benchmark": { ...published, version: 2 },
+  "get /v1/admin/audit": page([audit]),
+};
+
+// Named variants, chosen with the header `Prefer: example=<name>`.
+export const variants: Record<string, Record<string, unknown>> = {
+  "get /v1/app/me": {
+    seed_benchmark: me(seedWorkspace, [
+      { code: "seed_benchmark", message: "You are using the Moroku seed benchmark table." },
+    ]),
+    zero_credits: me(zeroWorkspace, [
+      { code: "zero_credits", message: "You have no credits. Buy a pack to invite applicants." },
+    ]),
+  },
+};
