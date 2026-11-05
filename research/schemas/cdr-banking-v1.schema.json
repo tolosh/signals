@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signals.moroku.digital/schemas/cdr-banking-v1.json",
+  "title": "CDR banking response shapes used by openfeed (subset)",
+  "description": "Written for SIG-12 from the Consumer Data Standards banking API (Get Accounts, Get Account Detail, Get Balance, Get Transactions), which openfeed's Sharing API v1 implements. openfeed's own OpenAPI file could not be reached when this was written; re-validate against it when it can be (see SIG-12). Fields openfeed does not supply (direct debits, scheduled payments, payees, customer) are out of scope (Product Specification 4.6).",
+  "$defs": {
+    "AmountString": { "type": "string", "pattern": "^-?(0|[1-9][0-9]*)\\.[0-9]{2}$" },
+    "DateTimeString": { "type": "string", "format": "date-time" },
+    "DateString": { "type": "string", "format": "date" },
+    "Links": {
+      "type": "object",
+      "required": ["self"],
+      "properties": { "self": { "type": "string", "format": "uri" } }
+    },
+    "LinksPaginated": {
+      "type": "object",
+      "required": ["self"],
+      "properties": {
+        "self": { "type": "string", "format": "uri" },
+        "first": { "type": "string", "format": "uri" },
+        "prev": { "type": "string", "format": "uri" },
+        "next": { "type": "string", "format": "uri" },
+        "last": { "type": "string", "format": "uri" }
+      }
+    },
+    "MetaPaginated": {
+      "type": "object",
+      "required": ["totalRecords", "totalPages"],
+      "properties": {
+        "totalRecords": { "type": "integer", "minimum": 0 },
+        "totalPages": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "ProductCategory": {
+      "enum": [
+        "BUSINESS_LOANS",
+        "CRED_AND_CHRG_CARDS",
+        "LEASES",
+        "MARGIN_LOANS",
+        "OVERDRAFTS",
+        "PERS_LOANS",
+        "REGULATED_TRUST_ACCOUNTS",
+        "RESIDENTIAL_MORTGAGES",
+        "TERM_DEPOSITS",
+        "TRADE_FINANCE",
+        "TRAVEL_CARDS",
+        "TRANS_AND_SAVINGS_ACCOUNTS"
+      ]
+    },
+    "BankingAccount": {
+      "type": "object",
+      "required": ["accountId", "displayName", "maskedNumber", "productCategory", "productName"],
+      "properties": {
+        "accountId": { "type": "string", "minLength": 1 },
+        "creationDate": { "$ref": "#/$defs/DateString" },
+        "displayName": { "type": "string" },
+        "nickname": { "type": "string" },
+        "openStatus": { "enum": ["OPEN", "CLOSED"] },
+        "isOwned": { "type": "boolean" },
+        "accountOwnership": {
+          "enum": ["UNKNOWN", "ONE_PARTY", "TWO_PARTY", "MANY_PARTY", "OTHER"]
+        },
+        "maskedNumber": { "type": "string" },
+        "productCategory": { "$ref": "#/$defs/ProductCategory" },
+        "productName": { "type": "string" }
+      }
+    },
+    "BankingAccountDetail": {
+      "allOf": [
+        { "$ref": "#/$defs/BankingAccount" },
+        {
+          "type": "object",
+          "properties": {
+            "bsb": { "type": "string", "pattern": "^[0-9]{6}$" },
+            "accountNumber": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "BankingBalance": {
+      "type": "object",
+      "required": ["accountId", "currentBalance", "availableBalance"],
+      "properties": {
+        "accountId": { "type": "string" },
+        "currentBalance": { "$ref": "#/$defs/AmountString" },
+        "availableBalance": { "$ref": "#/$defs/AmountString" },
+        "creditLimit": { "$ref": "#/$defs/AmountString" },
+        "amortisedLimit": { "$ref": "#/$defs/AmountString" },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+      }
+    },
+    "BankingTransaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "accountId",
+        "transactionId",
+        "isDetailAvailable",
+        "type",
+        "status",
+        "description",
+        "amount",
+        "reference"
+      ],
+      "properties": {
+        "accountId": { "type": "string" },
+        "transactionId": { "type": "string" },
+        "isDetailAvailable": { "type": "boolean" },
+        "type": {
+          "enum": [
+            "FEE",
+            "INTEREST_CHARGED",
+            "INTEREST_PAID",
+            "TRANSFER_OUTGOING",
+            "TRANSFER_INCOMING",
+            "PAYMENT",
+            "DIRECT_DEBIT",
+            "OTHER"
+          ]
+        },
+        "status": { "enum": ["PENDING", "POSTED"] },
+        "description": { "type": "string", "minLength": 1 },
+        "postingDateTime": { "$ref": "#/$defs/DateTimeString" },
+        "valueDateTime": { "$ref": "#/$defs/DateTimeString" },
+        "executionDateTime": { "$ref": "#/$defs/DateTimeString" },
+        "amount": { "$ref": "#/$defs/AmountString" },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "reference": { "type": "string" },
+        "merchantName": { "type": "string" },
+        "merchantCategoryCode": { "type": "string", "pattern": "^[0-9]{4}$" },
+        "billerCode": { "type": "string" },
+        "billerName": { "type": "string" },
+        "crn": { "type": "string" },
+        "apcaNumber": { "type": "string" }
+      }
+    },
+    "AccountListResponse": {
+      "type": "object",
+      "required": ["data", "links", "meta"],
+      "properties": {
+        "data": {
+          "type": "object",
+          "required": ["accounts"],
+          "properties": {
+            "accounts": { "type": "array", "items": { "$ref": "#/$defs/BankingAccount" } }
+          }
+        },
+        "links": { "$ref": "#/$defs/LinksPaginated" },
+        "meta": { "$ref": "#/$defs/MetaPaginated" }
+      }
+    },
+    "AccountDetailResponse": {
+      "type": "object",
+      "required": ["data", "links"],
+      "properties": {
+        "data": { "$ref": "#/$defs/BankingAccountDetail" },
+        "links": { "$ref": "#/$defs/Links" },
+        "meta": { "type": "object" }
+      }
+    },
+    "BalanceResponse": {
+      "type": "object",
+      "required": ["data", "links"],
+      "properties": {
+        "data": { "$ref": "#/$defs/BankingBalance" },
+        "links": { "$ref": "#/$defs/Links" },
+        "meta": { "type": "object" }
+      }
+    },
+    "TransactionListResponse": {
+      "type": "object",
+      "required": ["data", "links", "meta"],
+      "properties": {
+        "data": {
+          "type": "object",
+          "required": ["transactions"],
+          "properties": {
+            "transactions": { "type": "array", "items": { "$ref": "#/$defs/BankingTransaction" } }
+          }
+        },
+        "links": { "$ref": "#/$defs/LinksPaginated" },
+        "meta": { "$ref": "#/$defs/MetaPaginated" }
+      }
+    }
+  }
+}

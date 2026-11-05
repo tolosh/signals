@@ -1,0 +1,234 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signals.moroku.digital/schemas/ground-truth-v1.json",
+  "title": "Synthetic applicant ground truth, schema 1.0.0 (SIG-12)",
+  "description": "The known answers for one generated applicant. Monetary values are AUD, monthly figures are expected values from the generator's parameters (amount x cadence), not the realised totals in the window. surplus_monthly = income.net_monthly - expenses.total_monthly - liabilities.repayments_monthly. A change to this shape is a new schema version; a published version is never edited.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generator_version",
+    "applicant_id",
+    "seed",
+    "tags",
+    "archetype",
+    "feed_type",
+    "history",
+    "coverage",
+    "income",
+    "expenses",
+    "commitments",
+    "liabilities",
+    "behaviours",
+    "surplus_monthly"
+  ],
+  "$defs": {
+    "money": { "type": "number" },
+    "cadence": { "enum": ["weekly", "fortnightly", "monthly", "quarterly", "annual"] },
+    "date": { "type": "string", "format": "date" }
+  },
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "generator_version": { "type": "string" },
+    "applicant_id": { "type": "string" },
+    "seed": { "type": "integer" },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "archetype": { "enum": ["salaried", "variable", "gig", "benefits"] },
+    "feed_type": { "enum": ["cdr", "uploaded_statement"] },
+    "history": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["months", "start_date", "end_date"],
+      "properties": {
+        "months": { "enum": [1, 3, 6, 12] },
+        "start_date": { "$ref": "#/$defs/date" },
+        "end_date": { "$ref": "#/$defs/date" }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "salary_account_shared",
+        "unshared_transfer_accounts",
+        "transfers_to_unshared_count",
+        "shared_account_ids",
+        "unshared_account_ids"
+      ],
+      "properties": {
+        "salary_account_shared": { "type": "boolean" },
+        "unshared_transfer_accounts": { "type": "integer", "minimum": 0 },
+        "transfers_to_unshared_count": { "type": "integer", "minimum": 0 },
+        "shared_account_ids": { "type": "array", "items": { "type": "string" } },
+        "unshared_account_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "income": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["net_monthly", "gross_annual", "streams"],
+      "properties": {
+        "net_monthly": { "$ref": "#/$defs/money" },
+        "gross_annual": { "$ref": "#/$defs/money" },
+        "streams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "type",
+              "payer",
+              "cadence",
+              "net_per_pay",
+              "variability",
+              "net_monthly",
+              "account_id",
+              "account_shared"
+            ],
+            "properties": {
+              "type": { "enum": ["salary", "variable", "gig", "benefit"] },
+              "payer": { "type": "string" },
+              "cadence": { "$ref": "#/$defs/cadence" },
+              "net_per_pay": { "$ref": "#/$defs/money" },
+              "variability": { "type": "number", "minimum": 0, "maximum": 1 },
+              "net_monthly": { "$ref": "#/$defs/money" },
+              "account_id": { "type": "string" },
+              "account_shared": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "expenses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "committed_monthly",
+        "basic_monthly",
+        "discretionary_monthly",
+        "total_monthly",
+        "items"
+      ],
+      "properties": {
+        "committed_monthly": { "$ref": "#/$defs/money" },
+        "basic_monthly": { "$ref": "#/$defs/money" },
+        "discretionary_monthly": { "$ref": "#/$defs/money" },
+        "total_monthly": { "$ref": "#/$defs/money" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "group", "cadence", "monthly_equivalent"],
+            "properties": {
+              "name": { "type": "string" },
+              "group": { "enum": ["committed", "basic", "discretionary"] },
+              "cadence": { "$ref": "#/$defs/cadence" },
+              "monthly_equivalent": { "$ref": "#/$defs/money" }
+            }
+          }
+        }
+      }
+    },
+    "commitments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "cadence",
+          "amount",
+          "monthly_equivalent",
+          "occurrences_in_window",
+          "account_id"
+        ],
+        "properties": {
+          "kind": { "type": "string" },
+          "cadence": { "$ref": "#/$defs/cadence" },
+          "amount": { "$ref": "#/$defs/money" },
+          "monthly_equivalent": { "$ref": "#/$defs/money" },
+          "occurrences_in_window": { "type": "integer", "minimum": 0 },
+          "account_id": { "type": "string" }
+        }
+      }
+    },
+    "liabilities": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repayments_monthly", "items"],
+      "properties": {
+        "repayments_monthly": { "$ref": "#/$defs/money" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "type",
+              "provider",
+              "declared",
+              "account_shared",
+              "limit",
+              "balance",
+              "repayment",
+              "cadence",
+              "monthly_commitment"
+            ],
+            "properties": {
+              "id": { "type": "string" },
+              "type": {
+                "enum": [
+                  "credit_card",
+                  "personal_loan",
+                  "car_loan",
+                  "mortgage",
+                  "bnpl",
+                  "sacc",
+                  "wage_advance"
+                ]
+              },
+              "provider": { "type": "string" },
+              "declared": { "type": "boolean" },
+              "account_shared": { "type": "boolean" },
+              "limit": { "type": ["number", "null"] },
+              "balance": { "type": ["number", "null"] },
+              "repayment": { "$ref": "#/$defs/money" },
+              "cadence": { "$ref": "#/$defs/cadence" },
+              "monthly_commitment": { "$ref": "#/$defs/money" }
+            }
+          }
+        }
+      }
+    },
+    "behaviours": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gambling_monthly", "dishonours", "positive"],
+      "properties": {
+        "gambling_monthly": { "type": ["number", "null"] },
+        "dishonours": { "type": "integer", "minimum": 0 },
+        "positive": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rent_on_time",
+            "cards_cleared_in_full",
+            "savings_growing",
+            "savings_monthly",
+            "no_dishonours"
+          ],
+          "properties": {
+            "rent_on_time": { "type": "boolean" },
+            "cards_cleared_in_full": { "type": "boolean" },
+            "savings_growing": { "type": "boolean" },
+            "savings_monthly": { "$ref": "#/$defs/money" },
+            "no_dishonours": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "surplus_monthly": { "$ref": "#/$defs/money" }
+  }
+}

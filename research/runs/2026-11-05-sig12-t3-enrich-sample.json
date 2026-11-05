@@ -1,0 +1,325 @@
+{
+  "ticket": "SIG-12",
+  "test": "T3",
+  "seed": 42,
+  "sample_size": 50,
+  "population_transactions": 55503,
+  "sample_sha256": "dbd7b7fe2cfffcce27fd5e3efc4adec5c744684b2bf53a7ce9553f7f67955100",
+  "enrich": {
+    "engine_version": "1.7.0",
+    "taxonomy_version": "1.4"
+  },
+  "lookups_loaded": "none (no dictionary, overrides or LLM cache)",
+  "by_source": {
+    "credit": 2,
+    "exclusion": 7,
+    "mcc": 32,
+    "income": 8,
+    "rules": 1
+  },
+  "deterministic_share": 1,
+  "flag_below_80_percent": false,
+  "fallbacks": [],
+  "rows": [
+    {
+      "description": "BEFOREPAY ADVANCE",
+      "amount": "150.00",
+      "source": "credit",
+      "category": "uncategorised_credit"
+    },
+    {
+      "description": "BPAY ANZ CREDIT CARD PAYMENT",
+      "amount": "-180.00",
+      "source": "exclusion",
+      "category": "transfer"
+    },
+    {
+      "description": "TELSTRA RICHMOND AUS",
+      "amount": "-65.00",
+      "source": "mcc",
+      "category": "utilities"
+    },
+    {
+      "description": "COLES 8759 MELBOURNE VI AUS",
+      "amount": "-298.39",
+      "source": "mcc",
+      "category": "groceries"
+    },
+    {
+      "description": "MENULOG 4836 MELBOURNE VI AUS",
+      "amount": "-47.47",
+      "source": "mcc",
+      "category": "dining_entertainment"
+    },
+    {
+      "description": "AMPOL 5432 BRISBANE QL AUS",
+      "amount": "-55.81",
+      "source": "mcc",
+      "category": "vehicle_running"
+    },
+    {
+      "description": "COLES 4563 RICHMOND VI AUS",
+      "amount": "-168.19",
+      "source": "mcc",
+      "category": "groceries"
+    },
+    {
+      "description": "SALARY ACME CONSULTING PTY LTD",
+      "amount": "2385.00",
+      "source": "income",
+      "category": "income"
+    },
+    {
+      "description": "SALARY BLUEGUM CONSTRUCTIONS",
+      "amount": "1269.00",
+      "source": "income",
+      "category": "income"
+    },
+    {
+      "description": "SALARY HARBOUR LOGISTICS",
+      "amount": "1038.00",
+      "source": "income",
+      "category": "income"
+    },
+    {
+      "description": "GRILLD 1501 PARRAMATTA NS AUS",
+      "amount": "-39.18",
+      "source": "mcc",
+      "category": "dining_entertainment"
+    },
+    {
+      "description": "WOOLWORTHS 2741 CHATSWOOD NS AUS",
+      "amount": "-150.02",
+      "source": "mcc",
+      "category": "groceries"
+    },
+    {
+      "description": "MENULOG 5980 PARRAMATTA NS AUS",
+      "amount": "-72.38",
+      "source": "mcc",
+      "category": "dining_entertainment"
+    },
+    {
+      "description": "SPOTIFY SYDNEY AUS",
+      "amount": "-13.99",
+      "source": "mcc",
+      "category": "subscriptions"
+    },
+    {
+      "description": "NETFLIX.COM SYDNEY AUS",
+      "amount": "-18.99",
+      "source": "mcc",
+      "category": "subscriptions"
+    },
+    {
+      "description": "SALARY NORTHSIDE HEALTH",
+      "amount": "6417.00",
+      "source": "income",
+      "category": "income"
+    },
+    {
+      "description": "INTERNET TRANSFER SAVINGS",
+      "amount": "-900.00",
+      "source": "exclusion",
+      "category": "transfer"
+    },
+    {
+      "description": "BP 3623 PARRAMATTA NS AUS",
+      "amount": "-83.05",
+      "source": "mcc",
+      "category": "vehicle_running"
+    },
+    {
+      "description": "SALARY ACME CONSULTING PTY LTD",
+      "amount": "3692.00",
+      "source": "income",
+      "category": "income"
+    },
+    {
+      "description": "GUZMAN Y GOMEZ 7766 ADELAIDE SA AUS",
+      "amount": "-52.29",
+      "source": "mcc",
+      "category": "dining_entertainment"
+    },
+    {
+      "description": "SPOTIFY SYDNEY AUS",
+      "amount": "-13.99",
+      "source": "mcc",
+      "category": "subscriptions"
+    },
+    {
+      "description": "BP 7048 BONDI JUNCTION NS AUS",
+      "amount": "-58.12",
+      "source": "mcc",
+      "category": "vehicle_running"
+    },
+    {
+      "description": "COLES 7849 RICHMOND VI AUS",
+      "amount": "-298.19",
+      "source": "mcc",
+      "category": "groceries"
+    },
+    {
+      "description": "SALARY NORTHSIDE HEALTH",
+      "amount": "1212.00",
+      "source": "income",
+      "category": "income"
+    },
+    {
+      "description": "COLES 7189 CHATSWOOD NS AUS",
+      "amount": "-235.13",
+      "source": "mcc",
+      "category": "groceries"
+    },
+    {
+      "description": "TELSTRA RICHMOND AUS",
+      "amount": "-65.00",
+      "source": "mcc",
+      "category": "utilities"
+    },
+    {
+      "description": "RENT BELLE PROPERTY REAL ESTATE",
+      "amount": "-1900.00",
+      "source": "rules",
+      "category": "rent"
+    },
+    {
+      "description": "AMPOL 4176 BONDI JUNCTION NS AUS",
+      "amount": "-85.05",
+      "source": "mcc",
+      "category": "vehicle_running"
+    },
+    {
+      "description": "PAYMENT RECEIVED THANK YOU",
+      "amount": "180.00",
+      "source": "credit",
+      "category": "uncategorised_credit"
+    },
+    {
+      "description": "OPTUS PARRAMATTA AUS",
+      "amount": "-65.00",
+      "source": "mcc",
+      "category": "utilities"
+    },
+    {
+      "description": "BPAY NRMA INSURANCE",
+      "amount": "-1100.00",
+      "source": "exclusion",
+      "category": "transfer"
+    },
+    {
+      "description": "SALARY CITY OF SYDNEY",
+      "amount": "1885.00",
+      "source": "income",
+      "category": "income"
+    },
+    {
+      "description": "AMPOL 5021 BRISBANE QL AUS",
+      "amount": "-105.20",
+      "source": "mcc",
+      "category": "vehicle_running"
+    },
+    {
+      "description": "MCDONALDS 4799 BONDI JUNCTION NS AUS",
+      "amount": "-48.87",
+      "source": "mcc",
+      "category": "dining_entertainment"
+    },
+    {
+      "description": "INTERNET TRANSFER SAVINGS",
+      "amount": "-700.00",
+      "source": "exclusion",
+      "category": "transfer"
+    },
+    {
+      "description": "7-ELEVEN 5070 BRISBANE QL AUS",
+      "amount": "-93.24",
+      "source": "mcc",
+      "category": "vehicle_running"
+    },
+    {
+      "description": "WOOLWORTHS 2364 ADELAIDE SA AUS",
+      "amount": "-202.98",
+      "source": "mcc",
+      "category": "groceries"
+    },
+    {
+      "description": "MENULOG 2068 MELBOURNE VI AUS",
+      "amount": "-35.74",
+      "source": "mcc",
+      "category": "dining_entertainment"
+    },
+    {
+      "description": "BP 2848 PARRAMATTA NS AUS",
+      "amount": "-119.38",
+      "source": "mcc",
+      "category": "vehicle_running"
+    },
+    {
+      "description": "TRANSFER TO 062-000 959048",
+      "amount": "-270.00",
+      "source": "exclusion",
+      "category": "transfer"
+    },
+    {
+      "description": "BPAY WESTPAC CREDIT CARD PAYMENT",
+      "amount": "-180.00",
+      "source": "exclusion",
+      "category": "transfer"
+    },
+    {
+      "description": "GUZMAN Y GOMEZ 3871 MELBOURNE VI AUS",
+      "amount": "-40.42",
+      "source": "mcc",
+      "category": "dining_entertainment"
+    },
+    {
+      "description": "BPAY WESTPAC CREDIT CARD PAYMENT",
+      "amount": "-180.00",
+      "source": "exclusion",
+      "category": "transfer"
+    },
+    {
+      "description": "GUZMAN Y GOMEZ 6339 CHERMSIDE QL AUS",
+      "amount": "-35.58",
+      "source": "mcc",
+      "category": "dining_entertainment"
+    },
+    {
+      "description": "MENULOG 7166 CHERMSIDE QL AUS",
+      "amount": "-58.51",
+      "source": "mcc",
+      "category": "dining_entertainment"
+    },
+    {
+      "description": "COLES 4147 PERTH WA AUS",
+      "amount": "-154.53",
+      "source": "mcc",
+      "category": "groceries"
+    },
+    {
+      "description": "SALARY ACME CONSULTING PTY LTD",
+      "amount": "942.00",
+      "source": "income",
+      "category": "income"
+    },
+    {
+      "description": "AMPOL 1067 PARRAMATTA NS AUS",
+      "amount": "-60.48",
+      "source": "mcc",
+      "category": "vehicle_running"
+    },
+    {
+      "description": "WOOLWORTHS 1431 SYDNEY NS AUS",
+      "amount": "-132.19",
+      "source": "mcc",
+      "category": "groceries"
+    },
+    {
+      "description": "ALDI STORES 9288 MELBOURNE VI AUS",
+      "amount": "-194.52",
+      "source": "mcc",
+      "category": "groceries"
+    }
+  ]
+}
