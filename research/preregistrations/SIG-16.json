@@ -46,7 +46,8 @@
   "negative_control": {
     "run_first": true,
     "name": "shuffled payer names",
-    "manipulation": "every credit narrative is replaced with a name unique to that transaction (PAYER <transactionId>), destroying payer grouping while keeping amounts and dates",
+    "manipulation": "every credit narrative is replaced with a name unique to that credit, spelt in letters only (PAYER followed by the credit's index within the applicant in base 26, A to Z), destroying payer grouping while keeping amounts and dates",
+    "amendment": "2026-11-07, before any run: the first registration used PAYER <transactionId>, which payer normalisation (digits removed) would have collapsed into one group; the names are now letters only",
     "expected": "share within 5% below 0.20; if it is 0.20 or more, the grouping is not what drives the result and no other result in the set stands"
   },
   "known_limits": [
