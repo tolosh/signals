@@ -9,4 +9,9 @@ export default tseslint.config(
     files: ["scripts/**/*.mjs"],
     languageOptions: { globals: { process: "readonly", console: "readonly" } },
   },
+  {
+    // Tests index into arrays they have just asserted on; non-null assertions are allowed there.
+    files: ["test/**/*.ts"],
+    rules: { "@typescript-eslint/no-non-null-assertion": "off" },
+  },
 );
