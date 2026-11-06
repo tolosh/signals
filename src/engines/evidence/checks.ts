@@ -1,4 +1,5 @@
-// Assessment-level checks EQ-01 to EQ-03 (Amendment 2, EQ-R3; D20). They run before any family
+// Assessment-level checks EQ-01 to EQ-03 (Amendment 2, EQ-R3; D20). Interpretations E-2 to E-6 are
+// in docs/adr/0002-evidence-quality-interpretations.md. The checks run before any family
 // and return pass, partial or fail. Thresholds for EQ-03 are Amendment 2's; the EQ-02
 // "regular and material" test is interpretation E-2, recorded on SIG-39 for ruling.
 import { DEFINITIONS_VERSION } from "../signals/definitions.js";
