@@ -336,7 +336,8 @@ describe("the logo upload flow works end to end", () => {
     expect(u.headers).toEqual({ "Content-Type": "image/png" });
     const minutes = (Date.parse(u.expires_at) - Date.now()) / 60_000;
     expect(minutes).toBeGreaterThan(9);
-    expect(minutes).toBeLessThanOrEqual(10);
+    // A few seconds of tolerance for clock skew between the hosted mock and this machine.
+    expect(minutes).toBeLessThanOrEqual(10.1);
     expect(new URL(u.upload_url).origin).toBe(new URL(base).origin);
     expect((await put(u, png)).status).toBe(200);
   });
