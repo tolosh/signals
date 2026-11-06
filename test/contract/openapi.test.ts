@@ -193,6 +193,88 @@ describe("roll-up state is declared where generated clients can see it", () => {
   });
 
   it("the contract version is bumped for the additive change", () => {
-    expect(doc.info.version).toBe("1.1.0");
+    expect(doc.info.version).toMatch(/^1\.[1-9]/);
+  });
+});
+
+// Lovable gaps (SIG-19 comment, 7 November 2026), under SIG-10.
+describe("auto top-up can be read, and the logo upload is specified", () => {
+  type Schema = {
+    required?: string[];
+    properties?: Record<string, Schema>;
+    enum?: unknown[];
+    type?: unknown;
+    minimum?: number;
+    maximum?: number;
+    $ref?: string;
+    minProperties?: number;
+  };
+  const schemas = doc.components.schemas as Record<string, Schema>;
+  type Op = {
+    requestBody?: { content: { "application/json": { schema: Schema } } };
+    responses: Record<
+      string,
+      { $ref?: string; content?: { "application/json": { schema: Schema } } }
+    >;
+  };
+  const op = (path: string, method: string) => doc.paths[path]?.[method] as Op;
+  const requestRef = (o: Op) => o.requestBody?.content["application/json"].schema.$ref;
+  const responseRef = (o: Op, status: string) =>
+    o.responses[status]?.content?.["application/json"].schema.$ref ?? o.responses[status]?.$ref;
+
+  it("GET /v1/app/credits carries an auto_topup block { enabled, pack_id, updated_at }", () => {
+    expect(schemas.Credits?.required).toContain("auto_topup");
+    expect(schemas.Credits?.properties?.auto_topup?.$ref).toBe("#/components/schemas/AutoTopup");
+    expect(schemas.AutoTopup?.required).toEqual(["enabled", "pack_id", "updated_at"]);
+    expect(schemas.AutoTopup?.properties?.updated_at?.type).toEqual(["string", "null"]);
+  });
+
+  it("PATCH /billing/auto-topup takes an input and returns the same block", () => {
+    const patch = op("/v1/app/billing/auto-topup", "patch");
+    expect(requestRef(patch)).toBe("#/components/schemas/AutoTopupInput");
+    expect(schemas.AutoTopupInput?.required).toEqual(["enabled"]);
+    expect(responseRef(patch, "200")).toBe("#/components/schemas/AutoTopup");
+    expect(responseRef(patch, "400")).toBe("#/components/responses/Error");
+  });
+
+  it("POST /workspace/logo takes { content_type, size_bytes } within PNG, JPEG or SVG and 2 MB", () => {
+    const post = op("/v1/app/workspace/logo", "post");
+    expect(requestRef(post)).toBe("#/components/schemas/LogoUploadRequest");
+    const req = schemas.LogoUploadRequest;
+    expect(req?.required).toEqual(["content_type", "size_bytes"]);
+    expect(req?.properties?.content_type?.enum).toEqual([
+      "image/png",
+      "image/jpeg",
+      "image/svg+xml",
+    ]);
+    expect(req?.properties?.size_bytes?.minimum).toBe(1);
+    expect(req?.properties?.size_bytes?.maximum).toBe(2 * 1024 * 1024);
+    expect(responseRef(post, "400")).toBe("#/components/responses/Error");
+  });
+
+  it("returns a presigned PUT: { upload_url, method, headers, expires_at, logo_key }", () => {
+    const post = op("/v1/app/workspace/logo", "post");
+    expect(responseRef(post, "200")).toBe("#/components/schemas/LogoUpload");
+    const res = schemas.LogoUpload;
+    expect(res?.required).toEqual(["upload_url", "method", "headers", "expires_at", "logo_key"]);
+    expect(res?.properties?.method?.enum).toEqual(["PUT"]);
+    expect(res?.properties?.headers?.required).toEqual(["Content-Type"]);
+  });
+
+  it("PATCH /workspace takes a partial update with logo_key, and POST /workspaces still needs a name", () => {
+    const patch = op("/v1/app/workspace", "patch");
+    expect(requestRef(patch)).toBe("#/components/schemas/WorkspaceUpdate");
+    expect(schemas.WorkspaceUpdate?.required ?? []).toEqual([]);
+    expect(schemas.WorkspaceUpdate?.minProperties).toBe(1);
+    expect(schemas.WorkspaceUpdate?.properties?.logo_key?.type).toEqual(["string", "null"]);
+    expect(responseRef(patch, "400")).toBe("#/components/responses/Error");
+    expect(requestRef(op("/v1/app/workspaces", "post"))).toBe(
+      "#/components/schemas/WorkspaceInput",
+    );
+    expect(schemas.WorkspaceInput?.required).toEqual(["name"]);
+  });
+
+  it("is a minor version bump to 1.2.0", () => {
+    expect(doc.info.version).toBe("1.2.0");
   });
 });
