@@ -1,0 +1,58 @@
+{
+  "ticket": "SIG-16",
+  "registered_at": "2026-11-07",
+  "status": "pre-registered before any run; not to be edited after the first scored run",
+  "hypothesis": "H1 Serviceability. Grouping recurring credits by normalised payer name and cadence (weekly, fortnightly, monthly), excluding own-account transfers, refunds, loan disbursements and wage advances, will derive net monthly income within 5% of the verified figure for salaried applicants with at least 3 months of history, because salary credits are regular in both timing and amount.",
+  "metric": "absolute percentage error of derived against ground-truth net monthly income (scoring harness, run record schema 1.0.0)",
+  "tolerance_pct": 0.05,
+  "target_share_within": 0.9,
+  "fails_if_share_within_below": 0.8,
+  "classification": {
+    "supported": "primary run share within 5% >= 0.90, with the negative control passing",
+    "refuted": "primary run share within 5% < 0.80, with the negative control passing",
+    "inconclusive": "0.80 <= share < 0.90, or the negative control fails, or the data cannot test the claim"
+  },
+  "data": {
+    "set": "synthetic-v1",
+    "manifest": "research/datasets/synthetic-v1.manifest.json",
+    "seed": 42,
+    "set_sha256": "8f5cf973ec46b33bbeccd97e87dcde10edea22919ed9af9bc9469149b2e17ea9",
+    "population": "the 200 applicants tagged salaried-base; all have 3, 6 or 12 months of history and the salary account shared",
+    "as_of": "2026-10-31",
+    "consented_test_set": "not available; not run"
+  },
+  "primary_configuration": { "lookback_months": 6, "min_occurrences": 3 },
+  "variables": { "lookback_months": [3, 6], "min_occurrences": [2, 3] },
+  "method": {
+    "credits_considered": "positive amounts in transaction and savings accounts (CDR productCategory TRANS_AND_SAVINGS_ACCOUNTS, or no category) inside the lookback window ending on as_of",
+    "exclusions": [
+      "own-account transfers: a narrative carrying a BSB and account number; or a credit matched by a debit of the same amount on the same day in another shared account",
+      "refunds and reversals: narratives containing REFUND, REVERSAL or CASHBACK",
+      "loan disbursements and advances: narratives containing LOAN or ADVANCE",
+      "wage-advance and BNPL providers: BEFOREPAY, MYPAYNOW, CASHD, AFTERPAY, ZIP PAY, ZIP MONEY, HUMM, KLARNA",
+      "interest: narratives containing INTEREST",
+      "card and loan repayments received: PAYMENT RECEIVED, REPAYMENT RECEIVED"
+    ],
+    "payer_normalisation": "upper case; digits and punctuation removed; whitespace collapsed",
+    "cadence_from_median_gap_days": {
+      "weekly": [5, 9],
+      "fortnightly": [12, 16],
+      "monthly": [26, 35]
+    },
+    "stream_rule": "a group is a stream when it has at least min_occurrences credits in the window and its median gap falls in a cadence band; other groups are not income",
+    "monthly_equivalent": "median credit amount x 52/12 (weekly), 26/12 (fortnightly) or 1 (monthly), per AF-I1; streams are summed",
+    "enrich": "not used: the hypothesis groups by payer name, and the engine imports nothing outside src/engines (D3). The ticket's control 'Enrich taxonomy 1.3' therefore does not apply to this run"
+  },
+  "negative_control": {
+    "run_first": true,
+    "name": "shuffled payer names",
+    "manipulation": "every credit narrative is replaced with a name unique to that credit, spelt in letters only (PAYER followed by the credit's index within the applicant in base 26, A to Z), destroying payer grouping while keeping amounts and dates",
+    "amendment": "2026-11-07, before any run: the first registration used PAYER <transactionId>, which payer normalisation (digits removed) would have collapsed into one group; the names are now letters only",
+    "expected": "share within 5% below 0.20; if it is 0.20 or more, the grouping is not what drives the result and no other result in the set stands"
+  },
+  "known_limits": [
+    "set v1 salaried-base profiles have pay variability 0, so this tests grouping, cadence and exclusion, not robustness to overtime, bonuses or mid-cycle changes (the ticket's 'what we don't know')",
+    "set v1 payer names are stable by construction; stability across real data holders cannot be tested on synthetic data",
+    "expenses and liabilities are not derived by this engine; their harness metrics in these run records are not results"
+  ]
+}
