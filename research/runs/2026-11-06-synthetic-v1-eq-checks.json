@@ -1,0 +1,94 @@
+{
+  "run_id": "2026-11-06-synthetic-v1-eq-checks",
+  "created_at": "2026-11-06T20:21:42Z",
+  "ticket": "SIG-39",
+  "dataset": {
+    "set": "synthetic-v1",
+    "seed": 42,
+    "set_sha256": "8f5cf973ec46b33bbeccd97e87dcde10edea22919ed9af9bc9469149b2e17ea9"
+  },
+  "engine": {
+    "name": "evidence-quality",
+    "commit": "95dbec7b7d0129db07b19bcb2c54ac5503e30389",
+    "definitions_version": 1
+  },
+  "input": {
+    "as_of": "2026-10-31",
+    "lookback_months": 6
+  },
+  "by_tag": {
+    "salaried-base": {
+      "applicants": 200,
+      "EQ-01 pass": 200,
+      "EQ-02 pass": 200,
+      "EQ-03 pass": 137,
+      "EQ-03 fail": 63
+    },
+    "variable-income": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 pass": 16,
+      "EQ-03 fail": 4
+    },
+    "gig": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 pass": 10,
+      "EQ-03 fail": 10
+    },
+    "benefits": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 pass": 12,
+      "EQ-03 fail": 8
+    },
+    "undisclosed-card": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 fail": 8,
+      "EQ-03 pass": 12
+    },
+    "bnpl": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 fail": 9,
+      "EQ-03 pass": 11
+    },
+    "sacc": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 pass": 12,
+      "EQ-03 fail": 8
+    },
+    "wage-advance": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 pass": 12,
+      "EQ-03 fail": 8
+    },
+    "gambling": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 fail": 10,
+      "EQ-03 pass": 10
+    },
+    "coverage-gap": {
+      "applicants": 20,
+      "EQ-01 fail": 7,
+      "EQ-02 fail": 14,
+      "EQ-03 pass": 17,
+      "EQ-01 pass": 13,
+      "EQ-02 partial": 6,
+      "EQ-03 fail": 3
+    }
+  },
+  "mismatches": []
+}
