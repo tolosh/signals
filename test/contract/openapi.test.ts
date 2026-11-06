@@ -99,7 +99,7 @@ describe("T1 OpenAPI 3.1 validation", () => {
     expect(result.errors).toBeUndefined();
     expect(result.valid).toBe(true);
     expect(validator.version).toBe("3.1");
-    expect(doc.info.version).toBe("1.0.0");
+    expect(doc.info.version).toMatch(/^1./);
   });
 });
 
@@ -164,5 +164,35 @@ describe("contract rules", () => {
     };
     walk(doc.components.schemas);
     expect(bad).toEqual([]);
+  });
+});
+
+// Lovable build follow-ups (SIG-19 comment, 6 November 2026), under SIG-10.
+describe("roll-up state is declared where generated clients can see it", () => {
+  const ROLLUP = ["green", "amber", "red_refer", "red_knockout", "unverified"];
+  type Prop = { enum?: unknown[]; type?: unknown };
+  const props = (name: string) =>
+    (doc.components.schemas[name] as { properties: Record<string, Prop> }).properties;
+
+  it.each(["Applicant", "AssessmentSummary"])(
+    "%s.rollup_state lists every value inline",
+    (name) => {
+      const field = props(name).rollup_state;
+      expect(field?.enum).toEqual([...ROLLUP, null]);
+      expect(field?.type).toEqual(["string", "null"]);
+    },
+  );
+
+  it("GET /v1/app/applicants takes a rollup_state filter with the same values", () => {
+    const op = doc.paths["/v1/app/applicants"]?.get as {
+      parameters: { name?: string; in?: string; schema?: Prop }[];
+    };
+    const param = op.parameters.find((p) => p.name === "rollup_state");
+    expect(param?.in).toBe("query");
+    expect(param?.schema?.enum).toEqual(ROLLUP);
+  });
+
+  it("the contract version is bumped for the additive change", () => {
+    expect(doc.info.version).toBe("1.1.0");
   });
 });

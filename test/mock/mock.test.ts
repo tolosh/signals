@@ -188,3 +188,48 @@ describe("every operation in the contract is served and validates", () => {
     }
   });
 });
+
+// Lovable build follow-ups (SIG-19 comment, 6 November 2026), under SIG-11.
+describe("Lovable fixes", () => {
+  it("serves apl_01, the applicant asm_01 points to", async () => {
+    const asm = (await (await get("/v1/app/assessments/asm_01")).json()) as {
+      applicant_id: string;
+    };
+    const res = await get(`/v1/app/applicants/${asm.applicant_id}`);
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { id: string; latest_assessment_id: string; status: string };
+    expect(body).toMatchObject({
+      id: "apl_01",
+      latest_assessment_id: "asm_01",
+      status: "assessed",
+    });
+    expect(validateAgainst("get", T, res.status, body).errors ?? null).toBeNull();
+  });
+
+  it.each(["amber", "unverified"])(
+    "filters the applicant list by rollup_state=%s",
+    async (state) => {
+      const res = await get(`/v1/app/applicants?rollup_state=${state}`);
+      const body = (await res.json()) as { items: { rollup_state: string | null }[] };
+      expect(body.items.length).toBeGreaterThan(0);
+      expect(body.items.every((a) => a.rollup_state === state)).toBe(true);
+      expect(
+        validateAgainst("get", "/v1/app/applicants", res.status, body).errors ?? null,
+      ).toBeNull();
+    },
+  );
+
+  it("filters by status and rollup_state together", async () => {
+    const res = await get("/v1/app/applicants?status=watching&rollup_state=amber");
+    const body = (await res.json()) as { items: { status: string; rollup_state: string }[] };
+    expect(body.items.map((a) => [a.status, a.rollup_state])).toEqual([["watching", "amber"]]);
+  });
+
+  it("negative control: an unknown rollup_state is a contract-shaped 400", async () => {
+    const res = await get("/v1/app/applicants?rollup_state=red");
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: { code: string } };
+    expect(body.error.code).toBe("invalid_parameter");
+    expect(validateAgainst("get", "/v1/app/applicants", 400, body).errors ?? null).toBeNull();
+  });
+});

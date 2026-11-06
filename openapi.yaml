@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moroku Signals API
-  version: 1.0.0
+  version: 1.1.0
   description: >-
     Canonical contract between the Lovable front ends and the Signals backend. Behaviour is
     specified in Confluence (Build Specification section 3, Product Specification and Amendment 1).
@@ -219,6 +219,12 @@ paths:
         - name: status
           in: query
           schema: { $ref: "#/components/schemas/ApplicantStatus" }
+        - name: rollup_state
+          in: query
+          description: Only applicants whose latest assessment has this roll-up state
+          schema:
+            type: string
+            enum: [green, amber, red_refer, red_knockout, unverified]
       responses:
         "200":
           description: Applicants
@@ -1277,9 +1283,9 @@ components:
         product_type: { $ref: "#/components/schemas/ProductType" }
         status: { $ref: "#/components/schemas/ApplicantStatus" }
         rollup_state:
-          oneOf:
-            - $ref: "#/components/schemas/RollupState"
-            - type: "null"
+          description: Roll-up state of the latest assessment (Product Specification 7.5); null before one completes
+          type: [string, "null"]
+          enum: [green, amber, red_refer, red_knockout, unverified, null]
         grant_revoked: { type: boolean }
         loan_request: { $ref: "#/components/schemas/LoanRequest" }
         invites:
@@ -1312,9 +1318,9 @@ components:
         version: { type: integer, minimum: 1 }
         status: { $ref: "#/components/schemas/AssessmentStatus" }
         rollup_state:
-          oneOf:
-            - $ref: "#/components/schemas/RollupState"
-            - type: "null"
+          description: Roll-up state (Product Specification 7.5); null while running
+          type: [string, "null"]
+          enum: [green, amber, red_refer, red_knockout, unverified, null]
         data_as_of: { type: [string, "null"], format: date-time }
     RollupReason:
       type: object
