@@ -3,6 +3,7 @@ import { createMockHandler } from "./server.js";
 
 type HttpApiEvent = {
   rawPath: string;
+  rawQueryString?: string;
   headers?: Record<string, string | undefined>;
   requestContext: { http: { method: string } };
 };
@@ -14,6 +15,7 @@ export const handler = async (event: HttpApiEvent) => {
     event.requestContext.http.method,
     event.rawPath,
     event.headers?.prefer,
+    event.rawQueryString ?? "",
   );
   return { statusCode: status, headers, body };
 };

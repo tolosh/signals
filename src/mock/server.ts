@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import { pathToFileURL } from "node:url";
 import { parse } from "yaml";
-import { fixtures, IDS, variants } from "./fixtures.js";
+import { fixtures, IDS, variants, type MockError } from "./fixtures.js";
 
 const METHODS = ["get", "post", "put", "patch", "delete"];
 
@@ -16,7 +16,12 @@ type Route = {
   operations: Record<string, Operation>;
 };
 export type MockResponse = { status: number; headers: Record<string, string>; body: string };
-export type MockHandler = (method: string, path: string, prefer?: string) => MockResponse;
+export type MockHandler = (
+  method: string,
+  path: string,
+  prefer?: string,
+  query?: string,
+) => MockResponse;
 
 function loadRoutes(): Route[] {
   const doc = parse(readFileSync("openapi.yaml", "utf8")) as {
@@ -56,7 +61,7 @@ const successStatus = (op: Operation) =>
 
 export function createMockHandler(): MockHandler {
   const routes = loadRoutes();
-  return (rawMethod, path, prefer) => {
+  return (rawMethod, path, prefer, query = "") => {
     const method = rawMethod.toLowerCase();
     if (method === "options") return { status: 204, headers: CORS, body: "" };
 
@@ -77,7 +82,12 @@ export function createMockHandler(): MockHandler {
     const key = `${method} ${route.template}`;
     const params = { ...match.groups };
     const fixture = fixtures[key];
-    let body: unknown = typeof fixture === "function" ? fixture(params) : fixture;
+    let body: unknown =
+      typeof fixture === "function" ? fixture(params, new URLSearchParams(query)) : fixture;
+    if (body && typeof body === "object" && "mockError" in body) {
+      const e = (body as MockError).mockError;
+      return error(e.status, e.code, e.message);
+    }
 
     // A plain fixture is keyed by template, so its path IDs are checked against the known set.
     const unknownId =
@@ -108,8 +118,13 @@ export function createMockHandler(): MockHandler {
 export function createMockServer(): Server {
   const handle = createMockHandler();
   return createServer((req, res) => {
-    const path = new URL(req.url ?? "/", "http://mock").pathname;
-    const out = handle(req.method ?? "GET", path, String(req.headers.prefer ?? ""));
+    const url = new URL(req.url ?? "/", "http://mock");
+    const out = handle(
+      req.method ?? "GET",
+      url.pathname,
+      String(req.headers.prefer ?? ""),
+      url.search,
+    );
     res.writeHead(out.status, out.headers);
     res.end(out.body);
   });

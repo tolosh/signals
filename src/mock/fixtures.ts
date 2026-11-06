@@ -59,6 +59,17 @@ const applicant = (status: string, rollup: string | null = null, over: Json = {}
   ...over,
 });
 const applicants = [
+  // apl_01 is the AF-T1 applicant that asm_01 points to (Build Specification 3.4).
+  applicant("assessed", "amber", {
+    id: "apl_01",
+    name: "AF-T1 applicant",
+    latest_assessment_id: "asm_01",
+  }),
+  applicant("assessed", "unverified", {
+    id: "apl_02",
+    name: "Salary account not shared",
+    latest_assessment_id: "asm_unverified",
+  }),
   applicant("invited"),
   applicant("connecting"),
   applicant("syncing"),
@@ -74,7 +85,7 @@ const unverified = (): AssessmentFixture => {
   return {
     ...base,
     id: "asm_unverified",
-    applicant_id: "apl_assessed",
+    applicant_id: "apl_02",
     rollup: {
       state: "unverified",
       top_reasons: [
@@ -284,7 +295,39 @@ const url = (target: string) => ({ url: target });
 // One response per "<method> <template>". Where the response depends on an ID, it is a function
 // of the path parameters and returns undefined for an unknown ID.
 type Params = Record<string, string>;
-type Fixture = unknown | ((params: Params) => unknown);
+type Fixture = unknown | ((params: Params, query: URLSearchParams) => unknown);
+
+/** A fixture returns this to make the mock answer with a contract-shaped error. */
+export type MockError = { mockError: { status: number; code: string; message: string } };
+const ROLLUP_STATES = ["green", "amber", "red_refer", "red_knockout", "unverified"];
+const STATUSES = [
+  "invited",
+  "connecting",
+  "syncing",
+  "connected",
+  "assessed",
+  "watching",
+  "closed",
+];
+
+function listApplicants(_params: Params, query: URLSearchParams): unknown {
+  const status = query.get("status");
+  const rollup = query.get("rollup_state");
+  if (status !== null && !STATUSES.includes(status)) {
+    return { mockError: { status: 400, code: "invalid_parameter", message: "Unknown status" } };
+  }
+  if (rollup !== null && !ROLLUP_STATES.includes(rollup)) {
+    return {
+      mockError: { status: 400, code: "invalid_parameter", message: "Unknown rollup_state" },
+    };
+  }
+  return page(
+    applicants.filter(
+      (a) =>
+        (status === null || a.status === status) && (rollup === null || a.rollup_state === rollup),
+    ),
+  );
+}
 
 export const IDS = new Set([
   "mem_01",
@@ -349,7 +392,7 @@ export const fixtures: Record<string, Fixture> = {
   "post /v1/app/members": member,
   "patch /v1/app/members/{id}": member,
   "delete /v1/app/members/{id}": null,
-  "get /v1/app/applicants": page(applicants),
+  "get /v1/app/applicants": listApplicants,
   "post /v1/app/applicants": applicant("invited"),
   "get /v1/app/applicants/{id}": findApplicant,
   "patch /v1/app/applicants/{id}": findApplicant,
