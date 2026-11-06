@@ -156,7 +156,13 @@ describe("contract rules", () => {
       if (Array.isArray(node)) return node.forEach(walk);
       if (node && typeof node === "object") {
         const record = node as Record<string, unknown>;
-        if (record.properties && typeof record.properties === "object") {
+        // A map of HTTP header names (x-http-headers) is not JSON fields; header names keep
+        // their HTTP spelling, such as Content-Type.
+        if (
+          record["x-http-headers"] !== true &&
+          record.properties &&
+          typeof record.properties === "object"
+        ) {
           bad.push(...Object.keys(record.properties).filter((k) => !/^[a-z][a-z0-9_]*$/.test(k)));
         }
         Object.values(record).forEach(walk);
@@ -164,6 +170,18 @@ describe("contract rules", () => {
     };
     walk(doc.components.schemas);
     expect(bad).toEqual([]);
+  });
+
+  it("only the logo upload's header map is exempt from API-1", () => {
+    const exempt: string[] = [];
+    const walk = (node: unknown, path: string): void => {
+      if (node && typeof node === "object") {
+        if ((node as Record<string, unknown>)["x-http-headers"] === true) exempt.push(path);
+        for (const [k, v] of Object.entries(node)) walk(v, `${path}.${k}`);
+      }
+    };
+    walk(doc.components.schemas, "schemas");
+    expect(exempt).toEqual(["schemas.LogoUpload.properties.headers"]);
   });
 });
 

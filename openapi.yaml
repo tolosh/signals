@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moroku Signals API
-  version: 1.1.0
+  version: 1.2.0
   description: >-
     Canonical contract between the Lovable front ends and the Signals backend. Behaviour is
     specified in Confluence (Build Specification section 3, Product Specification and Amendment 1).
@@ -107,38 +107,66 @@ paths:
       tags: [app]
       operationId: updateAutoTopup
       summary: Turn auto top-up on or off, choose the pack (BL-2)
+      description: >-
+        Returns the saved setting, which GET /v1/app/credits then reports as auto_topup. Turning
+        it on needs a pack_id that GET /v1/app/packs lists; omitting pack_id keeps the saved
+        pack. Otherwise 400 invalid_parameter.
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/AutoTopup" }
+            schema: { $ref: "#/components/schemas/AutoTopupInput" }
       responses:
         "200":
-          description: Updated setting
+          description: The saved setting
           content:
             application/json:
               schema: { $ref: "#/components/schemas/AutoTopup" }
+        "400": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /v1/app/workspace:
     patch:
       tags: [app]
       operationId: updateWorkspace
-      summary: Name and website (FR-A5)
+      summary: Name, website and logo (FR-A5)
+      description: >-
+        A partial update. To set the logo, send the logo_key from POST /v1/app/workspace/logo
+        after the PUT has succeeded: the backend checks the object exists and is within the
+        signed type and size, then sets logo_url. A key that was not uploaded is 400
+        logo_not_uploaded. logo_key null removes the logo.
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/WorkspaceInput" }
+            schema: { $ref: "#/components/schemas/WorkspaceUpdate" }
       responses:
         "200": { $ref: "#/components/responses/Workspace" }
+        "400": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /v1/app/workspace/logo:
     post:
       tags: [app]
       operationId: createLogoUpload
-      summary: Returns an upload URL for the workspace logo (FR-A5)
+      summary: Returns a presigned PUT for the workspace logo (FR-A5)
+      description: >-
+        Step 1 of 3. The backend returns an S3 presigned PUT, valid for 10 minutes, signed for
+        the declared content type and size. Step 2: the client PUTs the file to upload_url with
+        exactly the returned headers; S3 refuses a different type or size. Step 3: the client
+        sends PATCH /v1/app/workspace with logo_key. PNG, JPEG and SVG up to 2 MB are allowed;
+        anything else is 400 invalid_logo. SVG is untrusted: it is re-rendered to PNG before it
+        is served or used in the credit-file PDF, so logo_url always points to a PNG or JPEG.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LogoUploadRequest" }
       responses:
-        "200": { $ref: "#/components/responses/RedirectUrl" }
+        "200":
+          description: Where and how to upload
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LogoUpload" }
+        "400": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /v1/app/members:
     get:
@@ -1154,6 +1182,37 @@ components:
       properties:
         name: { type: string, minLength: 1 }
         website: { type: [string, "null"] }
+    WorkspaceUpdate:
+      type: object
+      minProperties: 1
+      properties:
+        name: { type: string, minLength: 1 }
+        website: { type: [string, "null"] }
+        logo_key:
+          type: [string, "null"]
+          description: From POST /v1/app/workspace/logo, after the upload; null removes the logo
+    LogoUploadRequest:
+      type: object
+      required: [content_type, size_bytes]
+      properties:
+        content_type: { type: string, enum: [image/png, image/jpeg, image/svg+xml] }
+        size_bytes: { type: integer, minimum: 1, maximum: 2097152, description: At most 2 MB }
+    LogoUpload:
+      type: object
+      required: [upload_url, method, headers, expires_at, logo_key]
+      properties:
+        upload_url: { type: string, format: uri }
+        method: { type: string, enum: [PUT] }
+        headers:
+          type: object
+          description: Send exactly these headers with the PUT. Keys are HTTP header names.
+          x-http-headers: true
+          required: [Content-Type]
+          properties:
+            Content-Type: { type: string }
+          additionalProperties: { type: string }
+        expires_at: { type: string, format: date-time, description: 10 minutes after issue }
+        logo_key: { type: string, description: Opaque; pass it to PATCH /v1/app/workspace }
     Workspace:
       type: object
       required: [id, name, status, credit_balance, on_seed_benchmark]
@@ -1222,20 +1281,34 @@ components:
         at: { type: string, format: date-time }
     Credits:
       type: object
-      required: [balance, reserved, entries, next_cursor]
+      required: [balance, reserved, auto_topup, entries, next_cursor]
       properties:
         balance: { type: integer }
         reserved: { type: integer }
+        auto_topup: { $ref: "#/components/schemas/AutoTopup" }
         entries:
           type: array
           items: { $ref: "#/components/schemas/CreditLedgerEntry" }
         next_cursor: { type: [string, "null"] }
     AutoTopup:
       type: object
-      required: [enabled]
+      description: The saved auto top-up setting (BL-2)
+      required: [enabled, pack_id, updated_at]
       properties:
         enabled: { type: boolean }
         pack_id: { type: [string, "null"] }
+        updated_at:
+          type: [string, "null"]
+          format: date-time
+          description: Null until the setting is first saved
+    AutoTopupInput:
+      type: object
+      required: [enabled]
+      properties:
+        enabled: { type: boolean }
+        pack_id:
+          type: [string, "null"]
+          description: Required when enabled is true and no pack is saved
     Member:
       type: object
       required: [id, email, role]

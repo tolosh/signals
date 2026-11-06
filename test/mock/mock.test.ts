@@ -327,7 +327,7 @@ describe("the logo upload flow works end to end", () => {
     fetch(u.upload_url, {
       method: u.method,
       headers: { "Content-Type": contentType },
-      body: bytes,
+      body: new Uint8Array(bytes),
     });
 
   it("returns a presigned-style PUT, valid for 10 minutes, on a URL the mock accepts", async () => {
