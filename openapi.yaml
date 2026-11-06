@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moroku Signals API
-  version: 1.2.0
+  version: 1.3.0
   description: >-
     Canonical contract between the Lovable front ends and the Signals backend. Behaviour is
     specified in Confluence (Build Specification section 3, Product Specification and Amendment 1).
@@ -1395,6 +1395,10 @@ components:
           type: [string, "null"]
           enum: [green, amber, red_refer, red_knockout, unverified, null]
         data_as_of: { type: [string, "null"], format: date-time }
+        evidence_checks:
+          description: The EQ checks (Amendment 2, EQ-R3); null while running
+          type: [array, "null"]
+          items: { $ref: "#/components/schemas/EvidenceCheck" }
     RollupReason:
       type: object
       required: [signal_id, reason]
@@ -1470,8 +1474,31 @@ components:
             is_seed: { type: boolean }
     SignalState:
       type: string
-      description: evidenced and not_observed are for family 10 only; positive signals are never amber or red (D13).
-      enum: [green, amber, red, unverified, evidenced, not_observed]
+      description: >-
+        evidenced and not_observed are for family 10 (POS) only; positive signals are never amber
+        or red (D13). none_observed is returned by a signal that depends on something being
+        absent when nothing was found; absence is never proof (Amendment 2, EQ-R2).
+      enum: [green, amber, red, unverified, evidenced, not_observed, none_observed]
+    RollupClass:
+      type: string
+      description: How a signal feeds the roll-up (Amendment 2 §3). Configurable per workspace (RU-1).
+      enum: [knockout, refer, standard, context, review_only, indicative, positive]
+    EvidenceCheck:
+      type: object
+      description: >-
+        An assessment-level evidence-quality check (Amendment 2, EQ-R3; D20). The checks run
+        before any family and return pass, partial or fail, never a colour.
+      required: [id, name, result, detail, resolve_with, review_required]
+      properties:
+        id: { type: string, enum: [EQ-01, EQ-02, EQ-03] }
+        name: { type: string }
+        result: { type: string, enum: [pass, partial, fail] }
+        detail: { type: string }
+        resolve_with:
+          type: array
+          description: Further evidence that would remove the doubt
+          items: { type: string }
+        review_required: { type: boolean }
     EvidenceQuality:
       type: object
       description: Decision Record D12 and D13; SIG-10 scope note of 28 October 2026.
@@ -1500,6 +1527,10 @@ components:
           properties:
             primary_income_account_shared: { type: boolean }
             unshared_own_account_transfers: { type: integer, minimum: 0 }
+            institutions_without_shared_account:
+              type: integer
+              minimum: 0
+              description: Institutions seen in transfers that have no account in the grant
             history_months_available: { type: number, minimum: 0 }
             history_months_required: { type: number, minimum: 0 }
         reliability:
@@ -1519,7 +1550,18 @@ components:
     Signal:
       type: object
       required:
-        [id, family, name, state, value, reason, confidence, evidence_count, evidence_quality]
+        [
+          id,
+          family,
+          name,
+          state,
+          rollup_class,
+          value,
+          reason,
+          confidence,
+          evidence_count,
+          evidence_quality,
+        ]
       properties:
         id: { type: string }
         family:
@@ -1530,9 +1572,10 @@ components:
         family_code:
           type: [string, "null"]
           pattern: "^[A-Z]{2,5}$"
-          description: Prefix of the signal id. Codes for families 7 to 10 are not yet assigned.
+          description: Prefix of the signal id (Amendment 2 §1; D19)
         name: { type: string }
         state: { $ref: "#/components/schemas/SignalState" }
+        rollup_class: { $ref: "#/components/schemas/RollupClass" }
         value: { type: [string, "null"] }
         reason: { type: string }
         confidence: { type: string, enum: [high, medium, low] }
@@ -1549,6 +1592,7 @@ components:
           product_type,
           data_as_of,
           rollup,
+          evidence_checks,
           affordability,
           signals,
           pins,
@@ -1562,6 +1606,10 @@ components:
         product_type: { $ref: "#/components/schemas/ProductType" }
         data_as_of: { type: string, format: date-time }
         rollup: { $ref: "#/components/schemas/Rollup" }
+        evidence_checks:
+          type: array
+          description: The EQ checks (Amendment 2, EQ-R3); empty when the data was not evaluated
+          items: { $ref: "#/components/schemas/EvidenceCheck" }
         affordability:
           oneOf:
             - $ref: "#/components/schemas/Affordability"
@@ -1573,7 +1621,9 @@ components:
           type: object
           required: [definitions_version, thresholds_version, taxonomy_version]
           properties:
-            definitions_version: { type: integer }
+            definitions_version:
+              type: integer
+              description: The signal definitions, with the evidence-quality layer (EQ-R6)
             thresholds_version: { type: integer }
             taxonomy_version: { type: string }
     Evidence:

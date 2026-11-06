@@ -292,7 +292,7 @@ describe("auto top-up can be read, and the logo upload is specified", () => {
     expect(schemas.WorkspaceInput?.required).toEqual(["name"]);
   });
 
-  it("is a minor version bump to 1.2.0", () => {
-    expect(doc.info.version).toBe("1.2.0");
+  it("is a minor version bump to 1.3.0 (1.2.0 was SIG-39)", () => {
+    expect(doc.info.version).toBe("1.3.0");
   });
 });

@@ -94,6 +94,32 @@ const unverified = (): AssessmentFixture => {
       ],
       reasons_to_say_yes: [],
     },
+    evidence_checks: [
+      {
+        id: "EQ-01",
+        name: "Income account present",
+        result: "fail",
+        detail: "No recurring salary or benefit credit is in a shared account",
+        resolve_with: ["Connect the account your salary or benefit is paid into"],
+        review_required: false,
+      },
+      {
+        id: "EQ-02",
+        name: "Unmatched own-account transfers",
+        result: "fail",
+        detail: "Regular, material transfers from 1 account outside the grant",
+        resolve_with: ["Connect the account sending transfers ending 4821"],
+        review_required: true,
+      },
+      {
+        id: "EQ-03",
+        name: "Window covered",
+        result: "pass",
+        detail: "The sync returned 100% of the 6-month lookback window",
+        resolve_with: [],
+        review_required: false,
+      },
+    ],
     affordability: null,
     signals: [
       {
@@ -107,11 +133,15 @@ const unverified = (): AssessmentFixture => {
           ...signal.evidence_quality,
           completeness: {
             primary_income_account_shared: false,
-            unshared_own_account_transfers: 3,
+            unshared_own_account_transfers: 1,
+            institutions_without_shared_account: 0,
             history_months_available: 6,
             history_months_required: 6,
           },
-          resolve_with: ["Connect the account the salary is paid into"],
+          resolve_with: [
+            "Connect the account your salary or benefit is paid into",
+            "Connect the account sending transfers ending 4821",
+          ],
           review_required: true,
           review_reason: "The primary income account is not shared",
         },
@@ -127,6 +157,7 @@ const incomplete = (): AssessmentFixture => ({
   status: "data_incomplete",
   status_reason: "The sync failed three times, so partial data was not evaluated",
   rollup: { state: "unverified", top_reasons: [], reasons_to_say_yes: [] },
+  evidence_checks: [],
   affordability: null,
   signals: [],
 });
@@ -138,9 +169,16 @@ const evidenceAssessment = (): AssessmentFixture => {
     ...base,
     id: "asm_evidence",
     signals: [
-      { ...inc, id: "LIQ-02", family: 2, family_code: "LIQ", evidence_count: 0 },
+      {
+        ...inc,
+        id: "LIQ-02",
+        family: 2,
+        family_code: "LIQ",
+        rollup_class: "refer",
+        evidence_count: 0,
+      },
       lia,
-      { ...lia, id: "LIA-05", name: "BNPL", evidence_count: 50 },
+      { ...lia, id: "LIA-05", name: "BNPL", rollup_class: "standard", evidence_count: 50 },
     ],
   };
 };
@@ -190,6 +228,7 @@ const summary = {
   status: "complete",
   rollup_state: "amber",
   data_as_of: AT,
+  evidence_checks: afT1().evidence_checks,
 };
 const ledger = {
   id: "led_01",
@@ -473,7 +512,12 @@ export const fixtures: Record<string, Fixture> = {
   "delete /v1/app/applicants/{id}/invites/{inviteId}": knownApplicant(null),
   "post /v1/app/applicants/{id}/request-accounts": knownApplicant(invite),
   "get /v1/app/applicants/{id}/assessments": knownApplicant(page([summary])),
-  "post /v1/app/applicants/{id}/assessments": knownApplicant({ ...summary, status: "running" }),
+  "post /v1/app/applicants/{id}/assessments": knownApplicant({
+    ...summary,
+    status: "running",
+    rollup_state: null,
+    evidence_checks: null,
+  }),
   "get /v1/app/applicants/{id}/timeline": knownApplicant(
     page([
       {
