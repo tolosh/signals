@@ -47,7 +47,8 @@ describe("T2 55% of the lookback window returned", () => {
   it("EQ-03 fails and the roll-up is unverified (RU-4)", () => {
     const eq03 = check(ctx.checks, "EQ-03");
     expect(eq03.result).toBe("fail");
-    expect(eq03.detail).toMatch(/55%/);
+    // Coverage is measured from the first transaction returned, which can land a day after the cut.
+    expect(eq03.detail).toMatch(/returned 5[45]% of the 6-month/);
     expect(evidenceRollup(ctx).state).toBe("unverified");
     expect(applyEvidence(STUBS, ctx).every((s) => s.state === "unverified")).toBe(true);
   });

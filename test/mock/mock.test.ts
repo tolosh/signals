@@ -57,11 +57,16 @@ describe("T1 AF-T1 assessment", () => {
     expect(await res.json()).toStrictEqual(readJson("test/fixtures/af-t1-assessment.json"));
   });
 
-  it("differs from the published 3.4 JSON only by the ruled signal fields", async () => {
+  it("differs from the published 3.4 JSON only by the ruled fields (D12, D13, D19, D20)", async () => {
     const res = await get("/v1/app/assessments/asm_01");
-    const body = (await res.json()) as { signals: Record<string, unknown>[] };
+    const body = (await res.json()) as {
+      signals: Record<string, unknown>[];
+      evidence_checks?: unknown;
+    };
+    delete body.evidence_checks;
     for (const signal of body.signals) {
       delete signal.evidence_quality;
+      delete signal.rollup_class;
       signal.family = signal.family_code;
       delete signal.family_code;
     }

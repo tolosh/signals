@@ -24,6 +24,32 @@
       { "signal_id": "LIQ-02", "reason": "No dishonoured payments in 6 months" }
     ]
   },
+  "evidence_checks": [
+    {
+      "id": "EQ-01",
+      "name": "Income account present",
+      "result": "pass",
+      "detail": "A recurring salary credit is in a shared account",
+      "resolve_with": [],
+      "review_required": false
+    },
+    {
+      "id": "EQ-02",
+      "name": "Unmatched own-account transfers",
+      "result": "pass",
+      "detail": "No transfers to or from accounts outside the grant",
+      "resolve_with": [],
+      "review_required": false
+    },
+    {
+      "id": "EQ-03",
+      "name": "Window covered",
+      "result": "pass",
+      "detail": "The sync returned 100% of the 6-month lookback window",
+      "resolve_with": [],
+      "review_required": false
+    }
+  ],
   "affordability": {
     "status": "complete",
     "serviceability": {
@@ -65,6 +91,7 @@
       "family_code": "INC",
       "name": "Income regularity",
       "state": "green",
+      "rollup_class": "standard",
       "value": "13 fortnightly pays",
       "reason": "Salary from the same employer every fortnight for 6 months",
       "confidence": "high",
@@ -79,6 +106,7 @@
         "completeness": {
           "primary_income_account_shared": true,
           "unshared_own_account_transfers": 0,
+          "institutions_without_shared_account": 0,
           "history_months_available": 6,
           "history_months_required": 6
         },
@@ -99,6 +127,7 @@
       "family_code": "LIA",
       "name": "Undisclosed liabilities",
       "state": "amber",
+      "rollup_class": "knockout",
       "value": "1 account",
       "reason": "A credit card with a $6,000 limit is in the shared data but not in the application",
       "confidence": "high",
@@ -113,6 +142,7 @@
         "completeness": {
           "primary_income_account_shared": true,
           "unshared_own_account_transfers": 0,
+          "institutions_without_shared_account": 0,
           "history_months_available": 6,
           "history_months_required": 6
         },
