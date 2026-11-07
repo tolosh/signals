@@ -1,0 +1,9 @@
+household_type,dependants,income_band,location,monthly_amount
+single,0,0-79999,NSW-metro,1650
+single,0,80000+,NSW-metro,2050
+single,1,0-79999,NSW-metro,2150
+single,1,80000+,NSW-metro,2550
+couple,0,0-79999,NSW-metro,2450
+couple,0,80000+,NSW-metro,2950
+couple,1,0-79999,NSW-metro,2950
+couple,1,80000+,NSW-metro,3450

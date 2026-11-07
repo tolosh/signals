@@ -16,4 +16,10 @@ await build({
   },
 });
 cpSync("openapi.yaml", `${out}/openapi.yaml`);
-cpSync("test/fixtures/af-t1-assessment.json", `${out}/test/fixtures/af-t1-assessment.json`);
+for (const f of [
+  "af-t1-assessment.json",
+  "af-t1.json",
+  "benchmark-valid.csv",
+  "benchmark-invalid.csv",
+])
+  cpSync(`test/fixtures/${f}`, `${out}/test/fixtures/${f}`);

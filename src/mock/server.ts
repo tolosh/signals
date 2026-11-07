@@ -61,10 +61,10 @@ const CORS = {
 };
 const JSON_TYPE = { "content-type": "application/json" };
 
-const error = (status: number, code: string, message: string): MockResponse => ({
+const error = (status: number, code: string, message: string, details?: unknown): MockResponse => ({
   status,
   headers: { ...CORS, ...JSON_TYPE },
-  body: JSON.stringify({ error: { code, message } }),
+  body: JSON.stringify({ error: { code, message, ...(details === undefined ? {} : { details }) } }),
 });
 
 const successStatus = (op: Operation) =>
@@ -121,12 +121,17 @@ export function createMockHandler(): MockHandler {
     const key = `${method} ${route.template}`;
     const params = { ...match.groups };
     const fixture = fixtures[key];
-    const req = { body: parseJson(request), origin: request.origin ?? "", now: Date.now() };
+    const req = {
+      body: parseJson(request),
+      text: request.body?.toString("utf8") ?? "",
+      origin: request.origin ?? "",
+      now: Date.now(),
+    };
     let body: unknown =
       typeof fixture === "function" ? fixture(params, new URLSearchParams(query), req) : fixture;
     if (body && typeof body === "object" && "mockError" in body) {
       const e = (body as MockError).mockError;
-      return error(e.status, e.code, e.message);
+      return error(e.status, e.code, e.message, e.details);
     }
 
     // A plain fixture is keyed by template, so its path IDs are checked against the known set.
