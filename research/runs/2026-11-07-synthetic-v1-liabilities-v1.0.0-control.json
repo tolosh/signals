@@ -1,0 +1,1763 @@
+{
+  "ticket": "SIG-18",
+  "hypothesis": "H2",
+  "run": "negative control",
+  "date": "2026-11-07",
+  "command": "npx tsx scripts/lia-detect.ts --mode control",
+  "preregistration": "research/preregistrations/SIG-18.json",
+  "set": {
+    "name": "synthetic-v1",
+    "seed": 42,
+    "set_sha256": "8f5cf973ec46b33bbeccd97e87dcde10edea22919ed9af9bc9469149b2e17ea9",
+    "applicants": 380
+  },
+  "engine": {
+    "name": "liabilities",
+    "method_version": "1.0.0",
+    "commit": "2f7f2aa98d696e37bffe4a98e25012003f1e632b"
+  },
+  "categoriser": {
+    "engine_version": "1.7.0",
+    "taxonomy_version": "1.4",
+    "source": "research/enrich/synthetic-v1-categories.json"
+  },
+  "runs": [
+    {
+      "config": {
+        "min_occurrences": 3,
+        "amount_tolerance": 0.15
+      },
+      "variant": "rotated-declarations",
+      "undisclosed_truth": 69,
+      "detected_undisclosed": 344,
+      "true_positives": 66,
+      "false_positives": 278,
+      "false_negatives": 3,
+      "precision": 0.1919,
+      "recall": 0.9565,
+      "by_family": {
+        "loan": {
+          "truth": 0,
+          "tp": 0,
+          "fp": 147
+        },
+        "credit_card": {
+          "truth": 20,
+          "tp": 20,
+          "fp": 121
+        },
+        "bnpl": {
+          "truth": 15,
+          "tp": 14,
+          "fp": 4
+        },
+        "sacc": {
+          "truth": 18,
+          "tp": 18,
+          "fp": 2
+        },
+        "wage_advance": {
+          "truth": 16,
+          "tp": 14,
+          "fp": 4
+        }
+      },
+      "false_positive_causes": {
+        "FP1 declared liability not matched": 278
+      },
+      "false_negative_causes": {
+        "FN6 matched as disclosed": 3
+      },
+      "false_positives_list": [
+        {
+          "applicant_id": "syn-v1-0002",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0004",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0006",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0008",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0008",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0009",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0009",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0009",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0010",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0010",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0013",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0016",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0018",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0021",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0023",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0023",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0025",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0026",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0029",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0030",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0035",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0036",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0036",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0039",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0041",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0041",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0043",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0045",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0047",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0049",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0051",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0051",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0053",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0053",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0054",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0056",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0057",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0058",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0058",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0059",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0063",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0065",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0066",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0067",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0072",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0072",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0074",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0079",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0079",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0080",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0082",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0083",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0085",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0086",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0090",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0091",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0091",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0094",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0097",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0097",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0098",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0099",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0101",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0102",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0103",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0104",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0105",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0106",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0107",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0111",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0111",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0114",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0114",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0117",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0120",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0122",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0125",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0127",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0129",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0132",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0133",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0133",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0134",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0135",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0136",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0137",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0138",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0141",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0141",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0144",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0145",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0145",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0147",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0148",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0150",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0150",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0152",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0155",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0155",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0158",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0159",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0159",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0160",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0160",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0162",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0163",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0165",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0167",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0168",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0169",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0171",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0175",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0177",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0179",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0179",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0181",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0182",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0185",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0189",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0191",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0192",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0194",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0198",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0199",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0200",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0200",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0201",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0202",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0203",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0203",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0204",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0205",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0206",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0209",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0210",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0213",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0215",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0217",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0218",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0220",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0222",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0222",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0223",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0223",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0224",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0225",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0226",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0227",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0228",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0228",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0229",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0229",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0231",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0234",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0234",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0235",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0237",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0238",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0241",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0243",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0244",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0245",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0245",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0246",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0247",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0247",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0249",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0250",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0250",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0252",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0254",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0256",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0257",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0257",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0259",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0259",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0260",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0261",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0264",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0268",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0272",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0274",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0279",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0281",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0282",
+          "family": "bnpl",
+          "provider": "ZIP PAY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0282",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0283",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0284",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0287",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0288",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0289",
+          "family": "bnpl",
+          "provider": "ZIP PAY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0289",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0289",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0290",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0291",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0292",
+          "family": "bnpl",
+          "provider": "AFTERPAY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0292",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0295",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0296",
+          "family": "bnpl",
+          "provider": "ZIP PAY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0298",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0298",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0299",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0300",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0304",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0305",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0306",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0307",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0308",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0308",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0308",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0314",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0314",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0315",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0315",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0316",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0316",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0318",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0318",
+          "family": "sacc",
+          "provider": "NIMBLE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0319",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0319",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0320",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0320",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0320",
+          "family": "sacc",
+          "provider": "CASH CONVERTERS",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0321",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0321",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0322",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0323",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0325",
+          "family": "wage_advance",
+          "provider": "MYPAYNOW",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0327",
+          "family": "wage_advance",
+          "provider": "BEFOREPAY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0329",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0330",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0331",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0332",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0334",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0335",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0337",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0338",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0338",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0338",
+          "family": "wage_advance",
+          "provider": "BEFOREPAY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0340",
+          "family": "wage_advance",
+          "provider": "MYPAYNOW",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0342",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0343",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0343",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0344",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0345",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0345",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0347",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0348",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0349",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0350",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0351",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0351",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0352",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0353",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0353",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0354",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0356",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0356",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0357",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0361",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0362",
+          "family": "credit_card",
+          "provider": "ANZ",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0363",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0364",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0366",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0367",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0368",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0370",
+          "family": "credit_card",
+          "provider": "NAB",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0370",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0370",
+          "family": "loan",
+          "provider": "SOCIETYONE",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0372",
+          "family": "loan",
+          "provider": "HARMONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0373",
+          "family": "credit_card",
+          "provider": "CBA",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0375",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0375",
+          "family": "loan",
+          "provider": "FIRSTMAC",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0376",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0378",
+          "family": "loan",
+          "provider": "MACQUARIE LEASING",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0378",
+          "family": "loan",
+          "provider": "PLENTI",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0379",
+          "family": "loan",
+          "provider": "MONEY",
+          "cause": "FP1 declared liability not matched"
+        },
+        {
+          "applicant_id": "syn-v1-0380",
+          "family": "credit_card",
+          "provider": "WESTPAC",
+          "cause": "FP1 declared liability not matched"
+        }
+      ],
+      "false_negatives_list": [
+        {
+          "applicant_id": "syn-v1-0291",
+          "family": "bnpl",
+          "provider": "AFTERPAY",
+          "cause": "FN6 matched as disclosed"
+        },
+        {
+          "applicant_id": "syn-v1-0324",
+          "family": "wage_advance",
+          "provider": "MYPAYNOW",
+          "cause": "FN6 matched as disclosed"
+        },
+        {
+          "applicant_id": "syn-v1-0326",
+          "family": "wage_advance",
+          "provider": "BEFOREPAY",
+          "cause": "FN6 matched as disclosed"
+        }
+      ]
+    }
+  ]
+}
