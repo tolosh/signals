@@ -65,6 +65,7 @@ const POLICY_FIELDS = [
   "card_factor",
   "expense_method",
   "ratio_thresholds",
+  "income_signals",
 ] as const;
 type PolicyVersion = { policy: Json; author: string; created_at: string; changes: Change[] };
 type Change = { field: string; from: unknown; to: unknown };
@@ -93,13 +94,15 @@ export const getPolicy = (product: string, base: Json) => ({
 });
 
 export function putPolicy(product: string, base: Json, body: unknown, now: number, author: string) {
-  const input = record(body);
-  const missing = POLICY_FIELDS.filter((f) => !(f in input));
+  const input = { ...record(body) };
+  // income_signals is optional (1.7.0): when absent, the previous version's value carries on.
+  const missing = POLICY_FIELDS.filter((f) => f !== "income_signals" && !(f in input));
   if (missing.length > 0) return fail("invalid_parameter", `Missing ${missing.join(", ")}`);
   if (!OPTIONS.some((o) => o.key === input.expense_method))
     return fail("invalid_parameter", "expense_method is not a listed method");
   const list = versionsOf(product, base);
   const prev = latest(list).policy;
+  if (!("income_signals" in input)) input.income_signals = prev.income_signals;
   const changes: Change[] = POLICY_FIELDS.filter(
     (f) => JSON.stringify(prev[f]) !== JSON.stringify(input[f]),
   ).map((f) => ({ field: f, from: prev[f], to: input[f] }));

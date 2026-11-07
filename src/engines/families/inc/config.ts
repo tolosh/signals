@@ -19,9 +19,9 @@ export type IncConfig = {
   occupation_bands: Record<string, { min_monthly: number; max_monthly: number }>;
   /** INC-04 red: the lender's policy loan size. None by default, so INC-04 is never red. */
   policy_loan_amount: number | null;
-  /** INC-07 amber: a "large loan" (candidate, N-9). */
+  /** INC-07 amber: a "large loan". A candidate workspace default (ruling 3, 7 November 2026). */
   large_loan_amount: number;
-  /** INC-03 red: a "loan sized for wages" (candidate, N-7). */
+  /** INC-03 red: a "loan sized for wages". A candidate workspace default (ruling 3). */
   wage_sized_loan_amount: number;
   /**
    * INC-10: gig and platform payers. Until Enrich curates them (Amendment 2 §4.1, "Enrich
@@ -49,6 +49,12 @@ export const INC_DEFAULTS: Readonly<IncConfig> = Object.freeze({
   gig_payers: Object.freeze(["UBER AUSTRALIA PTY", "DOORDASH AUSTRALIA", "AIRTASKER"]),
   benefit_payers: Object.freeze(["SERVICES AUSTRALIA", "CENTRELINK"]),
 }) as Readonly<IncConfig>;
+
+/** Workspace defaults the specifications don't give, ruled as candidates each lender can change. */
+export const INC_CANDIDATES = Object.freeze([
+  "wage_sized_loan_amount",
+  "large_loan_amount",
+] as const);
 
 /** Thresholds from Amendment 2 §4.1 and Product Specification §7.2. */
 export const INC_THRESHOLDS = Object.freeze({

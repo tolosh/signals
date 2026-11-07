@@ -10,7 +10,13 @@ import type { FeedType } from "../../signals/definitions.js";
 import { INC_DEFAULTS, INC_THRESHOLDS as T, type IncConfig } from "./config.js";
 import { SALARY_LIKE, streamsOf, type Credit, type Streams, type TypedStream } from "./streams.js";
 
-export { INC_DEFAULTS, INC_THRESHOLDS, type IncConfig, type StreamType } from "./config.js";
+export {
+  INC_CANDIDATES,
+  INC_DEFAULTS,
+  INC_THRESHOLDS,
+  type IncConfig,
+  type StreamType,
+} from "./config.js";
 export const INC_VERSION = "1.0.0";
 
 export type IncApplication = {
@@ -340,6 +346,11 @@ function inc07(c: Ctx): Out {
   const share = top && total > 0 ? round(top.monthly / total) : 0;
   const single = c.streams.length === 1;
   const earners = c.app.household_earners ?? null;
+  // Ruling 2 (7 November 2026): without household_earners, INC-07 is unverified, never green.
+  if (earners === null)
+    return missing("INC-07", "Not verified: the application does not say how many earn an income", [
+      "Confirm how many people in the household earn an income",
+    ]);
   const loan = c.app.loan_amount ?? 0;
   const flagged = single && earners === 1 && loan >= c.config.large_loan_amount;
   return out(
@@ -348,8 +359,7 @@ function inc07(c: Ctx): Out {
     `${pct(share)}% from one payer`,
     flagged
       ? `A single payer and a single income in the household, on a loan of $${loan.toFixed(0)}`
-      : `The largest payer provides ${pct(share)}% of income` +
-          (single && earners === null ? "; the application does not say how many earn" : ""),
+      : `The largest payer provides ${pct(share)}% of income`,
     top?.credits ?? [],
   );
 }
@@ -373,16 +383,25 @@ function inc08(c: Ctx): Out {
 function inc09(c: Ctx): Out {
   const asOf = isoOf(c.end);
   const all = creditsOf(c.streams);
+  const missed = missedPays(c);
   const months = Array.from({ length: 12 }, (_, k) => {
     const from = lookbackStart(asOf, k + 1);
     const to = lookbackStart(asOf, k) - 1;
     return {
       from,
       total: sum(all.filter((x) => x.day >= from && x.day <= to).map((x) => x.amount)),
+      // Ruling 1 (7 November 2026): a missed pay counts once, in INC-12.
+      missed: sum(missed.filter((m) => m.day >= from && m.day <= to).map((m) => m.amount)),
     };
   });
   const average = sum(months.map((m) => m.total)) / 12;
-  const troughs = months.filter((m) => average > 0 && round(m.total / average) < T.trough_share);
+  // A trough fully explained by pays INC-12 has flagged as missed is not a trough here.
+  const troughs = months.filter(
+    (m) =>
+      average > 0 &&
+      round(m.total / average) < T.trough_share &&
+      round((m.total + m.missed) / average) < T.trough_share,
+  );
   const repayment = c.app.proposed_repayment_monthly ?? null;
   const uncovered = troughs.filter((m) => repayment !== null && m.total < repayment);
   const state = uncovered.length > 0 ? "red" : troughs.length > 0 ? "amber" : "green";
@@ -454,22 +473,33 @@ function inc11(c: Ctx): Out {
 }
 
 // INC-12 Interruptions in a regular cadence (N-14).
-function inc12(c: Ctx): Out {
+/**
+ * The pays INC-12 flags as missed in the last 6 months: the day each was expected, and the
+ * stream's median pay. INC-09 reads the same list (ruling 1, 7 November 2026).
+ */
+function missedPays(c: Ctx): { day: number; amount: number }[] {
   const since = lookbackStart(isoOf(c.end), T.interruption_window_months);
-  const regular = c.streams.filter((s) => s.type !== "gig_platform");
-  const expectedMissing: number[] = [];
-  for (const s of regular) {
+  const out: { day: number; amount: number }[] = [];
+  for (const s of c.streams.filter((x) => x.type !== "gig_platform")) {
     const days = s.credits.map((x) => x.day);
     days.forEach((d, i) => {
       const prev = days[i - 1];
       if (prev === undefined || d - prev <= s.cycle_days * 1.5) return;
       const k = Math.round((d - prev) / s.cycle_days) - 1;
-      for (let j = 1; j <= k; j++) expectedMissing.push(Math.round(prev + s.cycle_days * j));
+      for (let j = 1; j <= k; j++)
+        out.push({ day: Math.round(prev + s.cycle_days * j), amount: s.median_amount });
     });
     const overdue = Math.floor((c.end - s.last - s.cycle_days * 0.5) / s.cycle_days);
-    for (let j = 1; j <= overdue; j++) expectedMissing.push(Math.round(s.last + s.cycle_days * j));
+    for (let j = 1; j <= overdue; j++)
+      out.push({ day: Math.round(s.last + s.cycle_days * j), amount: s.median_amount });
   }
-  const missed = expectedMissing.filter((d) => d >= since).sort((a, b) => a - b);
+  return out.filter((m) => m.day >= since).sort((a, b) => a.day - b.day);
+}
+
+function inc12(c: Ctx): Out {
+  const since = lookbackStart(isoOf(c.end), T.interruption_window_months);
+  const regular = c.streams.filter((s) => s.type !== "gig_platform");
+  const missed = missedPays(c).map((m) => m.day);
   const recent = missed.some((d) => d >= c.end - T.interruption_recent_days);
   const state = missed.length >= 2 || recent ? "red" : missed.length === 1 ? "amber" : "green";
   return out(
