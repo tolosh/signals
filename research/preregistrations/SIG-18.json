@@ -1,0 +1,119 @@
+{
+  "ticket": "SIG-18",
+  "registered_at": "2026-11-07",
+  "status": "pre-registered before any detection code or run; not to be edited after the first scored run",
+  "hypothesis": "H2 Hidden liabilities. Combining (a) loan and card accounts present in the grant, (b) recurring outflows to lenders identified by Enrich category, brand, BPAY biller code or reference, and (c) cadence detection will identify liabilities missing from the application with precision of at least 90% and recall of at least 80%, for applicants with at least 3 months of history, because repayments are regular in amount and timing and lenders are identifiable payees.",
+  "research_question": "RQ-2",
+  "metric": {
+    "unit": "a liability: one (applicant, family, provider). Families: credit_card, loan (car_loan and personal_loan), bnpl, sacc, wage_advance",
+    "detected_undisclosed": "a liability the method finds that matches no declared liability of the same family and provider in the application",
+    "true_positive": "a detected-undisclosed liability that matches a ground-truth liability with declared = false, by family and normalised provider; each ground-truth liability is matched at most once",
+    "false_positive": "a detected-undisclosed liability that matches no undeclared ground-truth liability",
+    "precision": "true positives / detected-undisclosed",
+    "recall": "true positives / undeclared ground-truth liabilities"
+  },
+  "targets": { "precision_at_least": 0.9, "recall_at_least": 0.8 },
+  "fails_if": { "precision_below": 0.8 },
+  "classification": {
+    "supported": "primary run precision >= 0.90 and recall >= 0.80, with the negative control passing",
+    "refuted": "primary run precision < 0.80, with the negative control passing",
+    "inconclusive": "anything else: precision 0.80 to 0.90, or recall below 0.80 with precision at least 0.80, or the negative control fails, or the data cannot test the claim"
+  },
+  "data": {
+    "set": "synthetic-v1",
+    "manifest": "research/datasets/synthetic-v1.manifest.json",
+    "seed": 42,
+    "set_sha256": "8f5cf973ec46b33bbeccd97e87dcde10edea22919ed9af9bc9469149b2e17ea9",
+    "population": "all 380 applicants; every one has 3, 6 or 12 months of history, so all meet the hypothesis's 3-month floor",
+    "as_of": "2026-10-31",
+    "labelled_liabilities": {
+      "source": "ground truth truth.liabilities.items (counted before registration; no detection was run)",
+      "total": 374,
+      "declared": 305,
+      "undisclosed": 69,
+      "by_type_declared_account_shared": {
+        "credit_card declared, account shared": 92,
+        "credit_card declared, account not shared": 43,
+        "credit_card undisclosed, account shared": 10,
+        "credit_card undisclosed, account not shared": 10,
+        "car_loan declared, account shared": 59,
+        "car_loan declared, account not shared": 43,
+        "personal_loan declared, account not shared": 57,
+        "bnpl declared": 5,
+        "bnpl undisclosed": 15,
+        "sacc declared": 2,
+        "sacc undisclosed": 18,
+        "wage_advance declared": 4,
+        "wage_advance undisclosed": 16
+      },
+      "undisclosed_by_history_months": { "3": 28, "6": 18, "12": 23 }
+    },
+    "consented_test_set": "not available; not run"
+  },
+  "inspection_before_registration": "Before registering, the narrative and field formats of set v1 were inspected (product names of card and loan accounts, and the most common narratives for the loan_repayment, bnpl, sacc_loan, wage_advance and transfer categories), and the ground-truth liabilities were counted. No detection was run and nothing was scored. The finding that shaped the method: card repayments by BPAY are categorised as transfer by Enrich (ENR-28), and their biller name names the card (for example 'NAB CREDIT CARD PAYMENT'), so step (b) uses the BPAY biller name.",
+  "categorisation": {
+    "source": "the committed cache research/enrich/synthetic-v1-categories.json: Moroku Enrich local engine 1.7.0, taxonomy 1.4, no dictionary, overrides or LLM cache, as in SIG-17",
+    "deviation": "the ticket's control is taxonomy 1.3; only the local engine at taxonomy 1.4 is available (the deployed Enrich, D27, is not built). Recorded in each run record",
+    "brand": "Enrich's output in the cache has no brand; the provider comes from the narrative, the BPAY biller name or the account's product name"
+  },
+  "method": {
+    "window": "every transaction in a shared transaction account up to as_of (the whole history the feed holds, at most 12 months)",
+    "a_accounts_in_grant": "each account with productCategory CRED_AND_CHRG_CARDS is a credit_card liability; each PERS_LOANS account is a loan. Provider: the productName with a trailing 'Credit Card', 'car loan' or 'personal loan' removed. Found from the account alone, with no repayments needed",
+    "b_lender_outflows": {
+      "by_category": {
+        "loan_repayment": "loan",
+        "bnpl": "bnpl",
+        "sacc_loan": "sacc",
+        "wage_advance": "wage_advance"
+      },
+      "by_bpay_biller": "a debit with a BPAY biller name containing 'CREDIT CARD' is a credit_card repayment; provider = the biller name before 'CREDIT CARD'",
+      "provider_from_narrative": "for category matches: the description",
+      "excluded": "credits, and debits whose narrative carries a BSB and account number (own-account transfers, as in SIG-39 EQ-02)"
+    },
+    "provider_normalisation": "upper case; digits removed; the words LOAN, REPAYMENT, REPAYMENTS, INSTALMENT, PAYMENT, CREDIT, CARD, PTY, LTD and BPAY removed; spaces collapsed. The same normalisation applies to ground truth and the application",
+    "c_recurrence": "lender outflows are grouped by (family, normalised provider). A group is a liability when at least min_occurrences of its debits lie within amount_tolerance of the group's median amount, and the median gap between those debits falls in a cadence band: weekly 5 to 9 days, fortnightly 12 to 16, monthly 26 to 35",
+    "merge": "a liability found by (a) and by (b) or (c) with the same family and provider is one liability",
+    "disclosure": "a liability is disclosed when the application's declared_liabilities holds one with the same family (car_loan and personal_loan are both loan) and the same normalised provider",
+    "output": "for each applicant, its detected-undisclosed liabilities, each with its evidence transaction IDs (empty for an account-only find)"
+  },
+  "primary_configuration": { "min_occurrences": 3, "amount_tolerance": 0.15 },
+  "variables": { "min_occurrences": [2, 3], "amount_tolerance": [0.05, 0.15] },
+  "negative_control": {
+    "run_first": true,
+    "name": "rotated declarations",
+    "manipulation": "each applicant is given the declared_liabilities of the next applicant in ID order (the last takes the first's); the transactions, accounts and categories are unchanged",
+    "expected": "precision below 0.50, because declared liabilities now read as undisclosed. If precision is 0.50 or more, the disclosure comparison is not what drives the result, and no other result in the set stands",
+    "configuration": "the primary configuration"
+  },
+  "miss_causes": {
+    "note": "every false negative and false positive in the primary run is tagged with one cause, in this order of precedence",
+    "false_negative": {
+      "FN1 no visible repayment": "no debit to the provider in any shared account, and its account is not in the grant (paid from an unshared account, or not yet due)",
+      "FN2 not identified as a lender": "debits to the provider exist but none is a lender outflow: category not a credit category and no BPAY card biller",
+      "FN3 too few occurrences": "lender outflows exist but fewer than min_occurrences in the window",
+      "FN4 amount varies": "enough occurrences, but fewer than min_occurrences within amount_tolerance of the median",
+      "FN5 cadence": "enough occurrences within tolerance, but the median gap is outside every cadence band",
+      "FN6 matched as disclosed": "detected, but read as disclosed"
+    },
+    "false_positive": {
+      "FP1 declared liability not matched": "the application declares it, but family or provider did not match",
+      "FP2 not a liability": "no ground-truth liability of that family and provider",
+      "FP3 duplicate": "a second detection of one ground-truth liability"
+    }
+  },
+  "tests": {
+    "T1": "a $450 monthly repayment to a named lender for 6 months, not in the application, is detected as undisclosed with those 6 transactions as evidence (LIA-01 amber in SIG-42)",
+    "T2": "the same repayment declared in the application is not undisclosed (LIA-01 green)",
+    "T3": "a monthly gym direct debit is not a liability",
+    "T4": "per D28, CI asserts that the primary run reproduces its recorded precision and recall from the committed inputs, not that they meet the targets",
+    "file": "test/engines/signals/lia-01.test.ts"
+  },
+  "known_limits": [
+    "set v1 has no mortgages, and no undisclosed car or personal loans: the undisclosed liabilities are cards (20), BNPL (15), SACC (18) and wage advances (16)",
+    "openfeed supplies no direct debits, scheduled payments or loan schedules, so detection rests on posted transactions and account lists only",
+    "set v1's narratives are generated from templates and every repayment names its lender plainly; real narratives are noisier, so this result is an upper bound on real performance",
+    "the categoriser is the local engine at taxonomy 1.4, not the deployed Enrich at 1.3",
+    "card repayments by BPAY are categorised as transfer (ENR-28); step (b) recovers them from the biller name only because set v1's billers say 'CREDIT CARD'",
+    "a liability paid from an account the applicant didn't share is invisible unless its own account is in the grant (FN1); set v1 does not model how often that happens in practice"
+  ]
+}
