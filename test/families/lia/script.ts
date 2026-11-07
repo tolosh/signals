@@ -22,6 +22,8 @@ export type Line = {
   billerName?: string;
   type?: string;
   account?: string;
+  /** The payment reference, which LIA-06 also reads. */
+  reference?: string;
 };
 export type Script = {
   months?: number;
@@ -51,6 +53,7 @@ export function build(s: Script): { feed: LiaFeed; categories: Record<string, st
       postingDateTime: `${isoOf(END - l.ago)}T02:00:00Z`,
       amount: l.amount.toFixed(2),
       ...(l.billerName ? { billerName: l.billerName } : {}),
+      ...(l.reference ? { reference: l.reference } : {}),
     });
   };
   add({ ago: END - start, description: "WOOLWORTHS SYDNEY", amount: -85.4, category: "groceries" });

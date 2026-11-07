@@ -2,7 +2,8 @@
 // Amendment 2 §4.2 and LIA-R1). LIA-01 is built on SIG-18's detector at 1.0.0, as the experiment
 // left it (Supported on synthetic set v1 only; H2 open on realistic data). Every output passes
 // through the evidence-quality layer (SIG-39), so absence is never proof (EQ-R2). Interpretations
-// L-1 to L-8 are in docs/adr/0006-lia-family.md, for ruling.
+// L-1 to L-8 are in docs/adr/0006-lia-family.md, ruled 8 November 2026 (SIG-42) with two changes:
+// keywords match whole words only, and three thresholds are candidate workspace defaults (1.1.0).
 // Pure: categories and the application are inputs; no clock, no randomness, relative imports (D3).
 import { applyEvidence, assessEvidence } from "../../evidence/index.js";
 import { dayOf, isoOf } from "../../evidence/dates.js";
@@ -16,7 +17,7 @@ import {
   type DetectedLiability,
 } from "../../liabilities/index.js";
 
-export const LIA_VERSION = "1.0.0";
+export const LIA_VERSION = "1.1.0";
 
 /** A shared-account feed with the fields both the evidence layer and the detector read. */
 export type LiaFeed = {
@@ -43,11 +44,11 @@ export type LiaConfig = {
   /** LIA-04 red: at least this many advances in the last 90 days, at most this far apart. */
   advance_cycle_min: number;
   advance_cycle_max_gap_days: number;
-  /** LIA-05: providers for amber and red, and the rise that makes outflow "rising". */
+  /** LIA-05: providers for amber and red, and the rise that makes outflow "rising" (candidate). */
   bnpl_amber_providers: number;
   bnpl_red_providers: number;
   bnpl_rising: number;
-  /** LIA-06: a monthly mean this large is red (candidate), and a rise this large is "increasing". */
+  /** LIA-06: a monthly mean this large is red, and a rise this large is "increasing" (candidates). */
   private_large_monthly: number;
   private_increasing: number;
 };
@@ -65,6 +66,35 @@ export const LIA_DEFAULTS: Readonly<LiaConfig> = Object.freeze({
   private_large_monthly: 500,
   private_increasing: 0.25,
 });
+
+/**
+ * Workspace defaults the specifications don't give, ruled as candidates each lender can change
+ * (SIG-42 ruling 2, 8 November 2026), as for INC's income_signals.
+ */
+export const LIA_CANDIDATES = Object.freeze([
+  "bnpl_rising",
+  "private_large_monthly",
+  "private_increasing",
+] as const);
+
+/** The contract's PolicyInput.liability_signals (1.8.0), as a lender saves it. */
+export type LiabilitySignalsPolicy = Partial<Record<(typeof LIA_CANDIDATES)[number], number>>;
+
+/**
+ * Maps a lender's liability_signals policy onto the LIA config. The names are the contract's; a
+ * field the policy leaves out keeps the workspace default.
+ */
+export function liaConfigFromPolicy(
+  signals: LiabilitySignalsPolicy | null | undefined,
+): Partial<LiaConfig> {
+  const out: Partial<LiaConfig> = {};
+  if (!signals) return out;
+  for (const field of LIA_CANDIDATES) {
+    const value = signals[field];
+    if (value !== undefined) out[field] = value;
+  }
+  return out;
+}
 
 export type LiaInput = {
   feed: LiaFeed;
@@ -91,6 +121,8 @@ type Line = {
   t: LiaFeed["accounts"][number]["transactions"][number];
 };
 const BSB_NUMBER = /\b\d{3}-?\d{3}\s+\d{6,10}\b/;
+// Keywords match whole words only, case-insensitively (the text is upper-cased first), so OWEN,
+// LOANS4U and BIOU don't match (SIG-42 ruling 1). test/families/lia/rulings.test.ts pins each.
 const DISBURSEMENT = /\b(LOAN|DISBURSEMENT|DRAWDOWN)\b/;
 const PRIVATE_REPAYMENT = /\b(LOAN|REPAY|REPAYMENT|OWED|OWE|IOU)\b/;
 const EXTRA_WORDS = new Set([

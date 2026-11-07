@@ -68,7 +68,11 @@ const POLICY_FIELDS = [
   "expense_method",
   "ratio_thresholds",
   "income_signals",
+  "liability_signals",
 ] as const;
+// Optional on a save (income_signals 1.7.0, liability_signals 1.8.0): when absent, the previous
+// version's value carries on.
+const CARRIED = new Set<string>(["income_signals", "liability_signals"]);
 type PolicyVersion = { policy: Json; author: string; created_at: string; changes: Change[] };
 type Change = { field: string; from: unknown; to: unknown };
 const policies = new Map<string, PolicyVersion[]>();
@@ -97,14 +101,13 @@ export const getPolicy = (product: string, base: Json) => ({
 
 export function putPolicy(product: string, base: Json, body: unknown, now: number, author: string) {
   const input = { ...record(body) };
-  // income_signals is optional (1.7.0): when absent, the previous version's value carries on.
-  const missing = POLICY_FIELDS.filter((f) => f !== "income_signals" && !(f in input));
+  const missing = POLICY_FIELDS.filter((f) => !CARRIED.has(f) && !(f in input));
   if (missing.length > 0) return fail("invalid_parameter", `Missing ${missing.join(", ")}`);
   if (!OPTIONS.some((o) => o.key === input.expense_method))
     return fail("invalid_parameter", "expense_method is not a listed method");
   const list = versionsOf(product, base);
   const prev = latest(list).policy;
-  if (!("income_signals" in input)) input.income_signals = prev.income_signals;
+  for (const f of CARRIED) if (!(f in input)) input[f] = prev[f];
   const changes: Change[] = POLICY_FIELDS.filter(
     (f) => JSON.stringify(prev[f]) !== JSON.stringify(input[f]),
   ).map((f) => ({ field: f, from: prev[f], to: input[f] }));

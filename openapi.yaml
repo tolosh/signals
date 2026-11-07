@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moroku Signals API
-  version: 1.7.0
+  version: 1.8.0
   description: >-
     Canonical contract between the Lovable front ends and the Signals backend. Behaviour is
     specified in Confluence (Build Specification section 3, Product Specification and Amendment 1).
@@ -1919,6 +1919,31 @@ components:
             policy_loan_amount:
               description: INC-04 red, a new employer and a loan over this policy size. Unset by default.
               type: [number, "null"]
+              minimum: 0
+        liability_signals:
+          description: >-
+            Thresholds the family 3 LIA signals use (1.8.0; SIG-42 ruling, 8 November 2026). The
+            defaults are candidates, which each lender can change. When a save leaves this out,
+            the previous version's values carry on.
+          type: object
+          properties:
+            bnpl_rising:
+              description: >-
+                LIA-05 red, BNPL outflow "rising": the last 90 days more than this fraction above
+                the 90 days before. Candidate default 0.25.
+              type: number
+              minimum: 0
+            private_large_monthly:
+              description: >-
+                LIA-06 red, a "large" private loan: a monthly mean of at least this many dollars
+                over the last 90 days. Candidate default 500.
+              type: number
+              minimum: 0
+            private_increasing:
+              description: >-
+                LIA-06 red, "increasing" repayments: the latest more than this fraction above the
+                first. Candidate default 0.25.
+              type: number
               minimum: 0
     ExpenseMethod:
       type: string

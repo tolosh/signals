@@ -1,6 +1,26 @@
 # ADR 0006: Family 3 LIA, hidden and stacked credit
 
-Status: proposed, for ruling (SIG-42).
+Status: ruled (Colin, 8 November 2026, on SIG-42). L-1 to L-8 stand as recorded, with the two
+changes below. Where a ruling changes an interpretation, the ruling wins, and the interpretation is
+kept as it was recorded. The engine is at 1.1.0.
+
+## Rulings, 8 November 2026
+
+1. **Keywords match whole words only,** case-insensitively: LIA-02's LOAN, DISBURSEMENT and
+   DRAWDOWN (L-2), and LIA-06's LOAN, REPAY, REPAYMENT, OWE, OWED and IOU (L-6). "OWEN", "LOANS4U"
+   and "BIOU" don't match. The 1.0.0 patterns already matched on word boundaries
+   (`\b`, on upper-cased text), so no output changes; `test/families/lia/rulings.test.ts` now pins
+   one positive and one near-miss case per keyword, and a mutation check (the boundaries removed)
+   fails every near-miss case. A word boundary in these patterns falls between a letter or digit
+   and anything else, so "LOAN-REPAY" matches both words and "LOAN4U" matches neither.
+2. **The candidate thresholds are workspace defaults a lender can override:** LIA-05's 25% rise
+   (`bnpl_rising`, L-5), and LIA-06's $500 monthly mean (`private_large_monthly`) and 25% increase
+   (`private_increasing`, L-6). They are listed in `LIA_CANDIDATES` and saved on the lender's
+   policy as `liability_signals`, as INC's `income_signals` are. That is a contract change, so the
+   contract is **1.8.0** (minor: one optional policy field). A save that leaves it out keeps the
+   previous version's values. `liaConfigFromPolicy` maps the policy onto the engine's config.
+
+## Interpretations, as recorded at 1.0.0
 
 Product Specification §7.2 (LIA-01 to LIA-06) and Amendment 2 §4.2 (LIA-R1) define the
 signals. Those pages are the source of truth. This record lists where the engine

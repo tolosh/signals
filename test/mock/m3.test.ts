@@ -142,6 +142,54 @@ describe("2 and 3. policy history, and a save that GET then returns", () => {
   });
 });
 
+describe("SIG-42 ruling 2: liability_signals on the policy (contract 1.8.0)", () => {
+  type Signals = { bnpl_rising: number; private_large_monthly: number; private_increasing: number };
+  type WithSignals = Policy & { liability_signals: Signals; [k: string]: unknown };
+  const inputOf = (p: WithSignals) =>
+    Object.fromEntries(
+      Object.entries(p).filter(
+        ([k]) => !["expense_method_options", "product", "version"].includes(k),
+      ),
+    );
+
+  it("an unchanged product's policy carries the candidate workspace defaults", async () => {
+    const car = (await (await get("/v1/app/settings/policy/car")).json()) as WithSignals;
+    expect(valid("get", POLICY, 200, car)).toBeNull();
+    expect(car.liability_signals).toEqual({
+      bnpl_rising: 0.25,
+      private_large_monthly: 500,
+      private_increasing: 0.25,
+    });
+  });
+
+  it("a lender can change them; history lists the change; a save without them keeps them", async () => {
+    const before = (await (await get("/v1/app/settings/policy/home")).json()) as WithSignals;
+    const signals = {
+      ...before.liability_signals,
+      private_large_monthly: before.liability_signals.private_large_monthly + 50,
+    };
+    const res = await json("PUT", "/v1/app/settings/policy/home", {
+      ...inputOf(before),
+      liability_signals: signals,
+    });
+    expect(res.status).toBe(200);
+    const saved = (await res.json()) as WithSignals;
+    expect(valid("put", POLICY, 200, saved)).toBeNull();
+    expect(saved.liability_signals).toEqual(signals);
+    const page = (await (await get("/v1/app/settings/policy/home/versions")).json()) as {
+      items: { changes: { field: string }[] }[];
+    };
+    expect(page.items[0]?.changes.map((c) => c.field)).toEqual(["liability_signals"]);
+
+    const without = inputOf(saved);
+    delete without.liability_signals;
+    const again = (await (
+      await json("PUT", "/v1/app/settings/policy/home", without)
+    ).json()) as WithSignals;
+    expect(again.liability_signals).toEqual(signals);
+  });
+});
+
 describe("5. fixtures: asm_01 versions 1 and 2, and a revoked grant", () => {
   const ASM = "/v1/app/assessments/{id}";
   it("apl_01 lists asm_01 version 1 and version 2, and version 2 differs", async () => {
