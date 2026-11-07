@@ -539,7 +539,11 @@ function inc12(c: Ctx): Out {
   // trough month that holds a missed pay, and add that month's transactions to the evidence.
   const linked = c.inc09Fires ? crossReferenced(c) : [];
   const linkedMonths = [...new Map(linked.map((x) => [monthOf(x.month), x.month])).values()];
-  const troughLinks = linkedMonths.map((m) => `${monthOf(m)} is a trough month in INC-09`);
+  // Each of INC-09's 12 months ends on the as-of date's day, so a month is named by its dates: a
+  // label like "2025-12" would point at the wrong calendar month (closing check, 8 November).
+  const troughLinks = linkedMonths.map(
+    (m) => `${isoOf(m.from)} to ${isoOf(m.to)} is a trough month in INC-09`,
+  );
   const base = creditsOf(regular).filter((x) => x.day >= since);
   const seen = new Set(base.map((x) => x.transactionId));
   const monthLines: Credit[] = c.feed.accounts.flatMap((a) =>
