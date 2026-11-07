@@ -1,7 +1,8 @@
 // SIG-11 hosting: offline checks on the stack and the Lambda bundle. Nothing touches AWS.
 // SIG-51: synthesising the stack takes about 6 to 7 seconds on a slow machine, so these tests have
 // an explicit 30-second timeout (T2). The one-container cap (T1) was measured to throttle
-// concurrent requests with 503s and is withdrawn pending a ruling: docs/adr/0005-mock-hosting.md.
+// concurrent requests with 503s and is withdrawn. Ruled 7 November 2026 (ADR 0005): the mock stays
+// on Lambda with no cap, and keeps its state in one on-demand DynamoDB table in the mock stack.
 import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -26,20 +27,50 @@ describe("hosted mock", () => {
     );
 
   it(
-    "is one Node 22 Lambda behind one HTTP API, and nothing stateful",
+    "is one Node 22 Lambda behind one HTTP API, with one table and no other store",
     () => {
       const t = template();
       t.hasResourceProperties("AWS::Lambda::Function", { Runtime: "nodejs22.x" });
       t.resourceCountIs("AWS::Lambda::Function", 1);
       t.resourceCountIs("AWS::ApiGatewayV2::Api", 1);
-      t.resourceCountIs("AWS::DynamoDB::Table", 0);
+      t.resourceCountIs("AWS::DynamoDB::Table", 1);
       t.resourceCountIs("AWS::RDS::DBCluster", 0);
       t.resourceCountIs("AWS::S3::Bucket", 0);
     },
     SLOW,
   );
 
-  it("the one-container cap is withdrawn pending a ruling: no stack reserves concurrency", () => {
+  it(
+    "the table is on demand, keyed by scenario and resource, with a TTL, and only the mock uses it",
+    () => {
+      const t = template();
+      t.hasResourceProperties("AWS::DynamoDB::Table", {
+        BillingMode: "PAY_PER_REQUEST",
+        KeySchema: [
+          { AttributeName: "pk", KeyType: "HASH" },
+          { AttributeName: "sk", KeyType: "RANGE" },
+        ],
+        TimeToLiveSpecification: { AttributeName: "expires_at", Enabled: true },
+      });
+      const fn = Object.values(t.findResources("AWS::Lambda::Function"))[0] as {
+        Properties: { Environment: { Variables: Record<string, unknown> } };
+      };
+      expect(Object.keys(fn.Properties.Environment.Variables)).toContain("MOCK_TABLE");
+      const policies = JSON.stringify(t.findResources("AWS::IAM::Policy"));
+      expect(policies).toMatch(/dynamodb:Query/);
+      expect(policies).toMatch(/dynamodb:BatchWriteItem/);
+    },
+    SLOW,
+  );
+
+  it("the table is in the mock stack only: no other infra file declares one", () => {
+    const tables = readdirSync("infra")
+      .filter((f) => f.endsWith(".ts"))
+      .filter((f) => /aws-dynamodb/.test(readFileSync(`infra/${f}`, "utf8")));
+    expect(tables).toEqual(["mock-stack.ts"]);
+  });
+
+  it("the one-container cap stays withdrawn: no stack reserves concurrency", () => {
     const capped = readdirSync("infra")
       .filter((f) => f.endsWith(".ts"))
       .filter((f) => /reservedConcurrentExecutions/.test(readFileSync(`infra/${f}`, "utf8")));
