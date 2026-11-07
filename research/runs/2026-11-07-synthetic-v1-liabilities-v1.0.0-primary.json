@@ -1,0 +1,66 @@
+{
+  "ticket": "SIG-18",
+  "hypothesis": "H2",
+  "run": "primary (the result)",
+  "date": "2026-11-07",
+  "command": "npx tsx scripts/lia-detect.ts --mode primary",
+  "preregistration": "research/preregistrations/SIG-18.json",
+  "set": {
+    "name": "synthetic-v1",
+    "seed": 42,
+    "set_sha256": "8f5cf973ec46b33bbeccd97e87dcde10edea22919ed9af9bc9469149b2e17ea9",
+    "applicants": 380
+  },
+  "engine": {
+    "name": "liabilities",
+    "method_version": "1.0.0",
+    "commit": "fa89b8e1bd1d08a83df84106345832191d74238f"
+  },
+  "categoriser": {
+    "engine_version": "1.7.0",
+    "taxonomy_version": "1.4",
+    "source": "research/enrich/synthetic-v1-categories.json"
+  },
+  "runs": [
+    {
+      "config": {
+        "min_occurrences": 3,
+        "amount_tolerance": 0.15
+      },
+      "variant": "as-generated",
+      "undisclosed_truth": 69,
+      "detected_undisclosed": 69,
+      "true_positives": 69,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1,
+      "recall": 1,
+      "by_family": {
+        "credit_card": {
+          "truth": 20,
+          "tp": 20,
+          "fp": 0
+        },
+        "bnpl": {
+          "truth": 15,
+          "tp": 15,
+          "fp": 0
+        },
+        "sacc": {
+          "truth": 18,
+          "tp": 18,
+          "fp": 0
+        },
+        "wage_advance": {
+          "truth": 16,
+          "tp": 16,
+          "fp": 0
+        }
+      },
+      "false_positive_causes": {},
+      "false_negative_causes": {},
+      "false_positives_list": [],
+      "false_negatives_list": []
+    }
+  ]
+}
