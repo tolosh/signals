@@ -1,0 +1,84 @@
+{
+  "run_id": "2026-11-07-synthetic-v1-eq-checks-lookback-requested",
+  "created_at": "2026-11-07T00:42:16Z",
+  "ticket": "SIG-39",
+  "dataset": {
+    "set": "synthetic-v1",
+    "seed": 42,
+    "set_sha256": "8f5cf973ec46b33bbeccd97e87dcde10edea22919ed9af9bc9469149b2e17ea9"
+  },
+  "engine": {
+    "name": "evidence-quality",
+    "commit": "5498df65121c073885844de7fb5c4df80b716556",
+    "definitions_version": 1
+  },
+  "input": {
+    "as_of": "2026-10-31",
+    "lookback_months": "max(3, history months)"
+  },
+  "by_tag": {
+    "salaried-base": {
+      "applicants": 200,
+      "EQ-01 pass": 200,
+      "EQ-02 pass": 200,
+      "EQ-03 pass": 200
+    },
+    "variable-income": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 pass": 20
+    },
+    "gig": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 pass": 20
+    },
+    "benefits": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 pass": 20
+    },
+    "undisclosed-card": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 pass": 20
+    },
+    "bnpl": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 pass": 20
+    },
+    "sacc": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 pass": 20
+    },
+    "wage-advance": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 pass": 20
+    },
+    "gambling": {
+      "applicants": 20,
+      "EQ-01 pass": 20,
+      "EQ-02 pass": 20,
+      "EQ-03 pass": 20
+    },
+    "coverage-gap": {
+      "applicants": 20,
+      "EQ-01 fail": 7,
+      "EQ-02 fail": 14,
+      "EQ-03 pass": 20,
+      "EQ-01 pass": 13,
+      "EQ-02 partial": 6
+    }
+  },
+  "mismatches": []
+}
