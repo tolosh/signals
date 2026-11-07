@@ -1,0 +1,115 @@
+{
+  "run_id": "2026-11-07-synthetic-v1-eq-unverified-sensitivity",
+  "created_at": "2026-11-07T09:34:39Z",
+  "ticket": "SIG-39",
+  "command": "npx tsx scripts/eq-unverified.ts --mode sensitivity",
+  "reported_as": "Sensitivity range across assumed requests only, never a result (ruling, 7 November 2026)",
+  "dataset": {
+    "set": "synthetic-v1",
+    "seed": 42,
+    "set_sha256": "8f5cf973ec46b33bbeccd97e87dcde10edea22919ed9af9bc9469149b2e17ea9"
+  },
+  "engine": {
+    "name": "evidence-quality",
+    "commit": "f645efa08151acdb5f27c41e1a82d05bdfb66638",
+    "definitions_version": 1
+  },
+  "input": {
+    "as_of": "2026-10-31",
+    "unverified_rule": "RU-4: EQ-01 or EQ-03 fails"
+  },
+  "results": [
+    {
+      "assumed_request_months": 3,
+      "applicants": 380,
+      "unverified": 7,
+      "unverified_pct": 1.8,
+      "eq01_fail": 7,
+      "eq03_fail": 0,
+      "eq03_partial": 0,
+      "by_history": {
+        "6 months": {
+          "applicants": 122,
+          "unverified": 6
+        },
+        "3 months": {
+          "applicants": 131,
+          "unverified": 0
+        },
+        "12 months": {
+          "applicants": 127,
+          "unverified": 1
+        }
+      }
+    },
+    {
+      "assumed_request_months": 6,
+      "applicants": 380,
+      "unverified": 138,
+      "unverified_pct": 36.3,
+      "eq01_fail": 7,
+      "eq03_fail": 131,
+      "eq03_partial": 0,
+      "by_history": {
+        "6 months": {
+          "applicants": 122,
+          "unverified": 6
+        },
+        "3 months": {
+          "applicants": 131,
+          "unverified": 131
+        },
+        "12 months": {
+          "applicants": 127,
+          "unverified": 1
+        }
+      }
+    },
+    {
+      "assumed_request_months": 12,
+      "applicants": 380,
+      "unverified": 254,
+      "unverified_pct": 66.8,
+      "eq01_fail": 7,
+      "eq03_fail": 253,
+      "eq03_partial": 0,
+      "by_history": {
+        "6 months": {
+          "applicants": 122,
+          "unverified": 122
+        },
+        "3 months": {
+          "applicants": 131,
+          "unverified": 131
+        },
+        "12 months": {
+          "applicants": 127,
+          "unverified": 1
+        }
+      }
+    },
+    {
+      "assumed_request_months": "max(3, history)",
+      "applicants": 380,
+      "unverified": 7,
+      "unverified_pct": 1.8,
+      "eq01_fail": 7,
+      "eq03_fail": 0,
+      "eq03_partial": 0,
+      "by_history": {
+        "6 months": {
+          "applicants": 122,
+          "unverified": 6
+        },
+        "3 months": {
+          "applicants": 131,
+          "unverified": 0
+        },
+        "12 months": {
+          "applicants": 127,
+          "unverified": 1
+        }
+      }
+    }
+  ]
+}
