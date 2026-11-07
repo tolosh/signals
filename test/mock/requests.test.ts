@@ -1,7 +1,8 @@
 // SIG-48 T6 on the mock, and the request fixtures SIG-49 builds against. Runs against the local
-// server, or the hosted mock with MOCK_BASE_URL (each test starts from POST /mock-reset/requests).
+// server, or the hosted mock with npm run test:hosted (each test starts from POST /mock-reset/requests).
 import "./scenario.js";
 import type { Server } from "node:http";
+import { hostedBase } from "./target.js";
 import type { AddressInfo } from "node:net";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
@@ -17,8 +18,9 @@ ajv.addSchema(doc as object, "openapi");
 let server: Server | undefined;
 let base: string;
 beforeAll(async () => {
-  if (process.env.MOCK_BASE_URL) {
-    base = process.env.MOCK_BASE_URL;
+  const hosted = hostedBase();
+  if (hosted) {
+    base = hosted;
     return;
   }
   server = createMockServer();

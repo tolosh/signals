@@ -14,7 +14,7 @@
     "check:pr-title": "node scripts/check-pr-title.mjs",
     "mock": "tsx src/mock/server.ts",
     "build:mock": "node scripts/build-mock-lambda.mjs",
-    "test:hosted": "vitest run test/mock/mock.test.ts test/mock/m3.test.ts test/mock/requests.test.ts test/mock/durable.test.ts"
+    "test:hosted": "vitest run --mode hosted test/mock/mock.test.ts test/mock/m3.test.ts test/mock/requests.test.ts test/mock/durable.test.ts"
   },
   "devDependencies": {
     "@aws-sdk/client-dynamodb": "3.1156.0",

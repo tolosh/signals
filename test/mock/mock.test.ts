@@ -2,6 +2,7 @@
 import "./scenario.js";
 import { readFileSync } from "node:fs";
 import type { Server } from "node:http";
+import { hostedBase } from "./target.js";
 import type { AddressInfo } from "node:net";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
@@ -17,9 +18,10 @@ ajv.addSchema(doc as object, "openapi");
 let server: Server | undefined;
 let base: string;
 beforeAll(async () => {
-  // MOCK_BASE_URL runs the same tests against the hosted mock.
-  if (process.env.MOCK_BASE_URL) {
-    base = process.env.MOCK_BASE_URL;
+  // npm run test:hosted (MOCK_BASE_URL) runs the same tests against the hosted mock.
+  const hosted = hostedBase();
+  if (hosted) {
+    base = hosted;
     return;
   }
   server = createMockServer();
