@@ -93,7 +93,7 @@ describe("state survives a request reaching another container", () => {
         })
       ).body,
     ) as { upload_url: string; logo_key: string };
-    const u = new URL(issued.upload_url);
+    const u = new URL(issued.upload_url, "http://mock");
     const bytes = Buffer.alloc(size, 7);
     resetAllState();
     const put = await handle({

@@ -1,9 +1,11 @@
 // Mock behaviour for the lender's M3 screens (SIG-11; contract 1.5.0; Lovable gaps of 7 November):
 // versioned policy saves with history, expense-method options, override-created assessment
 // versions (figures recomputed by the real affordability engine), and validated benchmark
-// uploads. State is in memory for the life of the process, as for auto top-up and the logo.
+// uploads. SIG-51: policy versions, override inputs and uploaded benchmarks are state slices, kept
+// in the mock's table between Lambda containers. Seeded values aren't written, so reads write nothing.
 import { readFileSync } from "node:fs";
 import { computeAffordability, type AffordabilityInput } from "../engines/affordability/index.js";
+import { registerSlice } from "./state.js";
 
 type Json = Record<string, unknown>;
 export type MockFailure = {
@@ -257,10 +259,10 @@ export function validateBenchmarkCsv(text: string): RowError[] {
   return errors.slice(0, 100);
 }
 
-const benchmarks: Json[] = [];
+/** Uploaded benchmarks, after the seed table. */
+const uploaded: Json[] = [];
 export function listBenchmarks(seed: Json) {
-  if (benchmarks.length === 0) benchmarks.push(seed);
-  return { items: benchmarks };
+  return { items: [seed, ...uploaded] };
 }
 export function uploadBenchmark(seed: Json, text: string, now: number) {
   const rows = validateBenchmarkCsv(text);
@@ -278,8 +280,50 @@ export function uploadBenchmark(seed: Json, text: string, now: number) {
     is_seed: false,
     effective_from: new Date(now).toISOString().slice(0, 10),
   };
-  list.push(created);
+  uploaded.push(created);
   return created;
 }
 export const benchmarkCsv = (name: "valid" | "invalid") =>
   readFileSync(`test/fixtures/benchmark-${name}.csv`, "utf8");
+
+// --- State slices (SIG-51) ------------------------------------------------------------------------
+/** The engine inputs the fixtures seed (asm_01 and asm_01_v2); only later ones are stored. */
+let seededInputs = new Set<string>();
+export const markInputsSeeded = () => {
+  seededInputs = new Set(inputs.keys());
+};
+registerSlice({
+  type: "policy",
+  reset: () => policies.clear(),
+  // Version 1 is the seeded default, created on first read; only saved versions are stored.
+  snapshot: () => Object.fromEntries([...policies].filter(([, list]) => list.length > 1)),
+  restore: (items) => {
+    for (const [product, list] of Object.entries(items))
+      policies.set(product, list as PolicyVersion[]);
+  },
+});
+registerSlice({
+  type: "input",
+  reset: () => {
+    for (const key of [...inputs.keys()]) if (!seededInputs.has(key)) inputs.delete(key);
+  },
+  snapshot: () => Object.fromEntries([...inputs].filter(([key]) => !seededInputs.has(key))),
+  restore: (items) => {
+    for (const [key, value] of Object.entries(items)) inputs.set(key, value as AffordabilityInput);
+  },
+});
+registerSlice({
+  type: "benchmark",
+  reset: () => {
+    uploaded.length = 0;
+  },
+  snapshot: () => Object.fromEntries(uploaded.map((b) => [String(b.id), b])),
+  restore: (items) => {
+    uploaded.length = 0;
+    uploaded.push(
+      ...Object.values(items as Record<string, Json>).sort(
+        (a, b) => Number(a.version) - Number(b.version),
+      ),
+    );
+  },
+});

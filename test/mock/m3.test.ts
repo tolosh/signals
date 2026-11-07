@@ -2,6 +2,7 @@
 // for policy saves, overrides and benchmark uploads; validates benchmark CSVs with row-level
 // errors; and serves version-switching and revoked-grant fixtures. Runs against the local server,
 // or the hosted mock with MOCK_BASE_URL.
+import "./scenario.js";
 import { readFileSync } from "node:fs";
 import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
