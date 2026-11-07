@@ -99,17 +99,23 @@ describe("2 and 3. policy history, and a save that GET then returns", () => {
     const before = (await (await get("/v1/app/settings/policy/home")).json()) as Policy & {
       [k: string]: unknown;
     };
-    const { expense_method_options: _, product: __, version: ___, ...input } = before;
-    const res = await json("PUT", "/v1/app/settings/policy/home", { ...input, buffer: 3.5 });
+    // Relative to whatever is saved, so the test also holds against the long-lived hosted mock.
+    const input = Object.fromEntries(
+      Object.entries(before).filter(
+        ([k]) => !["expense_method_options", "product", "version"].includes(k),
+      ),
+    );
+    const buffer = before.buffer + 0.5;
+    const res = await json("PUT", "/v1/app/settings/policy/home", { ...input, buffer });
     expect(res.status).toBe(200);
     const saved = (await res.json()) as Policy;
     expect(valid("put", POLICY, 200, saved)).toBeNull();
     expect(saved.version).toBe(before.version + 1);
-    expect(saved.buffer).toBe(3.5);
+    expect(saved.buffer).toBe(buffer);
 
     const after = (await (await get("/v1/app/settings/policy/home")).json()) as Policy;
     expect(after.version).toBe(saved.version);
-    expect(after.buffer).toBe(3.5);
+    expect(after.buffer).toBe(buffer);
 
     const history = await get("/v1/app/settings/policy/home/versions");
     const page = (await history.json()) as {
@@ -124,8 +130,8 @@ describe("2 and 3. policy history, and a save that GET then returns", () => {
     expect(valid("get", VERSIONS, 200, page)).toBeNull();
     const latest = page.items[0];
     expect(latest?.version).toBe(saved.version);
-    expect(latest?.summary).toMatch(/buffer 3 → 3\.5/);
-    expect(latest?.changes).toEqual([{ field: "buffer", from: 3, to: 3.5 }]);
+    expect(latest?.summary).toBe(`buffer ${before.buffer} → ${buffer}`);
+    expect(latest?.changes).toEqual([{ field: "buffer", from: before.buffer, to: buffer }]);
     expect(page.items.at(-1)?.version).toBe(1);
   });
 
@@ -168,7 +174,14 @@ describe("5. fixtures: asm_01 versions 1 and 2, and a revoked grant", () => {
 });
 
 describe("3. an override creates a new assessment version that GET returns", () => {
-  it("POST overrides on asm_01 returns version 3; GET and the applicant's list show it", async () => {
+  it("POST overrides on asm_01 returns the next version; GET and the applicant's list show it", async () => {
+    const listed = async () =>
+      (
+        (await (await get("/v1/app/applicants/apl_01/assessments")).json()) as {
+          items: { version: number }[];
+        }
+      ).items.map((i) => i.version);
+    const before = await listed();
     const res = await json("POST", "/v1/app/assessments/asm_01/overrides", {
       kind: "correct_stated_figure",
       target: "confirmed_monthly",
@@ -178,17 +191,15 @@ describe("3. an override creates a new assessment version that GET returns", () 
     expect(res.status).toBe(201);
     const created = (await res.json()) as { id: string; version: number };
     expect(valid("post", "/v1/app/assessments/{id}/overrides", 201, created)).toBeNull();
-    expect(created.version).toBe(3);
+    expect(created.version).toBe(Math.max(...before) + 1);
     const asm = (await (await get(`/v1/app/assessments/${created.id}`)).json()) as {
       version: number;
       affordability: { serviceability: { monthly_expenses_gle: number } };
     };
-    expect(asm.version).toBe(3);
+    expect(asm.version).toBe(created.version);
     expect(asm.affordability.serviceability.monthly_expenses_gle).toBe(3600);
-    const list = (await (await get("/v1/app/applicants/apl_01/assessments")).json()) as {
-      items: { version: number }[];
-    };
-    expect(list.items.map((i) => i.version)).toEqual([1, 2, 3]);
+    expect(await listed()).toEqual([...before, created.version]);
+    expect(before.slice(0, 2)).toEqual([1, 2]);
   });
 
   it("an override without a reason is a 400", async () => {

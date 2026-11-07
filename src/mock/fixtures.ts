@@ -1,5 +1,16 @@
 // Synthetic fixtures for the mock server (SIG-11, Build Specification 3.4). No real data.
 import { readFileSync } from "node:fs";
+import {
+  benchmarkCsv,
+  createOverride,
+  getPolicy,
+  listBenchmarks,
+  listPolicyVersions,
+  putPolicy,
+  seedVersions,
+  summaryOf,
+  uploadBenchmark,
+} from "./m3.js";
 import { issueUpload, isUploaded, LOGO_MAX_BYTES, LOGO_PREFIX, LOGO_TYPES } from "./uploads.js";
 
 type Json = Record<string, unknown>;
@@ -78,6 +89,13 @@ const applicants = [
   applicant("assessed", "amber", { latest_assessment_id: "asm_01" }),
   applicant("watching", "amber", { latest_assessment_id: "asm_01" }),
   applicant("closed", null, { grant_revoked: true }),
+  // apl_03: assessed, then the applicant revoked the grant (Build Spec 4.6, the revoked banner).
+  applicant("assessed", "amber", {
+    id: "apl_03",
+    name: "Grant revoked after assessment",
+    grant_revoked: true,
+    latest_assessment_id: "asm_03",
+  }),
 ];
 
 const unverified = (): AssessmentFixture => {
@@ -168,6 +186,7 @@ const evidenceAssessment = (): AssessmentFixture => {
   return {
     ...base,
     id: "asm_evidence",
+    applicant_id: "apl_assessed",
     signals: [
       {
         ...inc,
@@ -188,7 +207,10 @@ export const assessments: Record<string, Json> = {
   asm_unverified: unverified(),
   asm_incomplete: incomplete(),
   asm_evidence: evidenceAssessment(),
+  asm_03: { ...afT1(), id: "asm_03", applicant_id: "apl_03" },
 };
+// asm_01_v2: version 2 of apl_01's assessment, for the version picker (contract 1.5.0).
+seedVersions(assessments);
 
 const evidenceRows = (count: number, prefix: string): Json[] =>
   Array.from({ length: count }, (_, i) => ({
@@ -247,6 +269,7 @@ const note = {
   explained: true,
   created_at: AT,
 };
+const PRODUCTS = new Set(["personal", "home", "car", "business"]);
 const policy = {
   product: "home",
   version: 1,
@@ -336,11 +359,13 @@ const url = (target: string) => ({ url: target });
 // of the path parameters and returns undefined for an unknown ID.
 type Params = Record<string, string>;
 /** The request as a fixture sees it: the parsed JSON body, the mock's own origin and the time. */
-export type MockRequest = { body: unknown; origin: string; now: number };
+export type MockRequest = { body: unknown; text: string; origin: string; now: number };
 type Fixture = unknown | ((params: Params, query: URLSearchParams, req: MockRequest) => unknown);
 
 /** A fixture returns this to make the mock answer with a contract-shaped error. */
-export type MockError = { mockError: { status: number; code: string; message: string } };
+export type MockError = {
+  mockError: { status: number; code: string; message: string; details?: unknown };
+};
 const ROLLUP_STATES = ["green", "amber", "red_refer", "red_knockout", "unverified"];
 const invalid = (code: string, message: string): MockError => ({
   mockError: { status: 400, code, message },
@@ -511,7 +536,13 @@ export const fixtures: Record<string, Fixture> = {
   "post /v1/app/applicants/{id}/invites": knownApplicant(invite),
   "delete /v1/app/applicants/{id}/invites/{inviteId}": knownApplicant(null),
   "post /v1/app/applicants/{id}/request-accounts": knownApplicant(invite),
-  "get /v1/app/applicants/{id}/assessments": knownApplicant(page([summary])),
+  "get /v1/app/applicants/{id}/assessments": (params: Params) => {
+    if (!findApplicant(params)) return undefined;
+    const chain = Object.values(assessments)
+      .filter((a) => a.applicant_id === params.id)
+      .sort((a, b) => Number(a.version) - Number(b.version));
+    return chain.length > 0 ? page(chain.map(summaryOf)) : page([summary]);
+  },
   "post /v1/app/applicants/{id}/assessments": knownApplicant({
     ...summary,
     status: "running",
@@ -572,12 +603,31 @@ export const fixtures: Record<string, Fixture> = {
   }),
   "post /v1/app/assessments/{id}/notes": knownAssessment(note),
   "patch /v1/app/notes/{id}": note,
-  "post /v1/app/assessments/{id}/overrides": knownAssessment({ ...summary, version: 2 }),
+  "post /v1/app/assessments/{id}/overrides": (
+    { id = "" }: Params,
+    _: URLSearchParams,
+    req: MockRequest,
+  ) =>
+    createOverride(id, req.body, assessments, (applicantId, newId) => {
+      const a = applicants.find((x) => x.id === applicantId);
+      if (a) a.latest_assessment_id = newId;
+    }),
   "get /v1/app/assessments/{id}/report.pdf": knownAssessment({ pdf: true }),
-  "get /v1/app/settings/policy/{product}": policy,
-  "put /v1/app/settings/policy/{product}": { ...policy, version: 2 },
-  "get /v1/app/benchmarks": { items: [benchmark] },
-  "post /v1/app/benchmarks": { ...benchmark, source: "lender_upload", is_seed: false, version: 2 },
+  "get /v1/app/settings/policy/{product}": ({ product = "" }: Params) =>
+    PRODUCTS.has(product) ? getPolicy(product, policy) : undefined,
+  "put /v1/app/settings/policy/{product}": (
+    { product = "" }: Params,
+    _: URLSearchParams,
+    req: MockRequest,
+  ) =>
+    PRODUCTS.has(product)
+      ? putPolicy(product, policy, req.body, req.now, "officer@harbourmutual.example")
+      : undefined,
+  "get /v1/app/settings/policy/{product}/versions": ({ product = "" }: Params) =>
+    PRODUCTS.has(product) ? listPolicyVersions(product, policy) : undefined,
+  "get /v1/app/benchmarks": () => listBenchmarks(benchmark),
+  "post /v1/app/benchmarks": (_: Params, __: URLSearchParams, req: MockRequest) =>
+    uploadBenchmark(benchmark, req.text, req.now),
   "get /v1/app/benchmarks/template.csv": {
     csv: "household_type,dependants,income_band,location,monthly_amount\n",
   },
@@ -631,6 +681,10 @@ export const fixtures: Record<string, Fixture> = {
 
 // Named variants, chosen with the header `Prefer: example=<name>`.
 export const variants: Record<string, Record<string, unknown>> = {
+  "get /v1/app/benchmarks/template.csv": {
+    valid: { csv: benchmarkCsv("valid") },
+    invalid: { csv: benchmarkCsv("invalid") },
+  },
   "get /v1/app/me": {
     seed_benchmark: me(seedWorkspace, [
       { code: "seed_benchmark", message: "You are using the Moroku seed benchmark table." },

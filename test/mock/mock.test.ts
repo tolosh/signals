@@ -172,6 +172,8 @@ describe("every operation in the contract is served and validates", () => {
       .replace("/v1/portal/{token}", "/v1/portal/tok_01")
       .replace("/settings/policy/{product}", "/settings/policy/home")
       .replace("/v1/admin/workspaces/{id}", "/v1/admin/workspaces/wks_01")
+      // Overrides create a real version now; use asm_evidence so apl_01's chain is untouched.
+      .replace("/v1/app/assessments/{id}/overrides", "/v1/app/assessments/asm_evidence/overrides")
       .replace("/v1/app/assessments/{id}", "/v1/app/assessments/asm_01")
       .replace("/v1/app/applicants/{id}", "/v1/app/applicants/apl_assessed")
       .replace("/members/{id}", "/members/mem_01")
@@ -186,15 +188,31 @@ describe("every operation in the contract is served and validates", () => {
     "patch /v1/app/billing/auto-topup": { enabled: false },
     "post /v1/app/workspace/logo": { content_type: "image/png", size_bytes: 1024 },
     "patch /v1/app/workspace": { name: "Harbour Mutual" },
+    "post /v1/app/assessments/{id}/overrides": {
+      kind: "exclude_one_off_expense",
+      target: "txn_holiday",
+      value: null,
+      reason: "One-off holiday",
+    },
+    "put /v1/app/settings/policy/{product}": {
+      buffer: 3,
+      floor_rate: 5.5,
+      income_shading: { salary: 1 },
+      card_factor: 0.03,
+      expense_method: "confirmed",
+      ratio_thresholds: {},
+    },
+    "post /v1/app/benchmarks": readFileSync("test/fixtures/benchmark-valid.csv", "utf8"),
   };
   it.each(ops)("%s %s", async (method, template) => {
     const body = BODIES[`${method} ${template}`];
+    const headers = {
+      "content-type": typeof body === "string" ? "text/csv" : "application/json",
+    };
     const res = await fetch(base + fill(template), {
       method: method.toUpperCase(),
       redirect: "manual",
-      ...(body
-        ? { body: JSON.stringify(body), headers: { "content-type": "application/json" } }
-        : {}),
+      ...(body ? { body: typeof body === "string" ? body : JSON.stringify(body), headers } : {}),
     });
     expect(res.status).toBeLessThan(400);
     if (res.headers.get("content-type")?.startsWith("application/json")) {
@@ -213,11 +231,10 @@ describe("Lovable fixes", () => {
     const res = await get(`/v1/app/applicants/${asm.applicant_id}`);
     expect(res.status).toBe(200);
     const body = (await res.json()) as { id: string; latest_assessment_id: string; status: string };
-    expect(body).toMatchObject({
-      id: "apl_01",
-      latest_assessment_id: "asm_01",
-      status: "assessed",
-    });
+    // Since contract 1.5.0 an override creates a new version, so on the long-lived hosted mock the
+    // latest may be a later asm_01 version.
+    expect(body).toMatchObject({ id: "apl_01", status: "assessed" });
+    expect(body.latest_assessment_id).toMatch(/^asm_01(_v\d+)?$/);
     expect(validateAgainst("get", T, res.status, body).errors ?? null).toBeNull();
   });
 

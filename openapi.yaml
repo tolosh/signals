@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moroku Signals API
-  version: 1.4.0
+  version: 1.5.0
   description: >-
     Canonical contract between the Lovable front ends and the Signals backend. Behaviour is
     specified in Confluence (Build Specification section 3, Product Specification and Amendment 1).
@@ -537,6 +537,34 @@ paths:
       responses:
         "200": { $ref: "#/components/responses/Policy" }
         default: { $ref: "#/components/responses/Error" }
+  /v1/app/settings/policy/{product}/versions:
+    parameters:
+      - name: product
+        in: path
+        required: true
+        schema: { $ref: "#/components/schemas/ProductType" }
+    get:
+      tags: [app]
+      operationId: listPolicyVersions
+      summary: Policy version history, newest first (6.6)
+      parameters:
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Policy versions
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Page"
+                  - type: object
+                    required: [items]
+                    properties:
+                      items:
+                        type: array
+                        items: { $ref: "#/components/schemas/PolicyVersion" }
+        default: { $ref: "#/components/responses/Error" }
   /v1/app/benchmarks:
     get:
       tags: [app]
@@ -570,6 +598,11 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Benchmark" }
+        "400":
+          description: The CSV failed validation; nothing was saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BenchmarkValidationError" }
         default: { $ref: "#/components/responses/Error" }
   /v1/app/benchmarks/template.csv:
     get:
@@ -1766,14 +1799,80 @@ components:
           observed,
           higher_of_confirmed_benchmark,
         ]
+    ExpenseMethodOption:
+      type: object
+      description: >-
+        One living-expense method the lender can choose (D26), with the inputs it needs. A method
+        is unavailable while an input it requires cannot yet be supplied; it can still be saved,
+        but assessments using it are unverified until the input exists.
+      required: [key, label, description, requires, available, unavailable_reason]
+      properties:
+        key: { $ref: "#/components/schemas/ExpenseMethod" }
+        label: { type: string }
+        description: { type: string }
+        requires:
+          type: array
+          items: { type: string, enum: [confirmed_expenses, benchmark, observed_expenses] }
+        available: { type: boolean }
+        unavailable_reason: { type: [string, "null"] }
+    PolicyVersion:
+      type: object
+      required: [version, author, created_at, summary, changes]
+      properties:
+        version: { type: integer, minimum: 1 }
+        author: { type: string }
+        created_at: { type: string, format: date-time }
+        summary: { type: string, description: What changed, in words }
+        changes:
+          type: array
+          items:
+            type: object
+            required: [field, from, to]
+            properties:
+              field: { type: string, description: The PolicyInput field that changed }
+              from: {}
+              to: {}
+    BenchmarkRowError:
+      type: object
+      required: [row, column, code, message]
+      properties:
+        row:
+          type: [integer, "null"]
+          description: Line number in the file, the header being line 1; null for a file-level error
+        column: { type: [string, "null"] }
+        code:
+          type: string
+          description: >-
+            For example invalid_header, invalid_value, missing_value, duplicate_profile,
+            incomplete_coverage
+        message: { type: string }
+    BenchmarkValidationError:
+      allOf:
+        - $ref: "#/components/schemas/Error"
+        - type: object
+          properties:
+            error:
+              type: object
+              required: [details]
+              properties:
+                details:
+                  type: object
+                  required: [rows]
+                  properties:
+                    rows:
+                      type: array
+                      items: { $ref: "#/components/schemas/BenchmarkRowError" }
     Policy:
       allOf:
         - $ref: "#/components/schemas/PolicyInput"
         - type: object
-          required: [product, version]
+          required: [product, version, expense_method_options]
           properties:
             product: { $ref: "#/components/schemas/ProductType" }
             version: { type: integer }
+            expense_method_options:
+              type: array
+              items: { $ref: "#/components/schemas/ExpenseMethodOption" }
     Benchmark:
       type: object
       required: [id, name, version, source, is_seed, effective_from]
