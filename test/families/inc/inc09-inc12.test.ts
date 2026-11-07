@@ -51,7 +51,9 @@ describe("8 November ruling: a missed pay alone makes both signals amber, cross-
     expect(signal(r, "INC-09").reason).toContain(
       `Includes a missed pay on ${missedDay}; see INC-12`,
     );
-    expect(signal(r, "INC-12").reason).toMatch(/2026-07 is a trough month in INC-09/);
+    expect(signal(r, "INC-12").reason).toMatch(
+      /2026-07-01 to 2026-07-31 is a trough month in INC-09/,
+    );
   });
 
   it("a trough with no missed pay in it carries no cross-reference", () => {

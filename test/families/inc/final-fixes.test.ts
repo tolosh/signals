@@ -39,7 +39,9 @@ describe("Fix 2: a missed pay belongs to the month it was due", () => {
     expect(stateOf(r, "INC-09")).toMatch(/amber|red/);
     expect(signal(r, "INC-09").reason).toContain("Includes a missed pay on 2026-09-01; see INC-12");
     expect(signal(r, "INC-12").reason).toContain("2026-09-01");
-    expect(signal(r, "INC-12").reason).toContain("2026-09 is a trough month in INC-09");
+    expect(signal(r, "INC-12").reason).toContain(
+      "2026-09-01 to 2026-09-30 is a trough month in INC-09",
+    );
   });
 });
 
@@ -67,7 +69,9 @@ describe("Fix 4: INC-12's evidence includes the trough month's transactions", ()
     }));
     const base = run({ pays: [{ ...STEADY, skip: [8] }] });
     const withDebits = run({ pays: [{ ...STEADY, skip: [8] }], extra: julyDebits });
-    expect(signal(withDebits, "INC-12").reason).toMatch(/2026-07 is a trough month in INC-09/);
+    expect(signal(withDebits, "INC-12").reason).toMatch(
+      /2026-07-01 to 2026-07-31 is a trough month in INC-09/,
+    );
     expect(signal(withDebits, "INC-12").evidence_count).toBe(
       signal(base, "INC-12").evidence_count + 3,
     );
