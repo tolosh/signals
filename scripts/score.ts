@@ -16,6 +16,11 @@ import {
 } from "../src/research/generator/index.js";
 import { score, summarise, truthFlags, type Engine } from "../src/research/harness/index.js";
 import {
+  deriveObservedExpenses,
+  OBSERVED_EXPENSES_METHOD_VERSION,
+  type ExpenseFeed,
+} from "../src/engines/affordability/observed-expenses.js";
+import {
   deriveIncome,
   INCOME_METHOD_VERSION,
   type IncomeFeed,
@@ -29,6 +34,9 @@ const engineName = arg("engine", "");
 const tag = arg("tag", "");
 const lookback = Number(arg("lookback", "6"));
 const minOccurrences = Number(arg("min-occurrences", "3"));
+const oneOff = Number(arg("one-off", "5000"));
+// SIG-17 populations: "covered" shares every account; "uncovered" has at least one unshared.
+const coverage = arg("population", "");
 const manifestPath = arg("manifest", "research/datasets/synthetic-v1.manifest.json");
 
 type Manifest = {
@@ -98,6 +106,46 @@ const income =
     flags: {},
   });
 const config = `lookback ${lookback}, min occurrences ${minOccurrences}`;
+
+// SIG-17: observed living expenses (committed + basic) from Enrich categories, read from the
+// cache made by scripts/enrich-categorise-set.ts. The rotated variant is the pre-registered
+// negative control: within each applicant, every debit takes the next debit's category.
+const categoryCache = engineName.startsWith("expenses")
+  ? (JSON.parse(readFileSync("research/enrich/synthetic-v1-categories.json", "utf8")) as {
+      set_sha256: string;
+      enrich: { engine_version: string; taxonomy_version: string };
+      categories: Record<string, string>;
+    })
+  : null;
+if (categoryCache && categoryCache.set_sha256 !== manifest.set_sha256)
+  throw new Error("the category cache was made from a different set");
+const rotate = (feed: ExpenseFeed, categories: Record<string, string>) => {
+  const debits = feed.accounts.flatMap((a) =>
+    a.transactions.filter((t) => Number(t.amount) < 0).map((t) => t.transactionId),
+  );
+  return Object.fromEntries(
+    debits.map((id, i) => [id, categories[debits[(i + 1) % debits.length] ?? ""] ?? "none"]),
+  );
+};
+const expenses =
+  (rotated: boolean): Engine =>
+  ({ feed }) => {
+    const f = feed as unknown as ExpenseFeed;
+    const all = categoryCache?.categories ?? {};
+    return {
+      income_net_monthly: 0,
+      expenses_total_monthly: deriveObservedExpenses({
+        feed: f,
+        categories: rotated ? rotate(f, all) : all,
+        as_of: AS_OF_DATE,
+        lookback_months: lookback,
+        one_off_threshold_aud: oneOff,
+      }).living_monthly,
+      liabilities: [],
+      flags: {},
+    };
+  };
+const expenseConfig = `lookback ${lookback}, one-off threshold $${oneOff}`;
 const ENGINES: Record<string, { engine: Engine; version: string }> = {
   oracle: { engine: oracle(1), version: "calibration" },
   "oracle-income-plus-10": { engine: oracle(1.1), version: "calibration" },
@@ -106,16 +154,32 @@ const ENGINES: Record<string, { engine: Engine; version: string }> = {
     engine: income(shufflePayers),
     version: `${INCOME_METHOD_VERSION}; ${config}; negative control`,
   },
+  "expenses-v1": {
+    engine: expenses(false),
+    version: `${OBSERVED_EXPENSES_METHOD_VERSION}; ${expenseConfig}`,
+  },
+  "expenses-v1-rotated-categories": {
+    engine: expenses(true),
+    version: `${OBSERVED_EXPENSES_METHOD_VERSION}; ${expenseConfig}; negative control`,
+  },
 };
 const chosen = ENGINES[engineName];
 if (!chosen) throw new Error(`--engine must be one of: ${Object.keys(ENGINES).join(", ")}`);
 
 const commit = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
 const createdAt = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
-const suffix = engineName.startsWith("income") ? `-lb${lookback}-occ${minOccurrences}` : "";
-const runId = `${createdAt.slice(0, 10)}-${manifest.set}${tag ? `-${tag}` : ""}-${engineName}${suffix}`;
+const suffix = engineName.startsWith("income")
+  ? `-lb${lookback}-occ${minOccurrences}`
+  : engineName.startsWith("expenses")
+    ? `-lb${lookback}-oneoff${oneOff}`
+    : "";
+const runId = `${createdAt.slice(0, 10)}-${manifest.set}${tag ? `-${tag}` : ""}${coverage ? `-${coverage}` : ""}-${engineName}${suffix}`;
 
-const scored = tag ? applicants.filter((a) => a.truth.tags.includes(tag)) : applicants;
+const covered = (a: GeneratedApplicant) =>
+  a.truth.coverage.unshared_account_ids.length === 0 && a.truth.history.months >= 3;
+const scored = applicants
+  .filter((a) => !tag || a.truth.tags.includes(tag))
+  .filter((a) => !coverage || (coverage === "covered" ? covered(a) : !covered(a)));
 const record = score(scored, chosen.engine, {
   run_id: runId,
   created_at: createdAt,
@@ -131,8 +195,11 @@ const record = score(scored, chosen.engine, {
   versions: {
     definitions: arg("definitions", "none"),
     thresholds: arg("thresholds", "none"),
-    taxonomy: arg("taxonomy", "1.4"),
+    taxonomy: categoryCache
+      ? `${categoryCache.enrich.taxonomy_version} (Enrich local engine ${categoryCache.enrich.engine_version})`
+      : arg("taxonomy", "1.4"),
   },
+  ...(engineName.startsWith("expenses") ? { expense_truth: "committed_plus_basic" as const } : {}),
 });
 
 const base = `research/runs/${runId}`;
@@ -144,6 +211,8 @@ console.log(
     income_mean_abs_pct_error: record.metrics.income.mean_abs_pct_error,
     liabilities: record.metrics.liabilities.all,
     income_within_tolerance_share: record.metrics.income.within_tolerance_share,
+    expenses_within_tolerance_share: record.metrics.expenses.within_tolerance_share,
+    expenses_mean_abs_pct_error: record.metrics.expenses.mean_abs_pct_error,
     applicants: scored.length,
     misses: record.misses.length,
   }),

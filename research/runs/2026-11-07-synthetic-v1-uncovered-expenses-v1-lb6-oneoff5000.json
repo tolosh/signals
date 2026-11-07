@@ -1,0 +1,1210 @@
+{
+  "schema_version": "1.1.0",
+  "run_id": "2026-11-07-synthetic-v1-uncovered-expenses-v1-lb6-oneoff5000",
+  "ticket": "SIG-17",
+  "created_at": "2026-11-07T01:00:28Z",
+  "dataset": {
+    "set": "synthetic-v1",
+    "seed": 42,
+    "set_sha256": "8f5cf973ec46b33bbeccd97e87dcde10edea22919ed9af9bc9469149b2e17ea9",
+    "generator_version": "1.0.0",
+    "ground_truth_schema_version": "1.0.0"
+  },
+  "engine": {
+    "name": "expenses-v1",
+    "commit": "27de9394fb19ef02befe097fc9497281eed42c13",
+    "version": "1.0.0; lookback 6, one-off threshold $5000"
+  },
+  "versions": {
+    "definitions": "1",
+    "thresholds": "none",
+    "taxonomy": "1.4 (Enrich local engine 1.7.0)"
+  },
+  "tolerances": {
+    "income_pct": 0.05,
+    "expenses_pct": 0.15
+  },
+  "expense_truth": "committed_plus_basic",
+  "applicants": 20,
+  "metrics": {
+    "income": {
+      "scored": 20,
+      "mean_abs_error": 7624.866499999999,
+      "mean_abs_pct_error": 1,
+      "mean_signed_pct_error": -1,
+      "within_tolerance_share": 0,
+      "tolerance_pct": 0.05
+    },
+    "expenses": {
+      "scored": 20,
+      "mean_abs_error": 238.82850000000002,
+      "mean_abs_pct_error": 0.11440491856419277,
+      "mean_signed_pct_error": -0.11440491856419277,
+      "within_tolerance_share": 0.7,
+      "tolerance_pct": 0.15
+    },
+    "liabilities": {
+      "all": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 19,
+        "precision": null,
+        "recall": 0
+      },
+      "undisclosed": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": null,
+        "recall": null
+      }
+    },
+    "flags": {
+      "gambling": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": null,
+        "recall": null
+      },
+      "dishonours": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": null,
+        "recall": null
+      },
+      "salary_account_unshared": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": null,
+        "recall": null
+      },
+      "transfers_to_unshared": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": null,
+        "recall": null
+      },
+      "rent_on_time": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": null,
+        "recall": null
+      },
+      "cards_cleared_in_full": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": null,
+        "recall": null
+      },
+      "savings_growing": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "precision": null,
+        "recall": null
+      }
+    }
+  },
+  "per_applicant": [
+    {
+      "applicant_id": "syn-v1-0361",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 5416.67,
+        "derived": 0,
+        "abs_error": 5416.67,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 1249.17,
+        "derived": 998.61,
+        "abs_error": 250.56000000000006,
+        "pct_error": -0.2005811859074426,
+        "within_tolerance": false
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0362",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 7999.33,
+        "derived": 0,
+        "abs_error": 7999.33,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 3126.17,
+        "derived": 2876.46,
+        "abs_error": 249.71000000000004,
+        "pct_error": -0.07987729394114844,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0363",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 3832.83,
+        "derived": 0,
+        "abs_error": 3832.83,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 3626.17,
+        "derived": 3424.01,
+        "abs_error": 202.15999999999985,
+        "pct_error": -0.05575028197795466,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0364",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 11167,
+        "derived": 0,
+        "abs_error": 11167,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 2713.54,
+        "derived": 2485,
+        "abs_error": 228.53999999999996,
+        "pct_error": -0.0842220862784407,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0365",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 4082,
+        "derived": 0,
+        "abs_error": 4082,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 1626.17,
+        "derived": 1412.54,
+        "abs_error": 213.6300000000001,
+        "pct_error": -0.13137002896376154,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0366",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 4333.33,
+        "derived": 0,
+        "abs_error": 4333.33,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 3349.17,
+        "derived": 3110.62,
+        "abs_error": 238.55000000000018,
+        "pct_error": -0.07122660241194093,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0367",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 8083,
+        "derived": 0,
+        "abs_error": 8083,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 3649.17,
+        "derived": 3435.63,
+        "abs_error": 213.53999999999996,
+        "pct_error": -0.058517416289183555,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0368",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 6000,
+        "derived": 0,
+        "abs_error": 6000,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 3013.54,
+        "derived": 2757.9,
+        "abs_error": 255.63999999999987,
+        "pct_error": -0.08483046516721195,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0369",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 6583,
+        "derived": 0,
+        "abs_error": 6583,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 4249.17,
+        "derived": 3968.42,
+        "abs_error": 280.75,
+        "pct_error": -0.06607172694902769,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0370",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 10833.33,
+        "derived": 0,
+        "abs_error": 10833.33,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 3726.17,
+        "derived": 3467.01,
+        "abs_error": 259.15999999999985,
+        "pct_error": -0.0695513087164568,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 3,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0371",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 8583,
+        "derived": 0,
+        "abs_error": 8583,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 1013.54,
+        "derived": 790.58,
+        "abs_error": 222.95999999999992,
+        "pct_error": -0.21998145115140985,
+        "within_tolerance": false
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0372",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 11667,
+        "derived": 0,
+        "abs_error": 11667,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 3913.54,
+        "derived": 3676.19,
+        "abs_error": 237.3499999999999,
+        "pct_error": -0.060648415501055285,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0373",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 9999.17,
+        "derived": 0,
+        "abs_error": 9999.17,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 1013.54,
+        "derived": 771.33,
+        "abs_error": 242.20999999999992,
+        "pct_error": -0.23897428813860325,
+        "within_tolerance": false
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0374",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 11167,
+        "derived": 0,
+        "abs_error": 11167,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 2413.54,
+        "derived": 2153.89,
+        "abs_error": 259.6500000000001,
+        "pct_error": -0.10758056630509547,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0375",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 6500,
+        "derived": 0,
+        "abs_error": 6500,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 4526.17,
+        "derived": 4281.7,
+        "abs_error": 244.47000000000025,
+        "pct_error": -0.05401255366015864,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 2,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0376",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 8750,
+        "derived": 0,
+        "abs_error": 8750,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 2849.17,
+        "derived": 2679.49,
+        "abs_error": 169.6800000000003,
+        "pct_error": -0.05955418595591007,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0377",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 5000.67,
+        "derived": 0,
+        "abs_error": 5000.67,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 1249.17,
+        "derived": 1017.03,
+        "abs_error": 232.1400000000001,
+        "pct_error": -0.18583539470208224,
+        "within_tolerance": false
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 0,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0378",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 11500.67,
+        "derived": 0,
+        "abs_error": 11500.67,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 3849.17,
+        "derived": 3574.44,
+        "abs_error": 274.73,
+        "pct_error": -0.0713738286435777,
+        "within_tolerance": true
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 2,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0379",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 4833,
+        "derived": 0,
+        "abs_error": 4833,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 1013.54,
+        "derived": 798.4,
+        "abs_error": 215.14,
+        "pct_error": -0.21226591945063836,
+        "within_tolerance": false
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    },
+    {
+      "applicant_id": "syn-v1-0380",
+      "tags": [
+        "coverage-gap"
+      ],
+      "income": {
+        "truth": 6166.33,
+        "derived": 0,
+        "abs_error": 6166.33,
+        "pct_error": -1,
+        "within_tolerance": false
+      },
+      "expenses": {
+        "truth": 1626.17,
+        "derived": 1340.17,
+        "abs_error": 286,
+        "pct_error": -0.17587337117275562,
+        "within_tolerance": false
+      },
+      "liabilities": {
+        "true_positives": 0,
+        "false_positives": 0,
+        "false_negatives": 1,
+        "undisclosed_false_negatives": 0
+      },
+      "flag_mismatches": []
+    }
+  ],
+  "misses": [
+    {
+      "applicant_id": "syn-v1-0361",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 5416.67,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0361",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "expenses",
+      "truth": 1249.17,
+      "derived": 998.61,
+      "error": -0.2005811859074426,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0361",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "personal_loan",
+        "provider": "HARMONEY"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0362",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 7999.33,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0362",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "credit_card",
+        "provider": "ANZ"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0363",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 3832.83,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0363",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "credit_card",
+        "provider": "WESTPAC"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0364",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 11167,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0364",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "car_loan",
+        "provider": "MACQUARIE LEASING"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0365",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 4082,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0366",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 4333.33,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0366",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "credit_card",
+        "provider": "NAB"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0367",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 8083,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0367",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "car_loan",
+        "provider": "FIRSTMAC"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0368",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 6000,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0368",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "credit_card",
+        "provider": "NAB"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0369",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 6583,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0370",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 10833.33,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0370",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "credit_card",
+        "provider": "NAB"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0370",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "car_loan",
+        "provider": "MONEY3"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0370",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "personal_loan",
+        "provider": "SOCIETYONE"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0371",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 8583,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0371",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "expenses",
+      "truth": 1013.54,
+      "derived": 790.58,
+      "error": -0.21998145115140985,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0372",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 11667,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0372",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "personal_loan",
+        "provider": "HARMONEY"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0373",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 9999.17,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0373",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "expenses",
+      "truth": 1013.54,
+      "derived": 771.33,
+      "error": -0.23897428813860325,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0373",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "credit_card",
+        "provider": "CBA"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0374",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 11167,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0375",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 6500,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0375",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "credit_card",
+        "provider": "WESTPAC"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0375",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "car_loan",
+        "provider": "FIRSTMAC"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0376",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 8750,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0376",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "car_loan",
+        "provider": "MACQUARIE LEASING"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0377",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 5000.67,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0377",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "expenses",
+      "truth": 1249.17,
+      "derived": 1017.03,
+      "error": -0.18583539470208224,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0378",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 11500.67,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0378",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "car_loan",
+        "provider": "MACQUARIE LEASING"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0378",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "personal_loan",
+        "provider": "PLENTI"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0379",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 4833,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0379",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "expenses",
+      "truth": 1013.54,
+      "derived": 798.4,
+      "error": -0.21226591945063836,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0379",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "car_loan",
+        "provider": "MONEY3"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0380",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "income",
+      "truth": 6166.33,
+      "derived": 0,
+      "error": -1,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0380",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "expenses",
+      "truth": 1626.17,
+      "derived": 1340.17,
+      "error": -0.17587337117275562,
+      "cause": null
+    },
+    {
+      "applicant_id": "syn-v1-0380",
+      "tags": [
+        "coverage-gap"
+      ],
+      "measure": "liability_missed",
+      "truth": {
+        "type": "credit_card",
+        "provider": "WESTPAC"
+      },
+      "derived": null,
+      "error": null,
+      "cause": null
+    }
+  ]
+}

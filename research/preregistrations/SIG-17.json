@@ -1,0 +1,79 @@
+{
+  "ticket": "SIG-17",
+  "registered_at": "2026-11-07",
+  "status": "pre-registered before any engine code or run; not to be edited after the first scored run",
+  "hypothesis": "H1 Serviceability. Averaging committed and basic Enrich categories over the lookback, excluding own-account transfers, debt repayments and one-off outflows above $5,000, will derive monthly living expenses within 15% of the true figure for applicants who share all their transaction accounts, with at least 3 months of history, because recurring living costs dominate monthly outflows once transfers and one-offs are removed.",
+  "metric": "absolute percentage error of derived against true monthly living expenses, where living expenses are committed plus basic (AF-E1, AF-E3; the GLE's observed component). Scored with the SIG-13 harness, expense_truth = committed_plus_basic (ground truth expenses.committed_monthly + expenses.basic_monthly)",
+  "tolerance_pct": 0.15,
+  "target_share_within": 0.85,
+  "fails_if_share_within_below": 0.7,
+  "classification": {
+    "supported": "primary run share within 15% >= 0.85, with the negative control passing",
+    "refuted": "primary run share within 15% < 0.70, with the negative control passing",
+    "inconclusive": "0.70 <= share < 0.85, or the negative control fails, or the data cannot test the claim"
+  },
+  "data": {
+    "set": "synthetic-v1",
+    "manifest": "research/datasets/synthetic-v1.manifest.json",
+    "seed": 42,
+    "set_sha256": "8f5cf973ec46b33bbeccd97e87dcde10edea22919ed9af9bc9469149b2e17ea9",
+    "population_primary": "fully covered: every account the applicant holds is in the grant (ground truth coverage.unshared_account_ids is empty), with 3 months of history or more",
+    "population_secondary": "applicants with at least one account not in the grant; error recorded, no target",
+    "as_of": "2026-10-31",
+    "consented_test_set": "not available; not run"
+  },
+  "categorisation": {
+    "source": "Moroku Enrich local engine (moroku-enrich/packages/engine), no dictionary, overrides or LLM cache loaded, as in SIG-12 T3",
+    "note": "the ticket's control is taxonomy 1.3; only the local engine at taxonomy 1.4 is available (the deployed Enrich over the private network, D27, is not built). The engine version and taxonomy are recorded in each run record",
+    "cache": "every debit in set v1 is categorised once and stored as research/enrich/synthetic-v1-categories.json, keyed by transaction id, so the tests run in CI without Enrich"
+  },
+  "group_mapping": {
+    "basis": "AF-E1's groups, mapped to Enrich category names before any run",
+    "committed": ["rent", "insurance", "utilities", "education", "strata"],
+    "basic": ["groceries", "transport", "vehicle_running", "healthcare"],
+    "discretionary": [
+      "dining_entertainment",
+      "subscriptions",
+      "clothing",
+      "general_retail",
+      "other_expenses",
+      "gambling_casino",
+      "gambling_lottery",
+      "gambling_wagering"
+    ],
+    "excluded": {
+      "own_account_and_savings": ["transfer", "savings_deposit", "savings_withdrawal"],
+      "debt_repayments": ["loan_repayment", "mortgage", "bnpl", "sacc_loan", "wage_advance"],
+      "other": [
+        "income",
+        "uncategorised_credit",
+        "crypto_atm",
+        "crypto_exchange",
+        "quasi_cash",
+        "debt_collection",
+        "fines_penalties"
+      ]
+    },
+    "also_excluded": "any debit whose narrative carries a BSB and account number (own-account transfer, as in SIG-39 EQ-02)",
+    "unmapped_category": "counted as discretionary and reported, so it never inflates GLE silently"
+  },
+  "method": {
+    "debits_considered": "negative amounts in every shared account inside the lookback window ending on as_of",
+    "one_offs": "a single debit in a committed or basic category above the one-off threshold is excluded from the average and listed for review (AF-E2)",
+    "average": "total per group divided by the months covered: days from the first transaction in the window to as_of, over 30.4375",
+    "derived_living_expenses": "committed + basic monthly"
+  },
+  "primary_configuration": { "one_off_threshold_aud": 5000, "lookback_months": 6 },
+  "variables": { "one_off_threshold_aud": [2000, 5000, 10000], "lookback_months": [3, 6] },
+  "negative_control": {
+    "run_first": true,
+    "name": "rotated categories",
+    "manipulation": "within each applicant, every debit takes the category of the next debit in transaction order (the last takes the first's), keeping the amounts, dates and the mix of categories but breaking which spend has which category",
+    "expected": "share within 15% below 0.30; if it is 0.30 or more, the categories are not what drives the result and no other result in the set stands"
+  },
+  "known_limits": [
+    "set v1's expense truth is the expected value of each generated item (mean amount x cadence factor); realised spending varies around it, and annual or quarterly items may or may not fall in the window",
+    "the categoriser is the local engine at taxonomy 1.4, not the deployed Enrich at 1.3",
+    "income, liabilities and flags are not derived by this engine; their metrics in these run records are not results"
+  ]
+}

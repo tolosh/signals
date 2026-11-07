@@ -4,7 +4,7 @@
 // timestamp, commit and versions.
 import type { GeneratedApplicant, GroundTruth } from "../generator/index.js";
 
-export const RUN_RECORD_SCHEMA_VERSION = "1.0.0";
+export const RUN_RECORD_SCHEMA_VERSION = "1.1.0"; // 1.1.0 (SIG-17): adds expense_truth
 
 /** Candidate pass conditions from the hypothesis page: income within 5%, expenses within 15%. */
 export const DEFAULT_TOLERANCES = { income_pct: 0.05, expenses_pct: 0.15 };
@@ -46,7 +46,14 @@ export type RunContext = {
   engine: { name: string; commit: string; version: string };
   versions: { definitions: string; thresholds: string; taxonomy: string };
   tolerances?: typeof DEFAULT_TOLERANCES;
+  /**
+   * Which ground-truth expense figure is scored (SIG-17). total_monthly (the default, as in
+   * SIG-13) includes discretionary spend; committed_plus_basic is living expenses as AF-E1 and
+   * AF-E3 define them.
+   */
+  expense_truth?: ExpenseTruth;
 };
+export type ExpenseTruth = "total_monthly" | "committed_plus_basic";
 
 type Counts = { true_positives: number; false_positives: number; false_negatives: number };
 type Rates = Counts & { precision: number | null; recall: number | null };
@@ -84,6 +91,7 @@ export type RunRecord = {
   engine: RunContext["engine"];
   versions: RunContext["versions"];
   tolerances: typeof DEFAULT_TOLERANCES;
+  expense_truth: ExpenseTruth;
   applicants: number;
   metrics: {
     income: ErrorStats;
@@ -189,6 +197,7 @@ export function score(
   context: RunContext,
 ): RunRecord {
   const tolerances = context.tolerances ?? DEFAULT_TOLERANCES;
+  const expenseTruth: ExpenseTruth = context.expense_truth ?? "total_monthly";
   const misses: Miss[] = [];
   let liabilitiesAll = ZERO;
   let liabilitiesUndisclosed = ZERO;
@@ -213,7 +222,9 @@ export function score(
     if (income.within_tolerance === false)
       miss("income", income.truth, income.derived, income.pct_error);
     const expenses = compare(
-      t.expenses.total_monthly,
+      expenseTruth === "committed_plus_basic"
+        ? t.expenses.committed_monthly + t.expenses.basic_monthly
+        : t.expenses.total_monthly,
       derived.expenses_total_monthly,
       tolerances.expenses_pct,
     );
@@ -277,6 +288,7 @@ export function score(
     engine: context.engine,
     versions: context.versions,
     tolerances,
+    expense_truth: expenseTruth,
     applicants: applicants.length,
     metrics: {
       income: stats(

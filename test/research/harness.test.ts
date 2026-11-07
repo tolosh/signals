@@ -154,3 +154,27 @@ describe("T4 the run record carries every field in the expected outcome", () => 
     expect(new Set(seen)).toEqual(new Set(["applicant_id,application,feed"]));
   });
 });
+
+// SIG-17: living expenses are scored against committed plus basic (AF-E1, AF-E3), not the total
+// that includes discretionary spend. The default stays the SIG-13 behaviour.
+describe("expense_truth selects which ground-truth expense figure is scored", () => {
+  const committedPlusBasic = oracle((d) => d);
+  it("defaults to total_monthly, as in SIG-13", () => {
+    expect(run(oracle()).expense_truth).toBe("total_monthly");
+  });
+
+  it("committed_plus_basic scores against committed + basic", () => {
+    const engine: Engine = (input) => {
+      const t = truthById.get(input.applicant_id);
+      if (!t) throw new Error("no truth");
+      return {
+        ...committedPlusBasic(input),
+        expenses_total_monthly: t.expenses.committed_monthly + t.expenses.basic_monthly,
+      };
+    };
+    const record = run(engine, { ...context, expense_truth: "committed_plus_basic" });
+    expect(record.expense_truth).toBe("committed_plus_basic");
+    expect(record.metrics.expenses.mean_abs_pct_error).toBe(0);
+    expect(run(engine).metrics.expenses.mean_abs_pct_error).toBeGreaterThan(0);
+  });
+});
