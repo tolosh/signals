@@ -1,6 +1,28 @@
 # ADR 0004: Family 1 INC, income integrity and continuity
 
-Status: N-1 to N-14 proposed for review on SIG-41
+Status: ruled (Colin, 7 November 2026, on SIG-41). The rulings are below; where one changes an
+interpretation, the ruling wins, and the interpretation is kept as it was recorded.
+
+## Rulings, 7 November 2026
+
+1. **INC-09 and INC-12 (changes N-10).** A missed pay counts once, in INC-12. A trough month that
+   pays INC-12 has flagged as missed fully explain isn't a trough in INC-09. The engine adds each
+   flagged pay back, at its stream's median, before judging the month. One missed fortnightly pay
+   gives INC-12 amber and INC-09 green.
+2. **`household_earners` (changes N-9).** It is on the applicant's `FinancialPosition` in contract
+   1.7.0. When it's absent, INC-07 is `unverified`, with `resolve_with` "Confirm how many people
+   in the household earn an income". It isn't green.
+3. **Loan sizes (N-7, N-9).** $20,000 "wage-sized" (INC-03) and $500,000 "large loan" (INC-07) are
+   workspace defaults, marked as candidates (`INC_CANDIDATES`). Each lender can change them in its
+   policy (`income_signals`, contract 1.7.0). INC-04's red stays unset until a lender sets its
+   policy loan size (N-5, as built).
+4. **N-13.** It stays in the INC family for now. After SIG-39 closes, it moves into the
+   evidence-quality layer as part of EQ-R4, in a separate PR, and INC's output must be
+   byte-identical before and after.
+
+N-1 to N-6, N-8, N-10 to N-12 and N-14 stand as recorded. The caveat on N-2: gig payers are
+recognised only from the synthetic fixtures' list until Enrich keeps its own, so any INC-10 result
+on real data carries that limit.
 
 Product Specification Amendment 2 §4.1 (INC-06 to INC-13, INC-R1 to INC-R3) and Product
 Specification §7.2 (INC-01 to INC-05) define the signals. Those pages are the source of truth;

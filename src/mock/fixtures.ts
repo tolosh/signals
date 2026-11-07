@@ -298,6 +298,12 @@ const policy = {
   card_factor: 0.03,
   expense_method: "highest_of_confirmed_benchmark_observed",
   ratio_thresholds: { dsr: { amber: 0.5, red: 0.7 }, lvr: { amber: 0.7, red: 0.9 } },
+  // SIG-41 ruling 3: candidate workspace defaults (contract 1.7.0).
+  income_signals: {
+    wage_sized_loan_amount: 20000,
+    large_loan_amount: 500000,
+    policy_loan_amount: null,
+  },
 };
 const benchmark = {
   id: "bmk_01",
@@ -344,6 +350,7 @@ const portalSession = {
   step: "welcome",
 };
 const financialPosition = {
+  household_earners: 2,
   assets: [{ type: "property", provider: null, amount: 1200000, source: "applicant" }],
   liabilities: [{ type: "credit_card", provider: "Synthetic Bank", amount: 6000, source: "bank" }],
   repayments: [{ type: "credit_card", provider: "Synthetic Bank", amount: 229, source: "bank" }],
