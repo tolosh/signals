@@ -1,0 +1,108 @@
+// Independent reviewer harness (R4). Imports only the engine's public entry point.
+import { assessInc } from "../signals/src/engines/families/inc/index.ts";
+
+export type Cad = "weekly" | "fortnightly" | "monthly";
+export const DAY = 86_400_000;
+export const toDay = (iso: string) => Math.floor(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)) / DAY);
+export const toIso = (d: number) => new Date(d * DAY).toISOString().slice(0, 10);
+
+/** Same calendar day `n` months before `iso`, clamped to the month end, as a day number. */
+export function monthsBefore(iso: string, n: number): number {
+  const y = +iso.slice(0, 4), m = +iso.slice(5, 7) - 1, d = +iso.slice(8, 10);
+  const idx = y * 12 + m - n;
+  const ty = Math.floor(idx / 12), tm = idx - ty * 12;
+  const dim = new Date(Date.UTC(ty, tm + 1, 0)).getUTCDate();
+  return Math.floor(Date.UTC(ty, tm, Math.min(d, dim)) / DAY);
+}
+/** The 12 months ending on as-of: month k covers (asOf - (k+1) months, asOf - k months]. */
+export function monthWindows(asOf: string) {
+  return Array.from({ length: 12 }, (_, k) => ({ from: monthsBefore(asOf, k + 1) + 1, to: monthsBefore(asOf, k) }));
+}
+
+export type Credit = { day: number; amount: number; payer: string };
+export type History = {
+  asOf: string;
+  credits: Credit[];
+  repayment: number | null;
+  /** Ground truth: scheduled pay days that were skipped. */
+  skipped: number[];
+  meta?: unknown;
+};
+
+/** Plain Amendment 2 §4.1 rule on actual received income, no rounding. */
+export function reference(h: History): { state: "green" | "amber" | "red"; troughs: { from: number; to: number; total: number }[]; ratios: number[] } {
+  const ms = monthWindows(h.asOf).map((w) => ({
+    ...w,
+    total: h.credits.filter((c) => c.day >= w.from && c.day <= w.to).reduce((s, c) => s + c.amount, 0),
+  }));
+  const avg = ms.reduce((s, m) => s + m.total, 0) / 12;
+  const troughs = ms.filter((m) => avg > 0 && m.total < 0.6 * avg);
+  const ratios = ms.map((m) => (avg > 0 ? m.total / avg : NaN));
+  const red = h.repayment !== null && troughs.some((m) => m.total < (h.repayment as number));
+  return { state: red ? "red" : troughs.length ? "amber" : "green", troughs, ratios };
+}
+
+export function feedOf(h: History) {
+  const start = monthsBefore(h.asOf, 12) + 1;
+  let n = 0;
+  const tx = [
+    // Everyday spending every 3 days, so the evidence layer sees a continuous feed (no EQ gap caps).
+    ...Array.from({ length: Math.floor((toDay(h.asOf) - start) / 3) + 1 }, (_, i) => ({
+      accountId: "a1", transactionId: `x${++n}`, type: "PAYMENT", description: "COLES 1234",
+      postingDateTime: `${toIso(start + 3 * i)}T09:00:00Z`, amount: "-42.10",
+    })),
+    ...[...h.credits]
+      .sort((a, b) => a.day - b.day)
+      .map((c) => ({
+        accountId: "a1",
+        transactionId: `x${++n}`,
+        type: "TRANSFER_INCOMING",
+        description: c.payer,
+        postingDateTime: `${toIso(c.day)}T02:00:00Z`,
+        amount: c.amount.toFixed(2),
+      })),
+  ];
+  return { accounts: [{ account: { accountId: "a1", productCategory: "TRANS_AND_SAVINGS_ACCOUNTS" }, detail: { data: { bsb: "062000", accountNumber: "11112222" } }, transactions: tx }] };
+}
+
+export function engine(h: History) {
+  const r = assessInc({
+    feed: feedOf(h) as never,
+    feed_type: "cdr",
+    as_of: h.asOf,
+    lookback_months: 6,
+    application: h.repayment === null ? {} : { proposed_repayment_monthly: h.repayment },
+    gross_up: null,
+  });
+  const s = (id: string) => r.signals.find((x) => x.id === id)!;
+  return { r, inc09: s("INC-09"), inc12: s("INC-12") };
+}
+
+export const xrefDates = (reason: string) => [...reason.matchAll(/Includes a missed pay on (\d{4}-\d{2}-\d{2}); see INC-12/g)].map((m) => m[1]!);
+export const inc12Dates = (reason: string) => {
+  const m = reason.match(/expected but not received around ([0-9, -]+?)(\.|$)/);
+  return m ? m[1]!.split(", ").map((x) => x.trim()) : [];
+};
+
+/** Pay schedule, most recent first. */
+export function schedule(asOf: string, cad: Cad, lastOffset: number, monthlyDay?: number): number[] {
+  const end = toDay(asOf);
+  const start = monthsBefore(asOf, 12) + 1;
+  const out: number[] = [];
+  if (cad === "monthly") {
+    const anchorDay = monthlyDay ?? +toIso(end - lastOffset).slice(8, 10);
+    // walk calendar months backward from as-of month
+    const y = +asOf.slice(0, 4), m = +asOf.slice(5, 7) - 1;
+    for (let k = 0; k < 14; k++) {
+      const idx = y * 12 + m - k;
+      const ty = Math.floor(idx / 12), tm = idx - ty * 12;
+      const dim = new Date(Date.UTC(ty, tm + 1, 0)).getUTCDate();
+      const d = Math.floor(Date.UTC(ty, tm, Math.min(anchorDay, dim)) / DAY);
+      if (d <= end && d >= start) out.push(d);
+    }
+  } else {
+    const step = cad === "weekly" ? 7 : 14;
+    for (let d = end - lastOffset; d >= start; d -= step) out.push(d);
+  }
+  return out;
+}
