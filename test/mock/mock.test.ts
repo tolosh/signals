@@ -175,6 +175,9 @@ describe("every operation in the contract is served and validates", () => {
       // Overrides create a real version now; use asm_evidence so apl_01's chain is untouched.
       .replace("/v1/app/assessments/{id}/overrides", "/v1/app/assessments/asm_evidence/overrides")
       .replace("/v1/app/assessments/{id}", "/v1/app/assessments/asm_01")
+      // Requests (SIG-48) belong to apl_02, whose EQ-01 fails; its request is req_01.
+      .replace("/v1/app/applicants/{id}/requests", "/v1/app/applicants/apl_02/requests")
+      .replace("{requestId}", "req_01")
       .replace("/v1/app/applicants/{id}", "/v1/app/applicants/apl_assessed")
       .replace("/members/{id}", "/members/mem_01")
       .replace("/notes/{id}", "/notes/note_01")
@@ -203,8 +206,12 @@ describe("every operation in the contract is served and validates", () => {
       ratio_thresholds: {},
     },
     "post /v1/app/benchmarks": readFileSync("test/fixtures/benchmark-valid.csv", "utf8"),
+    "post /v1/portal/{token}/requests/{requestId}/explain": { reason_code: "on_leave" },
   };
   it.each(ops)("%s %s", async (method, template) => {
+    // Each request transition starts from the seeded open request (mock-only reset).
+    if (template.includes("{requestId}"))
+      await fetch(`${base}/mock-reset/requests`, { method: "POST" });
     const body = BODIES[`${method} ${template}`];
     const headers = {
       "content-type": typeof body === "string" ? "text/csv" : "application/json",
