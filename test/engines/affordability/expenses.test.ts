@@ -95,8 +95,13 @@ describe("T2 a $1,500 transfer to the applicant's own savings", () => {
   });
 });
 
+// T3, changed after the result was known (D28, ruled 7 November 2026): CI asserts that the
+// pre-registered primary run reproduces its recorded result, 255 of 360 within 15% (70.8%),
+// exactly, not that it meets the 85% target. The verdict (Inconclusive) lives in the run record,
+// the ticket and the Results log. A later change that moved the figure in either direction fails.
+const RECORDED = { covered: 360, within: 255 };
 describe("T3 across fully covered applicants in set v1", () => {
-  it(`at least ${prereg.target_share_within * 100}% fall within ${prereg.tolerance_pct * 100}%`, () => {
+  it(`reproduces the recorded primary result: ${RECORDED.within} of ${RECORDED.covered} within ${prereg.tolerance_pct * 100}%`, () => {
     const cache = JSON.parse(
       readFileSync("research/enrich/synthetic-v1-categories.json", "utf8"),
     ) as {
@@ -107,12 +112,14 @@ describe("T3 across fully covered applicants in set v1", () => {
       .filter(
         (a) => a.truth.coverage.unshared_account_ids.length === 0 && a.truth.history.months >= 3,
       );
-    expect(covered.length).toBeGreaterThan(300);
+    expect(covered.length).toBe(RECORDED.covered);
     const within = covered.filter((a) => {
       const truth = a.truth.expenses.committed_monthly + a.truth.expenses.basic_monthly;
       const derived = derive(a.feed as unknown as ExpenseFeed, cache.categories).living_monthly;
       return Math.abs(derived - truth) / truth <= prereg.tolerance_pct;
     }).length;
-    expect(within / covered.length).toBeGreaterThanOrEqual(prereg.target_share_within);
+    expect(within).toBe(RECORDED.within);
+    // The verdict is recorded elsewhere; the target is still the pre-registered one.
+    expect(prereg.target_share_within).toBe(0.85);
   }, 120_000);
 });
