@@ -328,6 +328,74 @@ describe("the expense method is a declared setting", () => {
   });
 
   it("is a minor version bump to 1.4.0", () => {
-    expect(doc.info.version).toBe("1.4.0");
+    expect(doc.info.version).toMatch(/^1\.([4-9]|\d{2,})\./);
+  });
+});
+
+// Lovable M3 gaps (SIG-19 comment, 7 November 2026, 12:05), under SIG-10.
+describe("policy options and history, and benchmark row errors", () => {
+  type S = {
+    required?: string[];
+    properties?: Record<string, S>;
+    items?: S;
+    enum?: unknown[];
+    type?: unknown;
+    $ref?: string;
+    allOf?: S[];
+  };
+  const schemas = doc.components.schemas as Record<string, S>;
+  const policyProps = () =>
+    Object.assign({}, ...(schemas.Policy?.allOf ?? []).map((s) => s.properties ?? {})) as Record<
+      string,
+      S
+    >;
+
+  it("the policy response carries expense_method_options", () => {
+    expect(policyProps().expense_method_options?.items?.$ref).toBe(
+      "#/components/schemas/ExpenseMethodOption",
+    );
+    const opt = schemas.ExpenseMethodOption;
+    expect(opt?.required).toEqual([
+      "key",
+      "label",
+      "description",
+      "requires",
+      "available",
+      "unavailable_reason",
+    ]);
+    expect(opt?.properties?.key?.$ref).toBe("#/components/schemas/ExpenseMethod");
+    expect(opt?.properties?.requires?.items?.enum).toEqual([
+      "confirmed_expenses",
+      "benchmark",
+      "observed_expenses",
+    ]);
+  });
+
+  it("GET /settings/policy/{product}/versions lists version, author, created_at and what changed", () => {
+    const op = doc.paths["/v1/app/settings/policy/{product}/versions"]?.get as {
+      responses: Record<string, { content?: { "application/json": { schema: S } } }>;
+    };
+    expect(op).toBeDefined();
+    expect(schemas.PolicyVersion?.required).toEqual([
+      "version",
+      "author",
+      "created_at",
+      "summary",
+      "changes",
+    ]);
+  });
+
+  it("a benchmark upload's 400 carries row-level errors", () => {
+    const op = doc.paths["/v1/app/benchmarks"]?.post as {
+      responses: Record<string, { content?: { "application/json": { schema: S } } }>;
+    };
+    expect(op.responses["400"]?.content?.["application/json"].schema.$ref).toBe(
+      "#/components/schemas/BenchmarkValidationError",
+    );
+    expect(schemas.BenchmarkRowError?.required).toEqual(["row", "column", "code", "message"]);
+  });
+
+  it("is a minor version bump to 1.5.0", () => {
+    expect(doc.info.version).toBe("1.5.0");
   });
 });
