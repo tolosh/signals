@@ -3,10 +3,20 @@
 // hash matches the published one.
 // Usage: npx tsx scripts/score.ts --engine <name> [--manifest research/datasets/synthetic-v1.manifest.json]
 //        [--definitions none] [--thresholds none] [--taxonomy 1.4] [--tag <population tag>]
-//        [--lookback 6] [--min-occurrences 3] [--ticket SIG-13]
-import { execFileSync } from "node:child_process";
+//        [--lookback 6] [--min-occurrences 3] [--ticket SIG-13] [--out research/runs] [--allow-dirty]
+// SIG-56: the record stores its command and commit, the tree must be clean, and an existing
+// record is never overwritten (a same-day re-run goes to another folder with --out).
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import {
+  gitState,
+  manifestSeed,
+  parseRunArgs,
+  provenance,
+  requireCleanTree,
+  writeNew,
+} from "./lib/run-record.js";
 import {
   AS_OF_DATE,
   generateApplicant,
@@ -26,10 +36,10 @@ import {
   type IncomeFeed,
 } from "../src/engines/affordability/income.js";
 
-const arg = (name: string, fallback: string) => {
-  const i = process.argv.indexOf(`--${name}`);
-  return i > 0 ? (process.argv[i + 1] ?? fallback) : fallback;
-};
+const args = parseRunArgs();
+const git = gitState();
+requireCleanTree(git.status, args.allowDirty);
+const arg = (name: string, fallback: string) => args.values[name] ?? fallback;
 const engineName = arg("engine", "");
 const tag = arg("tag", "");
 const lookback = Number(arg("lookback", "6"));
@@ -39,14 +49,7 @@ const oneOff = Number(arg("one-off", "5000"));
 const coverage = arg("population", "");
 const manifestPath = arg("manifest", "research/datasets/synthetic-v1.manifest.json");
 
-type Manifest = {
-  set: string;
-  seed: number;
-  set_sha256: string;
-  generator_version: string;
-  ground_truth_schema_version: string;
-};
-const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as Manifest;
+const manifest = manifestSeed(manifestPath);
 
 const hash = createHash("sha256");
 const applicants: GeneratedApplicant[] = population(manifest.seed).map((spec) => {
@@ -166,7 +169,7 @@ const ENGINES: Record<string, { engine: Engine; version: string }> = {
 const chosen = ENGINES[engineName];
 if (!chosen) throw new Error(`--engine must be one of: ${Object.keys(ENGINES).join(", ")}`);
 
-const commit = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+const commit = git.commit;
 const createdAt = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 const suffix = engineName.startsWith("income")
   ? `-lb${lookback}-occ${minOccurrences}`
@@ -188,8 +191,8 @@ const record = score(scored, chosen.engine, {
     set: manifest.set,
     seed: manifest.seed,
     set_sha256: setSha,
-    generator_version: manifest.generator_version,
-    ground_truth_schema_version: manifest.ground_truth_schema_version,
+    generator_version: manifest.generator_version ?? "unknown",
+    ground_truth_schema_version: manifest.ground_truth_schema_version ?? "unknown",
   },
   engine: { name: engineName, commit, version: chosen.version },
   versions: {
@@ -202,9 +205,10 @@ const record = score(scored, chosen.engine, {
   ...(engineName.startsWith("expenses") ? { expense_truth: "committed_plus_basic" as const } : {}),
 });
 
-const base = `research/runs/${runId}`;
-writeFileSync(`${base}.json`, `${JSON.stringify(record, null, 2)}\n`);
-writeFileSync(`${base}.md`, summarise(record));
+const base = join(args.out, runId);
+const recorded = { ...provenance("scripts/score.ts", args, git), ...record };
+writeNew(`${base}.json`, `${JSON.stringify(recorded, null, 2)}\n`);
+writeNew(`${base}.md`, summarise(record));
 console.log(
   JSON.stringify({
     run: base,

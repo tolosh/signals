@@ -8,20 +8,34 @@
 //     the average away from its expected value
 //   other
 // Usage: npx tsx scripts/sig17-miss-analysis.ts --run <run record path> [--lookback 6] [--one-off 5000]
-import { readFileSync, writeFileSync } from "node:fs";
+//        [--manifest <path>] [--out research/runs] [--allow-dirty]
+// SIG-56: the seed comes from the manifest; the record stores its command and commit, the tree
+// must be clean, and an existing record is never overwritten.
+import { readFileSync } from "node:fs";
+import { basename, join } from "node:path";
 import {
   deriveObservedExpenses,
   type ExpenseFeed,
 } from "../src/engines/affordability/observed-expenses.js";
 import { AS_OF_DATE, generateApplicant, population } from "../src/research/generator/index.js";
+import {
+  DEFAULT_MANIFEST,
+  gitState,
+  manifestSeed,
+  parseRunArgs,
+  provenance,
+  requireCleanTree,
+  writeNew,
+} from "./lib/run-record.js";
 
-const arg = (name: string, fallback: string) => {
-  const i = process.argv.indexOf(`--${name}`);
-  return i > 0 ? (process.argv[i + 1] ?? fallback) : fallback;
-};
+const args = parseRunArgs();
+const git = gitState();
+requireCleanTree(git.status, args.allowDirty);
+const arg = (name: string, fallback: string) => args.values[name] ?? fallback;
 const runPath = arg("run", "");
 const lookback = Number(arg("lookback", "6"));
 const oneOff = Number(arg("one-off", "5000"));
+const { seed } = manifestSeed(arg("manifest", DEFAULT_MANIFEST));
 const run = JSON.parse(readFileSync(runPath, "utf8")) as {
   run_id: string;
   misses: {
@@ -35,14 +49,14 @@ const run = JSON.parse(readFileSync(runPath, "utf8")) as {
 const cache = JSON.parse(readFileSync("research/enrich/synthetic-v1-categories.json", "utf8")) as {
   categories: Record<string, string>;
 };
-const byId = new Map(population(42).map((s) => [s.id, s]));
+const byId = new Map(population(seed).map((s) => [s.id, s]));
 
 const rows = run.misses
   .filter((m) => m.measure === "expenses")
   .map((m) => {
     const spec = byId.get(m.applicant_id);
     if (!spec) throw new Error(`unknown ${m.applicant_id}`);
-    const a = generateApplicant(spec, 42);
+    const a = generateApplicant(spec, seed);
     const feed = a.feed as unknown as ExpenseFeed;
     const derived = deriveObservedExpenses({
       feed,
@@ -84,6 +98,16 @@ const rows = run.misses
   });
 const counts: Record<string, number> = {};
 for (const r of rows) counts[r.cause] = (counts[r.cause] ?? 0) + 1;
-const out = { run_id: run.run_id, misses: rows.length, by_cause: counts, rows };
-writeFileSync(runPath.replace(/\.json$/, "-misses.json"), `${JSON.stringify(out, null, 2)}\n`);
+const out = {
+  run_id: run.run_id,
+  ...provenance("scripts/sig17-miss-analysis.ts", args, git),
+  seed,
+  misses: rows.length,
+  by_cause: counts,
+  rows,
+};
+writeNew(
+  join(args.out, basename(runPath).replace(/\.json$/, "-misses.json")),
+  `${JSON.stringify(out, null, 2)}\n`,
+);
 console.log(JSON.stringify({ misses: rows.length, by_cause: counts }));

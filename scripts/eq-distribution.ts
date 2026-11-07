@@ -2,9 +2,10 @@
 // research/runs/. Usage: npx tsx scripts/eq-distribution.ts [--lookback 6|requested]
 // "requested" (D22) assumes each applicant's lender asked for the history set v1 holds for it,
 // floored at the 3-month minimum; a 1-month history is therefore a shortfall against 3.
-import { execFileSync } from "node:child_process";
+// [--out research/runs] [--allow-dirty]. SIG-56: the record stores its command and commit, the
+// tree must be clean, and an existing record is never overwritten.
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { assessEvidence, DEFINITIONS_VERSION, type Feed } from "../src/engines/evidence/index.js";
 import {
   AS_OF_DATE,
@@ -12,15 +13,22 @@ import {
   population,
   serialise,
 } from "../src/research/generator/index.js";
+import {
+  gitState,
+  manifestSeed,
+  parseRunArgs,
+  provenance,
+  requireCleanTree,
+  writeNew,
+} from "./lib/run-record.js";
 
-const mode = process.argv.includes("--lookback")
-  ? (process.argv[process.argv.indexOf("--lookback") + 1] ?? "6")
-  : "6";
+const args = parseRunArgs();
+const git = gitState();
+requireCleanTree(git.status, args.allowDirty);
+const mode = args.values.lookback ?? "6";
 const lookbackFor = (historyMonths: number) =>
   mode === "requested" ? Math.max(3, historyMonths) : Number(mode);
-const manifest = JSON.parse(
-  readFileSync("research/datasets/synthetic-v1.manifest.json", "utf8"),
-) as { set: string; seed: number; set_sha256: string };
+const manifest = manifestSeed();
 const hash = createHash("sha256");
 const rows: Record<string, Record<string, number>> = {};
 const mismatches: {
@@ -69,13 +77,14 @@ for (const spec of population(manifest.seed)) {
 const setSha = hash.digest("hex");
 if (setSha !== manifest.set_sha256)
   throw new Error(`set hash ${setSha} does not match the manifest`);
-const commit = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+const commit = git.commit;
 const created_at = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 const run_id = `${created_at.slice(0, 10)}-${manifest.set}-eq-checks${mode === "6" ? "" : `-lookback-${mode}`}`;
 const record = {
   run_id,
   created_at,
   ticket: "SIG-39",
+  ...provenance("scripts/eq-distribution.ts", args, git),
   dataset: { set: manifest.set, seed: manifest.seed, set_sha256: setSha },
   engine: { name: "evidence-quality", commit, definitions_version: DEFINITIONS_VERSION },
   input: {
@@ -85,5 +94,5 @@ const record = {
   by_tag: rows,
   mismatches,
 };
-writeFileSync(`research/runs/${run_id}.json`, `${JSON.stringify(record, null, 2)}\n`);
+writeNew(join(args.out, `${run_id}.json`), `${JSON.stringify(record, null, 2)}\n`);
 console.log(JSON.stringify({ by_tag: rows, mismatches: mismatches.length }, null, 1));
