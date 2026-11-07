@@ -1,6 +1,8 @@
 # ADR 0001: AF-T1 inputs and ratio interpretations
 
-Status: I-1 accepted (Colin, 5 November 2026); I-2 to I-7 proposed for review on SIG-15
+Status: all ruled. I-1 accepted (Colin, 5 November 2026). I-2 to I-7 ruled by Colin on
+7 November 2026 (Decision Record D24 to D26; comment on SIG-15): I-3 and I-7 accepted; I-2, I-4,
+I-5 and I-6 changed. Each item below keeps the text as proposed, followed by the ruling.
 
 Product Specification 6.1 and 6.5 define the ratios and publish AF-T1's outputs. The
 specification is the source of truth; this record only lists where the engine had to interpret
@@ -33,16 +35,29 @@ figure; other inputs could too, so AF-T1 tests the arithmetic, not how inputs ar
 - **I-2 Gross income is the stated figure.** AF-I4 allows grossing up observed net income with a
   resident tax table. That table is not built, so without a stated gross figure the gross LTI
   and DTI are `unverified`. The INC-02 agreement check is not applied yet.
+  **Ruled 7 November 2026 (D24), changed:** income comes from the data; stated income is only the
+  INC-02 cross-check. Gross is still an engine input; in live use it comes from the tax-table
+  gross-up of observed net pay (SIG-46). Until then the gross figures are absent and the trace
+  says "needs gross-up"; the badge still follows net (I-5). If no income is found, EQ-01 fails
+  and SIG-48 asks the applicant. AF-T1 is unaffected.
 - **I-3 Total debt counts limits.** Cards, charge cards and overdrafts count at their limit, not
   their balance (6.5, "card and overdraft limits"); other debts count at their balance.
+  **Ruled 7 November 2026 (D25): accepted.**
 - **I-4 States use unrounded values.** A ratio's state is judged before rounding to two places,
   so a value displayed as 0.70 can still be red.
+  **Ruled 7 November 2026 (D25), changed:** states are judged on the rounded value, 2 decimal
+  places, halves up, the same rounding as the display. Implemented in `stateOf`; AF-T1's states
+  do not change.
 - **I-5 Gross and net take the worse state.** LTI and DTI have one state; it is the worse of the
   gross and net states. In AF-T1 both are amber.
+  **Ruled 7 November 2026 (D24), changed:** the LTI and DTI badges follow net, always; gross is
+  shown for information only.
 - **I-6 Only the default expense method.** AF-E3 makes the method configurable; only the
   default (highest of confirmed, benchmark and observed committed plus basic) is implemented.
+  **Ruled 7 November 2026 (D26), changed:** build every expense method now (SIG-47).
 - **I-7 Threshold boundaries.** "Amber 0.50 to 0.70" and "amber 1.00 to 1.25" include both ends;
   "red above" and "amber above" exclude the boundary; "amber from" and "red from" include it.
+  **Ruled 7 November 2026 (D25): accepted,** applied to the rounded value.
 
 With no income, the engine returns `unverified` (AF-I6). Every ratio that divides by income is
 `unverified` with no value; LVR and Benchmark/GLE do not depend on income and are still computed.

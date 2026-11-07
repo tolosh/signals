@@ -143,17 +143,16 @@ const meets = (value: number, b: Bound) =>
         ? value < b.value
         : value <= b.value;
 
-// I-4: states are judged on the unrounded value.
+// I-4 (D25, ruled 7 November 2026): states are judged on the rounded value, 2 dp, halves up,
+// the same rounding as the display, so the colour always matches the number shown. I-7: the
+// threshold operators apply to that rounded value: a lower bound stated as from X includes X,
+// one stated as above X excludes it.
 function stateOf(value: number, rule: RatioRule): RatioState {
   if (!rule) return null;
-  if (rule.red && meets(value, rule.red)) return "red";
-  return meets(value, rule.amber) ? "amber" : "green";
+  const shown = ratio2(value);
+  if (rule.red && meets(shown, rule.red)) return "red";
+  return meets(shown, rule.amber) ? "amber" : "green";
 }
-
-const SEVERITY: RatioState[] = ["green", "amber", "red"];
-// I-5: a ratio reported on gross and net income takes the worse of the two states.
-const worse = (a: RatioState, b: RatioState): RatioState =>
-  SEVERITY.indexOf(a) >= SEVERITY.indexOf(b) ? a : b;
 
 export function computeAffordability(
   input: AffordabilityInput,
@@ -238,8 +237,8 @@ export function computeAffordability(
 
   const verified = income > 0;
   const annualNet = income * 12;
-  // I-2: gross income is the stated gross salary; grossing up from net needs the resident tax
-  // table, which is not built yet, so gross ratios are unverified without a stated figure.
+  // I-2 (D24): gross income is an input. In live use it comes from the tax-table gross-up of
+  // observed net pay (SIG-46); until then, without it the gross figures need a gross-up.
   const gross = input.income.stated_gross_annual;
 
   const ara = verified
@@ -268,13 +267,13 @@ export function computeAffordability(
   const grossOk = verified && gross != null && gross > 0;
   const ltiGross = grossOk
     ? step("lti_gross", input.loan.amount / gross, { loan: input.loan.amount, gross })
-    : step("lti_gross", null, { reason: "no stated gross income" });
+    : step("lti_gross", null, { reason: "needs gross-up" });
   const ltiNet = verified
     ? step("lti_net", input.loan.amount / annualNet, { loan: input.loan.amount, annualNet })
     : step("lti_net", null, { reason: "no income" });
   const dtiGross = grossOk
     ? step("dti_gross", totalDebt / gross, { totalDebt, gross })
-    : step("dti_gross", null, { reason: "no stated gross income" });
+    : step("dti_gross", null, { reason: "needs gross-up" });
   const dtiNet = verified
     ? step("dti_net", totalDebt / annualNet, { totalDebt, annualNet })
     : step("dti_net", null, { reason: "no income" });
@@ -302,15 +301,10 @@ export function computeAffordability(
     rule: RatioRule,
   ): Ratio => {
     if (n == null) return unverified(key, label);
-    const netState = stateOf(n, rule);
-    if (g == null) return { key, label, net: ratio2(n), state: "unverified" };
-    return {
-      key,
-      label,
-      gross: ratio2(g),
-      net: ratio2(n),
-      state: worse(stateOf(g, rule), netState),
-    };
+    // I-5 (D24): the badge follows net, always; gross is shown for information only.
+    const state = stateOf(n, rule);
+    if (g == null) return { key, label, net: ratio2(n), state };
+    return { key, label, gross: ratio2(g), net: ratio2(n), state };
   };
 
   const ratios: Ratio[] = [
