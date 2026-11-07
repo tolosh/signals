@@ -1,6 +1,10 @@
 # ADR 0002: Evidence-quality layer interpretations
 
-Status: E-1 to E-8 proposed for review on SIG-39
+Status: ruled by Colin on 7 November 2026 (Decision Record D22 and D23; comment on SIG-39).
+E-1 accepted: the contract's names stand, and Amendment 2 is corrected to match. E-2 accepted
+as ruled: EQ-02 fails at 3 or more months and 5% or more of observed income ($250 a month floor);
+the proposed "or every month covered when fewer" is dropped. E-3 to E-8 stand. E-4 is refined
+by D22 (below).
 
 Product Specification Amendment 2 §2 and §3 (D12, D13, D20) define the evidence-quality layer.
 Amendment 2 is the source of truth; this record only lists where the engine had to interpret
@@ -18,10 +22,15 @@ E-1 to E-8 in `src/engines/evidence/` and `src/engines/signals/definitions.ts`.
 | E-7 | EQ-R5 detection           | "An adverse category that is not recognised"              | Each family evaluator reports how many debits it could not classify that could be adverse. The layer caps signals that detect adverse categories (LIA, CMT-02) on statement feeds when that count is above zero.                                                                                                                          |
 | E-8 | Absence and POS (EQ-R2)   | Absence is never proof; POS is evidenced or not observed  | A signal that depends on absence and found nothing returns `none_observed`. A POS evaluator returning a colour, or a non-POS evaluator returning a POS state, is refused.                                                                                                                                                                 |
 
-## Consequence worth ruling on
+## Consequence (ruled: D22)
 
 Under E-4, a 3-month history against the default 6-month lookback covers about 50% of the window,
 so EQ-03 fails and the assessment is _unverified_ (RU-4). In synthetic set v1 that is 131 of 380
 applicants (the 1- and 3-month histories). That follows Amendment 2 as written. If a lender who
 asks for only 3 months should not be capped, the lookback input should be what that lender
 requested, which the engine already supports.
+
+**Ruled 7 November 2026 (D22):** EQ-03 is judged against the lookback the lender requested. The
+default request is 6 months, and a lender may request less, but never under 3; the engine refuses
+a smaller request. A shortfall against the requested window still fails, and signals keep their
+own minimum history (EQ-R4).

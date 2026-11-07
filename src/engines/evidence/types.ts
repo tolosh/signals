@@ -31,8 +31,11 @@ export type EvidenceInput = {
   feed_type: FeedType;
   /** The end of the lookback window, inclusive (YYYY-MM-DD). */
   as_of: string;
-  /** The lookback requested from the data holder (EQ-R4: 6 by default, 12 where supplied). */
-  lookback_months: number;
+  /**
+   * The lookback the lender requested (D22): 6 months by default, never under 3. EQ-03 is
+   * judged against it; signals keep their own minimum history (EQ-R4).
+   */
+  lookback_months?: number;
 };
 
 export type CheckResult = "pass" | "partial" | "fail";

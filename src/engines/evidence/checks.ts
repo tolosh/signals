@@ -14,7 +14,7 @@ export const EQ_THRESHOLDS = Object.freeze({
   income_min_occurrences: 3,
   income_max_median_gap_days: 35,
   income_min_mean_amount: 100,
-  /** EQ-02 (E-2): regular means in at least 3 calendar months, or every month covered. */
+  /** EQ-02 (E-2, ruled D23): regular means in 3 or more calendar months. */
   transfer_regular_months: 3,
   /** EQ-02 (E-2): material means a monthly mean of at least 5% of observed recurring income... */
   transfer_material_income_share: 0.05,
@@ -50,9 +50,16 @@ const payerKey = (description: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
+/** D22: the default request, and the least a lender may request. */
+export const DEFAULT_LOOKBACK_MONTHS = 6;
+export const MIN_LOOKBACK_MONTHS = 3;
+
 export function assessEvidence(input: EvidenceInput): EvidenceContext {
+  const lookback = input.lookback_months ?? DEFAULT_LOOKBACK_MONTHS;
+  if (!Number.isInteger(lookback) || lookback < MIN_LOOKBACK_MONTHS)
+    throw new Error(`The requested lookback must be at least 3 months (D22); got ${lookback}`);
   const end = dayOf(input.as_of);
-  const start = lookbackStart(input.as_of, input.lookback_months);
+  const start = lookbackStart(input.as_of, lookback);
   const windowDays = end - start + 1;
 
   const lines: Line[] = input.feed.accounts.flatMap((acc) =>
@@ -155,10 +162,7 @@ export function assessEvidence(input: EvidenceInput): EvidenceContext {
         };
 
   // EQ-02: transfers to or from own accounts outside the grant.
-  const monthsCovered = new Set(
-    Array.from({ length: Math.max(coveredDays, 0) }, (_, i) => isoOf(end - i).slice(0, 7)),
-  ).size;
-  const regularMonths = Math.min(EQ_THRESHOLDS.transfer_regular_months, monthsCovered);
+  const regularMonths = EQ_THRESHOLDS.transfer_regular_months;
   const materialFloor =
     incomeMonthly > 0
       ? incomeMonthly * EQ_THRESHOLDS.transfer_material_income_share
@@ -218,11 +222,11 @@ export function assessEvidence(input: EvidenceInput): EvidenceContext {
         : share >= EQ_THRESHOLDS.window_partial
           ? "partial"
           : "fail",
-    detail: `The sync returned ${pct(share)}% of the ${input.lookback_months}-month lookback window`,
+    detail: `The sync returned ${pct(share)}% of the ${lookback}-month lookback window`,
     resolve_with:
       share >= EQ_THRESHOLDS.window_pass
         ? []
-        : [`Share the full ${input.lookback_months} months of transaction history`],
+        : [`Share the full ${lookback} months of transaction history`],
     review_required: false,
   };
 
@@ -237,7 +241,7 @@ export function assessEvidence(input: EvidenceInput): EvidenceContext {
   return {
     definitions_version: DEFINITIONS_VERSION,
     as_of: isoOf(end),
-    lookback_months: input.lookback_months,
+    lookback_months: lookback,
     window: { start: isoOf(start), end: isoOf(end) },
     period: inWindow.length > 0 ? { start: isoOf(firstInWindow), end: isoOf(lastInWindow) } : null,
     feed_type: input.feed_type,
