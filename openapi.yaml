@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moroku Signals API
-  version: 1.5.0
+  version: 1.6.0
   description: >-
     Canonical contract between the Lovable front ends and the Signals backend. Behaviour is
     specified in Confluence (Build Specification section 3, Product Specification and Amendment 1).
@@ -308,6 +308,62 @@ paths:
       summary: Close the applicant; revokes the grant
       responses:
         "200": { $ref: "#/components/responses/Applicant" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/applicants/{id}/requests:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+    get:
+      tags: [app]
+      operationId: listApplicantRequests
+      summary: Evidence requests for the applicant, with their status and response (D24)
+      responses:
+        "200":
+          description: Requests, oldest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/EvidenceRequest" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/applicants/{id}/requests/{requestId}/resend:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+      - name: requestId
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [app]
+      operationId: resendRequest
+      summary: Send the request to the applicant again
+      responses:
+        "200":
+          description: The request
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EvidenceRequest" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/app/applicants/{id}/requests/{requestId}/close:
+    parameters:
+      - $ref: "#/components/parameters/Id"
+      - name: requestId
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [app]
+      operationId: closeRequest
+      summary: Close the request
+      responses:
+        "200":
+          description: The request, now closed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EvidenceRequest" }
         default: { $ref: "#/components/responses/Error" }
   /v1/app/applicants/{id}/invites:
     parameters:
@@ -700,6 +756,67 @@ paths:
       security: []
       responses:
         "200": { $ref: "#/components/responses/RedirectUrl" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/portal/{token}/requests:
+    parameters:
+      - $ref: "#/components/parameters/Token"
+    get:
+      tags: [portal]
+      operationId: listPortalRequests
+      summary: Open evidence requests for the applicant, such as income not found (D24)
+      security: []
+      responses:
+        "200":
+          description: Open requests (status open or connected)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/EvidenceRequest" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/portal/{token}/requests/{requestId}/connect:
+    parameters:
+      - $ref: "#/components/parameters/Token"
+      - name: requestId
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [portal]
+      operationId: connectForRequest
+      summary: Re-open the openfeed flow to connect the account the pay goes into (FR-C5, FR-D3)
+      security: []
+      responses:
+        "200": { $ref: "#/components/responses/RedirectUrl" }
+        default: { $ref: "#/components/responses/Error" }
+  /v1/portal/{token}/requests/{requestId}/explain:
+    parameters:
+      - $ref: "#/components/parameters/Token"
+      - name: requestId
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [portal]
+      operationId: explainForRequest
+      summary: Explain why the income is missing; a person reviews it, and it changes no figure or state
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ExplainInput" }
+      responses:
+        "200":
+          description: The request, now explained
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/EvidenceRequest" }
+        "400": { $ref: "#/components/responses/Error" }
         default: { $ref: "#/components/responses/Error" }
   /v1/openfeed/callback:
     get:
@@ -1643,6 +1760,7 @@ components:
         product_type: { $ref: "#/components/schemas/ProductType" }
         data_as_of: { type: string, format: date-time }
         rollup: { $ref: "#/components/schemas/Rollup" }
+        review: { $ref: "#/components/schemas/AssessmentReview" }
         evidence_checks:
           type: array
           description: The EQ checks (Amendment 2, EQ-R3); empty when the data was not evaluated
@@ -1799,6 +1917,66 @@ components:
           observed,
           higher_of_confirmed_benchmark,
         ]
+    IncomeReasonCode:
+      type: string
+      enum:
+        [
+          paid_in_cash,
+          new_job_no_pay_yet,
+          paid_to_another_account,
+          self_employed_irregular,
+          on_leave,
+          other,
+        ]
+    ExplainInput:
+      type: object
+      required: [reason_code]
+      properties:
+        reason_code: { $ref: "#/components/schemas/IncomeReasonCode" }
+        note:
+          type: [string, "null"]
+          maxLength: 500
+          description: Optional. Held as sensitive, never logged, never an engine input
+    EvidenceRequest:
+      type: object
+      description: >-
+        A request to the applicant for evidence the data could not supply (D24). When EQ-01
+        fails, an income_not_found request asks them to connect the account their pay goes into,
+        or explain. A person reviews an explanation; it never changes a ratio, a signal state or
+        the roll-up.
+      required:
+        [id, applicant_id, assessment_id, type, status, created_at, updated_at, resent_at, response]
+      properties:
+        id: { type: string }
+        applicant_id: { type: string }
+        assessment_id: { type: string, description: The assessment version that opened it }
+        type: { type: string, enum: [income_not_found] }
+        status: { type: string, enum: [open, connected, explained, resolved, closed] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        resent_at: { type: [string, "null"], format: date-time }
+        response:
+          oneOf:
+            - type: "null"
+            - type: object
+              required: [kind, reason_code, note, at]
+              properties:
+                kind: { type: string, enum: [connect, explain] }
+                reason_code:
+                  oneOf:
+                    - $ref: "#/components/schemas/IncomeReasonCode"
+                    - type: "null"
+                note: { type: [string, "null"], maxLength: 500 }
+                at: { type: string, format: date-time }
+    AssessmentReview:
+      type: object
+      description: Whether a person must review the assessment, and why. It changes no state.
+      required: [required, reasons]
+      properties:
+        required: { type: boolean }
+        reasons:
+          type: array
+          items: { type: string }
     ExpenseMethodOption:
       type: object
       description: >-

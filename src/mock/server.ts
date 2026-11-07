@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import { pathToFileURL } from "node:url";
 import { parse } from "yaml";
-import { fixtures, IDS, variants, type MockError } from "./fixtures.js";
+import { fixtures, IDS, resetRequestState, variants, type MockError } from "./fixtures.js";
 import { acceptUpload, LOGO_PREFIX, servedLogo, UPLOAD_PREFIX } from "./uploads.js";
 
 const METHODS = ["get", "post", "put", "patch", "delete"];
@@ -85,6 +85,11 @@ export function createMockHandler(): MockHandler {
     const method = rawMethod.toLowerCase();
     if (method === "options") return { status: 204, headers: CORS, body: "" };
 
+    // Mock-only: restore the starting request state (SIG-48), so tests can run again.
+    if (path === "/mock-reset/requests" && method === "post") {
+      resetRequestState();
+      return { status: 204, headers: CORS, body: "" };
+    }
     // The presigned PUT and the served logo are not contract paths: S3 serves them in production.
     if (path.startsWith(UPLOAD_PREFIX) && method === "put") {
       const key = decodeURIComponent(path.slice(UPLOAD_PREFIX.length));

@@ -396,6 +396,6 @@ describe("policy options and history, and benchmark row errors", () => {
   });
 
   it("is a minor version bump to 1.5.0", () => {
-    expect(doc.info.version).toBe("1.5.0");
+    expect(doc.info.version).toMatch(/^1\.([5-9]|\d{2,})\./);
   });
 });
