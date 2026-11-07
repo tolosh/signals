@@ -1,5 +1,6 @@
 // Synthetic fixtures for the mock server (SIG-11, Build Specification 3.4). No real data.
 import { readFileSync } from "node:fs";
+import { issueUpload, isUploaded, LOGO_MAX_BYTES, LOGO_PREFIX, LOGO_TYPES } from "./uploads.js";
 
 type Json = Record<string, unknown>;
 type SignalFixture = Json & { evidence_quality: Json };
@@ -334,11 +335,75 @@ const url = (target: string) => ({ url: target });
 // One response per "<method> <template>". Where the response depends on an ID, it is a function
 // of the path parameters and returns undefined for an unknown ID.
 type Params = Record<string, string>;
-type Fixture = unknown | ((params: Params, query: URLSearchParams) => unknown);
+/** The request as a fixture sees it: the parsed JSON body, the mock's own origin and the time. */
+export type MockRequest = { body: unknown; origin: string; now: number };
+type Fixture = unknown | ((params: Params, query: URLSearchParams, req: MockRequest) => unknown);
 
 /** A fixture returns this to make the mock answer with a contract-shaped error. */
 export type MockError = { mockError: { status: number; code: string; message: string } };
 const ROLLUP_STATES = ["green", "amber", "red_refer", "red_knockout", "unverified"];
+const invalid = (code: string, message: string): MockError => ({
+  mockError: { status: 400, code, message },
+});
+
+// The two settings the mock remembers (contract 1.2.0): auto top-up, and the workspace logo.
+// They live as long as the process: a warm Lambda container or the local server.
+const PACK_IDS = new Set(["pack_launch", "pack_100"]);
+const saved = {
+  autoTopup: { enabled: false, pack_id: null as string | null, updated_at: null as string | null },
+  logoUrl: null as string | null,
+};
+const record = (body: unknown): Record<string, unknown> =>
+  body && typeof body === "object" && !Array.isArray(body) ? (body as Record<string, unknown>) : {};
+
+function updateAutoTopup(_: Params, __: URLSearchParams, req: MockRequest) {
+  const body = record(req.body);
+  if (typeof body.enabled !== "boolean")
+    return invalid("invalid_parameter", "enabled must be true or false");
+  if ("pack_id" in body && body.pack_id !== null && typeof body.pack_id !== "string")
+    return invalid("invalid_parameter", "pack_id must be a string or null");
+  const pack = "pack_id" in body ? (body.pack_id as string | null) : saved.autoTopup.pack_id;
+  if (pack !== null && !PACK_IDS.has(pack))
+    return invalid("invalid_parameter", "pack_id is not a listed pack");
+  if (body.enabled && pack === null)
+    return invalid("invalid_parameter", "Choose a pack to turn auto top-up on");
+  saved.autoTopup = {
+    enabled: body.enabled,
+    pack_id: pack,
+    updated_at: new Date(req.now).toISOString(),
+  };
+  return saved.autoTopup;
+}
+
+function createLogoUpload(_: Params, __: URLSearchParams, req: MockRequest) {
+  const body = record(req.body);
+  const type = body.content_type;
+  const size = body.size_bytes;
+  if (typeof type !== "string" || !(LOGO_TYPES as readonly string[]).includes(type))
+    return invalid("invalid_logo", "The logo must be PNG, JPEG or SVG");
+  if (typeof size !== "number" || !Number.isInteger(size) || size < 1 || size > LOGO_MAX_BYTES)
+    return invalid("invalid_logo", "The logo must be at most 2 MB");
+  return issueUpload("wks_01", type, size, req.origin, req.now);
+}
+
+function updateWorkspace(_: Params, __: URLSearchParams, req: MockRequest) {
+  const body = record(req.body);
+  if (Object.keys(body).length === 0)
+    return invalid("invalid_parameter", "Send at least one field to change");
+  if ("logo_key" in body) {
+    const key = body.logo_key;
+    if (key === null) saved.logoUrl = null;
+    else if (typeof key !== "string" || !isUploaded(key))
+      return invalid("logo_not_uploaded", "No uploaded logo has that key");
+    else saved.logoUrl = `${req.origin}${LOGO_PREFIX}${key}`;
+  }
+  return {
+    ...workspace(),
+    logo_url: saved.logoUrl,
+    ...(typeof body.name === "string" ? { name: body.name } : {}),
+    ...("website" in body ? { website: body.website } : {}),
+  };
+}
 const STATUSES = [
   "invited",
   "connecting",
@@ -397,7 +462,7 @@ const adminById = ({ id }: Params) =>
   [workspace(), seedWorkspace, zeroWorkspace].map(adminWorkspace).find((w) => w.id === id);
 
 export const fixtures: Record<string, Fixture> = {
-  "get /v1/app/me": me(workspace(), []),
+  "get /v1/app/me": () => me(workspace({ logo_url: saved.logoUrl }), []),
   "post /v1/app/workspaces": workspace(),
   "get /v1/app/packs": {
     packs: [
@@ -423,10 +488,16 @@ export const fixtures: Record<string, Fixture> = {
   },
   "post /v1/app/checkout": url("https://checkout.stripe.example/session"),
   "post /v1/app/billing/portal": url("https://billing.stripe.example/session"),
-  "get /v1/app/credits": { balance: 120, reserved: 2, entries: [ledger], next_cursor: null },
-  "patch /v1/app/billing/auto-topup": { enabled: false, pack_id: null },
-  "patch /v1/app/workspace": workspace(),
-  "post /v1/app/workspace/logo": url("https://uploads.moroku.example/logo"),
+  "get /v1/app/credits": () => ({
+    balance: 120,
+    reserved: 2,
+    auto_topup: saved.autoTopup,
+    entries: [ledger],
+    next_cursor: null,
+  }),
+  "patch /v1/app/billing/auto-topup": updateAutoTopup,
+  "patch /v1/app/workspace": updateWorkspace,
+  "post /v1/app/workspace/logo": createLogoUpload,
   "get /v1/app/members": page([member]),
   "post /v1/app/members": member,
   "patch /v1/app/members/{id}": member,

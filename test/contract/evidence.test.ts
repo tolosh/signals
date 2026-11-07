@@ -62,8 +62,8 @@ describe("contract-first changes for the evidence-quality layer", () => {
     expect(eq.properties.completeness.properties.institutions_without_shared_account).toBeDefined();
   });
 
-  it("is a minor version bump", () => {
-    expect(doc.info.version).toBe("1.2.0");
+  it("is a minor version bump (1.2.0 for SIG-39, kept by later minor versions)", () => {
+    expect(doc.info.version).toMatch(/^1\.([2-9]|\d{2,})\./);
   });
 });
 
