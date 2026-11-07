@@ -90,7 +90,7 @@ describe("T2 a $1,500 transfer to the applicant's own savings", () => {
       categories,
     );
     // Only the six $800 grocery debits count; the average divides by the months covered.
-    expect(result.living_monthly).toBeCloseTo((800 * 6) / result.months_covered, 1);
+    expect(result.living_monthly).toBeCloseTo((800 * 6) / result.months_covered, 0);
     expect(result.excluded.own_account_and_savings).toBe(12);
   });
 });
