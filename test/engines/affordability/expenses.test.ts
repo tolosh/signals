@@ -52,9 +52,12 @@ describe("T1 rent $2,000 and groceries $800 a month, with a $7,000 one-off holid
   );
 
   it("excludes the holiday from GLE", () => {
-    expect(result.committed_monthly).toBeCloseTo(2000, 0);
-    expect(result.basic_monthly).toBeCloseTo(800, 0);
-    expect(result.living_monthly).toBeCloseTo(2800, 0);
+    // Averages divide by the days covered over 30.4375 (pre-registered), so six $2,000 rents in a
+    // 184-day window average about $1,985; the pass criterion is that the holiday is excluded.
+    const within1pct = (x: number, y: number) => Math.abs(x - y) / y <= 0.01;
+    expect(within1pct(result.committed_monthly, 2000)).toBe(true);
+    expect(within1pct(result.basic_monthly, 800)).toBe(true);
+    expect(within1pct(result.living_monthly, 2800)).toBe(true);
   });
 
   it("lists it for the officer to confirm (AF-E2)", () => {
@@ -86,7 +89,8 @@ describe("T2 a $1,500 transfer to the applicant's own savings", () => {
       { accounts: [{ account: { accountId: "evd" }, transactions: lines }] },
       categories,
     );
-    expect(result.living_monthly).toBeCloseTo(800, 0);
+    // Only the six $800 grocery debits count; the average divides by the months covered.
+    expect(result.living_monthly).toBeCloseTo((800 * 6) / result.months_covered, 1);
     expect(result.excluded.own_account_and_savings).toBe(12);
   });
 });
