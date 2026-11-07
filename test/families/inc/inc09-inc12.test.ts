@@ -4,6 +4,9 @@
 // month contains a pay INC-12 reports as missed, INC-09's reason says "Includes a missed pay on
 // <date>; see INC-12", and INC-12's reason names that month. Neither changes the other's state.
 // Every probe from both independent reviews (b3bd9a5 and 7a25f34) is here, judged by a plain oracle.
+// The oracle applies D25: each month's ratio to the average is rounded to 2 dp, halves up, before
+// the 60% test, as the engine does. It sums every pay credit, which for these scripted pays is the
+// same as the regular income INC-09 reads (N-1: the family reads SIG-16's streams only).
 import { describe, expect, it } from "vitest";
 import { dayOf, isoOf, lookbackStart } from "../../../src/engines/evidence/dates.js";
 import { INC_VERSION } from "../../../src/engines/families/inc/index.js";
@@ -187,7 +190,7 @@ describe("8 November ruling: every real trough is amber or red, whatever pays we
 });
 
 describe("8 November ruling: the engine version", () => {
-  it("is 1.2.0", () => {
-    expect(INC_VERSION).toBe("1.2.0");
+  it("is 1.2.1 (the cfa9d4f re-review fixes)", () => {
+    expect(INC_VERSION).toBe("1.2.1");
   });
 });
