@@ -14,10 +14,12 @@ export {
   INC_CANDIDATES,
   INC_DEFAULTS,
   INC_THRESHOLDS,
+  incConfigFromPolicy,
   type IncConfig,
+  type IncomeSignalsPolicy,
   type StreamType,
 } from "./config.js";
-export const INC_VERSION = "1.0.0";
+export const INC_VERSION = "1.1.0";
 
 export type IncApplication = {
   /** FR-C9; used only by INC-02 (INC-R3). */
@@ -383,15 +385,24 @@ function inc08(c: Ctx): Out {
 function inc09(c: Ctx): Out {
   const asOf = isoOf(c.end);
   const all = creditsOf(c.streams);
-  const missed = missedPays(c);
+  // Ruling 1 (7 November 2026), as fixed after the independent review: missed pays are found over
+  // INC-09's own 12 months, and each is added back at no more than the stream's level that month.
+  const missed = missedPays(c, 12);
   const months = Array.from({ length: 12 }, (_, k) => {
     const from = lookbackStart(asOf, k + 1);
     const to = lookbackStart(asOf, k) - 1;
+    const inMonth = (day: number) => day >= from && day <= to;
     return {
       from,
-      total: sum(all.filter((x) => x.day >= from && x.day <= to).map((x) => x.amount)),
-      // Ruling 1 (7 November 2026): a missed pay counts once, in INC-12.
-      missed: sum(missed.filter((m) => m.day >= from && m.day <= to).map((m) => m.amount)),
+      total: sum(all.filter((x) => inMonth(x.day)).map((x) => x.amount)),
+      missed: sum(
+        missed
+          .filter((m) => inMonth(m.day))
+          .map((m) => {
+            const received = m.stream.credits.filter((x) => inMonth(x.day)).map((x) => x.amount);
+            return received.length > 0 ? Math.min(m.amount, median(received)) : m.amount;
+          }),
+      ),
     };
   });
   const average = sum(months.map((m) => m.total)) / 12;
@@ -474,12 +485,14 @@ function inc11(c: Ctx): Out {
 
 // INC-12 Interruptions in a regular cadence (N-14).
 /**
- * The pays INC-12 flags as missed in the last 6 months: the day each was expected, and the
- * stream's median pay. INC-09 reads the same list (ruling 1, 7 November 2026).
+ * The pays missed over the last `months`: the day each was expected, its stream, and the
+ * stream's median pay. INC-12 counts them over its 6 months; INC-09 adds them back over its 12
+ * (ruling 1, 7 November 2026, as fixed after the independent review).
  */
-function missedPays(c: Ctx): { day: number; amount: number }[] {
-  const since = lookbackStart(isoOf(c.end), T.interruption_window_months);
-  const out: { day: number; amount: number }[] = [];
+type Missed = { day: number; amount: number; stream: TypedStream };
+function missedPays(c: Ctx, months: number): Missed[] {
+  const since = lookbackStart(isoOf(c.end), months);
+  const out: Missed[] = [];
   for (const s of c.streams.filter((x) => x.type !== "gig_platform")) {
     const days = s.credits.map((x) => x.day);
     days.forEach((d, i) => {
@@ -487,11 +500,11 @@ function missedPays(c: Ctx): { day: number; amount: number }[] {
       if (prev === undefined || d - prev <= s.cycle_days * 1.5) return;
       const k = Math.round((d - prev) / s.cycle_days) - 1;
       for (let j = 1; j <= k; j++)
-        out.push({ day: Math.round(prev + s.cycle_days * j), amount: s.median_amount });
+        out.push({ day: Math.round(prev + s.cycle_days * j), amount: s.median_amount, stream: s });
     });
     const overdue = Math.floor((c.end - s.last - s.cycle_days * 0.5) / s.cycle_days);
     for (let j = 1; j <= overdue; j++)
-      out.push({ day: Math.round(s.last + s.cycle_days * j), amount: s.median_amount });
+      out.push({ day: Math.round(s.last + s.cycle_days * j), amount: s.median_amount, stream: s });
   }
   return out.filter((m) => m.day >= since).sort((a, b) => a.day - b.day);
 }
@@ -499,7 +512,7 @@ function missedPays(c: Ctx): { day: number; amount: number }[] {
 function inc12(c: Ctx): Out {
   const since = lookbackStart(isoOf(c.end), T.interruption_window_months);
   const regular = c.streams.filter((s) => s.type !== "gig_platform");
-  const missed = missedPays(c).map((m) => m.day);
+  const missed = missedPays(c, T.interruption_window_months).map((m) => m.day);
   const recent = missed.some((d) => d >= c.end - T.interruption_recent_days);
   const state = missed.length >= 2 || recent ? "red" : missed.length === 1 ? "amber" : "green";
   return out(

@@ -56,6 +56,29 @@ export const INC_CANDIDATES = Object.freeze([
   "large_loan_amount",
 ] as const);
 
+/** The contract's PolicyInput.income_signals (1.7.0), as a lender saves it. */
+export type IncomeSignalsPolicy = {
+  wage_sized_loan_amount?: number;
+  large_loan_amount?: number;
+  policy_loan_amount?: number | null;
+};
+
+/**
+ * Maps a lender's income_signals policy onto the INC config (SIG-41 review, fix 5). The names
+ * are the contract's; a field the policy leaves out keeps the workspace default.
+ */
+export function incConfigFromPolicy(
+  signals: IncomeSignalsPolicy | null | undefined,
+): Partial<IncConfig> {
+  const out: Partial<IncConfig> = {};
+  if (!signals) return out;
+  if (signals.wage_sized_loan_amount !== undefined)
+    out.wage_sized_loan_amount = signals.wage_sized_loan_amount;
+  if (signals.large_loan_amount !== undefined) out.large_loan_amount = signals.large_loan_amount;
+  if (signals.policy_loan_amount !== undefined) out.policy_loan_amount = signals.policy_loan_amount;
+  return out;
+}
+
 /** Thresholds from Amendment 2 §4.1 and Product Specification §7.2. */
 export const INC_THRESHOLDS = Object.freeze({
   /** INC-01 */
