@@ -42,3 +42,23 @@ no lender request. 2 of 3 months stays `partial`. Run records:
 default request is 6 months, and a lender may request less, but never under 3; the engine refuses
 a smaller request. A shortfall against the requested window still fails, and signals keep their
 own minimum history (EQ-R4).
+
+## SIG-55: gaps in the middle of the window (EQ method 2), for ruling
+
+The SIG-39 review found that coverage under E-4 runs from the first transaction to `as_of`, so a
+hole in the middle of the window passes. EQ method 2 (`EQ_METHOD_VERSION`, EQ-R6) subtracts the
+days inside a gap. Method 1 is kept, so an assessment made under it replays unchanged
+(`eq_version: 1`). EQ-03's thresholds are unchanged: 90% passes, 60% to 90% is partial.
+
+| ID   | Question                | The engine does (proposed)                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ---- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| E-9  | Per account or per feed | **Per feed.** The question EQ-03 asks is whether the data holder returned the period, so a day is active when any shared account has a transaction. A quiet account while another is active is not a gap. The cost: a hole in one account's history is missed while another account is busy.                                                                                                                                                                                                   |
+| E-10 | What counts as a gap    | A silence between active days (or from the last one to `as_of`) is a gap when it is **longer than 21 days and more than 1.5 times each adjacent silence**. Both numbers are candidates. Judging a silence against its neighbours means a change of cadence (fortnightly to monthly pay) is not read as missing data, and an account active once a month is not penalised, while a 31-day hole in a busy feed is. The `detail` names each gap by date, and `resolve_with` asks for that period. |
+
+**Known limit of E-10:** two long holes in a row, separated by a single day of activity, are each
+about as long as their neighbour, so neither is flagged. A rule judged against the feed's median
+silence avoids that, but it read a legitimate change from fortnightly to monthly pay in a pay-only
+feed as a 49% window (seen on the INC-13 amber script), so it was not used.
+
+**Set v1 is unchanged:** every EQ-03 result at the 6-month request is the same under methods 1
+and 2, and 138 of 380 are still unverified. Set v1 has no mid-window gaps.
