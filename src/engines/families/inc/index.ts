@@ -19,7 +19,7 @@ export {
   type IncomeSignalsPolicy,
   type StreamType,
 } from "./config.js";
-export const INC_VERSION = "1.1.0";
+export const INC_VERSION = "1.2.0";
 
 export type IncApplication = {
   /** FR-C9; used only by INC-02 (INC-R3). */
@@ -381,50 +381,57 @@ function inc08(c: Ctx): Out {
   );
 }
 
-// INC-09 Seasonality over the last 12 months (N-10).
-function inc09(c: Ctx): Out {
+// INC-09 Seasonality over the last 12 months (N-10, as ruled 8 November 2026): the income actually
+// received in each month against the 12-month average of actual income (Amendment 2 §4.1). There
+// is no add-back: a missed pay is never used to hide a dip. INC-09 and INC-12 both fire, and each
+// names the other when a trough month holds a pay INC-12 reports as missed.
+type Month = { from: number; to: number; total: number };
+function troughMonths(c: Ctx): { months: Month[]; troughs: Month[] } {
   const asOf = isoOf(c.end);
   const all = creditsOf(c.streams);
-  // Ruling 1 (7 November 2026), as fixed after the independent review: missed pays are found over
-  // INC-09's own 12 months, and each is added back at no more than the stream's level that month.
-  const missed = missedPays(c, 12);
   const months = Array.from({ length: 12 }, (_, k) => {
     const from = lookbackStart(asOf, k + 1);
     const to = lookbackStart(asOf, k) - 1;
-    const inMonth = (day: number) => day >= from && day <= to;
     return {
       from,
-      total: sum(all.filter((x) => inMonth(x.day)).map((x) => x.amount)),
-      missed: sum(
-        missed
-          .filter((m) => inMonth(m.day))
-          .map((m) => {
-            const received = m.stream.credits.filter((x) => inMonth(x.day)).map((x) => x.amount);
-            return received.length > 0 ? Math.min(m.amount, median(received)) : m.amount;
-          }),
-      ),
+      to,
+      total: sum(all.filter((x) => x.day >= from && x.day <= to).map((x) => x.amount)),
     };
   });
   const average = sum(months.map((m) => m.total)) / 12;
-  // A trough fully explained by pays INC-12 has flagged as missed is not a trough here.
-  const troughs = months.filter(
-    (m) =>
-      average > 0 &&
-      round(m.total / average) < T.trough_share &&
-      round((m.total + m.missed) / average) < T.trough_share,
-  );
+  const troughs = months.filter((m) => average > 0 && round(m.total / average) < T.trough_share);
+  return { months, troughs };
+}
+const monthOf = (m: Month) => isoOf(m.to).slice(0, 7);
+/** The pays INC-12 reports as missed (its own 6 months) that fall in an INC-09 trough month. */
+function crossReferenced(c: Ctx): { day: number; month: Month }[] {
+  const { troughs } = troughMonths(c);
+  return missedPays(c, T.interruption_window_months).flatMap((m) => {
+    const month = troughs.find((t) => m.day >= t.from && m.day <= t.to);
+    return month ? [{ day: m.day, month }] : [];
+  });
+}
+
+function inc09(c: Ctx): Out {
+  const all = creditsOf(c.streams);
+  const { troughs } = troughMonths(c);
   const repayment = c.app.proposed_repayment_monthly ?? null;
   const uncovered = troughs.filter((m) => repayment !== null && m.total < repayment);
   const state = uncovered.length > 0 ? "red" : troughs.length > 0 ? "amber" : "green";
-  return out(
-    "INC-09",
-    state,
-    `${troughs.length} trough month${troughs.length === 1 ? "" : "s"}`,
+  const links = crossReferenced(c).map(
+    (x) => `Includes a missed pay on ${isoOf(x.day)}; see INC-12`,
+  );
+  const base =
     state === "red"
       ? `In ${uncovered.length} trough month${uncovered.length === 1 ? "" : "s"}, income is below the proposed repayment`
       : state === "amber"
         ? `${troughs.length} month${troughs.length === 1 ? "" : "s"} fell below 60% of the annual average`
-        : "Every month is at or above 60% of the annual average",
+        : "Every month is at or above 60% of the annual average";
+  return out(
+    "INC-09",
+    state,
+    `${troughs.length} trough month${troughs.length === 1 ? "" : "s"}`,
+    [base, ...links].join(". "),
     all,
   );
 }
@@ -486,8 +493,8 @@ function inc11(c: Ctx): Out {
 // INC-12 Interruptions in a regular cadence (N-14).
 /**
  * The pays missed over the last `months`: the day each was expected, its stream, and the
- * stream's median pay. INC-12 counts them over its 6 months; INC-09 adds them back over its 12
- * (ruling 1, 7 November 2026, as fixed after the independent review).
+ * stream's median pay. INC-12 reports them over its 6 months; INC-09 names those that fall in its
+ * trough months (8 November 2026 ruling, replacing the 7 November add-back).
  */
 type Missed = { day: number; amount: number; stream: TypedStream };
 function missedPays(c: Ctx, months: number): Missed[] {
@@ -515,13 +522,21 @@ function inc12(c: Ctx): Out {
   const missed = missedPays(c, T.interruption_window_months).map((m) => m.day);
   const recent = missed.some((d) => d >= c.end - T.interruption_recent_days);
   const state = missed.length >= 2 || recent ? "red" : missed.length === 1 ? "amber" : "green";
+  // 8 November 2026 ruling: name each INC-09 trough month that holds a missed pay. The evidence
+  // already covers that month, as it spans INC-12's 6 months.
+  const troughLinks = [...new Set(crossReferenced(c).map((x) => monthOf(x.month)))].map(
+    (m) => `${m} is a trough month in INC-09`,
+  );
   return out(
     "INC-12",
     state,
     `${missed.length} missed cycle${missed.length === 1 ? "" : "s"}`,
     missed.length === 0
       ? "No missed pay cycles in the last 6 months"
-      : `Pay was expected but not received around ${missed.map(isoOf).join(", ")}`,
+      : [
+          `Pay was expected but not received around ${missed.map(isoOf).join(", ")}`,
+          ...troughLinks,
+        ].join(". "),
     creditsOf(regular).filter((x) => x.day >= since),
   );
 }
