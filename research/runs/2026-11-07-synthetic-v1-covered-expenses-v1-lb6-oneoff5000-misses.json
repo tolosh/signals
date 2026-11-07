@@ -1,0 +1,1059 @@
+{
+  "run_id": "2026-11-07-synthetic-v1-covered-expenses-v1-lb6-oneoff5000",
+  "misses": 105,
+  "by_cause": {
+    "bill_paid_as_transfer": 105
+  },
+  "rows": [
+    {
+      "applicant_id": "syn-v1-0001",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.178,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0010",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.234,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0012",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.156,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0013",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.155,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0014",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.215,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0017",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.159,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0021",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.229,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0025",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.237,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0029",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.207,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0041",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.159,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0042",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.237,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0047",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.244,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0048",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.251,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0049",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.216,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0051",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.154,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0058",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.162,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0059",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.195,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0061",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.194,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0062",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.278,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 1550,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0071",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.19,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0072",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.182,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 1550,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0074",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.274,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 1550,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0075",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.211,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0081",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.244,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0085",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.218,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0087",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.225,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0091",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.173,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0093",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.238,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0095",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.187,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0096",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.227,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0097",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.17,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0104",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.16,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0107",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.16,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0110",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.275,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0112",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.243,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0114",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.245,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0116",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.157,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0124",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.155,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0127",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.235,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0128",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.191,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0131",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.255,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0132",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.221,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0133",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.241,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0141",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.198,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0144",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.262,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0146",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.215,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0148",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.235,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0153",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.204,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0155",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.244,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0156",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.158,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0161",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.195,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0166",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.187,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0178",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.217,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0179",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.188,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0181",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.239,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0183",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.251,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 1550,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0185",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.162,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0187",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.249,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0189",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.16,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0190",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.272,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0191",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.161,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0192",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.197,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0198",
+      "tags": [
+        "salaried-base"
+      ],
+      "error": -0.242,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0203",
+      "tags": [
+        "variable-income"
+      ],
+      "error": -0.203,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0205",
+      "tags": [
+        "variable-income"
+      ],
+      "error": -0.241,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0207",
+      "tags": [
+        "variable-income"
+      ],
+      "error": -0.174,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0209",
+      "tags": [
+        "variable-income"
+      ],
+      "error": -0.203,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0218",
+      "tags": [
+        "variable-income"
+      ],
+      "error": -0.187,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0219",
+      "tags": [
+        "variable-income"
+      ],
+      "error": -0.167,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0222",
+      "tags": [
+        "gig"
+      ],
+      "error": -0.164,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0225",
+      "tags": [
+        "gig"
+      ],
+      "error": -0.151,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0231",
+      "tags": [
+        "gig"
+      ],
+      "error": -0.218,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0237",
+      "tags": [
+        "gig"
+      ],
+      "error": -0.164,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0238",
+      "tags": [
+        "gig"
+      ],
+      "error": -0.152,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0241",
+      "tags": [
+        "benefits"
+      ],
+      "error": -0.155,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0244",
+      "tags": [
+        "benefits"
+      ],
+      "error": -0.208,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0247",
+      "tags": [
+        "benefits"
+      ],
+      "error": -0.231,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0250",
+      "tags": [
+        "benefits"
+      ],
+      "error": -0.193,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0254",
+      "tags": [
+        "benefits"
+      ],
+      "error": -0.231,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0259",
+      "tags": [
+        "benefits"
+      ],
+      "error": -0.178,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 1550,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0265",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "error": -0.185,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0268",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "error": -0.25,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0269",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "error": -0.238,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0272",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "error": -0.171,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 1550,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0278",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "error": -0.201,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 1550,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0279",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "error": -0.183,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0285",
+      "tags": [
+        "bnpl"
+      ],
+      "error": -0.177,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0289",
+      "tags": [
+        "bnpl"
+      ],
+      "error": -0.214,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0297",
+      "tags": [
+        "bnpl"
+      ],
+      "error": -0.165,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 1550,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0308",
+      "tags": [
+        "sacc"
+      ],
+      "error": -0.194,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0310",
+      "tags": [
+        "sacc"
+      ],
+      "error": -0.249,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0311",
+      "tags": [
+        "sacc"
+      ],
+      "error": -0.233,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0316",
+      "tags": [
+        "sacc"
+      ],
+      "error": -0.254,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0319",
+      "tags": [
+        "sacc"
+      ],
+      "error": -0.151,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0320",
+      "tags": [
+        "sacc"
+      ],
+      "error": -0.251,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0322",
+      "tags": [
+        "wage-advance"
+      ],
+      "error": -0.25,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0323",
+      "tags": [
+        "wage-advance"
+      ],
+      "error": -0.227,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0324",
+      "tags": [
+        "wage-advance"
+      ],
+      "error": -0.183,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 1550,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0338",
+      "tags": [
+        "wage-advance"
+      ],
+      "error": -0.183,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0345",
+      "tags": [
+        "gambling"
+      ],
+      "error": -0.254,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 1550,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0348",
+      "tags": [
+        "gambling"
+      ],
+      "error": -0.191,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 450,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0349",
+      "tags": [
+        "gambling"
+      ],
+      "error": -0.204,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 1550,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0356",
+      "tags": [
+        "gambling"
+      ],
+      "error": -0.268,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0358",
+      "tags": [
+        "gambling"
+      ],
+      "error": -0.201,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2000,
+      "one_offs": 0
+    },
+    {
+      "applicant_id": "syn-v1-0360",
+      "tags": [
+        "gambling"
+      ],
+      "error": -0.175,
+      "cause": "bill_paid_as_transfer",
+      "bills_paid_as_transfer_in_window": 2900,
+      "one_offs": 0
+    }
+  ]
+}
