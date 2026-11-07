@@ -16,6 +16,9 @@ export class SignalsMockStack extends Stack {
       code: Code.fromAsset(props.assetPath),
       memorySize: 256,
       timeout: Duration.seconds(5),
+      // SIG-51 (ruled 7 November 2026): one container, so the mock's in-memory state is shared by
+      // every request. See docs/adr/0005-mock-hosting.md.
+      reservedConcurrentExecutions: 1,
       logGroup: new LogGroup(this, "MockLogs", { retention: RetentionDays.ONE_WEEK }),
     });
 
