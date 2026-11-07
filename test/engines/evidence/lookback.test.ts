@@ -29,7 +29,8 @@ describe("D22 EQ-03 measures against the requested lookback", () => {
   });
 
   it("the default request is 6 months", () => {
-    const { lookback_months: _, ...rest } = input(threeMonths);
+    const rest = { ...input(threeMonths) };
+    delete rest.lookback_months;
     expect(assessEvidence(rest).lookback_months).toBe(6);
     expect(eq(assessEvidence(rest).checks, "EQ-03")).toBe("fail");
   });
