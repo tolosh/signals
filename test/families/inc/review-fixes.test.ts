@@ -57,3 +57,36 @@ describe("Fix 3: the engine version", () => {
     expect(INC_VERSION).toBe("1.1.0");
   });
 });
+
+describe("Fix 5: the contract's income_signals reaches the engine", () => {
+  it("a lender's policy values (contract 1.7.0) become INC config; absent ones keep the defaults", async () => {
+    const { incConfigFromPolicy, INC_DEFAULTS } =
+      await import("../../../src/engines/families/inc/index.js");
+    expect(incConfigFromPolicy(undefined)).toEqual({});
+    expect(incConfigFromPolicy({ large_loan_amount: 300_000 })).toEqual({
+      large_loan_amount: 300_000,
+    });
+    expect(
+      incConfigFromPolicy({
+        wage_sized_loan_amount: 25_000,
+        large_loan_amount: 750_000,
+        policy_loan_amount: null,
+      }),
+    ).toEqual({
+      wage_sized_loan_amount: 25_000,
+      large_loan_amount: 750_000,
+      policy_loan_amount: null,
+    });
+    expect(INC_DEFAULTS.large_loan_amount).toBe(500_000);
+  });
+
+  it("a policy's large-loan size changes INC-07 through the mapping", async () => {
+    const { incConfigFromPolicy } = await import("../../../src/engines/families/inc/index.js");
+    const r = run(
+      { pays: [STEADY] },
+      { household_earners: 1, loan_amount: 400_000 },
+      incConfigFromPolicy({ large_loan_amount: 300_000 }),
+    );
+    expect(stateOf(r, "INC-07")).toBe("amber");
+  });
+});
