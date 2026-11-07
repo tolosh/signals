@@ -22,6 +22,7 @@ import {
   resetRequests,
 } from "./requests.js";
 import { issueUpload, isUploaded, LOGO_MAX_BYTES, LOGO_PREFIX, LOGO_TYPES } from "./uploads.js";
+import { incomeAssessment } from "./inc.js";
 
 type Json = Record<string, unknown>;
 type SignalFixture = Json & { evidence_quality: Json };
@@ -218,6 +219,8 @@ export const assessments: Record<string, Json> = {
   asm_incomplete: incomplete(),
   asm_evidence: evidenceAssessment(),
   asm_03: { ...afT1(), id: "asm_03", applicant_id: "apl_03" },
+  // SIG-41: the 13 INC signals, computed by the family 1 engine.
+  asm_income: incomeAssessment(afT1()),
 };
 // asm_01_v2: version 2 of apl_01's assessment, for the version picker (contract 1.5.0).
 seedVersions(assessments);
