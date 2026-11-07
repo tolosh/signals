@@ -538,6 +538,7 @@ export const fixtures: Record<string, Fixture> = {
     return items && { items };
   },
   "get /v1/app/assessments/{id}/affordability/trace": knownAssessment({
+    expense_method: "highest_of_confirmed_benchmark_observed",
     income: [
       {
         payer: "Synthetic Employer",

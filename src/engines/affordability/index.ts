@@ -1,6 +1,7 @@
 // Affordability calculation core: Product Specification 6.1 to 6.6 (AF-1, AF-T1).
 // A pure function of its inputs and a threshold set. Interpretations of the specification are
 // recorded in docs/adr/0001-af-t1-inputs-and-interpretations.md and cited here as I-n.
+import { assessExpenses, type ExpenseInput, type ExpenseMethod } from "./expenses.js";
 import { DEFAULT_THRESHOLDS, type Bound, type RatioRule, type ThresholdSet } from "./thresholds.js";
 
 export { DEFAULT_THRESHOLDS, type ThresholdSet } from "./thresholds.js";
@@ -44,14 +45,11 @@ export type AffordabilityInput = {
     floor_rate_pct: number;
     card_commitment_factor: number;
     shading: Record<string, number>;
+    /** §6.6 (SIG-47): the living-expense method; AF-E3's default when absent. */
+    expense_method?: ExpenseMethod;
   };
   income: { streams: IncomeStream[]; stated_gross_annual: number | null };
-  expenses: {
-    confirmed_monthly: number | null;
-    benchmark_monthly: number | null;
-    observed_committed_monthly: number;
-    observed_basic_monthly: number;
-  };
+  expenses: ExpenseInput;
   liabilities: Liability[];
   benchmark: { name: string; version: number; is_seed: boolean };
 };
@@ -81,6 +79,8 @@ export type AffordabilityResult = {
     };
     ratios: Ratio[];
     benchmark: AffordabilityInput["benchmark"];
+    /** Present only when unverified: the evidence that would resolve it. */
+    resolve_with?: string[];
   };
   trace: TraceStep[];
   versions: { thresholds_version: number };
@@ -174,20 +174,12 @@ export function computeAffordability(
   const income = streams.reduce((sum, s) => sum + s.monthly * s.shading, 0);
   step("income", income, { streams });
 
-  // 6.3 expenses: default method, the higher of confirmed, benchmark and observed committed
-  // plus basic (AF-E3). I-6: only the default method is implemented.
-  const observed =
-    input.expenses.observed_committed_monthly + input.expenses.observed_basic_monthly;
-  const gle = Math.max(
-    input.expenses.confirmed_monthly ?? 0,
-    input.expenses.benchmark_monthly ?? 0,
-    observed,
-  );
-  step("gle", gle, {
-    ...input.expenses,
-    observed,
-    method: "highest_of_confirmed_benchmark_observed",
-  });
+  // 6.3 expenses: the policy's method (SIG-47, D26; I-6 as ruled). A method whose inputs are
+  // missing gives no figure, and every ratio that needs expenses is unverified.
+  const expenses = assessExpenses(input.expenses, input.policy.expense_method);
+  const expensesOk = expenses.gle != null;
+  const gle = expenses.gle ?? 0;
+  step("gle", expenses.gle, { ...expenses });
 
   const assessmentRate = Math.max(
     input.loan.product_rate_pct + input.policy.buffer_pct,
@@ -235,7 +227,10 @@ export function computeAffordability(
     liabilities: input.liabilities.length,
   });
 
-  const verified = income > 0;
+  const hasIncome = income > 0;
+  // Expenses feed ARA, DSR, NDI and Benchmark/GLE; LTI, DTI and LVR do not use them.
+  const verified = hasIncome && expensesOk;
+  const why = hasIncome ? "expenses unverified" : "no income";
   const annualNet = income * 12;
   // I-2 (D24): gross income is an input. In live use it comes from the tax-table gross-up of
   // observed net pay (SIG-46); until then, without it the gross figures need a gross-up.
@@ -243,13 +238,13 @@ export function computeAffordability(
 
   const ara = verified
     ? step("ara", income - gle - repayments, { income, gle, repayments })
-    : step("ara", null, { reason: "no income" });
+    : step("ara", null, { reason: why });
   const dsr = verified
     ? step("dsr", (gle + repayments + proposed) / income, { gle, repayments, proposed, income })
-    : step("dsr", null, { reason: "no income" });
+    : step("dsr", null, { reason: why });
   const ndi = verified
     ? step("ndi", (income - gle) / (repayments + proposed), { income, gle, repayments, proposed })
-    : step("ndi", null, { reason: "no income" });
+    : step("ndi", null, { reason: why });
 
   const security = input.loan.security_value ?? 0;
   const securedDebt = input.loan.amount + (input.loan.other_secured_debt_on_security ?? 0);
@@ -260,21 +255,23 @@ export function computeAffordability(
 
   const benchmark = input.expenses.benchmark_monthly;
   const benchmarkGle =
-    benchmark != null && gle > 0
+    benchmark != null && expensesOk && gle > 0
       ? step("benchmark_gle", benchmark / gle, { benchmark, gle })
-      : step("benchmark_gle", null, { reason: "no benchmark" });
+      : step("benchmark_gle", null, {
+          reason: expensesOk ? "no benchmark" : "expenses unverified",
+        });
 
-  const grossOk = verified && gross != null && gross > 0;
+  const grossOk = hasIncome && gross != null && gross > 0;
   const ltiGross = grossOk
     ? step("lti_gross", input.loan.amount / gross, { loan: input.loan.amount, gross })
     : step("lti_gross", null, { reason: "needs gross-up" });
-  const ltiNet = verified
+  const ltiNet = hasIncome
     ? step("lti_net", input.loan.amount / annualNet, { loan: input.loan.amount, annualNet })
     : step("lti_net", null, { reason: "no income" });
   const dtiGross = grossOk
     ? step("dti_gross", totalDebt / gross, { totalDebt, gross })
     : step("dti_gross", null, { reason: "needs gross-up" });
-  const dtiNet = verified
+  const dtiNet = hasIncome
     ? step("dti_net", totalDebt / annualNet, { totalDebt, annualNet })
     : step("dti_net", null, { reason: "no income" });
 
@@ -334,6 +331,7 @@ export function computeAffordability(
       },
       ratios,
       benchmark: { ...input.benchmark },
+      ...(expenses.resolve_with.length > 0 ? { resolve_with: expenses.resolve_with } : {}),
     },
     trace,
     versions: { thresholds_version: thresholds.version },

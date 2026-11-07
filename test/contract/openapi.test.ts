@@ -293,6 +293,41 @@ describe("auto top-up can be read, and the logo upload is specified", () => {
   });
 
   it("is a minor version bump to 1.3.0 (1.2.0 was SIG-39)", () => {
-    expect(doc.info.version).toBe("1.3.0");
+    expect(doc.info.version).toMatch(/^1\.([3-9]|\d{2,})\./);
+  });
+});
+
+// SIG-47 (D26): every living-expense method, selected per policy version.
+describe("the expense method is a declared setting", () => {
+  type Schema = {
+    enum?: unknown[];
+    $ref?: string;
+    properties?: Record<string, Schema>;
+    type?: unknown;
+  };
+  const schemas = doc.components.schemas as Record<string, Schema>;
+
+  it("PolicyInput.expense_method is the ExpenseMethod enum", () => {
+    expect(schemas.ExpenseMethod?.enum).toEqual([
+      "highest_of_confirmed_benchmark_observed",
+      "confirmed",
+      "benchmark",
+      "observed",
+      "higher_of_confirmed_benchmark",
+    ]);
+    expect(schemas.PolicyInput?.properties?.expense_method?.$ref).toBe(
+      "#/components/schemas/ExpenseMethod",
+    );
+  });
+
+  it("Affordability can say what would resolve unverified expenses, and the trace names the method", () => {
+    expect(schemas.Affordability?.properties?.resolve_with?.type).toBe("array");
+    expect(schemas.AffordabilityTrace?.properties?.expense_method?.$ref).toBe(
+      "#/components/schemas/ExpenseMethod",
+    );
+  });
+
+  it("is a minor version bump to 1.4.0", () => {
+    expect(doc.info.version).toBe("1.4.0");
   });
 });
