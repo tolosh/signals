@@ -22,6 +22,9 @@ project SIG. Every change traces to a ticket.
 Before work:
 - Work only on the ticket you were given. Read it in full first (sections 1 to 6),
   its parent workstream, and the hypothesis it names on the hypothesis page.
+- Before planning a ticket, and before reporting anything as "waiting on Colin":
+  re-read the Decision Record ratification table and every comment on the ticket,
+  and on any ticket it depends on. Rulings land as dated comments.
 - Never edit a ticket's sections 1 to 6: hypothesis, expected outcome, targets,
   method or tests. If they are wrong or untestable, stop and comment on the ticket
   explaining why.
@@ -57,6 +60,8 @@ At close (every ticket, no exceptions):
    contract or decision page says, update that page as a new version and link it
    in section 8.
 5. Do not move the ticket to Done. A person reviews sections 7 and 8 and closes it.
+- Re-read a shared page immediately before saving; change only what you came to
+  change; Results log entries are new rows only (Decision Record D4).
 - Design decisions worth keeping go in docs/adr/ and are linked from the ticket.
   Docs in this repo point to Confluence; they never fork it.
 - When sweeping Jira, fetch tickets key by key; JQL under-reports on this instance.
