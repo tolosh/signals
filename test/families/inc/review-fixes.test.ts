@@ -1,5 +1,7 @@
 // SIG-41 fixes after the independent review at b3bd9a5 (7 November 2026). Ruling 1's intent: a
-// missed pay counts once, and a real trough is never hidden.
+// missed pay counts once, and a real trough is never hidden. Fixes 1 and 2 (the add-back) were
+// superseded on 8 November 2026 with ruling 1 itself: INC-09 judges actual income only, and both
+// signals fire (inc09-inc12.test.ts). The assertions below now state the replacement.
 //   Fix 1: the add-back for a missed pay is no more than the stream's level that month: the lower
 //          of its median and the median of its pays received that month (the median if none).
 //   Fix 2: missed pays for the add-back are found over INC-09's 12 months, not INC-12's 6.
@@ -43,18 +45,18 @@ describe("Fix 1: a missed pay in a month of genuinely lower pay doesn't hide the
 });
 
 describe("Fix 2: missed pays for the add-back are found over INC-09's 12 months", () => {
-  it("a missed pay 8 months ago: INC-12 green (outside its 6 months) and INC-09 green", () => {
+  it("a missed pay 8 months ago: INC-12 green (outside its 6 months), INC-09 amber on actual income", () => {
     // Pay 17 is 238 days before the most recent pay: 5 March 2026.
     expect(isoOf(dayOf("2026-10-29") - 14 * 17)).toBe("2026-03-05");
     const r = run({ pays: [{ ...STEADY, skip: [17] }] });
     expect(stateOf(r, "INC-12")).toBe("green");
-    expect(stateOf(r, "INC-09")).toBe("green");
+    expect(stateOf(r, "INC-09")).toBe("amber");
   });
 });
 
 describe("Fix 3: the engine version", () => {
-  it("is 1.1.0, because the rulings and fixes change its outputs", () => {
-    expect(INC_VERSION).toBe("1.1.0");
+  it("is 1.2.0 since the 8 November ruling (1.1.0 carried the superseded add-back)", () => {
+    expect(INC_VERSION).toBe("1.2.0");
   });
 });
 
@@ -78,6 +80,20 @@ describe("Fix 5: the contract's income_signals reaches the engine", () => {
       policy_loan_amount: null,
     });
     expect(INC_DEFAULTS.large_loan_amount).toBe(500_000);
+  });
+
+  it("a policy's wage-sized loan changes INC-03 through the mapping", async () => {
+    const { incConfigFromPolicy } = await import("../../../src/engines/families/inc/index.js");
+    const benefits = {
+      pays: [{ description: "SERVICES AUSTRALIA", cadence: "fortnightly" as const, amount: 900 }],
+    };
+    expect(stateOf(run(benefits, { loan_amount: 15_000 }), "INC-03")).not.toBe("red");
+    const r = run(
+      benefits,
+      { loan_amount: 15_000 },
+      incConfigFromPolicy({ wage_sized_loan_amount: 10_000 }),
+    );
+    expect(stateOf(r, "INC-03")).toBe("red");
   });
 
   it("a policy's large-loan size changes INC-07 through the mapping", async () => {

@@ -1,11 +1,28 @@
 # ADR 0004: Family 1 INC, income integrity and continuity
 
-Status: ruled (Colin, 7 November 2026, on SIG-41). The rulings are below; where one changes an
-interpretation, the ruling wins, and the interpretation is kept as it was recorded.
+Status: ruled (Colin, 7 November 2026, on SIG-41; ruling 1 replaced 8 November 2026). The rulings
+are below; where one changes an interpretation, the ruling wins, and the interpretation is kept as
+it was recorded.
+
+## Ruling, 8 November 2026 (replaces ruling 1)
+
+**INC-09 and INC-12 both fire, cross-referenced** (Colin, on the SIG-41 re-review at `7a25f34`).
+INC-09 judges the income actually received in each of the last 12 months against the 12-month
+average of actual income, exactly as Amendment 2 §4.1 defines it. There is no add-back. When a
+trough month holds a pay INC-12 reports as missed (over INC-12's 6 months), INC-09's reason says
+"Includes a missed pay on <date>; see INC-12", and INC-12's reason names the month ("<YYYY-MM> is
+a trough month in INC-09"). Neither signal changes its state because of the other. Counting the
+event once is a roll-up question for phase 2 (D13). INC engine 1.2.0.
+
+- **Why:** the add-back could hide a real dip (both reviews found cases), and its 12-month search
+  counted pays that INC-12, which reports 6 months, never shows.
+- **How "links that month" is done:** the signal's `evidence` block holds counts and a period, not
+  links, so INC-12 names the month in its reason. Its evidence period already spans the month,
+  because it covers INC-12's 6 months.
 
 ## Rulings, 7 November 2026
 
-1. **INC-09 and INC-12 (changes N-10).** A missed pay counts once, in INC-12. A trough month that
+1. **Superseded 8 November 2026 (above).** _As recorded:_ **INC-09 and INC-12 (changes N-10).** A missed pay counts once, in INC-12. A trough month that
    pays INC-12 has flagged as missed fully explain isn't a trough in INC-09. The engine adds each
    flagged pay back, at its stream's median, before judging the month. One missed fortnightly pay
    gives INC-12 amber and INC-09 green.
@@ -62,7 +79,7 @@ specifications don't give.
 | N-7  | **INC-03:** variable means overtime or bonus, commission, gig and rental. Shares use observed (unshaded) amounts; the shading appears in the income table. Red when benefits are the only income and the loan is at least the workspace's "wage-sized" amount (candidate: **$20,000**).                                                                                                                                                                                                                                                                                                                                                                                                         |
 | N-8  | **INC-06:** the band is the workspace's net monthly pay range per occupation, with none by default. Outside the band is amber. Red when an occupation is stated and there is no salary-like payer. With no occupation, or no band for it, the signal is `unverified` (N-13).                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | N-9  | **INC-07:** a single payer means one stream. A single income needs a new application field, `household_earners` (1), because the specifications name no field for it. A large loan is candidate **$500,000**. Without `household_earners` the signal stays green and says so.                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| N-10 | **INC-09:** income in each of the 12 months ending on the as-of date. A trough month is below 60% of the average month. Red when a trough month's income is below the proposed monthly repayment. The "no buffer" part (savings) isn't assessed here; it needs LIQ or RES. **Finding:** a single missed fortnightly pay also makes a trough month, so INC-09 overlaps INC-12. Telling seasonality apart from interruption ("same month a year earlier") needs 24 months of history.                                                                                                                                                                                                             |
+| N-10 | **Superseded 8 November 2026** (see the ruling above): INC-09 now judges actual income only, and the overlap with INC-12 is shown by cross-reference. _As recorded:_ **INC-09:** income in each of the 12 months ending on the as-of date. A trough month is below 60% of the average month. Red when a trough month's income is below the proposed monthly repayment. The "no buffer" part (savings) isn't assessed here; it needs LIQ or RES. **Finding:** a single missed fortnightly pay also makes a trough month, so INC-09 overlaps INC-12. Telling seasonality apart from interruption ("same month a year earlier") needs 24 months of history.                                        |
 | N-11 | **INC-10:** declining means the last 3 months' gig income is more than 10% below the 3 months before. The fixture-list limit can't be recorded in the `reliability` block, which has no field for it, so the signal's confidence is `medium` and its reason states the limit.                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | N-12 | **INC-02:** the gap is relative to the stated gross salary, comparing salary-like streams grossed up. The gross-up is SIG-46's, passed in as a function. SIG-46 is on hold until set v2 (SIG-54), so production passes none and INC-02 is `unverified` ("needs gross-up", D24). The thresholds are tested with a stand-in gross-up of net × 1.3. No stated salary also gives `unverified`.                                                                                                                                                                                                                                                                                                      |
 | N-14 | **INC-12:** a gap over 1.5 cycles counts round(gap ÷ cycle) − 1 missed pays, and a pay more than half a cycle overdue counts as missed. Gig streams are excluded, because they have no regular cadence. The window is the last 6 months. Red when 2 or more pays are missed, or one is missed in the last 60 days. **INC-13:** a change is either (a) a salary-like stream whose cadence band in the last 90 days differs from before, with 3 or more credits each side, or (b) a salary-like payer first paid in the last 90 days, with at least 30 days of history before it. Red when monthly-equivalent pay after the change is more than 10% below pay before it (the INC-11 amber level). |
