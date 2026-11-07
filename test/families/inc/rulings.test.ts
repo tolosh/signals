@@ -5,11 +5,13 @@ import { STEADY, run, signal, stateOf } from "./script.js";
 import { INC_CANDIDATES, INC_DEFAULTS } from "../../../src/engines/families/inc/index.js";
 import { loadContract, schemaValidator } from "../../contract/helpers.js";
 
-describe("Ruling 1: a missed pay counts once, in INC-12", () => {
-  it("one missed fortnightly pay gives INC-12 amber and leaves INC-09 green", () => {
+// Ruling 1 was superseded on 8 November 2026: INC-09 and INC-12 both fire, cross-referenced
+// (test/families/inc/inc09-inc12.test.ts). This test now asserts the replacement.
+describe("Ruling 1 (superseded 8 November): both signals fire on a missed pay", () => {
+  it("one missed fortnightly pay gives INC-12 amber and INC-09 amber", () => {
     const r = run({ pays: [{ ...STEADY, skip: [8] }] });
     expect(stateOf(r, "INC-12")).toBe("amber");
-    expect(stateOf(r, "INC-09")).toBe("green");
+    expect(stateOf(r, "INC-09")).toBe("amber");
   });
   it("a trough not explained by a flagged missed pay still counts in INC-09", () => {
     const winter = (day: number) => {
