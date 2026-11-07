@@ -1,0 +1,69 @@
+{
+  "run_id": "2026-11-07-sig15-rulings",
+  "created_at": "2026-11-07T00:38:57Z",
+  "ticket": "SIG-15",
+  "rulings": [
+    "I-4 (D25): states on the rounded value",
+    "I-5 (D24): LTI and DTI badges follow net"
+  ],
+  "engine": {
+    "commit": "9a16a8a2ecd789416d2a72f790c461f4e8327f46",
+    "thresholds_version": 1
+  },
+  "af_t1": {
+    "affordability_sha256": "fe91e7d85158cc22d30253fc58e1ec9ef5ac754d8498d70fdfaff37371e8fc51",
+    "states": {
+      "dsr": "red",
+      "ndi": "green",
+      "ara": null,
+      "lvr": "amber",
+      "benchmark_gle": "green",
+      "lti": "amber",
+      "dti": "amber"
+    }
+  },
+  "boundary_sweep": {
+    "ratio": "lti (net), amber from 3.5",
+    "loans": {
+      "from": 600000,
+      "to": 680000,
+      "step": 1
+    },
+    "cases": 80001,
+    "state_changed_by_i4": 909,
+    "examples": [
+      {
+        "loan": 635727,
+        "net_unrounded": 3.495003,
+        "net_shown": 3.5,
+        "state": "amber"
+      },
+      {
+        "loan": 635728,
+        "net_unrounded": 3.495008,
+        "net_shown": 3.5,
+        "state": "amber"
+      },
+      {
+        "loan": 635729,
+        "net_unrounded": 3.495014,
+        "net_shown": 3.5,
+        "state": "amber"
+      }
+    ]
+  },
+  "without_gross": [
+    {
+      "key": "lti",
+      "label": "LTI",
+      "net": 5.28,
+      "state": "amber"
+    },
+    {
+      "key": "dti",
+      "label": "DTI",
+      "net": 5.54,
+      "state": "amber"
+    }
+  ]
+}
