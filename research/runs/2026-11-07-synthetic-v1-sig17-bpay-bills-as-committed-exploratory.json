@@ -1,0 +1,29 @@
+{
+  "run_id": "2026-11-07-synthetic-v1-sig17-bpay-bills-as-committed-exploratory",
+  "created_at": "2026-11-07T19:40:55Z",
+  "ticket": "SIG-17",
+  "status": "exploratory, not pre-registered; reproduces a figure, not a result (SIG-56)",
+  "command": "npx tsx scripts/sig17-bpay-exploratory.ts",
+  "arguments": {},
+  "engine_commit": "c450196595e41897e5aad894298190332dcd82f0",
+  "tree": "clean",
+  "dataset": {
+    "set": "synthetic-v1",
+    "seed": 42,
+    "set_sha256": "8f5cf973ec46b33bbeccd97e87dcde10edea22919ed9af9bc9469149b2e17ea9"
+  },
+  "method": {
+    "lookback_months": 6,
+    "one_off_threshold_aud": 5000,
+    "tolerance": 0.15,
+    "bill_category": "utilities",
+    "population": "fully covered (no unshared account), 3 months of history or more",
+    "change_from_primary": "debits categorised 'transfer' whose narrative starts 'BPAY ' and is not a credit-card payment are counted as committed bills"
+  },
+  "result": {
+    "applicants": 360,
+    "within_15_pct": 349,
+    "share": 0.9694,
+    "recategorised_debits": 1039
+  }
+}

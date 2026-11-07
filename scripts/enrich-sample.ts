@@ -3,21 +3,30 @@
 // directly, with no dictionary, overrides or LLM cache loaded, so it measures the rules, MCC,
 // exclusion, income and high-risk tiers only.
 // Usage: npx tsx scripts/enrich-sample.ts --engine <path to moroku-enrich/packages/engine/dist/index.js>
-//        [--seed 42] [--out research/runs/<file>.json]
+//        [--seed <default: the manifest's>] [--out research/runs] [--allow-dirty]
+// SIG-56: the seed comes from the manifest unless given; the record stores its command and
+// commit, the tree must be clean, and an existing record is never overwritten.
 import { createHash } from "node:crypto";
-import { writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { stream } from "../src/research/generator/rng.js";
 import { generateApplicant, population } from "../src/research/generator/index.js";
+import {
+  gitState,
+  manifestSeed,
+  parseRunArgs,
+  provenance,
+  requireCleanTree,
+  writeNew,
+} from "./lib/run-record.js";
 
-const arg = (name: string, fallback?: string) => {
-  const i = process.argv.indexOf(`--${name}`);
-  return i > 0 ? process.argv[i + 1] : fallback;
-};
-const enginePath = arg("engine");
+const args = parseRunArgs();
+const git = gitState();
+requireCleanTree(git.status, args.allowDirty);
+const enginePath = args.values.engine;
 if (!enginePath) throw new Error("--engine is required");
-const seed = Number(arg("seed", "42"));
-const out = arg("out", "research/runs/sig12-t3-enrich-sample.json") ?? "";
+const seed = Number(args.values.seed ?? manifestSeed().seed);
+const out = join(args.out, `${new Date().toISOString().slice(0, 10)}-sig12-t3-enrich-sample.json`);
 
 type Result = { source: string; category: string; confidence: number };
 type Engine = {
@@ -65,6 +74,7 @@ const deterministicShare = (rows.length - fallback) / rows.length;
 const record = {
   ticket: "SIG-12",
   test: "T3",
+  ...provenance("scripts/enrich-sample.ts", args, git),
   seed,
   sample_size: rows.length,
   population_transactions: all.length,
@@ -77,5 +87,5 @@ const record = {
   fallbacks: rows.filter((r) => r.source === "fallback"),
   rows,
 };
-writeFileSync(out, `${JSON.stringify(record, null, 2)}\n`);
+writeNew(out, `${JSON.stringify(record, null, 2)}\n`);
 console.log(JSON.stringify({ out, by_source: bySource, deterministic_share: deterministicShare }));

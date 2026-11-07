@@ -2,20 +2,28 @@
 // store the categories keyed by transaction id, so the expense tests run in CI without Enrich.
 // No dictionary, overrides or LLM cache are loaded, as in SIG-12 T3. Synthetic data only.
 // Usage: npx tsx scripts/enrich-categorise-set.ts --engine <moroku-enrich/packages/engine/dist/index.js>
+//        [--out research/enrich] [--allow-dirty]
+// SIG-56: the cache stores its command and commit, the tree must be clean, and the committed
+// cache is never overwritten (a re-run goes to another folder with --out).
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { generateApplicant, population, serialise } from "../src/research/generator/index.js";
+import {
+  gitState,
+  manifestSeed,
+  parseRunArgs,
+  provenance,
+  requireCleanTree,
+  writeNew,
+} from "./lib/run-record.js";
 
-const arg = (name: string) => {
-  const i = process.argv.indexOf(`--${name}`);
-  return i > 0 ? process.argv[i + 1] : undefined;
-};
-const enginePath = arg("engine");
+const args = parseRunArgs(process.argv.slice(2), "research/enrich");
+const git = gitState();
+requireCleanTree(git.status, args.allowDirty);
+const enginePath = args.values.engine;
 if (!enginePath) throw new Error("--engine is required");
-const manifest = JSON.parse(
-  readFileSync("research/datasets/synthetic-v1.manifest.json", "utf8"),
-) as { set: string; seed: number; set_sha256: string };
+const manifest = manifestSeed();
 
 type Result = { source: string; category: string; confidence: number };
 type EnrichEngine = {
@@ -56,9 +64,9 @@ const setSha = hash.digest("hex");
 if (setSha !== manifest.set_sha256)
   throw new Error(`set hash ${setSha} does not match the manifest`);
 
-mkdirSync("research/enrich", { recursive: true });
 const out = {
   set: manifest.set,
+  ...provenance("scripts/enrich-categorise-set.ts", args, git),
   set_sha256: setSha,
   enrich: { engine_version: engine.ENGINE_VERSION, taxonomy_version: engine.TAXONOMY_VERSION },
   lookups_loaded: "none (no dictionary, overrides or LLM cache)",
@@ -66,5 +74,5 @@ const out = {
   by_source: bySource,
   categories,
 };
-writeFileSync(`research/enrich/${manifest.set}-categories.json`, `${JSON.stringify(out)}\n`);
+writeNew(join(args.out, `${manifest.set}-categories.json`), `${JSON.stringify(out)}\n`);
 console.log(JSON.stringify({ debits: out.debits, enrich: out.enrich, by_source: bySource }));
