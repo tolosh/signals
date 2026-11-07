@@ -1,5 +1,6 @@
 // SIG-48 T6 on the mock, and the request fixtures SIG-49 builds against. Runs against the local
 // server, or the hosted mock with MOCK_BASE_URL (each test starts from POST /mock-reset/requests).
+import "./scenario.js";
 import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { Ajv2020 } from "ajv/dist/2020.js";

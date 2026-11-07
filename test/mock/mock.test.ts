@@ -1,4 +1,5 @@
 // SIG-11 section 6 tests, run against the real HTTP server on an ephemeral port.
+import "./scenario.js";
 import { readFileSync } from "node:fs";
 import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
@@ -207,6 +208,15 @@ describe("every operation in the contract is served and validates", () => {
     },
     "post /v1/app/benchmarks": readFileSync("test/fixtures/benchmark-valid.csv", "utf8"),
     "post /v1/portal/{token}/requests/{requestId}/explain": { reason_code: "on_leave" },
+    // SIG-51: the portal keeps the applicant's financial position, so the PUT is validated.
+    "put /v1/portal/{token}/financial-position": {
+      household_earners: 2,
+      assets: [{ type: "property", provider: null, amount: 1200000, source: "applicant" }],
+      liabilities: [],
+      repayments: [],
+      income: [],
+      expenses: [],
+    },
   };
   it.each(ops)("%s %s", async (method, template) => {
     // Each request transition starts from the seeded open request (mock-only reset).

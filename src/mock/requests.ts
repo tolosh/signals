@@ -2,33 +2,86 @@
 // module. apl_02 (salary account not shared, so EQ-01 fails on asm_unverified) starts with one
 // open request, and portal token tok_01 acts for apl_02. POST /mock-reset/requests (not a contract
 // path) restores that starting state, so tests and demos can run again on the hosted mock.
+// SIG-51: the requests are a state slice ("request"), kept in the mock's table between containers.
 import {
   EvidenceRequests,
+  explanationReview,
   InvalidInput,
   InvalidTransition,
   NotFound,
+  SensitiveNote,
+  type EvidenceRequest,
   type EvidenceRequestView,
   type ReasonCode,
 } from "../requests/lifecycle.js";
+import { registerSlice } from "./state.js";
 
 const WORKSPACE = "wks_01";
 const PORTAL_APPLICANT: Record<string, string> = { tok_01: "apl_02" };
 type Failure = { mockError: { status: number; code: string; message: string } };
 
+/** The seeded request's time, fixed so every container seeds the same request. */
+const SEEDED_AT = "2026-11-07T00:00:00.000Z";
 let svc: EvidenceRequests;
+let n = 0;
+let seeding = false;
 export function resetRequests(
   checksFor: (assessmentId: string) => { id: string; result: string }[],
 ) {
-  let n = 0;
+  n = 0;
   svc = new EvidenceRequests({
-    now: () => new Date().toISOString(),
+    now: () => (seeding ? SEEDED_AT : new Date().toISOString()),
     id: () => `req_${String(++n).padStart(2, "0")}`,
   });
-  svc.onAssessment(WORKSPACE, {
-    applicant_id: "apl_02",
-    assessment_id: "asm_unverified",
-    checks: checksFor("asm_unverified"),
+  seeding = true;
+  try {
+    svc.onAssessment(WORKSPACE, {
+      applicant_id: "apl_02",
+      assessment_id: "asm_unverified",
+      checks: checksFor("asm_unverified"),
+    });
+  } finally {
+    seeding = false;
+  }
+}
+
+type StoredRequest = EvidenceRequestView & { workspace_id: string };
+export function registerRequestSlice(reset: () => void) {
+  registerSlice({
+    type: "request",
+    reset,
+    // The note is revealed for the table only: the mock's data is synthetic (SIG-11).
+    snapshot: () =>
+      Object.fromEntries(
+        svc.all().map((r) => [r.id, { ...svc.toApi(r), workspace_id: r.workspace_id }]),
+      ),
+    restore: (items) => {
+      for (const value of Object.values(items)) {
+        const v = value as StoredRequest;
+        const r: EvidenceRequest = {
+          ...v,
+          response: v.response && {
+            ...v.response,
+            note: v.response.note === null ? null : new SensitiveNote(v.response.note),
+          },
+        };
+        svc.load(r);
+        n = Math.max(n, Number(/^req_(\d+)$/.exec(r.id)?.[1] ?? 0));
+      }
+    },
   });
+}
+
+/**
+ * The assessment's review block (contract 1.6.0; SIG-51 review fixtures): required once the
+ * applicant has explained a request raised from it, with the explanation's reasons.
+ */
+export function reviewFor(assessmentId: string): { required: boolean; reasons: string[] } {
+  const reasons = svc
+    .all()
+    .filter((r) => r.assessment_id === assessmentId && r.response?.kind === "explain")
+    .flatMap((r) => explanationReview(r.response?.reason_code as ReasonCode).reasons);
+  return { required: reasons.length > 0, reasons };
 }
 
 const guard = (f: () => unknown): unknown => {

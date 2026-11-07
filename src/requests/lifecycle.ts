@@ -82,6 +82,16 @@ const LABEL: Record<ReasonCode, string> = {
   other: "another reason",
 };
 
+/** The review an explanation needs (D24): a person reviews it; it changes no figure or state. */
+export function explanationReview(reason: ReasonCode): { required: true; reasons: string[] } {
+  return {
+    required: true,
+    reasons: [
+      `The applicant explained why their income is missing: ${LABEL[reason]}. A person must review it.`,
+    ],
+  };
+}
+
 export class EvidenceRequests {
   readonly #byId = new Map<string, EvidenceRequest>();
   readonly #now: () => string;
@@ -97,6 +107,16 @@ export class EvidenceRequests {
     const r = this.#byId.get(id);
     if (!r || r.workspace_id !== workspace) throw new NotFound(`No request ${id}`);
     return r;
+  }
+
+  /** Every request, for a store that keeps them between processes (the mock's table, SIG-51). */
+  all(): readonly EvidenceRequest[] {
+    return [...this.#byId.values()];
+  }
+
+  /** Puts back a request exactly as a store kept it. */
+  load(r: EvidenceRequest): void {
+    this.#byId.set(r.id, r);
   }
 
   list(workspace: string, applicantId: string): EvidenceRequest[] {
@@ -164,15 +184,7 @@ export class EvidenceRequests {
       at: this.#now(),
     };
     this.#set(r, "explained");
-    return {
-      request: r,
-      review: {
-        required: true,
-        reasons: [
-          `The applicant explained why their income is missing: ${LABEL[input.reason_code]}. A person must review it.`,
-        ],
-      },
-    };
+    return { request: r, review: explanationReview(input.reason_code) };
   }
 
   resend(workspace: string, id: string): EvidenceRequest {

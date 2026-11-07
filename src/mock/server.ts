@@ -1,11 +1,14 @@
 // Mock of openapi.yaml for the Lovable front ends (SIG-11). Routes come from the contract and
 // responses from fixtures.ts. Writes return a fixture and change nothing, except auto top-up and
 // the workspace logo, which the mock remembers (contract 1.2.0). Uploads go to uploads.ts.
+// SIG-51: createMockServer runs every request through persist.ts with an in-memory table, one
+// request at a time, exactly as the hosted mock does with DynamoDB.
 import { readFileSync } from "node:fs";
 import { createServer, type Server } from "node:http";
 import { pathToFileURL } from "node:url";
 import { parse } from "yaml";
 import { fixtures, IDS, resetRequestState, variants, type MockError } from "./fixtures.js";
+import { createPersistentHandler, MemoryStore } from "./persist.js";
 import { acceptUpload, LOGO_PREFIX, servedLogo, UPLOAD_PREFIX } from "./uploads.js";
 
 const METHODS = ["get", "post", "put", "patch", "delete"];
@@ -56,7 +59,8 @@ function loadRoutes(): Route[] {
 
 const CORS = {
   "access-control-allow-origin": "*",
-  "access-control-allow-headers": "authorization,content-type,idempotency-key,prefer",
+  "access-control-allow-headers":
+    "authorization,content-type,idempotency-key,prefer,x-mock-scenario",
   "access-control-allow-methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
 };
 const JSON_TYPE = { "content-type": "application/json" };
@@ -166,25 +170,38 @@ export function createMockHandler(): MockHandler {
 }
 
 export function createMockServer(): Server {
-  const handle = createMockHandler();
+  const handle = createPersistentHandler(new MemoryStore());
+  // The mock's modules hold one scenario's state at a time, so requests are served in turn.
+  let queue: Promise<unknown> = Promise.resolve();
   return createServer((req, res) => {
     const chunks: Buffer[] = [];
     req.on("data", (chunk: Buffer) => chunks.push(chunk));
     req.on("end", () => {
       const url = new URL(req.url ?? "/", "http://mock");
-      const out = handle(
-        req.method ?? "GET",
-        url.pathname,
-        String(req.headers.prefer ?? ""),
-        url.search.slice(1),
-        {
-          body: Buffer.concat(chunks),
-          ...(req.headers["content-type"] ? { contentType: req.headers["content-type"] } : {}),
-          origin: `http://${req.headers.host ?? "127.0.0.1"}`,
-        },
-      );
-      res.writeHead(out.status, out.headers);
-      res.end(out.base64 ? Buffer.from(out.body, "base64") : out.body);
+      const scenario = req.headers["x-mock-scenario"];
+      const run = () =>
+        handle({
+          method: req.method ?? "GET",
+          path: url.pathname,
+          scenario: typeof scenario === "string" ? scenario : "default",
+          prefer: String(req.headers.prefer ?? ""),
+          query: url.search.slice(1),
+          request: {
+            body: Buffer.concat(chunks),
+            ...(req.headers["content-type"] ? { contentType: req.headers["content-type"] } : {}),
+            origin: `http://${req.headers.host ?? "127.0.0.1"}`,
+          },
+        }).then(
+          (out) => {
+            res.writeHead(out.status, out.headers);
+            res.end(out.base64 ? Buffer.from(out.body, "base64") : out.body);
+          },
+          () => {
+            res.writeHead(500, { "content-type": "application/json" });
+            res.end(JSON.stringify({ error: { code: "mock_error", message: "Mock failure" } }));
+          },
+        );
+      queue = queue.then(run, run);
     });
   });
 }

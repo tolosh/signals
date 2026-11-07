@@ -18,11 +18,15 @@ import {
   portalExplain,
   portalRequests,
   requestStatusVariants,
+  registerRequestSlice,
   resendRequest,
   resetRequests,
+  reviewFor,
 } from "./requests.js";
+import { registerSlice } from "./state.js";
 import { issueUpload, isUploaded, LOGO_MAX_BYTES, LOGO_PREFIX, LOGO_TYPES } from "./uploads.js";
 import { incomeAssessment } from "./inc.js";
+import { markInputsSeeded } from "./m3.js";
 
 type Json = Record<string, unknown>;
 type SignalFixture = Json & { evidence_quality: Json };
@@ -224,12 +228,34 @@ export const assessments: Record<string, Json> = {
 };
 // asm_01_v2: version 2 of apl_01's assessment, for the version picker (contract 1.5.0).
 seedVersions(assessments);
+markInputsSeeded();
 // SIG-48: apl_02's assessment fails EQ-01, so it starts with an open income_not_found request.
 export const resetRequestState = () =>
   resetRequests(
     (id) => (assessments[id]?.evidence_checks ?? []) as { id: string; result: string }[],
   );
 resetRequestState();
+registerRequestSlice(resetRequestState);
+
+// SIG-51: assessment versions created by overrides are a state slice; the seeded ones aren't stored.
+const SEEDED_ASSESSMENTS = new Set(Object.keys(assessments));
+registerSlice({
+  type: "assessment",
+  reset: () => {
+    for (const id of Object.keys(assessments))
+      if (!SEEDED_ASSESSMENTS.has(id)) Reflect.deleteProperty(assessments, id);
+  },
+  snapshot: () =>
+    Object.fromEntries(Object.entries(assessments).filter(([id]) => !SEEDED_ASSESSMENTS.has(id))),
+  restore: (items) => {
+    for (const [id, a] of Object.entries(items)) assessments[id] = a as Json;
+  },
+});
+/**
+ * The assessments that carry the review block (contract 1.6.0; SIG-51 added scope): asm_unverified
+ * is required once req_01 has been explained, and asm_evidence is the counterpart, never required.
+ */
+const REVIEWED = new Set(["asm_unverified", "asm_evidence"]);
 
 const evidenceRows = (count: number, prefix: string): Json[] =>
   Array.from({ length: count }, (_, i) => ({
@@ -357,6 +383,72 @@ const financialPosition = {
   income: [{ type: "salary", provider: "Synthetic Employer", amount: 15158, source: "bank" }],
   expenses: [{ type: "living", provider: null, amount: 3367, source: "bank" }],
 };
+// SIG-50 and SIG-51: the portal remembers each token's step and its saved financial position.
+// connect moves welcome to progress; saving the finances moves to done; withdraw is final.
+const portalSteps = new Map<string, string>();
+const positions = new Map<string, Json>();
+const stepOf = (token: string) => portalSteps.get(token) ?? portalSession.step;
+const sessionOf = (token: string) => ({ ...portalSession, step: stepOf(token) });
+const withdrawn = (token: string): MockError | null =>
+  stepOf(token) === "withdrawn"
+    ? {
+        mockError: {
+          status: 409,
+          code: "grant_revoked",
+          message: "Consent was withdrawn; ask the lender for a new link",
+        },
+      }
+    : null;
+const POSITION_LISTS = ["assets", "liabilities", "repayments", "income", "expenses"] as const;
+function putFinancialPosition({ token = "" }: Params, _: URLSearchParams, req: MockRequest) {
+  if (!IDS.has(token)) return undefined;
+  const blocked = withdrawn(token);
+  if (blocked) return blocked;
+  const body = record(req.body);
+  const lists = POSITION_LISTS.every(
+    (k) => Array.isArray(body[k]) && (body[k] as unknown[]).every((r) => record(r) === r),
+  );
+  const earners = body.household_earners;
+  const earnersOk =
+    earners === undefined ||
+    earners === null ||
+    (Number.isInteger(earners) && Number(earners) >= 1);
+  if (!lists || !earnersOk)
+    return invalid(
+      "invalid_parameter",
+      "A financial position needs assets, liabilities, repayments, income and expenses as lists, and household_earners of at least 1 or null",
+    );
+  const kept: Json = {};
+  if ("household_earners" in body) kept.household_earners = earners;
+  for (const k of POSITION_LISTS) kept[k] = body[k];
+  positions.set(token, kept);
+  portalSteps.set(token, "done");
+  return kept;
+}
+function portalConnectFlow({ token = "" }: Params) {
+  if (!IDS.has(token)) return undefined;
+  const blocked = withdrawn(token);
+  if (blocked) return blocked;
+  if (stepOf(token) === "welcome") portalSteps.set(token, "progress");
+  return url("https://openfeed.example/authorize");
+}
+registerSlice({
+  type: "portal_session",
+  reset: () => portalSteps.clear(),
+  snapshot: () => Object.fromEntries([...portalSteps].map(([t, step]) => [t, { step }])),
+  restore: (items) => {
+    for (const [t, v] of Object.entries(items)) portalSteps.set(t, (v as { step: string }).step);
+  },
+});
+registerSlice({
+  type: "financial_position",
+  reset: () => positions.clear(),
+  snapshot: () => Object.fromEntries(positions),
+  restore: (items) => {
+    for (const [t, v] of Object.entries(items)) positions.set(t, v as Json);
+  },
+});
+
 const adminWorkspace = (wks: Json): Json => ({
   ...wks,
   member_count: 3,
@@ -398,12 +490,24 @@ const invalid = (code: string, message: string): MockError => ({
 });
 
 // The two settings the mock remembers (contract 1.2.0): auto top-up, and the workspace logo.
-// They live as long as the process: a warm Lambda container or the local server.
+// SIG-51: a state slice, kept in the mock's table between Lambda containers.
 const PACK_IDS = new Set(["pack_launch", "pack_100"]);
-const saved = {
+const defaultSettings = () => ({
   autoTopup: { enabled: false, pack_id: null as string | null, updated_at: null as string | null },
   logoUrl: null as string | null,
-};
+});
+let saved = defaultSettings();
+registerSlice({
+  type: "setting",
+  reset: () => {
+    saved = defaultSettings();
+  },
+  snapshot: () => ({ auto_topup: saved.autoTopup, logo_url: saved.logoUrl }),
+  restore: (items) => {
+    if ("auto_topup" in items) saved.autoTopup = items.auto_topup as typeof saved.autoTopup;
+    if ("logo_url" in items) saved.logoUrl = items.logo_url as string | null;
+  },
+});
 const record = (body: unknown): Record<string, unknown> =>
   body && typeof body === "object" && !Array.isArray(body) ? (body as Record<string, unknown>) : {};
 
@@ -483,6 +587,27 @@ function listApplicants(_params: Params, query: URLSearchParams): unknown {
     ),
   );
 }
+
+// SIG-51: which assessment each applicant points to changes when an override creates a version.
+const SEEDED_LATEST = new Map(applicants.map((a) => [a.id as string, a.latest_assessment_id]));
+registerSlice({
+  type: "applicant",
+  reset: () => {
+    for (const a of applicants) a.latest_assessment_id = SEEDED_LATEST.get(a.id as string);
+  },
+  snapshot: () =>
+    Object.fromEntries(
+      applicants
+        .filter((a) => a.latest_assessment_id !== SEEDED_LATEST.get(a.id as string))
+        .map((a) => [a.id, { latest_assessment_id: a.latest_assessment_id }]),
+    ),
+  restore: (items) => {
+    for (const a of applicants) {
+      const v = items[a.id as string] as { latest_assessment_id: string } | undefined;
+      if (v) a.latest_assessment_id = v.latest_assessment_id;
+    }
+  },
+});
 
 export const IDS = new Set([
   "mem_01",
@@ -589,7 +714,10 @@ export const fixtures: Record<string, Fixture> = {
       },
     ]),
   ),
-  "get /v1/app/assessments/{id}": ({ id = "" }: Params) => assessments[id],
+  "get /v1/app/assessments/{id}": ({ id = "" }: Params) => {
+    const a = assessments[id];
+    return a && REVIEWED.has(id) ? { ...a, review: reviewFor(id) } : a;
+  },
   "get /v1/app/assessments/{id}/signals/{signalId}/evidence": ({ id, signalId }: Params) => {
     const items = evidence[`${id}/${signalId}`];
     return items && { items };
@@ -681,12 +809,18 @@ export const fixtures: Record<string, Fixture> = {
   "get /v1/app/audit": page([audit]),
   "post /v1/app/watches": watch,
   "delete /v1/app/watches/{id}": { ...watch, status: "stopped", stop_reason: "officer" },
-  "get /v1/portal/{token}": portalSession,
-  "post /v1/portal/{token}/connect": url("https://openfeed.example/authorize"),
+  "get /v1/portal/{token}": ({ token = "" }: Params) =>
+    IDS.has(token) ? sessionOf(token) : undefined,
+  "post /v1/portal/{token}/connect": portalConnectFlow,
   "get /v1/openfeed/callback": { redirect: "/connect/tok_01/progress" },
-  "get /v1/portal/{token}/financial-position": financialPosition,
-  "put /v1/portal/{token}/financial-position": financialPosition,
-  "post /v1/portal/{token}/withdraw": { ...portalSession, step: "withdrawn" },
+  "get /v1/portal/{token}/financial-position": ({ token = "" }: Params) =>
+    IDS.has(token) ? (positions.get(token) ?? financialPosition) : undefined,
+  "put /v1/portal/{token}/financial-position": putFinancialPosition,
+  "post /v1/portal/{token}/withdraw": ({ token = "" }: Params) => {
+    if (!IDS.has(token)) return undefined;
+    portalSteps.set(token, "withdrawn");
+    return sessionOf(token);
+  },
   "get /v1/portal/{token}/watch": portalWatch,
   "post /v1/portal/{token}/watch": portalWatch,
   "post /v1/portal/{token}/watch/stop": {
