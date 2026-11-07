@@ -190,8 +190,18 @@ export function scoreSet(
   };
 }
 
-/** The pre-registered miss causes, FN1 to FN6, in order of precedence. */
-function missCause(
+/** True when the normalised text holds the provider's name as whole words. */
+const names = (text: string, provider: string) =>
+  provider !== "" && ` ${text} `.includes(` ${provider} `);
+
+/**
+ * The pre-registered miss causes, FN1 to FN6, in order of precedence. A debit is "to the provider"
+ * when its narrative (or card biller) names the provider among other words, not only when the
+ * whole narrative is the name (SIG-18 review, follow-up 4). Two tags fall outside the
+ * pre-registered list and say so: a miss the detector found under a noisier provider name, and a
+ * miss nothing explains. FN6 is only for a detection read as disclosed.
+ */
+export function missCause(
   feed: LiabilityFeed,
   categories: Readonly<Record<string, string>>,
   config: Config,
@@ -215,11 +225,11 @@ function missCause(
       const day = dayOf(t.postingDateTime ?? t.valueDateTime ?? "");
       if (!(amount < 0) || day > end || BSB_NUMBER.test(t.description)) continue;
       const card = /^(.*?)CREDIT CARD/i.exec(t.billerName ?? "");
-      const names = [
+      const texts = [
         normaliseProvider(t.description),
         card ? normaliseProvider(card[1] ?? "") : "",
       ];
-      if (!names.includes(provider)) continue;
+      if (!texts.some((text) => names(text, provider))) continue;
       const lender =
         CREDIT[categories[t.transactionId] ?? ""] === family ||
         (family === "credit_card" && !!card);
@@ -237,5 +247,9 @@ function missCause(
   if (near.length < config.min_occurrences) return "FN4 amount varies";
   const gap = median(near.slice(1).map((o, i) => o.day - (near[i] as { day: number }).day));
   if (!CADENCES.some(([lo, hi]) => gap >= lo && gap <= hi)) return "FN5 cadence";
-  return "FN6 matched as disclosed";
+  if (
+    found.some((d) => d.family === family && d.provider !== provider && names(d.provider, provider))
+  )
+    return "unregistered: detected under another provider name";
+  return "unregistered: not explained";
 }
