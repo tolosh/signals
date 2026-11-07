@@ -79,7 +79,7 @@ describe("evidence-request contract", () => {
     expect(text).not.toMatch(/approv|declin/i);
   });
 
-  it("is a minor version bump to 1.6.0", () => {
-    expect(doc.info.version).toBe("1.6.0");
+  it("is a minor version bump to 1.6.0 (kept by later minor versions)", () => {
+    expect(doc.info.version).toMatch(/^1.([6-9]|d{2,})./);
   });
 });
