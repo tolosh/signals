@@ -1,0 +1,111 @@
+import { writeFileSync } from "node:fs";
+import { engine, reference, schedule, toIso, toDay, monthWindows, type History, type Cad, type Credit } from "./lib.ts";
+
+function mulberry32(a: number) {
+  return () => {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const SEED = 20261108;
+const rnd = mulberry32(SEED);
+const ri = (lo: number, hi: number) => lo + Math.floor(rnd() * (hi - lo + 1));
+const pick = <T,>(xs: readonly T[]) => xs[Math.floor(rnd() * xs.length)]!;
+const cents = (x: number) => Math.round(x * 100) / 100;
+const PAYER = "SALARY ACME CONSULTING PTY LTD";
+const CYC = { weekly: 7, fortnightly: 14, monthly: 30.4375 };
+
+type Gen = { family: string; cad: Cad; base: number; lastOffset: number; skips: string[]; cuts: { month: string; factor: number }[]; repayment: number | null; extra: Credit[]; asOf: string };
+
+function gen(family: "A" | "B" | "C" | "D"): { h: History; g: Gen } {
+  const asOf = toIso(toDay("2025-06-01") + ri(0, 578));
+  const cad = pick(["weekly", "fortnightly", "monthly"] as const);
+  const base = cents(400 + rnd() * 5600);
+  const lastOffset = ri(0, Math.floor(CYC[cad]) - 1);
+  const days = schedule(asOf, cad, lastOffset);
+  const nSkip = family === "D" ? ri(5, 12) : ri(0, 4);
+  const skipSet = new Set<number>();
+  for (let i = 0; i < nSkip && days.length; i++) skipSet.add(pick(days));
+  const wins = monthWindows(asOf);
+  const cuts: { month: string; factor: number; from: number; to: number }[] = [];
+  const nCut = family === "C" ? 1 : ri(0, 2);
+  for (let i = 0; i < nCut; i++) {
+    const w = pick(wins);
+    cuts.push({ month: toIso(w.to), factor: family === "C" ? 0 : cents(rnd() * 1.2), from: w.from, to: w.to });
+  }
+  const amt = (d: number) => {
+    const c = cuts.find((x) => d >= x.from && d <= x.to);
+    return c ? cents(base * c.factor) : base;
+  };
+  let credits: Credit[] = days.filter((d) => !skipSet.has(d)).map((d) => ({ day: d, amount: amt(d), payer: PAYER })).filter((c) => c.amount > 0);
+  if (family === "C") {
+    // Place one month's total near 60% of the average: solve for the month total T so that
+    // T / ((S + T) / 12) = q, with q in [0.58, 0.62]; spread T over that month's pays.
+    const c = cuts[0]!;
+    const inCut = days.filter((d) => d >= c.from && d <= c.to && !skipSet.has(d));
+    if (inCut.length > 0) {
+      const S = credits.filter((x) => !(x.day >= c.from && x.day <= c.to)).reduce((s, x) => s + x.amount, 0);
+      const q = 0.58 + rnd() * 0.04;
+      const T = (q * S) / (12 - q);
+      const per = cents(T / inCut.length);
+      credits = credits.filter((x) => !(x.day >= c.from && x.day <= c.to)).concat(inCut.map((d) => ({ day: d, amount: per, payer: PAYER })));
+      c.factor = cents(per / base);
+    }
+  }
+  const extra: Credit[] = [];
+  if (family === "B") {
+    // Income actually received outside SIG-16's streams: a one-off bonus and 0-2 irregular side payments.
+    const start = toDay(asOf) - 360;
+    extra.push({ day: start + ri(0, 359), amount: cents(base * (0.5 + rnd() * 2)), payer: "ACME CONSULTING BONUS PAYMENT" });
+    for (let i = 0; i < ri(0, 2); i++) extra.push({ day: start + ri(0, 359), amount: cents(100 + rnd() * 1500), payer: "JONES CONTRACT WORK" });
+  }
+  const repayment = rnd() < 0.5 ? null : cents(rnd() * base * 3);
+  const h: History = { asOf, credits: [...credits, ...extra], repayment, skipped: [...skipSet] };
+  return { h, g: { family, cad, base, lastOffset, skips: [...skipSet].sort((a, b) => a - b).map(toIso), cuts: cuts.map(({ month, factor }) => ({ month: month.slice(0, 7), factor })), repayment, extra, asOf } };
+}
+
+const round2 = (x: number) => Math.round((x + Number.EPSILON * Math.sign(x)) * 100) / 100;
+function classify(h: History, eState: string, streamPayers: string[]) {
+  if (eState === "unverified") return "evidence-layer unverified";
+  const variant = (credits: Credit[], rounding: boolean) => {
+    const ms = monthWindows(h.asOf).map((w) => credits.filter((c) => c.day >= w.from && c.day <= w.to).reduce((s, c) => s + c.amount, 0));
+    const avg = ms.reduce((s, m) => s + m, 0) / 12;
+    const tr = ms.filter((m) => avg > 0 && (rounding ? round2(m / avg) < 0.6 : m < 0.6 * avg));
+    return h.repayment !== null && tr.some((m) => m < h.repayment!) ? "red" : tr.length ? "amber" : "green";
+  };
+  const inStreams = h.credits.filter((c) => streamPayers.includes(c.payer));
+  if (variant(h.credits, true) === eState) return "rounding of ratio to 2 dp";
+  if (variant(inStreams, false) === eState) return "only SIG-16 stream credits counted";
+  if (variant(inStreams, true) === eState) return "stream credits only + rounding";
+  return "unexplained";
+}
+
+const counts: Record<string, { n: number; m: number }> = {};
+const dist: Record<string, Record<string, number>> = {};
+const causes: Record<string, number> = {};
+const mismatches: unknown[] = [];
+const plan: ["A" | "B" | "C" | "D", number][] = [["A", 3000], ["B", 1000], ["C", 1000], ["D", 500]];
+for (const [fam, n] of plan) {
+  counts[fam] = { n: 0, m: 0 };
+  for (let i = 0; i < n; i++) {
+    const { h, g } = gen(fam);
+    const ref = reference(h);
+    const e = engine(h);
+    counts[fam]!.n++;
+    const dk = `${fam} ref=${ref.state}`; dist[dk] ??= {}; dist[dk]![e.inc09.state] = (dist[dk]![e.inc09.state] ?? 0) + 1;
+    if (ref.state !== e.inc09.state) {
+      counts[fam]!.m++;
+      const payers = e.r.income.map((x) => x.payer);
+      const cause = classify(h, e.inc09.state, payers);
+      causes[`${fam}: ${cause}`] = (causes[`${fam}: ${cause}`] ?? 0) + 1;
+      mismatches.push({ id: `${fam}-${i}`, cause, reference: ref.state, engine: e.inc09.state, engine_reason: e.inc09.reason, ref_trough_ratios: ref.troughs.map((t) => ({ month_end: toIso(t.to), total: cents(t.total) })), min_ratio: Math.min(...ref.ratios.filter(Number.isFinite)), streams: e.r.income.map((x) => `${x.payer} ${x.cadence}`), history: g });
+    }
+  }
+}
+writeFileSync(new URL("./random-mismatches.json", import.meta.url), JSON.stringify(mismatches, null, 1));
+console.log("seed", SEED);
+console.log(JSON.stringify(counts));
+console.log(JSON.stringify(causes, null, 1));
+console.log(JSON.stringify(dist));
