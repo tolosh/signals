@@ -136,7 +136,7 @@ export function run(
     lookback_months: extra.lookback_months ?? 6,
     application,
     config,
-    gross_up: extra.gross_up ?? STUB_GROSS_UP,
+    gross_up: "gross_up" in extra ? (extra.gross_up ?? null) : STUB_GROSS_UP,
   });
 }
 
