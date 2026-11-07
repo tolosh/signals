@@ -25,6 +25,7 @@ expire after 7 days.
 | `asm_incomplete`                                                                              | `status: data_incomplete`                                                                                           |
 | `asm_03`, `apl_03`                                                                            | Assessed, then the grant was revoked                                                                                |
 | `asm_income`                                                                                  | The 13 INC signals, computed by the family 1 engine (SIG-41)                                                        |
+| `asm_liabilities`                                                                             | The six LIA signals, computed by the family 3 engine (SIG-42): LIA-01, LIA-02 and LIA-05 amber                      |
 | `req_01`                                                                                      | `apl_02`'s open `income_not_found` request; portal token `tok_01` acts for `apl_02`                                 |
 | `req_open` … `req_closed`                                                                     | One request per status, with `Prefer: example=<status>` on `GET /v1/app/applicants/apl_02/requests`                 |
 | `tok_01`                                                                                      | The portal token. Its step moves welcome → progress (connect) → done (finances saved); withdraw is final            |

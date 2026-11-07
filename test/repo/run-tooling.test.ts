@@ -23,6 +23,7 @@ const RECORD_SCRIPTS = [
   "sig17-bpay-exploratory.ts",
   "enrich-sample.ts",
   "enrich-categorise-set.ts",
+  "lia-distribution.ts",
 ];
 /**
  * Already meet the standard with their own code, and belong to runs under independent review at
