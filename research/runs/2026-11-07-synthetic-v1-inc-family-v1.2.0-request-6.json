@@ -1,0 +1,568 @@
+{
+  "run_id": "2026-11-07-synthetic-v1-inc-family-v1.2.0-request-6",
+  "created_at": "2026-11-07T20:33:02Z",
+  "ticket": "SIG-41",
+  "command": "npx tsx scripts/inc-distribution.ts --lookback 6",
+  "dataset": {
+    "set": "synthetic-v1",
+    "seed": 42,
+    "set_sha256": "8f5cf973ec46b33bbeccd97e87dcde10edea22919ed9af9bc9469149b2e17ea9"
+  },
+  "engine": {
+    "name": "inc-family",
+    "version": "1.2.0",
+    "commit": "eb3a26f105bafaed3a7ef2c1710417abd403bfe3"
+  },
+  "input": {
+    "as_of": "2026-10-31",
+    "lookback_months": 6,
+    "application": "none",
+    "gross_up": "none (SIG-46 on hold)",
+    "config": "production defaults"
+  },
+  "by_tag": {
+    "salaried-base": {
+      "applicants": 200,
+      "states": {
+        "INC-01": {
+          "green": 137,
+          "unverified": 63
+        },
+        "INC-02": {
+          "unverified": 200
+        },
+        "INC-03": {
+          "green": 137,
+          "unverified": 63
+        },
+        "INC-04": {
+          "green": 137,
+          "unverified": 63
+        },
+        "INC-05": {
+          "none_observed": 137,
+          "unverified": 63
+        },
+        "INC-06": {
+          "unverified": 200
+        },
+        "INC-07": {
+          "unverified": 200
+        },
+        "INC-08": {
+          "green": 137,
+          "unverified": 63
+        },
+        "INC-09": {
+          "unverified": 135,
+          "green": 65
+        },
+        "INC-10": {
+          "green": 137,
+          "unverified": 63
+        },
+        "INC-11": {
+          "green": 137,
+          "unverified": 63
+        },
+        "INC-12": {
+          "green": 137,
+          "unverified": 63
+        },
+        "INC-13": {
+          "green": 137,
+          "unverified": 63
+        }
+      }
+    },
+    "variable-income": {
+      "applicants": 20,
+      "states": {
+        "INC-01": {
+          "amber": 13,
+          "unverified": 4,
+          "green": 3
+        },
+        "INC-02": {
+          "unverified": 20
+        },
+        "INC-03": {
+          "green": 16,
+          "unverified": 4
+        },
+        "INC-04": {
+          "green": 16,
+          "unverified": 4
+        },
+        "INC-05": {
+          "none_observed": 16,
+          "unverified": 4
+        },
+        "INC-06": {
+          "unverified": 20
+        },
+        "INC-07": {
+          "unverified": 20
+        },
+        "INC-08": {
+          "green": 16,
+          "unverified": 4
+        },
+        "INC-09": {
+          "green": 10,
+          "unverified": 10
+        },
+        "INC-10": {
+          "green": 16,
+          "unverified": 4
+        },
+        "INC-11": {
+          "green": 16,
+          "unverified": 4
+        },
+        "INC-12": {
+          "green": 16,
+          "unverified": 4
+        },
+        "INC-13": {
+          "green": 16,
+          "unverified": 4
+        }
+      }
+    },
+    "gig": {
+      "applicants": 20,
+      "states": {
+        "INC-01": {
+          "amber": 10,
+          "unverified": 10
+        },
+        "INC-02": {
+          "unverified": 20
+        },
+        "INC-03": {
+          "amber": 10,
+          "unverified": 10
+        },
+        "INC-04": {
+          "green": 10,
+          "unverified": 10
+        },
+        "INC-05": {
+          "none_observed": 10,
+          "unverified": 10
+        },
+        "INC-06": {
+          "unverified": 20
+        },
+        "INC-07": {
+          "unverified": 20
+        },
+        "INC-08": {
+          "green": 10,
+          "unverified": 10
+        },
+        "INC-09": {
+          "green": 8,
+          "unverified": 12
+        },
+        "INC-10": {
+          "amber": 9,
+          "unverified": 10,
+          "red": 1
+        },
+        "INC-11": {
+          "green": 10,
+          "unverified": 10
+        },
+        "INC-12": {
+          "green": 10,
+          "unverified": 10
+        },
+        "INC-13": {
+          "green": 10,
+          "unverified": 10
+        }
+      }
+    },
+    "benefits": {
+      "applicants": 20,
+      "states": {
+        "INC-01": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-02": {
+          "unverified": 20
+        },
+        "INC-03": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-04": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-05": {
+          "none_observed": 12,
+          "unverified": 8
+        },
+        "INC-06": {
+          "unverified": 20
+        },
+        "INC-07": {
+          "unverified": 20
+        },
+        "INC-08": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-09": {
+          "green": 8,
+          "unverified": 12
+        },
+        "INC-10": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-11": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-12": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-13": {
+          "green": 12,
+          "unverified": 8
+        }
+      }
+    },
+    "undisclosed-card": {
+      "applicants": 20,
+      "states": {
+        "INC-01": {
+          "unverified": 8,
+          "green": 12
+        },
+        "INC-02": {
+          "unverified": 20
+        },
+        "INC-03": {
+          "unverified": 8,
+          "green": 12
+        },
+        "INC-04": {
+          "unverified": 8,
+          "green": 12
+        },
+        "INC-05": {
+          "unverified": 8,
+          "none_observed": 12
+        },
+        "INC-06": {
+          "unverified": 20
+        },
+        "INC-07": {
+          "unverified": 20
+        },
+        "INC-08": {
+          "unverified": 8,
+          "green": 12
+        },
+        "INC-09": {
+          "unverified": 14,
+          "green": 6
+        },
+        "INC-10": {
+          "unverified": 8,
+          "green": 12
+        },
+        "INC-11": {
+          "unverified": 8,
+          "green": 12
+        },
+        "INC-12": {
+          "unverified": 8,
+          "green": 12
+        },
+        "INC-13": {
+          "unverified": 8,
+          "green": 12
+        }
+      }
+    },
+    "bnpl": {
+      "applicants": 20,
+      "states": {
+        "INC-01": {
+          "unverified": 9,
+          "green": 11
+        },
+        "INC-02": {
+          "unverified": 20
+        },
+        "INC-03": {
+          "unverified": 9,
+          "green": 11
+        },
+        "INC-04": {
+          "unverified": 9,
+          "green": 11
+        },
+        "INC-05": {
+          "unverified": 9,
+          "none_observed": 11
+        },
+        "INC-06": {
+          "unverified": 20
+        },
+        "INC-07": {
+          "unverified": 20
+        },
+        "INC-08": {
+          "unverified": 9,
+          "green": 11
+        },
+        "INC-09": {
+          "unverified": 16,
+          "green": 4
+        },
+        "INC-10": {
+          "unverified": 9,
+          "green": 11
+        },
+        "INC-11": {
+          "unverified": 9,
+          "green": 11
+        },
+        "INC-12": {
+          "unverified": 9,
+          "green": 11
+        },
+        "INC-13": {
+          "unverified": 9,
+          "green": 11
+        }
+      }
+    },
+    "sacc": {
+      "applicants": 20,
+      "states": {
+        "INC-01": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-02": {
+          "unverified": 20
+        },
+        "INC-03": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-04": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-05": {
+          "none_observed": 12,
+          "unverified": 8
+        },
+        "INC-06": {
+          "unverified": 20
+        },
+        "INC-07": {
+          "unverified": 20
+        },
+        "INC-08": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-09": {
+          "green": 9,
+          "unverified": 11
+        },
+        "INC-10": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-11": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-12": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-13": {
+          "green": 12,
+          "unverified": 8
+        }
+      }
+    },
+    "wage-advance": {
+      "applicants": 20,
+      "states": {
+        "INC-01": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-02": {
+          "unverified": 20
+        },
+        "INC-03": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-04": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-05": {
+          "none_observed": 12,
+          "unverified": 8
+        },
+        "INC-06": {
+          "unverified": 20
+        },
+        "INC-07": {
+          "unverified": 20
+        },
+        "INC-08": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-09": {
+          "green": 6,
+          "unverified": 14
+        },
+        "INC-10": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-11": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-12": {
+          "green": 12,
+          "unverified": 8
+        },
+        "INC-13": {
+          "green": 12,
+          "unverified": 8
+        }
+      }
+    },
+    "gambling": {
+      "applicants": 20,
+      "states": {
+        "INC-01": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-02": {
+          "unverified": 20
+        },
+        "INC-03": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-04": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-05": {
+          "unverified": 10,
+          "none_observed": 10
+        },
+        "INC-06": {
+          "unverified": 20
+        },
+        "INC-07": {
+          "unverified": 20
+        },
+        "INC-08": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-09": {
+          "unverified": 14,
+          "green": 6
+        },
+        "INC-10": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-11": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-12": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-13": {
+          "unverified": 10,
+          "green": 10
+        }
+      }
+    },
+    "coverage-gap": {
+      "applicants": 20,
+      "states": {
+        "INC-01": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-02": {
+          "unverified": 20
+        },
+        "INC-03": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-04": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-05": {
+          "unverified": 16,
+          "none_observed": 4
+        },
+        "INC-06": {
+          "unverified": 20
+        },
+        "INC-07": {
+          "unverified": 20
+        },
+        "INC-08": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-09": {
+          "unverified": 16,
+          "green": 4
+        },
+        "INC-10": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-11": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-12": {
+          "unverified": 10,
+          "green": 10
+        },
+        "INC-13": {
+          "unverified": 10,
+          "green": 10
+        }
+      }
+    }
+  },
+  "salaried_base_amber_or_red": []
+}
