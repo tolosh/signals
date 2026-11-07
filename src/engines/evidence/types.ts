@@ -36,6 +36,12 @@ export type EvidenceInput = {
    * judged against it; signals keep their own minimum history (EQ-R4).
    */
   lookback_months?: number;
+  /**
+   * The EQ method version to apply (EQ-R6), so an earlier assessment replays unchanged.
+   * 1: EQ-03 coverage runs from the first transaction to the as-of date (E-4).
+   * 2 (default, SIG-55): days inside a silence longer than the gap threshold are uncovered.
+   */
+  eq_version?: 1 | 2;
 };
 
 export type CheckResult = "pass" | "partial" | "fail";
@@ -52,6 +58,8 @@ export type EvidenceCheck = {
 /** Assessment-level evidence, computed once and applied to every signal. */
 export type EvidenceContext = {
   definitions_version: number;
+  /** The EQ method version applied (EQ-R6). */
+  eq_version: 1 | 2;
   as_of: string;
   lookback_months: number;
   window: { start: string; end: string };

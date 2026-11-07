@@ -1,7 +1,7 @@
 // SIG-55: EQ-03 detects gaps in the middle of the lookback window (found by the SIG-39 review).
-// Coverage is the days covered by returned data: a silence longer than the gap threshold is
-// uncovered. Interpretations E-9 (measured across the feed) and E-10 (the threshold follows the
-// feed's own rhythm) are in docs/adr/0002-evidence-quality-interpretations.md, for ruling.
+// Coverage is the days covered by returned data: a silence that is a gap (E-10) is
+// uncovered. Interpretations E-9 (measured across the feed) and E-10 (a silence is judged against
+// its neighbours) are in docs/adr/0002-evidence-quality-interpretations.md, for ruling.
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import {
@@ -55,7 +55,7 @@ describe("SIG-55 T1 to T3: a hole in the middle of the window", () => {
   it("T2: a 90-day hole makes EQ-03 fail, and the signals unverified (RU-4)", () => {
     const ctx = assessEvidence(input(hole(base, "2026-06-01", "2026-08-29")));
     expect(eq03(ctx.checks).result).toBe("fail");
-    expect(applyEvidence(ctx, INC_01).state).toBe("unverified");
+    expect(applyEvidence([INC_01], ctx)[0]?.state).toBe("unverified");
   });
 
   it("T3 (negative control): a gap-free feed with a quiet fortnight passes", () => {
@@ -66,7 +66,7 @@ describe("SIG-55 T1 to T3: a hole in the middle of the window", () => {
   });
 });
 
-describe("SIG-55 E-10: the threshold follows the feed's own rhythm", () => {
+describe("SIG-55 E-10: a silence is judged against its neighbours", () => {
   it("a feed active only once a month has no gaps, but a 3-month hole in it is still found", () => {
     const monthly = (months: number[]): GeneratedApplicant => {
       const feed = base.feed as unknown as Feed;
@@ -88,6 +88,38 @@ describe("SIG-55 E-10: the threshold follows the feed's own rhythm", () => {
     const gapped = eq03(assessEvidence(input(monthly([5, 6, 10]))).checks);
     expect(gapped.result).not.toBe("pass");
     expect(gapped.detail).toMatch(/No transactions from 2026-06-16 to 2026-10-14/);
+  });
+
+  it("a change from fortnightly to monthly pay in a pay-only feed is not a gap", () => {
+    const feed = base.feed as unknown as Feed;
+    const [first] = feed.accounts;
+    if (!first) throw new Error("no account");
+    const template = first.transactions[0] as Feed["accounts"][number]["transactions"][number];
+    const days = [
+      "2026-05-01",
+      "2026-05-14",
+      "2026-05-28",
+      "2026-06-11",
+      "2026-06-25",
+      "2026-07-09",
+      "2026-07-23",
+      "2026-08-06",
+      "2026-08-29",
+      "2026-09-29",
+      "2026-10-29",
+    ];
+    const transactions = days.map((d, i) => ({
+      ...template,
+      transactionId: `p${i}`,
+      postingDateTime: `${d}T00:00:00Z`,
+    }));
+    const a = {
+      ...base,
+      feed: { ...base.feed, accounts: [{ ...first, transactions }] },
+    } as unknown as GeneratedApplicant;
+    const c = eq03(assessEvidence(input(a)).checks);
+    expect(c.result).toBe("pass");
+    expect(c.detail).not.toMatch(/No transactions from/);
   });
 });
 

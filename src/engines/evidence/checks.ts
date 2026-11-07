@@ -22,7 +22,17 @@ export const EQ_THRESHOLDS = Object.freeze({
   transfer_material_floor: 250,
   /** EQ-R4 (E-4): a signal's history is met at 90% of its stated months, as for EQ-03. */
   history_tolerance: 0.9,
+  /**
+   * EQ-03 gaps (SIG-55, E-10, candidates for ruling): a silence between active days is a gap
+   * when it is longer than this many days and more than this multiple of each adjacent silence,
+   * so a change of cadence (fortnightly to monthly pay) is not read as missing data.
+   */
+  gap_min_days: 21,
+  gap_rhythm_multiple: 1.5,
 });
+
+/** The EQ method version (EQ-R6). Version 2 (SIG-55) measures EQ-03 by the days covered. */
+export const EQ_METHOD_VERSION = 2;
 
 /** "062-000 123456" or "062000 123456": a BSB and account number in a transfer narrative. */
 const BSB_NUMBER = /\b(\d{3})-?(\d{3})\s+(\d{6,10})\b/;
@@ -77,8 +87,34 @@ export function assessEvidence(input: EvidenceInput): EvidenceContext {
   const earliest = lines.reduce((m, l) => Math.min(m, l.day), Infinity);
   const firstInWindow = inWindow.reduce((m, l) => Math.min(m, l.day), Infinity);
   const lastInWindow = inWindow.reduce((m, l) => Math.max(m, l.day), -Infinity);
-  const coveredDays = Number.isFinite(firstInWindow) ? end - firstInWindow + 1 : 0;
-  const coveredMonths = coveredDays / DAYS_PER_MONTH;
+  const eqVersion = input.eq_version ?? EQ_METHOD_VERSION;
+  // EQ-03 coverage. Version 1 (E-4): from the first transaction in the window to the as-of date.
+  // Version 2 (SIG-55): the same, less every silence longer than the gap threshold, measured
+  // across the whole feed (E-9). A silence is judged against its neighbours (E-10).
+  const activeDays = [...new Set(inWindow.map((l) => l.day))].sort((a, b) => a - b);
+  // Each silence runs from one active day to the next; the last runs to the as-of date.
+  const silences: { from: number; to: number; days: number }[] = activeDays.map((d, i) => {
+    const next = activeDays[i + 1] ?? end + 1;
+    return { from: d + 1, to: next - 1, days: next - d };
+  });
+  const gaps: { from: number; to: number }[] = [];
+  if (eqVersion >= 2)
+    silences.forEach((sil, i) => {
+      const neighbours = [silences[i - 1]?.days, silences[i + 1]?.days].filter(
+        (n): n is number => n !== undefined,
+      );
+      const isGap =
+        sil.to >= sil.from &&
+        sil.days > EQ_THRESHOLDS.gap_min_days &&
+        neighbours.every((n) => sil.days > EQ_THRESHOLDS.gap_rhythm_multiple * n);
+      if (isGap) gaps.push({ from: sil.from, to: sil.to });
+    });
+  const gapDays = gaps.reduce((s, g) => s + (g.to - g.from + 1), 0);
+  // The span returned, as before: EQ-01 and EQ-02 average over it. Only EQ-03's share
+  // subtracts the gaps.
+  const spanDays = Number.isFinite(firstInWindow) ? end - firstInWindow + 1 : 0;
+  const coveredDays = Math.max(0, spanDays - gapDays);
+  const coveredMonths = spanDays / DAYS_PER_MONTH;
   const history = Number.isFinite(earliest) ? round1((end - earliest + 1) / DAYS_PER_MONTH) : 0;
 
   // Own-account transfers: matched by BSB and account number where the narrative carries them;
@@ -222,11 +258,15 @@ export function assessEvidence(input: EvidenceInput): EvidenceContext {
         : share >= EQ_THRESHOLDS.window_partial
           ? "partial"
           : "fail",
-    detail: `The sync returned ${pct(share)}% of the ${lookback}-month lookback window`,
+    detail:
+      `The sync returned ${pct(share)}% of the ${lookback}-month lookback window` +
+      gaps.map((g) => `. No transactions from ${isoOf(g.from)} to ${isoOf(g.to)}`).join(""),
     resolve_with:
       share >= EQ_THRESHOLDS.window_pass
         ? []
-        : [`Share the full ${lookback} months of transaction history`],
+        : gaps.length > 0
+          ? gaps.map((g) => `Share the full history from ${isoOf(g.from)} to ${isoOf(g.to)}`)
+          : [`Share the full ${lookback} months of transaction history`],
     review_required: false,
   };
 
@@ -240,6 +280,7 @@ export function assessEvidence(input: EvidenceInput): EvidenceContext {
 
   return {
     definitions_version: DEFINITIONS_VERSION,
+    eq_version: eqVersion,
     as_of: isoOf(end),
     lookback_months: lookback,
     window: { start: isoOf(start), end: isoOf(end) },
