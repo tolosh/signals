@@ -11,6 +11,16 @@ import {
   summaryOf,
   uploadBenchmark,
 } from "./m3.js";
+import {
+  applicantRequests,
+  closeRequest,
+  portalConnect,
+  portalExplain,
+  portalRequests,
+  requestStatusVariants,
+  resendRequest,
+  resetRequests,
+} from "./requests.js";
 import { issueUpload, isUploaded, LOGO_MAX_BYTES, LOGO_PREFIX, LOGO_TYPES } from "./uploads.js";
 import { incomeAssessment } from "./inc.js";
 
@@ -214,6 +224,12 @@ export const assessments: Record<string, Json> = {
 };
 // asm_01_v2: version 2 of apl_01's assessment, for the version picker (contract 1.5.0).
 seedVersions(assessments);
+// SIG-48: apl_02's assessment fails EQ-01, so it starts with an open income_not_found request.
+export const resetRequestState = () =>
+  resetRequests(
+    (id) => (assessments[id]?.evidence_checks ?? []) as { id: string; result: string }[],
+  );
+resetRequestState();
 
 const evidenceRows = (count: number, prefix: string): Json[] =>
   Array.from({ length: count }, (_, i) => ({
@@ -616,6 +632,27 @@ export const fixtures: Record<string, Fixture> = {
       if (a) a.latest_assessment_id = newId;
     }),
   "get /v1/app/assessments/{id}/report.pdf": knownAssessment({ pdf: true }),
+  "get /v1/portal/{token}/requests": ({ token = "" }: Params) => portalRequests(token),
+  "post /v1/portal/{token}/requests/{requestId}/connect": ({
+    token = "",
+    requestId = "",
+  }: Params) =>
+    portalConnect(token, requestId, url("https://openfeed.example/authorize?request=" + requestId)),
+  "post /v1/portal/{token}/requests/{requestId}/explain": (
+    { token = "", requestId = "" }: Params,
+    _: URLSearchParams,
+    req: MockRequest,
+  ) => portalExplain(token, requestId, req.body),
+  "get /v1/app/applicants/{id}/requests": (params: Params) =>
+    findApplicant(params) ? applicantRequests(params.id ?? "") : undefined,
+  "post /v1/app/applicants/{id}/requests/{requestId}/resend": ({
+    id = "",
+    requestId = "",
+  }: Params) => resendRequest(id, requestId),
+  "post /v1/app/applicants/{id}/requests/{requestId}/close": ({
+    id = "",
+    requestId = "",
+  }: Params) => closeRequest(id, requestId),
   "get /v1/app/settings/policy/{product}": ({ product = "" }: Params) =>
     PRODUCTS.has(product) ? getPolicy(product, policy) : undefined,
   "put /v1/app/settings/policy/{product}": (
@@ -684,6 +721,7 @@ export const fixtures: Record<string, Fixture> = {
 
 // Named variants, chosen with the header `Prefer: example=<name>`.
 export const variants: Record<string, Record<string, unknown>> = {
+  "get /v1/app/applicants/{id}/requests": requestStatusVariants,
   "get /v1/app/benchmarks/template.csv": {
     valid: { csv: benchmarkCsv("valid") },
     invalid: { csv: benchmarkCsv("invalid") },
