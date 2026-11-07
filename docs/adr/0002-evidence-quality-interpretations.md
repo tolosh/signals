@@ -26,9 +26,17 @@ E-1 to E-8 in `src/engines/evidence/` and `src/engines/signals/definitions.ts`.
 
 Under E-4, a 3-month history against the default 6-month lookback covers about 50% of the window,
 so EQ-03 fails and the assessment is _unverified_ (RU-4). In synthetic set v1 that is 131 of 380
-applicants (the 1- and 3-month histories). That follows Amendment 2 as written. If a lender who
+applicants (the 3-month histories; corrected 7 November 2026, after the independent review: set
+v1 has no 1-month histories). That follows Amendment 2 as written. If a lender who
 asks for only 3 months should not be capped, the lookback input should be what that lender
 requested, which the engine already supports.
+
+**Reporting (ruling, 7 November 2026, on the independent review):** set v1's result is 138
+unverified (36.3%) at the D22 default 6-month request. The 7 / 138 / 254 figures, for assumed
+requests of 3, 6 and 12 months, are a sensitivity range only, never a result, because set v1 records
+no lender request. 2 of 3 months stays `partial`. Run records:
+`research/runs/2026-11-07-synthetic-v1-eq-unverified-request-6.json` and
+`research/runs/2026-11-07-synthetic-v1-eq-unverified-sensitivity.json`.
 
 **Ruled 7 November 2026 (D22):** EQ-03 is judged against the lookback the lender requested. The
 default request is 6 months, and a lender may request less, but never under 3; the engine refuses
