@@ -81,9 +81,27 @@ function scannedFiles(root = "."): string[] {
   ];
 }
 
+/**
+ * The committed synthetic manifests' set hashes. A file that carries one (in full, or as the
+ * 8-character prefix and ellipsis the docs use, "c190552d…") belongs to that synthetic set, as a
+ * file that names the set does (SIG-60's leakage records and pre-registration name sets so).
+ */
+const SYNTHETIC_HASHES: string[] = readdirSync("research/datasets")
+  .filter((n) => n.endsWith(".manifest.json"))
+  .map(
+    (n) =>
+      (JSON.parse(readFileSync(`research/datasets/${n}`, "utf8")) as { set_sha256?: string })
+        .set_sha256 ?? "",
+  )
+  .filter((h) => /^[0-9a-f]{64}$/.test(h));
+const carriesSyntheticHash = (s: string): boolean =>
+  SYNTHETIC_HASHES.some((h) => s.includes(h) || s.includes(`${h.slice(0, 8)}…`));
+
 const namesSyntheticSet = (value: unknown): boolean =>
   typeof value === "string"
-    ? (SYNTHETIC_SOURCES as readonly string[]).includes(value) || /synthetic-v\d/.test(value)
+    ? (SYNTHETIC_SOURCES as readonly string[]).includes(value) ||
+      /synthetic-v\d/.test(value) ||
+      carriesSyntheticHash(value)
     : Array.isArray(value)
       ? value.some(namesSyntheticSet)
       : value !== null && typeof value === "object"
@@ -133,7 +151,9 @@ describe("SIG-61 T2: repo scan of research outputs and fixtures", () => {
 
   it("covers the run records, manifests and fixtures", () => {
     expect(files.filter((f) => f.startsWith("research/runs/")).length).toBeGreaterThan(40);
-    expect(files.filter((f) => /^research\/datasets\/.*\.manifest\.json$/.test(f)).length).toBe(3);
+    expect(
+      files.filter((f) => /^research\/datasets\/.*\.manifest\.json$/.test(f)).length,
+    ).toBeGreaterThanOrEqual(3);
     expect(files).toContain("test/fixtures/af-t1.json");
   });
 

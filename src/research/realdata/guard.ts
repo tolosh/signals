@@ -11,7 +11,12 @@
 /** Sources that are real consented CDR data. A record naming one is a real-data record. */
 export const REAL_SOURCES = ["openfeed-production"] as const;
 /** The synthetic sets (research/datasets/*.manifest.json). */
-export const SYNTHETIC_SOURCES = ["synthetic-v1", "synthetic-v2", "synthetic-v2.1"] as const;
+export const SYNTHETIC_SOURCES = [
+  "synthetic-v1",
+  "synthetic-v2",
+  "synthetic-v2.1",
+  "synthetic-v2.2",
+] as const;
 /** The consent bases a real-data run may name. The route is pending Colin's decision (ADR 0008). */
 export const CONSENT_BASES = ["cdr-service", "cdr-service-and-deidentification"] as const;
 
