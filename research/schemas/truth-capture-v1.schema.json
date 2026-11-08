@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signals.moroku.digital/schemas/truth-capture-v1.json",
+  "title": "Truth capture for a team member's own real data, schema 1.0.0 (SIG-61)",
+  "description": "What a team member declares about their own pay and liabilities, so a real-data run (Stage A) can be scored against it. Structured fields only: no free text and no unknown fields. Amounts are AUD. Employer and lender are normalised names, kept only in the secure environment's truth_capture store (ADR 0008); they never enter the repository or a run record, and the T2 guard rejects any record holding them. The TypeScript validator is src/research/realdata/truth-capture.ts; the two accept and reject the same records. A change to this shape is a new schema version.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "consumer_ref",
+    "captured_on",
+    "gross_annual_pay",
+    "net_pay_per_pay",
+    "pay_cadence",
+    "payslip_verified",
+    "employer",
+    "liabilities"
+  ],
+  "$defs": {
+    "normalised_name": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["normalised_name"],
+      "properties": {
+        "normalised_name": {
+          "type": "string",
+          "maxLength": 60,
+          "pattern": "^[A-Z0-9&'.-]+(?: [A-Z0-9&'.-]+){0,5}$"
+        }
+      }
+    },
+    "liability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "lender", "repayment_amount", "repayment_cadence"],
+      "properties": {
+        "type": {
+          "enum": [
+            "credit_card",
+            "personal_loan",
+            "car_loan",
+            "mortgage",
+            "bnpl",
+            "sacc",
+            "wage_advance",
+            "other_loan"
+          ]
+        },
+        "lender": { "$ref": "#/$defs/normalised_name" },
+        "repayment_amount": { "type": "number", "minimum": 0, "maximum": 1000000 },
+        "repayment_cadence": {
+          "enum": ["weekly", "fortnightly", "four_weekly", "monthly", "quarterly"]
+        },
+        "limit": { "type": "number", "minimum": 0, "maximum": 100000000 },
+        "balance": { "type": "number", "minimum": 0, "maximum": 100000000 }
+      }
+    }
+  },
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "consumer_ref": {
+      "type": "string",
+      "pattern": "^cr_[0-9a-z]{16,64}$",
+      "description": "Opaque reference issued in the secure environment; names no one."
+    },
+    "captured_on": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "gross_annual_pay": { "type": "number", "minimum": 0, "maximum": 10000000 },
+    "net_pay_per_pay": { "type": "number", "minimum": 0, "maximum": 1000000 },
+    "pay_cadence": { "enum": ["weekly", "fortnightly", "four_weekly", "monthly"] },
+    "payslip_verified": { "type": "boolean" },
+    "employer": { "$ref": "#/$defs/normalised_name" },
+    "liabilities": {
+      "type": "array",
+      "maxItems": 30,
+      "items": { "$ref": "#/$defs/liability" }
+    }
+  }
+}

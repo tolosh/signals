@@ -8,6 +8,8 @@ import { dirname } from "node:path";
 
 export const DEFAULT_OUT = "research/runs";
 export const DEFAULT_MANIFEST = "research/datasets/synthetic-v1.manifest.json";
+/** SIG-61: where real-data run records go. Git-ignored; it exists only in the secure environment. */
+export const REALDATA_OUT = "realdata/runs";
 
 export type RunArgs = {
   /** The arguments as given, flags without a value as "true". */
@@ -86,4 +88,13 @@ export type Manifest = {
 };
 export function manifestSeed(path = DEFAULT_MANIFEST): Manifest {
   return JSON.parse(readFileSync(path, "utf8")) as Manifest;
+}
+
+/** SIG-61 stub: written tests first; the T2 guard is not wired in yet. */
+export function writeRunRecord(path: string, record: Record<string, unknown>): void {
+  writeNew(
+    path,
+    `${JSON.stringify(record, null, 2)}
+`,
+  );
 }
