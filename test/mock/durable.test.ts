@@ -1,8 +1,9 @@
 // SIG-51 (ruling of 7 November 2026, ADR 0005): the mock keeps its state in DynamoDB, so a write
 // survives a reload on any Lambda container. Runs against the local server, or the hosted mock
-// with MOCK_BASE_URL. Each run uses its own scenario (X-Mock-Scenario), so Lovable's default state
+// with npm run test:hosted. Each run uses its own scenario (X-Mock-Scenario), so Lovable's default state
 // is never touched, and starts from POST /mock-reset.
 import type { Server } from "node:http";
+import { hostedBase } from "./target.js";
 import type { AddressInfo } from "node:net";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { createMockServer } from "../../src/mock/server.js";
@@ -14,8 +15,9 @@ const SLOW = 30_000;
 let server: Server | undefined;
 let base: string;
 beforeAll(async () => {
-  if (process.env.MOCK_BASE_URL) {
-    base = process.env.MOCK_BASE_URL;
+  const hosted = hostedBase();
+  if (hosted) {
+    base = hosted;
     return;
   }
   server = createMockServer();

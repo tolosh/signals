@@ -1,10 +1,11 @@
 // Lovable M3 gaps (SIG-19 comment, 7 November 2026, 12:05), under SIG-11: the mock keeps state
 // for policy saves, overrides and benchmark uploads; validates benchmark CSVs with row-level
 // errors; and serves version-switching and revoked-grant fixtures. Runs against the local server,
-// or the hosted mock with MOCK_BASE_URL.
+// or the hosted mock with npm run test:hosted.
 import "./scenario.js";
 import { readFileSync } from "node:fs";
 import type { Server } from "node:http";
+import { hostedBase } from "./target.js";
 import type { AddressInfo } from "node:net";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
@@ -20,8 +21,9 @@ ajv.addSchema(doc as object, "openapi");
 let server: Server | undefined;
 let base: string;
 beforeAll(async () => {
-  if (process.env.MOCK_BASE_URL) {
-    base = process.env.MOCK_BASE_URL;
+  const hosted = hostedBase();
+  if (hosted) {
+    base = hosted;
     return;
   }
   server = createMockServer();

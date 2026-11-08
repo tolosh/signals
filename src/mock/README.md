@@ -7,6 +7,10 @@ the mock serves, so a front end can find each state.
 Hosted (dev sandbox): <https://e8pgarelt8.execute-api.ap-southeast-2.amazonaws.com>.
 Local: `npm run mock` (port 4010).
 
+Tests: `npm test` runs the mock's test files against an in-process server and never calls the
+hosted mock, even when `MOCK_BASE_URL` is set. To run them against the hosted mock, set
+`MOCK_BASE_URL` and run `npm run test:hosted` (SIG-56).
+
 ## State (SIG-51, ADR 0005)
 
 Writes are kept in a DynamoDB table and seen on every reload. The `X-Mock-Scenario` header selects
