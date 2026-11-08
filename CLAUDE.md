@@ -95,8 +95,11 @@ At close (every ticket, no exceptions):
   (AF-E1) as an aggregate amount only, never itemised; religious, union and
   political spending never enters it. Every engine entry that reads transactions
   removes sensitive lines first with `withoutSensitive` (src/engines/sensitive.ts),
-  by Enrich category or MCC; observed living expenses apply D29 instead.
-  test/repo/gr3.test.ts enforces both. Limit: a line with neither a sensitive
+  by Enrich category or MCC; observed living expenses apply D29 instead. A
+  liability repayment (Enrich's loan, card, BNPL, SACC, mortgage or wage-advance
+  categories) is never removed, whatever its MCC. Reasons and traces name the
+  provider or lender, never a raw narrative (a BNPL by its lender, not the
+  merchant). test/repo/gr3.test.ts enforces all of this. Limit: a line with neither a sensitive
   category nor an MCC (a bank transfer to a parish) can't be recognised until
   Enrich marks sensitive payees (ENR-31).
 - No endpoint, field or enum returns approve or decline (GR-1). Decisioning

@@ -1,9 +1,61 @@
 # ADR 0006: Family 3 LIA, hidden and stacked credit
 
 Status: ruled (Colin, 8 November 2026, on SIG-42). L-1 to L-8 stand as recorded, with the two
-changes below, and the independent review's rulings of the same day (1.2.0, below). Where a ruling
-changes an interpretation, the ruling wins, and the interpretation is kept as it was recorded. The
-engine is at 1.2.0.
+changes below, the independent review's rulings of the same day (1.2.0, below) and the short
+re-review's ruling (1.3.0, below). Where a ruling changes an interpretation, the ruling wins, and
+the interpretation is kept as it was recorded. The engine is at 1.3.0.
+
+## Short re-review ruling, 8 November 2026, 19:40 (LIA 1.3.0)
+
+The re-review at `11e2ef4` found that the fallback could hide an undisclosed liability as green.
+The ruling and the architect's direction, as built (tests first, `test/families/lia/re-review.test.ts`
+and `test/repo/gr3.test.ts`):
+
+1. **"Possibly declared" is amber, never green.** The reason is "Possibly the declared <name>
+   (<amount> a month): confirm with the applicant", after the lender and type found, and review
+   is required. Only an exact name match (after SIG-57, an alias-table match) is green. This
+   supersedes 1.2.0's "possibly declared on its own is green".
+2. **Strict matching.**
+   - **Exact types only.** The detector's "loan" family is typed from the loan account's product
+     name or the repayments' narratives: CAR, AUTO, VEHICLE or MOTOR is a car loan; PERSONAL a
+     personal loan; MORTGAGE or HOME LOAN a mortgage. A loan the data doesn't type, or types two
+     ways, is "loan" and matches only a declaration typed "loan" (interpretation, for the
+     re-check).
+   - **Duplicates removed first:** two declarations with the same type, normalised name and
+     repayment count once.
+   - **Closest amount first, one-to-one:** every (liability, declaration) pair within the 15%
+     candidate tolerance is ranked by the difference in monthly repayment, and paired greedily.
+     The review's WBC/AMEX probe now pairs WBC with the declared Westpac card, and AMEX stays
+     undisclosed, in either order.
+   - Every review probe is a test, with a 320-case sweep (4 types found × 4 declared × 4 amounts
+     × 5 ratios) in which a liability not declared under its name is never green.
+3. **Lookback.** LIA reads within the requested lookback: LIA-01's detector gets the window's
+   transactions (accounts in the grant still count), and LIA-02, LIA-04, LIA-05 and LIA-06 read
+   the window. LIA-03 keeps its 12 months. LIA-05's "rising" is judged only when both 90-day
+   windows lie inside the lookback and the history inside it covers the earlier window to EQ-03's
+   pass share (90%, so it reaches 171 days back). The reviewer's grocery line 200 days old no
+   longer lets a 3-month request judge it.
+4. **D29 text.** A BNPL is named by its lender, the first word of the narrative ("HUMM", not
+   "HUMM SMILE DENTAL"), in reasons and in `liabilities`; LIA-05 counts lenders. Other lenders'
+   narratives name only the lender, with digits and references removed (interpretation, for the
+   re-check).
+5. **NFC.** Text is normalised to NFC before keyword matching, and a combining mark counts as part
+   of its letter, so JOSE + U+0301 + LOAN doesn't match.
+6. **Versions.** LIA 1.3.0; each result records `gr3_gate_version` (1.1.0, ADR 0007).
+
+**Mutation checks at 1.3.0** (LIA tests, 124): keyword boundaries removed, 16 fail; the fallback
+green again, 17; types merged by family, 2; alphabetical instead of closest, 3; no
+de-duplication, 1; the detector reading the whole feed, 1; rising without the coverage check, 2.
+**One survives:** without NFC, no test fails, because the boundary class already treats a
+combining mark as part of its letter; NFC is kept as the ruling asks.
+
+**Corrected count:** at 1.2.0, removing the boundaries failed 15 of **104** LIA tests, not 15 of
+99 as reported on SIG-42.
+
+Set v1 records at 1.3.0:
+
+- `research/runs/2026-11-08-synthetic-v1-lia-family-v1.3.0.json`, at a 6-month request.
+- `research/runs/2026-11-08-synthetic-v1-lia-family-v1.3.0-request-3.json`, at a 3-month request.
 
 ## Independent review rulings, 8 November 2026 (LIA 1.2.0)
 
