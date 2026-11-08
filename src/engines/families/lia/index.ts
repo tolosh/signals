@@ -18,7 +18,7 @@ import {
   type DetectedLiability,
 } from "../../liabilities/index.js";
 
-export const LIA_VERSION = "1.1.0";
+export const LIA_VERSION = "1.2.0";
 
 /** A shared-account feed with the fields both the evidence layer and the detector read. */
 export type LiaFeed = {
@@ -470,6 +470,20 @@ export function assessLia(input: LiaInput): LiaResult {
   const nowOut = outflow(end - 90, end);
   const priorOut = outflow(end - 180, end - 90);
   const rising = priorOut > 0 && nowOut > priorOut * (1 + cfg.bnpl_rising);
+  // One monthly figure for a BNPL in LIA-01 and LIA-05 (review ruling 5): the detector's
+  // cadence-based monthly where the provider's repayments recur, otherwise its last 90 days / 3.
+  const bnplMonthly = round2(
+    sum(
+      [...bnplProviders].map((p) => {
+        const ids = new Set(bnpl.filter((l) => providerOf(l.t.description) === p).map((l) => l.id));
+        const recurring = detected.liabilities.find(
+          (d) => d.family === "bnpl" && d.monthly !== null && d.evidence.some((e) => ids.has(e)),
+        );
+        if (recurring?.monthly) return recurring.monthly;
+        return -sum(bnpl.filter((l) => ids.has(l.id) && l.day > end - 90).map((l) => l.amount)) / 3;
+      }),
+    ),
+  );
   const lia05 =
     bnpl.length === 0
       ? nothing("LIA-05", "No BNPL repayment was found")
@@ -480,7 +494,7 @@ export function assessLia(input: LiaInput): LiaResult {
             : bnplProviders.size >= cfg.bnpl_amber_providers
               ? "amber"
               : "green",
-          `${bnplProviders.size} provider${bnplProviders.size === 1 ? "" : "s"}, $${round2(nowOut / 3)} a month`,
+          `${bnplProviders.size} provider${bnplProviders.size === 1 ? "" : "s"}, $${bnplMonthly} a month`,
           `${[...bnplProviders].join(", ")}; $${round2(nowOut)} in the last 90 days` +
             (rising ? `, up from $${round2(priorOut)} in the 90 days before` : ""),
           bnpl,

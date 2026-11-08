@@ -184,5 +184,5 @@ describe("Ruling 2: the candidate thresholds are workspace defaults a lender can
 });
 
 describe("version", () => {
-  it("is 1.1.0", () => expect(LIA_VERSION).toBe("1.1.0"));
+  it("is 1.2.0", () => expect(LIA_VERSION).toBe("1.2.0"));
 });
