@@ -4,7 +4,16 @@
 import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { LIA_VERSION } from "../../../src/engines/families/lia/index.js";
-import { LIA_IDS, repeat, run, signal, stateOf, type Line, type Script } from "./script.js";
+import {
+  DETECT_PRIVATE,
+  LIA_IDS,
+  repeat,
+  run,
+  signal,
+  stateOf,
+  type Line,
+  type Script,
+} from "./script.js";
 
 const loan = (provider: string, amount = 450, n = 6): Line[] =>
   repeat(n, 30, {
@@ -49,52 +58,55 @@ const privateLoan = (amount: number, n = 4, rising = false): Line[] =>
   }));
 
 describe("T1: each LIA signal at each state it defines", () => {
-  const cases: [string, string, Script, Parameters<typeof run>[1]?][] = [
-    // LIA-01 Undisclosed liabilities (L-1)
+  const cases: [string, string, Script, Parameters<typeof run>[1]?, Parameters<typeof run>[2]?][] =
     [
-      "LIA-01",
-      "green",
-      { lines: loan("SOCIETYONE") },
-      { declared_liabilities: [{ type: "personal_loan", provider: "SOCIETYONE" }] },
-    ],
-    ["LIA-01", "amber", { lines: loan("SOCIETYONE") }],
-    [
-      "LIA-01",
-      "red",
-      { lines: loan("SOCIETYONE") },
-      { declared_liabilities: [], assessed_surplus_monthly: 300 },
-    ],
-    // LIA-02 Loan stacking (L-2)
-    ["LIA-02", "green", { lines: [disbursement("PLENTI", 150)] }],
-    ["LIA-02", "amber", { lines: [disbursement("PLENTI", 40)] }],
-    ["LIA-02", "red", { lines: [disbursement("PLENTI", 40), disbursement("HARMONEY", 70)] }],
-    // LIA-03 Payday and SACC (L-3)
-    ["LIA-03", "amber", { lines: sacc("CASH CONVERTERS", 4, 120) }],
-    ["LIA-03", "red", { lines: sacc("CASH CONVERTERS", 4, 10) }],
-    // LIA-04 Wage advance (L-4)
-    ["LIA-04", "amber", { lines: advance(60) }],
-    ["LIA-04", "red", { lines: [10, 24, 38, 52, 66, 80].flatMap(advance) }],
-    // LIA-05 BNPL (L-5)
-    ["LIA-05", "green", { lines: bnpl("AFTERPAY") }],
-    ["LIA-05", "amber", { lines: [...bnpl("AFTERPAY"), ...bnpl("ZIP PAY", 6, 60, 6)] }],
-    [
-      "LIA-05",
-      "red",
-      { lines: [...bnpl("AFTERPAY"), ...bnpl("ZIP PAY", 6, 60, 6), ...bnpl("KLARNA", 6, 60, 7)] },
-    ],
-    // LIA-06 Private loans (L-6)
-    ["LIA-06", "amber", { lines: privateLoan(200) }],
-    ["LIA-06", "red", { lines: privateLoan(800) }],
-  ];
+      // LIA-01 Undisclosed liabilities (L-1)
+      [
+        "LIA-01",
+        "green",
+        { lines: loan("SOCIETYONE") },
+        { declared_liabilities: [{ type: "personal_loan", provider: "SOCIETYONE" }] },
+      ],
+      ["LIA-01", "amber", { lines: loan("SOCIETYONE") }],
+      [
+        "LIA-01",
+        "red",
+        { lines: loan("SOCIETYONE") },
+        { declared_liabilities: [], assessed_surplus_monthly: 300 },
+      ],
+      // LIA-02 Loan stacking (L-2)
+      ["LIA-02", "green", { lines: [disbursement("PLENTI", 150)] }],
+      ["LIA-02", "amber", { lines: [disbursement("PLENTI", 40)] }],
+      ["LIA-02", "red", { lines: [disbursement("PLENTI", 40), disbursement("HARMONEY", 70)] }],
+      // LIA-03 Payday and SACC (L-3)
+      ["LIA-03", "amber", { lines: sacc("CASH CONVERTERS", 4, 120) }],
+      ["LIA-03", "red", { lines: sacc("CASH CONVERTERS", 4, 10) }],
+      // LIA-04 Wage advance (L-4)
+      ["LIA-04", "amber", { lines: advance(60) }],
+      ["LIA-04", "red", { lines: [10, 24, 38, 52, 66, 80].flatMap(advance) }],
+      // LIA-05 BNPL (L-5)
+      ["LIA-05", "green", { lines: bnpl("AFTERPAY") }],
+      ["LIA-05", "amber", { lines: [...bnpl("AFTERPAY"), ...bnpl("ZIP PAY", 6, 60, 6)] }],
+      [
+        "LIA-05",
+        "red",
+        { lines: [...bnpl("AFTERPAY"), ...bnpl("ZIP PAY", 6, 60, 6), ...bnpl("KLARNA", 6, 60, 7)] },
+      ],
+      // LIA-06 Private loans (L-6): parked (review ruling 2); the 1.1.0 rules, behind the flag.
+      ["LIA-06", "amber", { lines: privateLoan(200) }, undefined, DETECT_PRIVATE],
+      ["LIA-06", "red", { lines: privateLoan(800) }, undefined, DETECT_PRIVATE],
+    ];
   it.each(cases.map((c, n) => [`${c[0]} ${c[1]} (#${n})`, ...c] as const))(
     "%s",
-    (_label, id, state, script, application) => {
-      expect(stateOf(run(script, application ?? { declared_liabilities: [] }), id)).toBe(state);
+    (_label, id, state, script, application, config) => {
+      expect(
+        stateOf(run(script, application ?? { declared_liabilities: [] }, config ?? {}), id),
+      ).toBe(state);
     },
   );
 
   it("LIA-03, LIA-04 and LIA-06 have no green above none_observed: nothing found is none_observed (EQ-R2)", () => {
-    const r = run({});
+    const r = run({}, undefined, DETECT_PRIVATE);
     for (const id of ["LIA-03", "LIA-04", "LIA-06"]) expect(stateOf(r, id)).toBe("none_observed");
   });
 
@@ -109,7 +121,9 @@ describe("T1: each LIA signal at each state it defines", () => {
   });
 
   it("LIA-06 red when transfers to the individual are increasing", () => {
-    expect(stateOf(run({ lines: privateLoan(200, 4, true) }), "LIA-06")).toBe("red");
+    expect(
+      stateOf(run({ lines: privateLoan(200, 4, true) }, undefined, DETECT_PRIVATE), "LIA-06"),
+    ).toBe("red");
   });
 });
 
@@ -133,9 +147,13 @@ describe("T3: two lender disbursements in 60 days", () => {
 });
 
 describe("T4: full coverage and no liabilities", () => {
-  it("every LIA signal is none_observed", () => {
+  it("every LIA signal is none_observed, but parked LIA-06 is unverified (review ruling 2)", () => {
     const r = run({});
-    for (const id of LIA_IDS) expect(stateOf(r, id), id).toBe("none_observed");
+    for (const id of LIA_IDS)
+      expect(stateOf(r, id), id).toBe(id === "LIA-06" ? "unverified" : "none_observed");
+  });
+  it("behind the flag, LIA-06 is none_observed too, as at 1.1.0", () => {
+    expect(stateOf(run({}, undefined, DETECT_PRIVATE), "LIA-06")).toBe("none_observed");
   });
 });
 

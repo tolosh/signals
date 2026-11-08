@@ -52,6 +52,12 @@ export type LiaConfig = {
   /** LIA-06: a monthly mean this large is red, and a rise this large is "increasing" (candidates). */
   private_large_monthly: number;
   private_increasing: number;
+  /**
+   * LIA-06 is parked (SIG-42 review ruling 2): it returns unverified until Enrich supplies a
+   * private-transfer category that excludes sensitive payees (ENR-30). "detect" runs the 1.1.0 rules,
+   * for tests only; a lender's policy can't set it (liaConfigFromPolicy maps candidates only).
+   */
+  private_loans: "parked" | "detect";
 };
 export const LIA_DEFAULTS: Readonly<LiaConfig> = Object.freeze({
   min_occurrences: 3,
@@ -66,6 +72,7 @@ export const LIA_DEFAULTS: Readonly<LiaConfig> = Object.freeze({
   bnpl_rising: 0.25,
   private_large_monthly: 500,
   private_increasing: 0.25,
+  private_loans: "parked",
 });
 
 /**
@@ -121,6 +128,7 @@ type Line = {
   amount: number;
   t: LiaFeed["accounts"][number]["transactions"][number];
 };
+export const LIA06_PARKED = "Private-loan detection is not yet supported on categorised data";
 const BSB_NUMBER = /\b\d{3}-?\d{3}\s+\d{6,10}\b/;
 // Keywords match whole words only, case-insensitively (the text is upper-cased first), so OWEN,
 // LOANS4U and BIOU don't match (SIG-42 ruling 1). test/families/lia/rulings.test.ts pins each.
@@ -420,24 +428,29 @@ export function assessLia(input: LiaInput): LiaResult {
     const lastAmt = -(byDay[byDay.length - 1]?.amount ?? 0);
     return firstAmt > 0 && lastAmt > firstAmt * (1 + cfg.private_increasing);
   });
-  const lia06 =
-    repeated.length === 0
-      ? nothing(
-          "LIA-06",
-          "No repeat transfer to an individual with a repayment reference was found",
-        )
-      : raw(
-          "LIA-06",
-          monthlyMean >= cfg.private_large_monthly || increasing ? "red" : "amber",
-          `$${round2(monthlyMean)} a month`,
-          `Repeat transfers with a repayment reference to ${repeated.length} payee${repeated.length === 1 ? "" : "s"}` +
-            (increasing
-              ? ", increasing"
-              : monthlyMean >= cfg.private_large_monthly
-                ? ", large"
-                : ""),
-          repeatedLines,
-        );
+  const lia06: RawSignal =
+    cfg.private_loans === "parked"
+      ? {
+          ...nothing("LIA-06", LIA06_PARKED),
+          missing_input: { reason: LIA06_PARKED, resolve_with: [] },
+        }
+      : repeated.length === 0
+        ? nothing(
+            "LIA-06",
+            "No repeat transfer to an individual with a repayment reference was found",
+          )
+        : raw(
+            "LIA-06",
+            monthlyMean >= cfg.private_large_monthly || increasing ? "red" : "amber",
+            `$${round2(monthlyMean)} a month`,
+            `Repeat transfers with a repayment reference to ${repeated.length} payee${repeated.length === 1 ? "" : "s"}` +
+              (increasing
+                ? ", increasing"
+                : monthlyMean >= cfg.private_large_monthly
+                  ? ", large"
+                  : ""),
+            repeatedLines,
+          );
 
   return {
     version: LIA_VERSION,

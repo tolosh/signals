@@ -47,7 +47,7 @@ input, including payees Enrich marks sensitive, with a mutation check.
     reserved, and the gate honours them now. `sensitive` is how Signals will read Enrich's mark.
   - **Limit:** a line with neither a sensitive category nor an MCC isn't recognised. A bank
     transfer to a parish is the example. That is why LIA-06 is parked.
-  - Raised with Enrich in the same ticket as the private-transfer category.
+  - Raised with Enrich as ENR-30, with the private-transfer category.
 - **G-3: the MCC list is a candidate.**
   - It covers pharmacies (5122, 5912), medical services and suppliers (4119, 5975, 5976, 8011 to
     8099), political organisations (8651) and religious organisations (8661).

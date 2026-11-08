@@ -39,7 +39,7 @@ describe("asm_liabilities: the LIA fixtures", () => {
       "LIA-03": "none_observed",
       "LIA-04": "none_observed",
       "LIA-05": "amber",
-      "LIA-06": "none_observed",
+      "LIA-06": "unverified",
     });
   });
 });
