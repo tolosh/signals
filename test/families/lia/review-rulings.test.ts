@@ -93,7 +93,8 @@ const PAIRS: {
   },
   {
     label: "personal loan",
-    lines: (n) => loanLines(n, 450),
+    // LIA 1.3.0 matches exact types only (re-review ruling 2), so the narrative names the type.
+    lines: (n) => loanLines(`${n} PERSONAL`, 450),
     type: "personal_loan",
     amount: 450,
     names: ["Society One", "SOCIETYONE"],
@@ -107,7 +108,7 @@ const PAIRS: {
   },
   {
     label: "car loan",
-    lines: (n) => loanLines(n, 560),
+    lines: (n) => loanLines(`${n} CAR`, 560),
     type: "car_loan",
     amount: 560,
     names: ["Macquarie", "MACQUARIE LEASING"],
@@ -121,11 +122,14 @@ describe("Ruling 1: LIA-01 amount-and-type fallback", () => {
         const s = lia01(p.lines(repaidAs.toUpperCase()), [
           { type: p.type, provider: declaredAs, repayment_monthly: p.amount },
         ]);
-        expect(s.state).toBe("green");
-        expect(s.value).toMatch(/1 possibly declared/);
-        expect(s.reason).toContain(declaredAs);
-        expect(s.reason).toContain(repaidAs.toUpperCase());
-        expect(s.reason).toMatch(/possibly declared: review/);
+        // LIA 1.3.0 (re-review ruling, 19:40): a fuzzy match is amber, never green, with the
+        // ruled reason; the provider found is named (a BNPL by its lender, the first word).
+        expect(s.state).toBe("amber");
+        expect(s.value).toBe("1 possibly declared");
+        expect(s.reason).toContain(
+          `Possibly the declared ${declaredAs} ($${p.amount} a month): confirm with the applicant`,
+        );
+        expect(s.reason).toContain(repaidAs.toUpperCase().split(" ")[0]);
         expect(s.evidence_quality.review_required).toBe(true);
       });
 
@@ -136,11 +140,12 @@ describe("Ruling 1: LIA-01 amount-and-type fallback", () => {
     expect(s.state).toBe("amber");
     expect(s.value).toBe("1 undisclosed");
   });
-  it("an amount just inside 15% matches", () => {
+  it("an amount just inside 15% matches, as possibly declared (amber from 1.3.0)", () => {
     const s = lia01(card("CBA CREDIT CARD", 207), [
       { type: "credit_card", provider: "Commonwealth Bank", repayment_monthly: 180 },
     ]);
-    expect(s.state).toBe("green");
+    expect(s.state).toBe("amber");
+    expect(s.value).toBe("1 possibly declared");
   });
   it("a type mismatch stays undisclosed, whatever the amount", () => {
     const s = lia01(card("CBA CREDIT CARD"), [
@@ -179,28 +184,33 @@ describe("Ruling 1: LIA-01 is never red until SIG-57 is Supported and SIG-58 is 
     const s = lia01(loanLines("SOCIETYONE", 450), [], 300);
     expect(s.state).toBe("amber");
   });
-  it("the review's case: a misnamed, declared card with a $100 surplus is not red, and not amber", () => {
+  it("the review's case: a misnamed, declared card with a $100 surplus is not red", () => {
     const s = lia01(
       card("CBA CREDIT CARD"),
       [{ type: "credit_card", provider: "Commonwealth Bank", repayment_monthly: 180 }],
       100,
     );
-    expect(s.state).toBe("green");
+    // Amber from 1.3.0: possibly declared, confirm with the applicant (re-review ruling 1).
+    expect(s.state).toBe("amber");
+    expect(s.value).toBe("1 possibly declared");
   });
 });
 
 describe("Ruling 1: T2 and T7 with natural-form declarations", () => {
-  it('T2: a disclosed car loan declared as "Macquarie", repaid as MACQUARIE LEASING, isn\'t flagged', () => {
-    const s = lia01(loanLines("MACQUARIE LEASING", 560), [
+  // From 1.3.0 (re-review ruling, 19:40) a natural-form declaration is amber "possibly declared",
+  // never undisclosed and never green: only an exact or (after SIG-57) alias-table name is green.
+  it('T2: a disclosed car loan declared as "Macquarie", repaid as MACQUARIE LEASING, isn\'t undisclosed', () => {
+    const s = lia01(loanLines("MACQUARIE LEASING CAR", 560), [
       { type: "car_loan", provider: "Macquarie", repayment_monthly: 560 },
     ]);
-    expect(["amber", "red"]).not.toContain(s.state);
+    expect(s.state).toBe("amber");
+    expect(s.value).toBe("1 possibly declared");
   });
-  it("T7: only disclosed, on-time credit, every declaration in natural form: no amber or red", () => {
+  it("T7: only disclosed, on-time credit, declared in natural form: LIA-01 asks to confirm, no other amber or red", () => {
     const r = run(
       {
         lines: [
-          ...loanLines("SOCIETYONE", 450),
+          ...loanLines("SOCIETYONE PERSONAL", 450),
           ...card("CBA CREDIT CARD"),
           ...bnplLines("AFTERPAY", 60),
         ],
@@ -214,7 +224,10 @@ describe("Ruling 1: T2 and T7 with natural-form declarations", () => {
         assessed_surplus_monthly: 2000,
       },
     );
-    for (const id of ["LIA-01", "LIA-02", "LIA-03", "LIA-04", "LIA-05", "LIA-06"])
+    // "Afterpay Pty Ltd" is an exact name once the company suffix is dropped; the other two are not.
+    expect(stateOf(r, "LIA-01")).toBe("amber");
+    expect(signal(r, "LIA-01").value).toBe("2 possibly declared");
+    for (const id of ["LIA-02", "LIA-03", "LIA-04", "LIA-05", "LIA-06"])
       expect(["amber", "red"], id).not.toContain(stateOf(r, id));
   });
 });
@@ -381,8 +394,8 @@ describe("Ruling 5: one BNPL monthly figure", () => {
     const r = run({ lines: [...bnplLines("AFTERPAY", 60), ...bnplLines("ZIP PAY", 45)] });
     expect(signal(r, "LIA-05").value).toBe("2 providers, $227.5 a month");
   });
-  it("is version 1.2.0", () => {
-    expect(run({}).version).toBe("1.2.0");
+  it("is version 1.3.0", () => {
+    expect(run({}).version).toBe("1.3.0");
   });
 });
 
