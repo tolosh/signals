@@ -26,19 +26,17 @@ const RECORD_SCRIPTS = [
   "lia-distribution.ts",
   "inc-distribution.ts",
   "enrich-sample-v2.ts",
+  // Moved onto the helpers by the SIG-42 review ruling (8 November 2026).
+  "eq-unverified.ts",
+  "lia-detect.ts",
+  "generate-synthetic.ts",
 ];
 /**
- * Already meet the standard with their own code, and belong to runs under independent review at
- * 7a25f34 (SIG-18, SIG-41), so they are left as they are until those reviews are posted.
- * generate-synthetic.ts writes the set itself, checked by its hash, not a run record.
+ * generate-synthetic-v2.ts writes set v2, which is under independent review at b0dad35 (SIG-54):
+ * it is left as it is until that review is posted. The .mjs files are build and CI tools.
  */
-const OWN_EQUIVALENT = ["eq-unverified.ts", "lia-detect.ts"];
-const EXEMPT = [
-  "generate-synthetic.ts",
-  "generate-synthetic-v2.ts",
-  "build-mock-lambda.mjs",
-  "check-pr-title.mjs",
-];
+const OWN_EQUIVALENT: string[] = [];
+const EXEMPT = ["generate-synthetic-v2.ts", "build-mock-lambda.mjs", "check-pr-title.mjs"];
 
 describe("SIG-56 T1: a run never overwrites a record", () => {
   it("writeNew refuses an existing file and writes nothing", () => {
@@ -103,7 +101,12 @@ describe("SIG-56 T3: a record carries its command, its arguments and its commit"
       expect(text, f).toMatch(/from "\.\/lib\/run-record\.js"/);
       expect(text, f).not.toMatch(/writeFileSync\(/);
       expect(text, f).toMatch(/requireCleanTree\(/);
+      expect(text, f).toMatch(/parseRunArgs\(/);
     }
+  });
+  it("no record-writing script hard-codes a record date (lia-detect.ts did)", () => {
+    for (const f of RECORD_SCRIPTS)
+      expect(readFileSync(`scripts/${f}`, "utf8"), f).not.toMatch(/["`/]20\d\d-\d\d-\d\d/);
   });
 });
 
@@ -114,6 +117,11 @@ describe("SIG-56 T4: seeds come from the manifest", () => {
     writeFileSync(path, JSON.stringify({ set: "x", seed: 7, set_sha256: "abc" }));
     expect(manifestSeed(path).seed).toBe(7);
     expect(manifestSeed().seed).toBe(42);
+  });
+  it("generate-synthetic.ts takes set v1's seed from its manifest, not a default of its own", () => {
+    const text = readFileSync("scripts/generate-synthetic.ts", "utf8");
+    expect(text).toMatch(/manifestSeed\(/);
+    expect(text).not.toMatch(/"42"/);
   });
   it("no run script hard-codes a seed the manifest holds", () => {
     for (const f of RECORD_SCRIPTS) {
