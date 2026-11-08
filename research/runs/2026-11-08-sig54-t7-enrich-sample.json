@@ -1,0 +1,857 @@
+{
+  "ticket": "SIG-54",
+  "test": "T7",
+  "command": "npx tsx scripts/enrich-sample-v2.ts --engine ../Enrich/moroku-enrich/packages/engine/dist/index.js",
+  "arguments": {
+    "engine": "../Enrich/moroku-enrich/packages/engine/dist/index.js"
+  },
+  "engine_commit": "3ca45a473c12fd9712934fca1e0ce166fdb534cd",
+  "tree": "clean",
+  "seed": 54,
+  "manifest": "research/datasets/synthetic-v2.manifest.json",
+  "enrich": {
+    "engine_version": "1.7.0",
+    "taxonomy_version": "1.4"
+  },
+  "lookups_loaded": "none (no dictionary, overrides or LLM cache)",
+  "pools": {
+    "bpay": 5352,
+    "statement": 6780
+  },
+  "bpay_as_transfer": {
+    "bills": {
+      "sampled": 31,
+      "categorised_as_transfer": 31
+    },
+    "card_repayments_control": {
+      "sampled": 19,
+      "categorised_as_transfer": 19
+    }
+  },
+  "bpay": {
+    "sample_sha256": "960ed48626def347cb29bd425cbf24e19cc45fc36a8aa532b88d3e321aa699a0",
+    "by_source": {
+      "exclusion": 50
+    },
+    "deterministic_share": 1,
+    "flag_below_80_percent": false,
+    "rows": [
+      {
+        "transaction_id": "syn-v2-0146-evd-t00110",
+        "description": "BPAY ANZ CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0285-evd-t00226",
+        "description": "BPAY NAB CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0529-evd-t00055",
+        "description": "BPAY NRMA INSURANCE",
+        "amount": "-900.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:insurance"
+      },
+      {
+        "transaction_id": "syn-v2-0237-evd-t00173",
+        "description": "BPAY ANZ CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0046-evd-t00058",
+        "description": "BPAY NAB CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0323-evd-t00107",
+        "description": "BPAY NAB CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0298-evd-t00050",
+        "description": "BPAY CBA CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0058-evd-t00037",
+        "description": "BPAY ANZ CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0534-evd-t00068",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-330.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0007-evd-t00080",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-580.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0345-evd-t00044",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-330.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0576-evd-t00062",
+        "description": "BPAY CITY COUNCIL RATES",
+        "amount": "-780.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:council_rates"
+      },
+      {
+        "transaction_id": "syn-v2-0333-evd-t00032",
+        "description": "BPAY NAB CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0114-evd-t00048",
+        "description": "BPAY WESTPAC CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0540-evd-t00109",
+        "description": "BPAY NAB CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0393-evd-t00101",
+        "description": "BPAY NAB CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0117-evd-t00090",
+        "description": "BPAY CBA CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0468-evd-t00039",
+        "description": "BPAY CITY COUNCIL RATES",
+        "amount": "-800.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:council_rates"
+      },
+      {
+        "transaction_id": "syn-v2-0078-evd-t00073",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-530.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0426-evd-t00034",
+        "description": "BPAY ANZ CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0196-evd-t00005",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-660.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0406-evd-t00049",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-520.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0492-evd-t00093",
+        "description": "BPAY NRMA INSURANCE",
+        "amount": "-1590.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:insurance"
+      },
+      {
+        "transaction_id": "syn-v2-0221-evd-t00053",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-680.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0175-evd-t00054",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-530.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0080-evd-t00019",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-600.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0387-evd-t00089",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-660.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0744-evd-t00091",
+        "description": "BPAY WESTPAC CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0371-evd-t00080",
+        "description": "BPAY CITY COUNCIL RATES",
+        "amount": "-570.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:council_rates"
+      },
+      {
+        "transaction_id": "syn-v2-0088-evd-t00109",
+        "description": "BPAY CITY COUNCIL RATES",
+        "amount": "-640.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:council_rates"
+      },
+      {
+        "transaction_id": "syn-v2-0530-evd-t00006",
+        "description": "BPAY CBA CREDIT CARD PAYMENT",
+        "amount": "-360.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0716-evd-t00228",
+        "description": "BPAY NAB CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0542-evd-t00021",
+        "description": "BPAY CBA CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0132-evd-t00074",
+        "description": "BPAY SERVICE NSW REGO",
+        "amount": "-800.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:car_registration"
+      },
+      {
+        "transaction_id": "syn-v2-0152-evd-t00023",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-340.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0050-evd-t00187",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-330.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0485-evd-t00160",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-360.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0244-evd-t00052",
+        "description": "BPAY NAB CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0497-evd-t00094",
+        "description": "BPAY CITY COUNCIL RATES",
+        "amount": "-680.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:council_rates"
+      },
+      {
+        "transaction_id": "syn-v2-0574-evd-t00037",
+        "description": "BPAY CITY COUNCIL RATES",
+        "amount": "-670.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:council_rates"
+      },
+      {
+        "transaction_id": "syn-v2-0241-evd-t00039",
+        "description": "BPAY CITY COUNCIL RATES",
+        "amount": "-680.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:council_rates"
+      },
+      {
+        "transaction_id": "syn-v2-0466-evd-t00039",
+        "description": "BPAY CITY COUNCIL RATES",
+        "amount": "-800.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:council_rates"
+      },
+      {
+        "transaction_id": "syn-v2-0125-evd-t00027",
+        "description": "BPAY NRMA INSURANCE",
+        "amount": "-1290.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:insurance"
+      },
+      {
+        "transaction_id": "syn-v2-0714-evd-t00095",
+        "description": "BPAY CITY COUNCIL RATES",
+        "amount": "-800.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:council_rates"
+      },
+      {
+        "transaction_id": "syn-v2-0713-evd-t00079",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-490.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0642-evd-t00074",
+        "description": "BPAY CITY COUNCIL RATES",
+        "amount": "-450.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:council_rates"
+      },
+      {
+        "transaction_id": "syn-v2-0571-evd-t00020",
+        "description": "BPAY CITY COUNCIL RATES",
+        "amount": "-770.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:council_rates"
+      },
+      {
+        "transaction_id": "syn-v2-0774-evd-t00114",
+        "description": "BPAY CITY COUNCIL RATES",
+        "amount": "-610.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:council_rates"
+      },
+      {
+        "transaction_id": "syn-v2-0107-evd-t00186",
+        "description": "BPAY NAB CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0101-evd-t00084",
+        "description": "BPAY AGL ENERGY",
+        "amount": "-640.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "bill",
+        "true_item": "commitment:utilities"
+      }
+    ]
+  },
+  "statement": {
+    "sample_sha256": "78866e79c99e416662bcf33eb456461549106585bbd3e5ee6d989b859ee0a52b",
+    "by_source": {
+      "fallback": 9,
+      "rules": 25,
+      "exclusion": 5,
+      "credit": 1,
+      "income": 10
+    },
+    "deterministic_share": 0.82,
+    "flag_below_80_percent": false,
+    "rows": [
+      {
+        "transaction_id": "syn-v2-0419-evd-t00139",
+        "description": "EFTPOS 7-ELEVEN 2955 PERTH WA AUS",
+        "amount": "-60.65",
+        "source": "fallback",
+        "category": "other_expenses"
+      },
+      {
+        "transaction_id": "syn-v2-0417-evd-t00159",
+        "description": "EFTPOS GUZMAN Y GOMEZ 4520 CHERMSIDE QL ",
+        "amount": "-39.08",
+        "source": "fallback",
+        "category": "other_expenses"
+      },
+      {
+        "transaction_id": "syn-v2-0437-evd-t00063",
+        "description": "EFTPOS BP 7440 PARRAMATTA NS AUS",
+        "amount": "-69.81",
+        "source": "rules",
+        "category": "vehicle_running"
+      },
+      {
+        "transaction_id": "syn-v2-0416-evd-t00110",
+        "description": "EFTPOS WOOLWORTHS 2763 SYDNEY NS AUS",
+        "amount": "-138.06",
+        "source": "rules",
+        "category": "groceries"
+      },
+      {
+        "transaction_id": "syn-v2-0410-evd-t00121",
+        "description": "EFTPOS NETFLIX.COM SYDNEY AUS",
+        "amount": "-18.99",
+        "source": "rules",
+        "category": "subscriptions"
+      },
+      {
+        "transaction_id": "syn-v2-0434-evd-t00087",
+        "description": "EFTPOS NETFLIX.COM SYDNEY AUS",
+        "amount": "-18.99",
+        "source": "rules",
+        "category": "subscriptions"
+      },
+      {
+        "transaction_id": "syn-v2-0419-evd-t00102",
+        "description": "EFTPOS 7-ELEVEN 1846 PERTH WA AUS",
+        "amount": "-46.32",
+        "source": "fallback",
+        "category": "other_expenses"
+      },
+      {
+        "transaction_id": "syn-v2-0438-evd-t00094",
+        "description": "INTERNET TRANSFER SAVINGS",
+        "amount": "-900.00",
+        "source": "exclusion",
+        "category": "transfer"
+      },
+      {
+        "transaction_id": "syn-v2-0440-evd-t00090",
+        "description": "EFTPOS TELSTRA MELBOURNE AUS",
+        "amount": "-65.00",
+        "source": "rules",
+        "category": "utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0429-evd-t00093",
+        "description": "EFTPOS GUZMAN Y GOMEZ 1503 CHERMSIDE QL ",
+        "amount": "-28.71",
+        "source": "fallback",
+        "category": "other_expenses"
+      },
+      {
+        "transaction_id": "syn-v2-0405-evd-t00040",
+        "description": "EFTPOS SPOTIFY SYDNEY AUS",
+        "amount": "-13.99",
+        "source": "rules",
+        "category": "subscriptions"
+      },
+      {
+        "transaction_id": "syn-v2-0419-evd-t00087",
+        "description": "EFTPOS GRILLD 8959 PERTH WA AUS",
+        "amount": "-34.16",
+        "source": "fallback",
+        "category": "other_expenses"
+      },
+      {
+        "transaction_id": "syn-v2-0403-evd-t00158",
+        "description": "EFTPOS MENULOG 8380 PERTH WA AUS",
+        "amount": "-31.92",
+        "source": "rules",
+        "category": "dining_entertainment"
+      },
+      {
+        "transaction_id": "syn-v2-0407-ccd-t00009",
+        "description": "PAYMENT RECEIVED THANK YOU",
+        "amount": "180.00",
+        "source": "credit",
+        "category": "uncategorised_credit"
+      },
+      {
+        "transaction_id": "syn-v2-0424-evd-t00064",
+        "description": "EFTPOS WOOLWORTHS 8908 CHATSWOOD NS AUS",
+        "amount": "-276.33",
+        "source": "rules",
+        "category": "groceries"
+      },
+      {
+        "transaction_id": "syn-v2-0403-evd-t00106",
+        "description": "EFTPOS BP 9861 PERTH WA AUS",
+        "amount": "-62.76",
+        "source": "rules",
+        "category": "vehicle_running"
+      },
+      {
+        "transaction_id": "syn-v2-0437-evd-t00017",
+        "description": "EFTPOS MCDONALDS 2967 PARRAMATTA NS AUS",
+        "amount": "-50.74",
+        "source": "fallback",
+        "category": "other_expenses"
+      },
+      {
+        "transaction_id": "syn-v2-0433-evd-t00130",
+        "description": "EFTPOS GRILLD 6355 BRISBANE QL AUS",
+        "amount": "-70.72",
+        "source": "fallback",
+        "category": "other_expenses"
+      },
+      {
+        "transaction_id": "syn-v2-0426-evd-t00029",
+        "description": "EFTPOS NETFLIX.COM SYDNEY AUS",
+        "amount": "-18.99",
+        "source": "rules",
+        "category": "subscriptions"
+      },
+      {
+        "transaction_id": "syn-v2-0406-evd-t00001",
+        "description": "EFTPOS COLES 6529 MELBOURNE VI AUS",
+        "amount": "-303.19",
+        "source": "rules",
+        "category": "groceries"
+      },
+      {
+        "transaction_id": "syn-v2-0421-evd-t00014",
+        "description": "EFTPOS SPOTIFY SYDNEY AUS",
+        "amount": "-13.99",
+        "source": "rules",
+        "category": "subscriptions"
+      },
+      {
+        "transaction_id": "syn-v2-0416-evd-t00153",
+        "description": "EFTPOS WOOLWORTHS 8543 SYDNEY NS AUS",
+        "amount": "-160.25",
+        "source": "rules",
+        "category": "groceries"
+      },
+      {
+        "transaction_id": "syn-v2-0429-evd-t00199",
+        "description": "EFTPOS OPTUS CHERMSIDE AUS",
+        "amount": "-65.00",
+        "source": "rules",
+        "category": "utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0412-evd-t00146",
+        "description": "EFTPOS COLES 3341 MELBOURNE VI AUS",
+        "amount": "-199.73",
+        "source": "rules",
+        "category": "groceries"
+      },
+      {
+        "transaction_id": "syn-v2-0438-evd-t00196",
+        "description": "EFTPOS OPTUS SYDNEY AUS",
+        "amount": "-65.00",
+        "source": "rules",
+        "category": "utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0408-evd-t00183",
+        "description": "SALARY NORTHSIDE HEALTH",
+        "amount": "1110.77",
+        "source": "income",
+        "category": "income"
+      },
+      {
+        "transaction_id": "syn-v2-0435-evd-t00098",
+        "description": "SALARY BLUEGUM CONSTRUCTIONS",
+        "amount": "4458.46",
+        "source": "income",
+        "category": "income"
+      },
+      {
+        "transaction_id": "syn-v2-0437-evd-t00080",
+        "description": "EFTPOS WOOLWORTHS 9728 PARRAMATTA NS AUS",
+        "amount": "-182.19",
+        "source": "rules",
+        "category": "groceries"
+      },
+      {
+        "transaction_id": "syn-v2-0428-evd-t00018",
+        "description": "EFTPOS SPOTIFY SYDNEY AUS",
+        "amount": "-13.99",
+        "source": "rules",
+        "category": "subscriptions"
+      },
+      {
+        "transaction_id": "syn-v2-0416-evd-t00169",
+        "description": "EFTPOS NETFLIX.COM SYDNEY AUS",
+        "amount": "-18.99",
+        "source": "rules",
+        "category": "subscriptions"
+      },
+      {
+        "transaction_id": "syn-v2-0403-evd-t00062",
+        "description": "EFTPOS TELSTRA PERTH AUS",
+        "amount": "-65.00",
+        "source": "rules",
+        "category": "utilities"
+      },
+      {
+        "transaction_id": "syn-v2-0402-evd-t00193",
+        "description": "FIRSTMAC LOAN REPAYMENT",
+        "amount": "-260.00",
+        "source": "rules",
+        "category": "loan_repayment"
+      },
+      {
+        "transaction_id": "syn-v2-0406-evd-t00061",
+        "description": "BPAY NAB CREDIT CARD PAYMENT",
+        "amount": "-180.00",
+        "source": "exclusion",
+        "category": "transfer",
+        "label": "card_repayment",
+        "true_item": null
+      },
+      {
+        "transaction_id": "syn-v2-0409-evd-t00111",
+        "description": "SALARY BLUEGUM CONSTRUCTIONS",
+        "amount": "2664.23",
+        "source": "income",
+        "category": "income"
+      },
+      {
+        "transaction_id": "syn-v2-0408-evd-t00185",
+        "description": "EFTPOS GRILLD 7535 PARRAMATTA NS AUS",
+        "amount": "-52.65",
+        "source": "fallback",
+        "category": "other_expenses"
+      },
+      {
+        "transaction_id": "syn-v2-0424-evd-t00123",
+        "description": "SALARY ORBIT RETAIL GROUP",
+        "amount": "1568.46",
+        "source": "income",
+        "category": "income"
+      },
+      {
+        "transaction_id": "syn-v2-0437-evd-t00060",
+        "description": "SALARY ORBIT RETAIL GROUP",
+        "amount": "1790.77",
+        "source": "income",
+        "category": "income"
+      },
+      {
+        "transaction_id": "syn-v2-0438-evd-t00133",
+        "description": "EFTPOS GUZMAN Y GOMEZ 9264 SYDNEY NS AUS",
+        "amount": "-36.29",
+        "source": "fallback",
+        "category": "other_expenses"
+      },
+      {
+        "transaction_id": "syn-v2-0402-evd-t00042",
+        "description": "SALARY NORTHSIDE HEALTH",
+        "amount": "4646.15",
+        "source": "income",
+        "category": "income"
+      },
+      {
+        "transaction_id": "syn-v2-0401-ccd-t00026",
+        "description": "EFTPOS MENULOG 7146 RICHMOND VI AUS",
+        "amount": "-64.36",
+        "source": "rules",
+        "category": "dining_entertainment"
+      },
+      {
+        "transaction_id": "syn-v2-0432-evd-t00013",
+        "description": "EFTPOS WOOLWORTHS 6268 RICHMOND VI AUS",
+        "amount": "-256.81",
+        "source": "rules",
+        "category": "groceries"
+      },
+      {
+        "transaction_id": "syn-v2-0416-evd-t00138",
+        "description": "INTERNET TRANSFER SAVINGS",
+        "amount": "-200.00",
+        "source": "exclusion",
+        "category": "transfer"
+      },
+      {
+        "transaction_id": "syn-v2-0413-evd-t00002",
+        "description": "INTERNET TRANSFER SAVINGS",
+        "amount": "-300.00",
+        "source": "exclusion",
+        "category": "transfer"
+      },
+      {
+        "transaction_id": "syn-v2-0416-evd-t00242",
+        "description": "INTERNET TRANSFER SAVINGS",
+        "amount": "-200.00",
+        "source": "exclusion",
+        "category": "transfer"
+      },
+      {
+        "transaction_id": "syn-v2-0406-evd-t00235",
+        "description": "SALARY ACME CONSULTING PTY LTD",
+        "amount": "1751.54",
+        "source": "income",
+        "category": "income"
+      },
+      {
+        "transaction_id": "syn-v2-0432-evd-t00060",
+        "description": "EFTPOS MENULOG 7107 RICHMOND VI AUS",
+        "amount": "-66.40",
+        "source": "rules",
+        "category": "dining_entertainment"
+      },
+      {
+        "transaction_id": "syn-v2-0424-evd-t00158",
+        "description": "SALARY ORBIT RETAIL GROUP",
+        "amount": "1568.46",
+        "source": "income",
+        "category": "income"
+      },
+      {
+        "transaction_id": "syn-v2-0405-evd-t00242",
+        "description": "SALARY ACME CONSULTING PTY LTD",
+        "amount": "1751.54",
+        "source": "income",
+        "category": "income"
+      },
+      {
+        "transaction_id": "syn-v2-0429-evd-t00177",
+        "description": "EFTPOS WOOLWORTHS 3731 CHERMSIDE QL AUS",
+        "amount": "-144.20",
+        "source": "rules",
+        "category": "groceries"
+      },
+      {
+        "transaction_id": "syn-v2-0415-evd-t00083",
+        "description": "SALARY CITY OF SYDNEY",
+        "amount": "5389.62",
+        "source": "income",
+        "category": "income"
+      }
+    ]
+  }
+}
