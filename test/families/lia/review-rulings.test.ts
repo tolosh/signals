@@ -62,8 +62,8 @@ const card = (biller: string, amount = 180): Line[] =>
   monthlyLines(`BPAY ${biller} PAYMENT`, amount, { category: "transfer", billerName: biller });
 const loanLines = (name: string, amount: number): Line[] =>
   monthlyLines(`${name} LOAN REPAYMENT`, amount, { category: "loan_repayment" });
-const bnplLines = (name: string, amount = 45): Line[] =>
-  repeat(12, 14, { description: `${name} INSTALMENT`, amount: -amount, category: "bnpl" });
+const bnplLines = (name: string, amount = 45, n = 26): Line[] =>
+  repeat(n, 14, { description: `${name} INSTALMENT`, amount: -amount, category: "bnpl" });
 const lia01 = (lines: Line[], declared: Declared[], surplus?: number) =>
   signal(
     run(

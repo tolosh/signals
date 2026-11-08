@@ -68,9 +68,11 @@ describe("T1: each LIA signal at each state it defines", () => {
         { declared_liabilities: [{ type: "personal_loan", provider: "SOCIETYONE" }] },
       ],
       ["LIA-01", "amber", { lines: loan("SOCIETYONE") }],
+      // Red is withheld until SIG-57 is Supported and SIG-58 is wired (review ruling 1): an
+      // undisclosed loan that would take the surplus below zero is amber.
       [
         "LIA-01",
-        "red",
+        "amber",
         { lines: loan("SOCIETYONE") },
         { declared_liabilities: [], assessed_surplus_monthly: 300 },
       ],
@@ -203,10 +205,12 @@ describe("LIA-01 is built on SIG-18's detector, and says how far to trust it", (
     expect(signal(r, "LIA-01").evidence_count).toBe(6);
   });
 
-  it("states the template dependence and exact-name matching, at medium confidence", () => {
+  it("states the template dependence and how it matches the application, at medium confidence", () => {
     const s = signal(run({ lines: loan("SOCIETYONE") }), "LIA-01");
     expect(s.confidence).toBe("medium");
-    expect(s.reason).toMatch(/exact provider name/);
+    expect(s.reason).toMatch(
+      /by provider name, or by type and repayment amount when the names differ/,
+    );
     expect(s.reason).toMatch(/synthetic/);
     expect(s.evidence_quality.review_required).toBe(true);
   });

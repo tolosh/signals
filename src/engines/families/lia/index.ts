@@ -58,6 +58,8 @@ export type LiaConfig = {
    * for tests only; a lender's policy can't set it (liaConfigFromPolicy maps candidates only).
    */
   private_loans: "parked" | "detect";
+  /** LIA-01's fallback: a declared repayment within this fraction matches (a candidate). */
+  declared_amount_tolerance: number;
 };
 export const LIA_DEFAULTS: Readonly<LiaConfig> = Object.freeze({
   min_occurrences: 3,
@@ -73,6 +75,7 @@ export const LIA_DEFAULTS: Readonly<LiaConfig> = Object.freeze({
   private_large_monthly: 500,
   private_increasing: 0.25,
   private_loans: "parked",
+  declared_amount_tolerance: 0.15,
 });
 
 /**
@@ -128,6 +131,16 @@ type Line = {
   amount: number;
   t: LiaFeed["accounts"][number]["transactions"][number];
 };
+/** Declared liability types, by detector family (the detector's own mapping, SIG-18 1.0.0). */
+const DECLARED_FAMILY: Readonly<Record<string, DetectedLiability["family"]>> = Object.freeze({
+  credit_card: "credit_card",
+  car_loan: "loan",
+  personal_loan: "loan",
+  loan: "loan",
+  bnpl: "bnpl",
+  sacc: "sacc",
+  wage_advance: "wage_advance",
+});
 export const LIA06_PARKED = "Private-loan detection is not yet supported on categorised data";
 const BSB_NUMBER = /\b\d{3}-?\d{3}\s+\d{6,10}\b/;
 // Keywords match whole words only, case-insensitively (the text is upper-cased first), so OWEN,
@@ -227,7 +240,10 @@ export function assessLia(input: LiaInput): LiaResult {
   const cat = (l: Line) => input.categories[l.id] ?? "";
   const inWindow = (l: Line) => l.day >= windowStart;
 
-  // LIA-01 Undisclosed liabilities (L-1): SIG-18's detector, then the assessed surplus.
+  // LIA-01 Undisclosed liabilities (L-1): SIG-18's detector, unchanged; then the declaration
+  // fallback (review ruling 1). A liability the detector couldn't match by name is "possibly
+  // declared: review" when a declaration of the same type, not already matched, has a repayment
+  // within declared_amount_tolerance of it; one declaration matches one liability.
   const detected = detectLiabilities({
     feed,
     categories: input.categories,
@@ -237,13 +253,65 @@ export function assessLia(input: LiaInput): LiaResult {
     amount_tolerance: cfg.amount_tolerance,
   });
   const caveat =
-    "Detection rests on lender names in the narratives (tested on synthetic, template-written data only) and matches the application by exact provider name only; check each item against the application";
+    "Detection rests on lender names in the narratives (tested on synthetic, template-written data only). It matches the application by provider name, or by type and repayment amount when the names differ; check each item against the application";
+  const declaredList = input.application.declared_liabilities.map((d, i) => ({
+    i,
+    d,
+    family: DECLARED_FAMILY[d.type],
+    name: normaliseProvider(d.provider),
+  }));
+  const used = new Set<number>();
+  for (const l of detected.liabilities.filter((x) => x.declared)) {
+    const exact = declaredList.find(
+      (x) => !used.has(x.i) && x.family === l.family && x.name === l.provider,
+    );
+    if (exact) used.add(exact.i);
+  }
+  const possibly: { liability: DetectedLiability; declared: DeclaredLiability }[] = [];
+  const undisclosed: DetectedLiability[] = [];
+  for (const l of detected.undisclosed) {
+    const monthly = l.monthly;
+    const candidates =
+      monthly === null
+        ? []
+        : declaredList
+            .filter(
+              (x) =>
+                !used.has(x.i) &&
+                x.family === l.family &&
+                x.d.repayment_monthly !== undefined &&
+                x.d.repayment_monthly > 0 &&
+                Math.abs(monthly - x.d.repayment_monthly) <=
+                  cfg.declared_amount_tolerance * x.d.repayment_monthly + 1e-9,
+            )
+            .sort(
+              (a, b) =>
+                Math.abs(monthly - (a.d.repayment_monthly ?? 0)) -
+                  Math.abs(monthly - (b.d.repayment_monthly ?? 0)) || a.i - b.i,
+            );
+    const match = candidates[0];
+    if (match) {
+      used.add(match.i);
+      possibly.push({ liability: l, declared: match.d });
+    } else undisclosed.push(l);
+  }
   const byId = new Map(lines.map((l) => [l.id, l]));
-  const lia01Lines = detected.undisclosed.flatMap((d) =>
-    d.evidence.map((e) => byId.get(e)).filter((l): l is Line => l !== undefined),
+  const linesOf = (ls: DetectedLiability[]) =>
+    ls.flatMap((d) => d.evidence.map((e) => byId.get(e)).filter((x): x is Line => x !== undefined));
+  const kind = (d: DetectedLiability) => d.family.replace("_", " ");
+  const describe = (d: DetectedLiability) =>
+    `${d.provider} (${kind(d)}${d.monthly ? `, $${d.monthly} a month` : ""})`;
+  const possiblyText = possibly.map(
+    (p) =>
+      `${describe(p.liability)} may be the declared "${p.declared.provider}" ${p.declared.type.replace("_", " ")} ($${p.declared.repayment_monthly} a month): the names differ, the type matches and the repayment is within ${Math.round(cfg.declared_amount_tolerance * 100)}%, so it is possibly declared: review`,
   );
-  const undisclosedMonthly = round2(sum(detected.undisclosed.map((d) => d.monthly ?? 0)));
-  const surplus = input.application.assessed_surplus_monthly ?? null;
+  const counts = [
+    ...(undisclosed.length > 0 ? [`${undisclosed.length} undisclosed`] : []),
+    ...(possibly.length > 0 ? [`${possibly.length} possibly declared`] : []),
+  ].join(", ");
+  // Red (L-1, knockout) waits until SIG-57's alias table is Supported and the assessed surplus is
+  // wired in (SIG-58); until then LIA-01 is amber at most (review ruling 1). The assessed
+  // surplus on the application is not read.
   const lia01: RawSignal =
     detected.liabilities.length === 0
       ? {
@@ -253,7 +321,7 @@ export function assessLia(input: LiaInput): LiaResult {
           ),
           confidence: "medium",
         }
-      : detected.undisclosed.length === 0
+      : undisclosed.length === 0 && possibly.length === 0
         ? raw(
             "LIA-01",
             "green",
@@ -264,21 +332,31 @@ export function assessLia(input: LiaInput): LiaResult {
           )
         : raw(
             "LIA-01",
-            surplus !== null && surplus - undisclosedMonthly < 0 ? "red" : "amber",
-            `${detected.undisclosed.length} undisclosed`,
-            `${detected.undisclosed.map((d) => `${d.provider} (${d.family.replace("_", " ")}${d.monthly ? `, $${d.monthly} a month` : ""})`).join("; ")} found but not in the application` +
-              (surplus !== null && surplus - undisclosedMonthly < 0
-                ? `; the repayments move the assessed surplus of $${surplus} below zero`
-                : "") +
-              `. ${caveat}`,
-            lia01Lines,
+            undisclosed.length > 0 ? "amber" : "green",
+            counts,
+            [
+              ...(undisclosed.length > 0
+                ? [`${undisclosed.map(describe).join("; ")} found but not in the application`]
+                : []),
+              ...possiblyText,
+            ].join(". ") + `. ${caveat}`,
+            linesOf([...undisclosed, ...possibly.map((p) => p.liability)]),
             {
               confidence: "medium",
-              review_reason: "A liability in the shared data is missing from the application",
-              resolve_with: detected.undisclosed.map(
-                (d) =>
-                  `The applicant's confirmation of the ${d.provider} ${d.family.replace("_", " ")}, added to the application`,
-              ),
+              review_reason:
+                undisclosed.length > 0
+                  ? "A liability in the shared data is missing from the application"
+                  : "A liability in the shared data may match a declared one under a different name",
+              resolve_with: [
+                ...undisclosed.map(
+                  (d) =>
+                    `The applicant's confirmation of the ${d.provider} ${kind(d)}, added to the application`,
+                ),
+                ...possibly.map(
+                  (p) =>
+                    `Confirm whether ${p.liability.provider} is the declared "${p.declared.provider}" ${p.declared.type.replace("_", " ")}`,
+                ),
+              ],
             },
           );
 
