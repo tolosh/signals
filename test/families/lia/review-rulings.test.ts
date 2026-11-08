@@ -369,3 +369,19 @@ describe("Ruling 4: LIA-03 and the shared-accounts rule, pinned", () => {
     expect(stateOf(run({ lines: saccAt(10) }), "LIA-03")).toBe("red");
   });
 });
+
+// Ruling 5: LIA 1.2.0, and one monthly figure for a BNPL in both LIA-01 and LIA-05.
+describe("Ruling 5: one BNPL monthly figure", () => {
+  it("an undisclosed Afterpay at $60 a fortnight is $130 a month in both LIA-01 and LIA-05", () => {
+    const r = run({ lines: bnplLines("AFTERPAY", 60) });
+    expect(signal(r, "LIA-01").reason).toContain("$130 a month");
+    expect(signal(r, "LIA-05").value).toBe("1 provider, $130 a month");
+  });
+  it("two providers add up: Afterpay $60 and Zip $45 a fortnight are $227.5 a month", () => {
+    const r = run({ lines: [...bnplLines("AFTERPAY", 60), ...bnplLines("ZIP PAY", 45)] });
+    expect(signal(r, "LIA-05").value).toBe("2 providers, $227.5 a month");
+  });
+  it("is version 1.2.0", () => {
+    expect(run({}).version).toBe("1.2.0");
+  });
+});
