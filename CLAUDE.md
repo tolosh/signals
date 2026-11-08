@@ -88,14 +88,17 @@ At close (every ticket, no exceptions):
   Real consented data never enters the repository, fixtures or run records;
   only counts and rates do.
 - Secrets only from Secrets Manager or KMS. openfeed signing keys never leave KMS.
-- Sensitive spending (medical, pharmacy, religious, union, political) never feeds
-  a signal or decisioning input (GR-3). Every engine entry that reads transactions
-  removes it first with `withoutSensitive` (src/engines/sensitive.ts), by Enrich
-  category (`healthcare`, or a payee Enrich marks sensitive) or by MCC;
-  test/repo/gr3.test.ts enforces it. Limits: a line with neither a sensitive
-  category nor an MCC (a bank transfer to a parish) can't be recognised, and
-  observed living expenses still count `healthcare` (AF-E1), pending ruling
-  G-1 (docs/adr/0007-gr3-sensitive-spending.md).
+- Sensitive spending (medical, pharmacy, religious, union, political, and payees
+  Enrich marks sensitive) never feeds a signal, a decisioning or scorecard input,
+  or anything shown or explained per category (GR-3, Product Specification §9.2;
+  Decision Record D29). Health still counts towards the living-expense total
+  (AF-E1) as an aggregate amount only, never itemised; religious, union and
+  political spending never enters it. Every engine entry that reads transactions
+  removes sensitive lines first with `withoutSensitive` (src/engines/sensitive.ts),
+  by Enrich category or MCC; observed living expenses apply D29 instead.
+  test/repo/gr3.test.ts enforces both. Limit: a line with neither a sensitive
+  category nor an MCC (a bank transfer to a parish) can't be recognised until
+  Enrich marks sensitive payees (ENR-31).
 - No endpoint, field or enum returns approve or decline (GR-1). Decisioning
   queues are in_appetite, review, outside_appetite, unverified. How GR-1 applies to
   reporting a lender's own recorded decisions is pending Decision Record D7.
