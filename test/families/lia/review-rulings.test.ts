@@ -392,7 +392,9 @@ describe("Ruling 5: one BNPL monthly figure", () => {
 describe("LIA-05 rising needs history covering both 90-day windows", () => {
   it("a 3-month history of steady BNPL repayments is not rising (3-month request)", () => {
     const r = run({ months: 3, lines: bnplLines("ZIP PAY", 60, 7) }, undefined, {}, 3);
-    expect(stateOf(r, "LIA-05")).toBe("green");
+    // Not red. One provider, not rising, is green, and green below the 6-month minimum stays
+    // unverified (ruling 3: only amber and red show on a short history).
+    expect(stateOf(r, "LIA-05")).toBe("unverified");
   });
   it("a 12-month history whose BNPL outflow rose is still red", () => {
     const lines = [
