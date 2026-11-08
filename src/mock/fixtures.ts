@@ -333,6 +333,12 @@ const policy = {
     large_loan_amount: 500000,
     policy_loan_amount: null,
   },
+  // SIG-42 ruling 2: candidate workspace defaults (contract 1.8.0).
+  liability_signals: {
+    bnpl_rising: 0.25,
+    private_large_monthly: 500,
+    private_increasing: 0.25,
+  },
 };
 const benchmark = {
   id: "bmk_01",
