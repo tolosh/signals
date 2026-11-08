@@ -39,7 +39,7 @@ export const EQ_THRESHOLDS = Object.freeze({
  * The EQ method version (EQ-R6). Version 2 (SIG-55) measures EQ-03 by the days covered; version 3
  * (SIG-55 ruling, E-10) adds the 60-day ceiling.
  */
-export const EQ_METHOD_VERSION = 3;
+export const EQ_METHOD_VERSION = 4;
 
 /** "062-000 123456" or "062000 123456": a BSB and account number in a transfer narrative. */
 const BSB_NUMBER = /\b(\d{3})-?(\d{3})\s+(\d{6,10})\b/;

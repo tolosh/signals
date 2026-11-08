@@ -57,11 +57,11 @@ function onDays(days: string[]): GeneratedApplicant {
 }
 
 describe("the ceiling is ruled: 60 days, with 21 and 1.5 unchanged", () => {
-  it("records the three candidates, and the method is version 3", () => {
+  it("records the three candidates, and the method is version 4 (SIG-42 ruling 3; its checks are method 3's)", () => {
     expect(EQ_THRESHOLDS.gap_min_days).toBe(21);
     expect(EQ_THRESHOLDS.gap_rhythm_multiple).toBe(1.5);
     expect(EQ_THRESHOLDS.gap_ceiling_days).toBe(60);
-    expect(EQ_METHOD_VERSION).toBe(3);
+    expect(EQ_METHOD_VERSION).toBe(4);
   });
 });
 

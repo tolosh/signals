@@ -1,8 +1,11 @@
 // SIG-42 review ruling 3 (8 November 2026), EQ method 4: findings show; absence needs history.
-// Under EQ-R4 a signal below its minimum history is unverified. From method 4, a signal that found
-// something adverse (amber or red) shows on any history the evidence checks allow; only absence
-// (none_observed), green and evidenced still need the signal's full minimum (EQ-R2: absence is
-// never proof; presence is). EQ-01, EQ-02 and EQ-03 caps still apply as ruled. Method 3 replays.
+// Under EQ-R4 a signal below its minimum history is unverified. From method 4, a signal that looks
+// for something's presence (depends_on_absence: LIA-01 to LIA-06, INC-05) and found it, amber or
+// red, shows on any history the evidence checks allow; nothing found, green and evidenced still
+// need the full minimum (EQ-R2: absence is never proof; presence is). EQ-01, EQ-02 and EQ-03 caps
+// still apply. Signals judged over months, such as INC-09, stay capped (E-12, ADR 0002): on set
+// v1 the wider reading made INC-09 amber on 72 salaried 6-month histories, from months with no
+// data. Method 3 replays.
 import { describe, expect, it } from "vitest";
 import {
   applyEvidence,
@@ -25,6 +28,7 @@ const as = (r: RawSignal, state: RawSignal["state"]): RawSignal => ({
   value: "found",
   reason: "Found something adverse",
 });
+const INC_05: RawSignal = { ...INC_09, id: "INC-05", nothing_found: true };
 const LIA_01_FOUND = (state: "amber" | "red"): RawSignal => ({
   ...as(LIA_01_NONE, state),
   evidence: { account_ids: ["x-evd"], transaction_count: 4 },
@@ -38,15 +42,19 @@ describe("EQ method 4: findings show, absence needs history", () => {
     expect(assessEvidence(input(six)).eq_version).toBe(4);
   });
 
-  it("a 12-month signal that found something amber or red shows it on a 6-month history", () => {
-    const ctx = assessEvidence(input(six));
-    expect(stateOf(as(INC_09, "amber"), ctx)).toBe("amber");
-    expect(stateOf(as(INC_09, "red"), ctx)).toBe("red");
+  it("a presence signal that found something amber or red shows it below its minimum", () => {
+    const ctx = assessEvidence(input(three, 3));
+    expect(stateOf(LIA_01_FOUND("amber"), ctx)).toBe("amber");
+    expect(stateOf(LIA_01_FOUND("red"), ctx)).toBe("red");
+    expect(stateOf(as(INC_05, "red"), ctx)).toBe("red");
   });
   it("its block still says how much history the signal needs", () => {
-    const [s] = applyEvidence([as(INC_09, "amber")], assessEvidence(input(six)));
-    expect(s?.evidence_quality.completeness.history_months_required).toBe(12);
+    const [s] = applyEvidence([LIA_01_FOUND("amber")], assessEvidence(input(three, 3)));
+    expect(s?.evidence_quality.completeness.history_months_required).toBe(6);
     expect(s?.confidence).toBe("high");
+  });
+  it("E-12: a signal judged over months stays unverified below its minimum, even amber", () => {
+    expect(stateOf(as(INC_09, "amber"), assessEvidence(input(six)))).toBe("unverified");
   });
   it("green on too short a history stays unverified", () => {
     expect(stateOf(INC_09, assessEvidence(input(six)))).toBe("unverified");
@@ -71,8 +79,8 @@ describe("EQ method 4: findings show, absence needs history", () => {
     expect(stateOf(LIA_01_FOUND("red"), ctx)).toBe("unverified");
   });
 
-  it("method 3 replays: the amber 12-month signal on 6 months is unverified", () => {
-    const ctx = assessEvidence({ ...input(six), eq_version: 3 });
-    expect(stateOf(as(INC_09, "amber"), ctx)).toBe("unverified");
+  it("method 3 replays: the amber card on a 3-month history is unverified", () => {
+    const ctx = assessEvidence({ ...input(three, 3), eq_version: 3 });
+    expect(stateOf(LIA_01_FOUND("amber"), ctx)).toBe("unverified");
   });
 });

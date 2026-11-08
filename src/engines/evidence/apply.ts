@@ -34,7 +34,17 @@ function caps(def: SignalDefinition, raw: RawSignal, ctx: EvidenceContext): Cap[
       resolve: ["Connect the accounts through open banking"],
       review: null,
     });
-  if (ctx.history_months_available < def.min_history_months * EQ_THRESHOLDS.history_tolerance)
+  // From EQ method 4 (SIG-42 review ruling 3): findings show, absence needs history. A signal
+  // that looks for something's presence (EQ-R2: depends_on_absence) and found it, amber or red,
+  // shows on any history the checks above allow; nothing found, green and evidenced still need
+  // the full minimum. Signals judged over months (INC-09's troughs, say) aren't findings of
+  // presence: below their minimum, the months without data would read as low months (E-12).
+  const found =
+    ctx.eq_version >= 4 && def.depends_on_absence && (raw.state === "amber" || raw.state === "red");
+  if (
+    !found &&
+    ctx.history_months_available < def.min_history_months * EQ_THRESHOLDS.history_tolerance
+  )
     out.push({
       reason: `Not verified: this signal needs ${def.min_history_months} months of history`,
       resolve: [`Share ${def.min_history_months} months of transaction history`],
