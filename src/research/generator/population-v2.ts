@@ -3,14 +3,19 @@
 // SIG-18 review). Every applicant is generated at 2.0.0 (a v2 block), with gross as the input
 // where there is an employer, and a requested lookback drawn from its own stream, independent of
 // the history held.
+import { createHash } from "node:crypto";
 import {
   EMPLOYER_ALIASES,
   EMPLOYERS,
+  GENUINELY_DIFFERENT_V21,
   GIG_PAYERS,
   NATURAL_NAMES,
+  NATURAL_NAMES_V21,
   NATURAL_SUFFIX,
+  PAYER_RENAMES_V21,
   PROVIDERS,
   UNSEEN_PROVIDERS,
+  UNSEEN_PROVIDERS_V21,
 } from "./catalog.js";
 import { merge, scenario } from "./population.js";
 import { stream } from "./rng.js";
@@ -19,6 +24,8 @@ import type { ApplicantSpec, LiabilitySpec, LiabilityType, SpecOverrides } from 
 
 /** Set v2's seed. Set v1 keeps 42. */
 export const SET_V2_SEED = 54;
+/** Set v2.1's seed (generator 2.1.0). */
+export const SET_V21_SEED = 541;
 const TAX_YEAR = "2026-27";
 
 /** Minimum count per tag. The manifest records the final counts. */
@@ -53,10 +60,17 @@ export const SET_V2_MINIMUMS: Readonly<Record<string, number>> = Object.freeze({
   "no-card-biller-cue": 20,
 });
 
+/** Set v2.1's minimums: set v2's, with the two the review found set to 1 at their real values. */
+export const SET_V21_MINIMUMS: Readonly<Record<string, number>> = Object.freeze({
+  ...SET_V2_MINIMUMS,
+  "salaried-fixed": 60,
+  "mortgage-undisclosed": 10,
+});
+
 type R = ReturnType<typeof stream>;
 const PAYS = { weekly: 52, fortnightly: 26, monthly: 12 } as const;
-const natural = (type: LiabilityType, provider: string) =>
-  `${NATURAL_NAMES[provider] ?? provider}${NATURAL_SUFFIX[type] ?? ""}`;
+const natural = (type: LiabilityType, provider: string, v21 = false) =>
+  `${(v21 ? NATURAL_NAMES_V21 : NATURAL_NAMES)[provider] ?? provider}${NATURAL_SUFFIX[type] ?? ""}`;
 /** Net per pay for a gross salary, through the generator's tax table. */
 const netPerPay = (gross: number, cadence: keyof typeof PAYS) =>
   Math.round((netFromGross(gross, taxTable(TAX_YEAR)).net_annual / PAYS[cadence]) * 100) / 100;
@@ -119,9 +133,15 @@ function salaried(rng: R): SpecOverrides {
   };
 }
 
-export function populationV2(seed: number): ApplicantSpec[] {
+export function populationV2(seed: number, variant: "2.0" | "2.1" = "2.0"): ApplicantSpec[] {
+  const v21 = variant === "2.1";
   const specs: ApplicantSpec[] = [];
   let n = 0;
+  // Set v2.1: IDs are seeded hashes, so the allocation block can't be read from them.
+  const idOf = (k: number) =>
+    v21
+      ? `syn-v21-${createHash("sha256").update(`${seed}|applicant|${k}`).digest("hex").slice(0, 12)}`
+      : `syn-v2-${String(k).padStart(4, "0")}`;
   /** Adds `count` applicants: the salaried base merged with `extra` (arrays replace). */
   const group = (
     tags: string[],
@@ -130,13 +150,19 @@ export function populationV2(seed: number): ApplicantSpec[] {
   ) => {
     for (let i = 0; i < count; i++) {
       n += 1;
-      const id = `syn-v2-${String(n).padStart(4, "0")}`;
+      const id = idOf(n);
       const rng = stream(seed, `population-v2:${id}`);
       const base = salaried(rng);
       const over = merge(base, extra(rng, base, i));
       // The lender's request: its own stream, never derived from the history (SIG-39 ruling).
       const requested_lookback = stream(seed, `request:${id}`).pick([3, 6, 6, 6, 12] as const);
-      specs.push(scenario(merge(over, { v2: { requested_lookback } }), id, tags));
+      specs.push(
+        scenario(
+          merge(over, { v2: { requested_lookback, ...(v21 ? { variant: "2.1" as const } : {}) } }),
+          id,
+          tags,
+        ),
+      );
     }
   };
   const changeAt = (rng: R, base: SpecOverrides, payer?: string): SpecOverrides => {
@@ -150,6 +176,7 @@ export function populationV2(seed: number): ApplicantSpec[] {
             after_days: rng.int(45, 150),
             net_per_pay: netPerPay(Math.round(gross), cadence),
             ...(payer ? { payer } : {}),
+            ...(v21 ? { gross_annual: Math.round(gross) } : {}),
           },
         },
       },
@@ -176,11 +203,14 @@ export function populationV2(seed: number): ApplicantSpec[] {
         mode === "over_time" ? "drift-over-time" : "drift-across-banks",
       ],
       20,
-      (_rng, base) => ({
-        v2: {
-          payer_drift: { mode, alias: EMPLOYER_ALIASES[base.income?.payer ?? ""] ?? "PAYROLL" },
-        },
-      }),
+      (rng, base) => {
+        const employer = base.income?.payer ?? "";
+        // Set v2.1: the payroll system's rename is drawn per applicant, so pairs aren't a fixed six.
+        const alias = v21
+          ? rng.pick(PAYER_RENAMES_V21)(employer)
+          : (EMPLOYER_ALIASES[employer] ?? "PAYROLL");
+        return { v2: { payer_drift: { mode, alias } } };
+      },
     );
 
   // Variable income and gig, 60 each (SIG-16). Gig earners have no employer gross.
@@ -306,11 +336,17 @@ export function populationV2(seed: number): ApplicantSpec[] {
     ];
     return {
       liabilities: [...own, ...declared].map((l) => {
-        const provider = l.provider ?? rng.pick(PROVIDERS[l.type] ?? ["LENDER"]);
+        // Set v2.1: mostly lenders whose natural name genuinely differs from the feed's.
+        const different = GENUINELY_DIFFERENT_V21[l.type];
+        const provider =
+          l.provider ??
+          (v21 && different && rng.chance(0.9)
+            ? rng.pick(different)
+            : rng.pick(PROVIDERS[l.type] ?? ["LENDER"]));
         return {
           ...l,
           provider,
-          ...(l.declared !== false ? { declared_as: natural(l.type, provider) } : {}),
+          ...(l.declared !== false ? { declared_as: natural(l.type, provider, v21) } : {}),
         };
       }),
     };
@@ -324,7 +360,7 @@ export function populationV2(seed: number): ApplicantSpec[] {
       "sacc",
       "wage_advance",
     ] as const);
-    const provider = rng.pick(UNSEEN_PROVIDERS[type] ?? ["LENDER"]);
+    const provider = rng.pick((v21 ? UNSEEN_PROVIDERS_V21 : UNSEEN_PROVIDERS)[type] ?? ["LENDER"]);
     const declared = rng.chance(0.3);
     return {
       liabilities: [
@@ -335,7 +371,7 @@ export function populationV2(seed: number): ApplicantSpec[] {
           declared,
           account_shared: type === "credit_card" ? rng.chance(0.5) : false,
           unseen_lender: true,
-          ...(declared ? { declared_as: natural(type, provider) } : {}),
+          ...(declared ? { declared_as: natural(type, provider, v21) } : {}),
         },
       ],
     };
@@ -361,5 +397,12 @@ export function populationV2(seed: number): ApplicantSpec[] {
       },
     ],
   }));
+  if (!v21) return specs;
+  // Set v2.1: groups are no longer contiguous; the order is a seeded shuffle.
+  const order = stream(seed, "v21:shuffle");
+  for (let i = specs.length - 1; i > 0; i--) {
+    const j = order.int(0, i);
+    [specs[i], specs[j]] = [specs[j] as ApplicantSpec, specs[i] as ApplicantSpec];
+  }
   return specs;
 }

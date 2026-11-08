@@ -1,0 +1,6798 @@
+{
+  "set": "synthetic-v2.1",
+  "seed": 541,
+  "generator_version": "2.1.0",
+  "ground_truth_schema_version": "2.1.0",
+  "as_of_date": "2026-10-31",
+  "tax_table": {
+    "id": "ato-resident-2026-27",
+    "income_year": "2026-27",
+    "effective_from": "2026-07-01",
+    "effective_to": "2027-06-30",
+    "brackets": [
+      {
+        "over": 18200,
+        "rate": 0.15
+      },
+      {
+        "over": 45000,
+        "rate": 0.3
+      },
+      {
+        "over": 135000,
+        "rate": 0.37
+      },
+      {
+        "over": 190000,
+        "rate": 0.45
+      }
+    ],
+    "medicare": {
+      "rate": 0.02,
+      "low_income_lower": 28011,
+      "low_income_upper": 35013,
+      "shade_in_rate": 0.1,
+      "thresholds_income_year": "2025-26",
+      "thresholds_provisional": true
+    },
+    "source": {
+      "url": "https://www.ato.gov.au/tax-rates-and-codes/tax-rates-australian-residents",
+      "page_updated": "2026-08-13",
+      "checked": "2026-11-08",
+      "medicare_url": "https://www.ato.gov.au/individuals-and-families/medicare-and-private-health-insurance/medicare-levy/medicare-levy-reduction/medicare-levy-reduction-for-low-income-earners"
+    }
+  },
+  "applicants": 780,
+  "transactions": 124178,
+  "minimums": {
+    "salaried": 200,
+    "salaried-irregular": 100,
+    "salaried-payer-drift": 40,
+    "salaried-fixed": 60,
+    "variable-income": 60,
+    "gig": 60,
+    "dishonour-one-recent": 20,
+    "dishonour-two-plus-recent": 20,
+    "dishonour-old-only": 20,
+    "dishonour-clean": 20,
+    "statement-feed": 40,
+    "history-1-month": 20,
+    "mortgage": 40,
+    "mortgage-undisclosed": 10,
+    "benefits": 20,
+    "undisclosed-card": 20,
+    "bnpl": 20,
+    "sacc": 20,
+    "wage-advance": 20,
+    "gambling": 20,
+    "coverage-gap": 20,
+    "undisclosed-personal-loan": 20,
+    "undisclosed-car-loan": 20,
+    "repaid-from-unshared": 20,
+    "natural-declarations": 20,
+    "unseen-lenders": 20,
+    "reference-noise": 20,
+    "no-card-biller-cue": 20
+  },
+  "by_tag": {
+    "account-in-grant": 20,
+    "account-not-in-grant": 20,
+    "benefits": 20,
+    "bnpl": 20,
+    "bonus": 33,
+    "coverage-gap": 20,
+    "dishonour-clean": 20,
+    "dishonour-old-only": 20,
+    "dishonour-one-recent": 20,
+    "dishonour-two-plus-recent": 20,
+    "drift-across-banks": 20,
+    "drift-over-time": 20,
+    "gambling": 20,
+    "gig": 60,
+    "history-1-month": 20,
+    "mortgage": 40,
+    "mortgage-undisclosed": 10,
+    "natural-declarations": 20,
+    "new-employer": 16,
+    "no-card-biller-cue": 20,
+    "overtime": 34,
+    "pay-rise": 17,
+    "reference-noise": 20,
+    "repaid-from-unshared": 20,
+    "sacc": 20,
+    "salaried": 200,
+    "salaried-fixed": 60,
+    "salaried-irregular": 100,
+    "salaried-payer-drift": 40,
+    "statement-feed": 40,
+    "undisclosed-car-loan": 20,
+    "undisclosed-card": 20,
+    "undisclosed-personal-loan": 20,
+    "unseen-lenders": 20,
+    "variable-income": 60,
+    "wage-advance": 20
+  },
+  "request_by_history": {
+    "request 12 / history 1": 8,
+    "request 12 / history 12": 48,
+    "request 12 / history 3": 42,
+    "request 12 / history 6": 63,
+    "request 3 / history 1": 4,
+    "request 3 / history 12": 61,
+    "request 3 / history 3": 45,
+    "request 3 / history 6": 59,
+    "request 6 / history 1": 8,
+    "request 6 / history 12": 143,
+    "request 6 / history 3": 141,
+    "request 6 / history 6": 158
+  },
+  "unseen_lenders": {
+    "credit_card": [
+      "BANKWEST",
+      "ING",
+      "HSBC"
+    ],
+    "personal_loan": [
+      "WISR",
+      "LATITUDE",
+      "NOW FINANCE"
+    ],
+    "car_loan": [
+      "PEPPER MONEY",
+      "ANGLE AUTO FINANCE"
+    ],
+    "bnpl": [
+      "PAYRIGHT",
+      "BUNDLL"
+    ],
+    "sacc": [
+      "SUNSHINE LOANS",
+      "MONEYME"
+    ],
+    "wage_advance": [
+      "EARND",
+      "HASTEE"
+    ]
+  },
+  "set_sha256": "819d9e2197597fe4b5ffe41f3248ef8e47d1389528d6e3761401da875c9d6de0",
+  "generated_by": {
+    "command": "npx tsx scripts/generate-synthetic-v2.ts --variant 2.1",
+    "arguments": {
+      "variant": "2.1"
+    },
+    "engine_commit": "76eeb14d8245f0bc841f50dbb62b64d47f8a218d",
+    "tree": "clean"
+  },
+  "files": [
+    {
+      "id": "syn-v21-83b6a0cd67a4",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "ca28a05d9b6d600979446a5b765cf7ece80ca3421cc7a6a6688d9a30e4803af9",
+      "transactions": 18
+    },
+    {
+      "id": "syn-v21-cdb19a7f7d6d",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "92dfdf993b2a36e58f5028899e82b11b5c4335e496b839f8b3d152ef3af3fa8b",
+      "transactions": 61
+    },
+    {
+      "id": "syn-v21-8831063c725f",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "91f6c88334d1f1ad66fc31d93a254a266278e0643988dda9d4218eee7efc0b32",
+      "transactions": 90
+    },
+    {
+      "id": "syn-v21-59a4f6081af4",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "871201c0186c8550b6bf7b40555b9ae14898d240f1f9f95b557baec229703be7",
+      "transactions": 71
+    },
+    {
+      "id": "syn-v21-c3d9f4aba549",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "fc29556340ebae10a49160ab6702425d220a8e5bae5af265ba31df438649772b",
+      "transactions": 72
+    },
+    {
+      "id": "syn-v21-9a71ece1eca2",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "35dcb68a5bad7bc615da7c7f1cb7989f48e3bd567f80de08aaba66607dd1f7b3",
+      "transactions": 174
+    },
+    {
+      "id": "syn-v21-a88a02b8288f",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "84e459b5402b7eb0e1803055bb6c5b9a88b823699d4f1d8f158c0d2c513052fe",
+      "transactions": 308
+    },
+    {
+      "id": "syn-v21-e6e274a41ad7",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "a69094fa9c4f703528b27eca10f517392e024fe72f8a0e03801a57f3369fca18",
+      "transactions": 294
+    },
+    {
+      "id": "syn-v21-9a462d235b68",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "dd1825631691d55098f5fb210c07f96ee485f3c10b86a9f69b134f2c064d5c33",
+      "transactions": 136
+    },
+    {
+      "id": "syn-v21-835d07ade318",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "bd2199aae2db7caf9fe32bf6321ada3bf198a697488a0d740a38b521031213a8",
+      "transactions": 129
+    },
+    {
+      "id": "syn-v21-73c1b429e233",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "f5c333a554c4da8100add5deafae59ec5e7585f7641fc0abdf33a16a85ccd520",
+      "transactions": 134
+    },
+    {
+      "id": "syn-v21-fe1c40e8c487",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "c4d7c6ec903134723ae874ea144482893ec74610ccde7c9e1abc5b17044c2aa6",
+      "transactions": 82
+    },
+    {
+      "id": "syn-v21-afa31f587ac4",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "03044d719d3ede4538d527659d887529e71d77f3df9cee450e543ba8917cfbc2",
+      "transactions": 139
+    },
+    {
+      "id": "syn-v21-ea3d23c4b5e2",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "dbf640f12e977e1c724b572aca285daebce80284fcd5ad61f95936d62716f158",
+      "transactions": 21
+    },
+    {
+      "id": "syn-v21-39af9e418727",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "81f96775be83463f56839b3ce7049e9630a226fe2650ae9279c5dc0685bdfca2",
+      "transactions": 117
+    },
+    {
+      "id": "syn-v21-237fb6b9314d",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "8cafeac991bb1c8b56fb2238e9c21bc08de1de69385a8e0c7be35fd43c901e5e",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-45853f5d7193",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "0f1ceefaa38dda8ee987104a3dede5f7cf3cea870b172532fd70d86bf5f1bad6",
+      "transactions": 55
+    },
+    {
+      "id": "syn-v21-35afaf011598",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "b43616a6c56a779d645f6cf27e890e300db9950f1049216a8d7270701aee4fea",
+      "transactions": 116
+    },
+    {
+      "id": "syn-v21-7e6a6597c44a",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "d1b8fcec1f681623763b7077123f973a5a7f78ed02a849c1d88e100836be8490",
+      "transactions": 260
+    },
+    {
+      "id": "syn-v21-81824ecc8ecb",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "5833815d4ce732c92e69f751332462e64a022e6092da3aac65091a3ccbf158a9",
+      "transactions": 126
+    },
+    {
+      "id": "syn-v21-2a22c0e030fd",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "0c0fb1bdefa530717423fa7015ddb375fad40716ad008531e6727bc0bac720a4",
+      "transactions": 23
+    },
+    {
+      "id": "syn-v21-96a35a1cb3de",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "fd05282dc7386662568de9ef47e97de6e44cb40729db19332f35ea3d35c07bc5",
+      "transactions": 70
+    },
+    {
+      "id": "syn-v21-8d19cdb0e213",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "705764aa96d846af4febd5b2e47d15ff8bfdb8e42ac0672cd92537f773042374",
+      "transactions": 154
+    },
+    {
+      "id": "syn-v21-213193d91910",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "f4c63b6482a2eb8b57863ab636aada8031844902243e44f1597b820cca86c350",
+      "transactions": 84
+    },
+    {
+      "id": "syn-v21-9cd362b37d9c",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "75d6052e3a7dc8021bc5797784d19963118123344711f119afd7dd65763b4103",
+      "transactions": 247
+    },
+    {
+      "id": "syn-v21-3f7d7a8f8e00",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "4ba242292cce4d13ee529ae523c393c6cc81b5851315191a3a93ea3a3f4280c0",
+      "transactions": 130
+    },
+    {
+      "id": "syn-v21-f9301682749c",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "fc7a88094d773575e5bcc60f7364e733b0a9c28ab72383f62164ce3b2587d704",
+      "transactions": 123
+    },
+    {
+      "id": "syn-v21-2014f27c1259",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "916eb3fa188e3368b29b598c0be31a9188821e298719a1ad43c1a0c3e609aed9",
+      "transactions": 267
+    },
+    {
+      "id": "syn-v21-4a13cb58776b",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "74f7818a85b7a6fc1444f35bc6d0c09b163da7caf0f466f7f0930ffa74f2024b",
+      "transactions": 124
+    },
+    {
+      "id": "syn-v21-c0d501ec0e58",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "2e734456ff56ef2ff727a64b2901de3431a063ff49664316dc7262c17042e56d",
+      "transactions": 314
+    },
+    {
+      "id": "syn-v21-b5375aed155d",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "e2d321e52f9932cf3190e87a9e6032c8065c523eb4deb7753788424dce4ec309",
+      "transactions": 71
+    },
+    {
+      "id": "syn-v21-fbcf99416241",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "f65026c25631a60bdd015796efc2af4a2da618a5431e3a2138a5fab5cb6e6911",
+      "transactions": 134
+    },
+    {
+      "id": "syn-v21-00833fd0ba06",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "6a8e9f0e9cffa7566ad2d0966c4389b4530efe818a371737ef53596d274bf07a",
+      "transactions": 81
+    },
+    {
+      "id": "syn-v21-7d859288f8ae",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "4ed3673f973dd1cd24c6aae3290b28dc30111ca3cbcf590ad2cbf3600c412130",
+      "transactions": 259
+    },
+    {
+      "id": "syn-v21-47372d4ff94e",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "6601da597367b6027c12378357880cc3ba4186b1622930c15a6234e773a41124",
+      "transactions": 185
+    },
+    {
+      "id": "syn-v21-cab58ac4b8f0",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "7d8626eca3133b7222ab199506b7d06d5c1511bab640df2e9eedc46f0e4973d5",
+      "transactions": 64
+    },
+    {
+      "id": "syn-v21-9540cb04fe44",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "bc6eff324c88fda3001f407907e966f6ddaa9f05eed76de09bb6592b39aa5093",
+      "transactions": 77
+    },
+    {
+      "id": "syn-v21-545b1d2408cb",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "87d417b41d54457d8440bfe29fb75ff49b5f517ca7ee75db6a0c6129df997169",
+      "transactions": 225
+    },
+    {
+      "id": "syn-v21-f03f2ff9458d",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "37e1d34967da832d03aca9423b952aeafa76b412e4e27a11bb5c586e93ebd4b3",
+      "transactions": 124
+    },
+    {
+      "id": "syn-v21-0a988981009b",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "8f0af93a38b62dabeee1b988c8a353977f3ec53bfe5a4025ac10e65f5a70d353",
+      "transactions": 271
+    },
+    {
+      "id": "syn-v21-9d302c17edb8",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "f7f49d98ec05482d42d61e10159810b689d1b5bd20a3ed0e3eb8f776800bbf83",
+      "transactions": 296
+    },
+    {
+      "id": "syn-v21-780c16b5a150",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "c1710e0f585ad6eb8bf900888401f1bf653e0d2dc444ac661d8d0ff808cd98fd",
+      "transactions": 283
+    },
+    {
+      "id": "syn-v21-ec01312ea97d",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "932916f1de2db1b308c8c4d99f92ba5da65cc6418105535edb48c7926b91fbe6",
+      "transactions": 220
+    },
+    {
+      "id": "syn-v21-d96e765c2154",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "5203201049ae9ffcfa3dfe553f9bc0d84dd509c7c0e2c3aa282dd33f67ae4e1c",
+      "transactions": 130
+    },
+    {
+      "id": "syn-v21-362213d8342c",
+      "tags": [
+        "mortgage-undisclosed",
+        "mortgage"
+      ],
+      "sha256": "7f4f30a6d2409d161913cf349f71f154fee1d7ed1bfd76d568dee01e5b552e5d",
+      "transactions": 113
+    },
+    {
+      "id": "syn-v21-edb4cb6ef100",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "b000c667c96809770bd2eebb54faaac782468f8831ebdfde6c42c04f70c4e5bf",
+      "transactions": 130
+    },
+    {
+      "id": "syn-v21-91ad7eb6f6b8",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "057ab8454d03f80cebaa435853e6e43d333f6ea2b08396524dbd14660dfbfdb0",
+      "transactions": 360
+    },
+    {
+      "id": "syn-v21-0386327a4891",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "5de8fc112dbfe5de3553342721cf9c11fcda92ec36224ca2ea1228538843095c",
+      "transactions": 238
+    },
+    {
+      "id": "syn-v21-f7d002950fe8",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "a07e214f70bd4b2c31fd3d7566124ae00654351aa9a7e043e1842aa630e36a74",
+      "transactions": 231
+    },
+    {
+      "id": "syn-v21-0dc272d3f38e",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "8f78a142e8406ad04aa45308af3b0e4142f1e67ec5249430d3cab07e6f76ad68",
+      "transactions": 137
+    },
+    {
+      "id": "syn-v21-f7dc39c9efac",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "bfa1d32db07063c78a8b9595d29186602a9a810001576466cb96ff52221c71b8",
+      "transactions": 174
+    },
+    {
+      "id": "syn-v21-366a6c2de3b0",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "83f7b2b3d3647d04db0c59ae4e9f5a03469b772a39bc521350465e32434524d3",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-50bea91f0ec9",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "bcd2496654cc88bc83083622187e388c048e14b613a8badb8791988080a7149b",
+      "transactions": 223
+    },
+    {
+      "id": "syn-v21-4d165e1523e6",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "1fa49a2889166e0283b9e5cea3501218dae048f4f30f1a42ce9c48d6a5678737",
+      "transactions": 226
+    },
+    {
+      "id": "syn-v21-21f143c27111",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "82448a4ba1878fcdca6922061d548881c9b076632f63b00dcd20ebcc78aeb287",
+      "transactions": 345
+    },
+    {
+      "id": "syn-v21-0c2f0ffe4f45",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "fa0c3c03ac943f8a5dc8da1dc9367d6b8505d2eddd1e8397ee725a63f042e3ac",
+      "transactions": 263
+    },
+    {
+      "id": "syn-v21-a40672afe6d6",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "81f95a30fc3b49bb398944b7f669d0b09d59d2d7693a12758d63d839b45b1b7e",
+      "transactions": 71
+    },
+    {
+      "id": "syn-v21-7d339a4ac50e",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "f26d92ef8d75a760516a4d133a8ea7195c3d69db3803eb10ff46b0cd7f27d9d0",
+      "transactions": 110
+    },
+    {
+      "id": "syn-v21-525f570afa2a",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "61ffa454253ff175c0f595745ff85667e3c480fc165cdbac054091a102a6d0d1",
+      "transactions": 118
+    },
+    {
+      "id": "syn-v21-c250d3fdc3be",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "163190bd60ebd271098e35268aa59cc2e10a2277c9d1f186832aeea0d314d507",
+      "transactions": 133
+    },
+    {
+      "id": "syn-v21-62d8db0891bb",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "5a5cb819d72aae4bdc3203d4da8952180a3a47c4d4fd3f6ec500ec0adb302bd3",
+      "transactions": 262
+    },
+    {
+      "id": "syn-v21-b342f03cdb60",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "4dc066ad490eefef877dfddcfe8d7138b67906f152139956e916f4e9637b83c7",
+      "transactions": 127
+    },
+    {
+      "id": "syn-v21-abffed4f83b2",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "7e524a62d141780df48ddd149df9f1d4e94edbbe54a54cd5e36945769275151b",
+      "transactions": 122
+    },
+    {
+      "id": "syn-v21-9160197b62ac",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "5aca739c251708833860e364ba1d9b19e833caa8efadb6f7da41e69f67a63092",
+      "transactions": 68
+    },
+    {
+      "id": "syn-v21-aef2e32e35e8",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "fc22a2359448925dde9c9d11e6ecca0772fbe6b4d16f797725606aed2a2ef4d6",
+      "transactions": 131
+    },
+    {
+      "id": "syn-v21-4365112839c3",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "1d46d24af825ff7841fe886892d044073703482006015f8a6282e9a2ad7aae25",
+      "transactions": 97
+    },
+    {
+      "id": "syn-v21-d30d5d2aec09",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "a414e97bcca8737aeef1de32b88f117cef3b96cf0d6df359eaf1dac704051452",
+      "transactions": 51
+    },
+    {
+      "id": "syn-v21-81ed9f024637",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "24b600397214b45c35835d1fb7dde4c5d6d23a616dfcf7c02377577b4e5b0f5c",
+      "transactions": 260
+    },
+    {
+      "id": "syn-v21-671dd18b93ec",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "1bb0874576b3981c9a23285f0a5b899b60b770d66f84cd8842684e086a3a7863",
+      "transactions": 236
+    },
+    {
+      "id": "syn-v21-6eec1747fa55",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "50e01e1c4a21f856b0e1e5a043d7bd689829b6cb34373feb0649f44f1a891326",
+      "transactions": 140
+    },
+    {
+      "id": "syn-v21-c92e59b18975",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "8b13e2a64668de3c8476790c2630823249ae991c7ec2bff19aa0757fdfc5493f",
+      "transactions": 273
+    },
+    {
+      "id": "syn-v21-d8b3d8047b72",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "a8600537aa7b56b3fad0ac569806e7b9431b6e93079a09dd70e44efc9b55cc0e",
+      "transactions": 60
+    },
+    {
+      "id": "syn-v21-9ee44478f440",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "a3ad2d6dd50d5517c5f4b7e380e71254a6c93776d6a914acb7e280adfa2c0bbf",
+      "transactions": 321
+    },
+    {
+      "id": "syn-v21-e5a3184da872",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "48417c728ef04ac3fd3a5bbee50843bbed156d5990a436690b1623ded7f9639b",
+      "transactions": 298
+    },
+    {
+      "id": "syn-v21-a939aa46068c",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "7f765ca3d122b2e653d682a997dbc5d91cf64b975d5cf42f5eca26fe7edfee35",
+      "transactions": 123
+    },
+    {
+      "id": "syn-v21-a2e57702be0f",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "1e2d550a8ef230779f6b0444f7c73509d24f2a3da155b2ab6dd0804456779595",
+      "transactions": 147
+    },
+    {
+      "id": "syn-v21-b7e00b0b0551",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "2d6dc05b999c0115e15af611cb28281ceb3a74f9e62c858bdd3b3dacc1109a09",
+      "transactions": 119
+    },
+    {
+      "id": "syn-v21-5c40c1e24c8a",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "90ba8229b1446cc4ada32ad3f1b127b6427c35ca5085e18656277034a77d1321",
+      "transactions": 63
+    },
+    {
+      "id": "syn-v21-52b89e4acb1c",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "a09459670ee2f99e48232df6751aa218e0ccb7b8ccc52720bb65dcb45895c495",
+      "transactions": 126
+    },
+    {
+      "id": "syn-v21-15cfeebe4dce",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "41cb4b604efa94fbd76f57ec05184657fd189359c76452cd6b024d6171aa77d5",
+      "transactions": 59
+    },
+    {
+      "id": "syn-v21-bcf56d92f87b",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "f9b2e1806917393946d8a961abd4b2fdc3496b28434db82de4e1b5b1f8c003e7",
+      "transactions": 71
+    },
+    {
+      "id": "syn-v21-e54c1fb6c92c",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "4c3bb7be8c64ce12aea8c3a5e322815be052c2b9a298a8e75229141264df1ac1",
+      "transactions": 55
+    },
+    {
+      "id": "syn-v21-e8a2d68a6375",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "2a298acc92f3a39dc76f32ec19f0dddf55974387b7ad232d805ad0cfcc367070",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-32801f1e54e6",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "96c5fc1a3645aa83ad922724d7bf69cd1b6ebd8b144e114aae42906076842422",
+      "transactions": 166
+    },
+    {
+      "id": "syn-v21-9575b790716e",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "c3f05fdcf85f77c55b8b12e27b8c638c8be12f3524b22ad4eeb626554caafae8",
+      "transactions": 299
+    },
+    {
+      "id": "syn-v21-acfa502e7a7c",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "47a3619964a9b5cac73c83e3b1db33df3c607ced031b98947544e0e55ae6f63d",
+      "transactions": 143
+    },
+    {
+      "id": "syn-v21-96ea3eb356a6",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "18aa20102804e651b50b6f732bceb86963801fd67df3ccc16efe26253dc15744",
+      "transactions": 159
+    },
+    {
+      "id": "syn-v21-d88633d07ddf",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "6135bdb830293d894f99b8ed3e392491c8a1e3d14e2e1c51a556831bbfaba4cd",
+      "transactions": 62
+    },
+    {
+      "id": "syn-v21-884e13984b74",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "217db5a7fe8abbf4820365b03ad0776d7d77095344fe6d4c2bd0152d5469ddb2",
+      "transactions": 146
+    },
+    {
+      "id": "syn-v21-12f9a9a2db1a",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "54dfd46f1ddcaf496d734f7b2d3df4a97d358676412b4a24bf968e040adcf25b",
+      "transactions": 247
+    },
+    {
+      "id": "syn-v21-100bd512e58b",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "d973266c6dc3934b84cb221dc0fc38ffd64baabb56e8ea7de90a5f21e0ed1d7d",
+      "transactions": 130
+    },
+    {
+      "id": "syn-v21-fa3acc80a921",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "be02940f0d33042f6ae1d902ef9c048d132b9be56d91ecc30568f94aeb7774fb",
+      "transactions": 272
+    },
+    {
+      "id": "syn-v21-438de5ed5841",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "6f32b0e9b65bcea671119e468f679f7b75441098390ecad5588a57d016f3b879",
+      "transactions": 118
+    },
+    {
+      "id": "syn-v21-dd15d7a14a25",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "a0e7ba250efa9ed6b3de5fbe31e9c0248d9b88114cb5ab4a2c6d6c17c290d7a7",
+      "transactions": 129
+    },
+    {
+      "id": "syn-v21-850904f3b630",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "0ff6c161523bc99afffe2aeb8e72f96a9fc58532e4765f2f85c9477545031689",
+      "transactions": 308
+    },
+    {
+      "id": "syn-v21-d36a4b4b2a91",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "eb98cb27eeff40c8f96c188ebf91500c2261e79a35953e0109f79ba268675f98",
+      "transactions": 119
+    },
+    {
+      "id": "syn-v21-9dd6f1864540",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "7c552d0ee9d0e6f173ca0b238cedfd5e18dbd4fc90df017c5d8386193877ff00",
+      "transactions": 131
+    },
+    {
+      "id": "syn-v21-0e44caa8ddaf",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "c957b618b6a34e8b5b6a9b1c36807fb56ea8dddd1ba4d902bb1cd4b93a58c336",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-6716f58da9f9",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "d70d849de90d0927a2c98940d2c931c8df2bd34cf6af253fb9bd80a32df5216e",
+      "transactions": 259
+    },
+    {
+      "id": "syn-v21-bad5171ed24d",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "61f5ad180c6cb77964f41a37ee37fe9d11a8a23a790012154619bd0839a37cfa",
+      "transactions": 149
+    },
+    {
+      "id": "syn-v21-fc465825afa5",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "9a94bf504f0120e96f4ab7fb937ca4a2360e8ebd45459a6b1dc4c5a74382cbf5",
+      "transactions": 122
+    },
+    {
+      "id": "syn-v21-f7dcea5368d1",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "4e51ebf4c64d71d83b7e3d68f2addf27d65c439a0a04fb7db22e93345b913c59",
+      "transactions": 161
+    },
+    {
+      "id": "syn-v21-4e7200c1879b",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "425f4d87a6594f30db5ffc223deff479d6cb8479171d4d7c6d4f4828cba43400",
+      "transactions": 274
+    },
+    {
+      "id": "syn-v21-7be480d3bf7d",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "859bc823e05d87428705f4523443a6b525a214131a1e9a33c55fa26f7c3ea8de",
+      "transactions": 138
+    },
+    {
+      "id": "syn-v21-53230c88c33d",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "8c96adb44823fe9a2321b06d18ae67ce7724d1529d4d2fd03e985c4e3a902b55",
+      "transactions": 59
+    },
+    {
+      "id": "syn-v21-486f7fc9f9cd",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "e7deab35c97e17f1192a00dc9fdf5fc9352844da382a3e1dfb261be5bc4d01d0",
+      "transactions": 128
+    },
+    {
+      "id": "syn-v21-ac25e3864ecf",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "ea2f227622baa45a86c357cb52911b7399595af5f9e5f18d8cbd5335479cfe25",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-fd380ab442f8",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "5e3b325bddd77bb7c3cc9d244866fa9764afe2bd48daac09165dd0f878ef9398",
+      "transactions": 78
+    },
+    {
+      "id": "syn-v21-a12360b40272",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "b68df5c93523ab6b5ac439536d8f18957897defe0b1ed55606ab7087456623e3",
+      "transactions": 60
+    },
+    {
+      "id": "syn-v21-ffa8424eb8ec",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "6a07249fd3060d8db874192e4926b13bedbb83f75bb3d3bf920e4f275894d8fa",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-d8c30f897075",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "f3461e6ff06f84d72b18fa24bffbb57904498d6a4b5844df95526e0084729823",
+      "transactions": 187
+    },
+    {
+      "id": "syn-v21-e53eba6c478c",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "0d4b3a7ef6fa6616e7b73ef26c40ef866bf1bd746f7a6d594d2e2bcb46a3bb50",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-8bbc789207c7",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "ee2e93bb6774bd59b7c7410955bbf96a4c39682af8113ac32051c98c5546de5f",
+      "transactions": 131
+    },
+    {
+      "id": "syn-v21-9348e6566ab7",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "80b3c5b4a0cf3e59c316de5c8ab14f2c6d33ec84b7be116b845cbbf9f7b704aa",
+      "transactions": 155
+    },
+    {
+      "id": "syn-v21-e9ca77a74416",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "b2128e8377a51ff51564c00e93cba067b6b888ac928055fbaac460b098f8b3ba",
+      "transactions": 117
+    },
+    {
+      "id": "syn-v21-f26413fe2e9d",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "057d753e7c526734fc9c71aa156608eff41fb43fba394e130c5ea0b4c9abe244",
+      "transactions": 76
+    },
+    {
+      "id": "syn-v21-afcb55e94193",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "475d63de25e3caad1bd3c14b97a5a438c9161170db0e0e3f41984f605f97a8bb",
+      "transactions": 72
+    },
+    {
+      "id": "syn-v21-e588c5c6cc42",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "376daa3228cc5a1b39b69f7f227225eef78305325f531018389e132433ea8bcb",
+      "transactions": 79
+    },
+    {
+      "id": "syn-v21-a138f6d4557f",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "15a5896e11bce1acf653c616da66789dd2e2d43717ad500085fa5cb11dd6b966",
+      "transactions": 274
+    },
+    {
+      "id": "syn-v21-7b10dc18632f",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "4c25f46f4577dc31ecb54f8a9dbd1236a9c75303797fc93b39c407cc72c174c3",
+      "transactions": 232
+    },
+    {
+      "id": "syn-v21-7ade3c116847",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "1a7dce2dadb9abeb64e68698665b0c88baa9fafc13d856b48a67e5df0c366573",
+      "transactions": 60
+    },
+    {
+      "id": "syn-v21-542fc5c587bd",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "ab1ed54d903a580e0bbe4b3b043131f80a45978c7ba9085fc638fa98ddc580c0",
+      "transactions": 251
+    },
+    {
+      "id": "syn-v21-dc0e0ef5eea5",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "ff0a7efcb262cf1ab915c47930dd45b853766930610f4713100fd192f3c379ee",
+      "transactions": 259
+    },
+    {
+      "id": "syn-v21-158d1b816902",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "39faefb3f9b9000b0181c8e8bc7be9fd1dd5b0397121c81e4bf6d9cf90c1dd2c",
+      "transactions": 135
+    },
+    {
+      "id": "syn-v21-06c227fef7f8",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "54ba77d9bed9fa199c57e1d53de80840b9a9855799e7c5724a57d4d30a87c464",
+      "transactions": 277
+    },
+    {
+      "id": "syn-v21-e63f99e3141d",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "55fc4ebe73be19c604518979c0ba5a706f8888719d2df14a00d9256e188bffd1",
+      "transactions": 321
+    },
+    {
+      "id": "syn-v21-30041fae518b",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "b833b9095815b24ddf7c0d6f7b29d43be3e99698ce6a13b86e5110b5910ee51c",
+      "transactions": 68
+    },
+    {
+      "id": "syn-v21-408958698198",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "64c6b8760fe1110550a11de5d0e90c2aad958db311a7711eaec87bbe5258cca3",
+      "transactions": 62
+    },
+    {
+      "id": "syn-v21-2f2c3e59f3c7",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "bb716b639118ebc56e583ce8ea937a3d4f567d9b60f3166155ad1113158da045",
+      "transactions": 235
+    },
+    {
+      "id": "syn-v21-ed4b560a7510",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "385e0118242748368241ebcf361892f3cda009718f0a40b17bfa6e6575a7f0fe",
+      "transactions": 197
+    },
+    {
+      "id": "syn-v21-ed33c944970d",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "9b37172d32a1c625879f498f11083c078d263ff67f276bd18bc8f3d25d65d81f",
+      "transactions": 55
+    },
+    {
+      "id": "syn-v21-717b0a6ebec6",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "dae54eee89fc7752ee3488423ee847b5c992a4bd20a00c7bca6407a24cc7dca1",
+      "transactions": 20
+    },
+    {
+      "id": "syn-v21-cde15ada4a99",
+      "tags": [
+        "mortgage-undisclosed",
+        "mortgage"
+      ],
+      "sha256": "fa7e0be8295feea6cb32abf06f1458cf8b7934f756235a84d13dbe4c33cd9928",
+      "transactions": 123
+    },
+    {
+      "id": "syn-v21-ce2e4fa76c4e",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "a6b4fb75c3525a57b7549d63b84ceddc2f074eeaddbc1d04f22bef351a744d31",
+      "transactions": 68
+    },
+    {
+      "id": "syn-v21-418dbf9c8ed5",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "ab5a36977064de6c1142ac3b6880aa02733447086950d1dfc6afa9e391717a7c",
+      "transactions": 131
+    },
+    {
+      "id": "syn-v21-faa27ab942de",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "d96555e08677c19664a154060bf0f7c9885598130b017a5056fa6cffaf1436b8",
+      "transactions": 130
+    },
+    {
+      "id": "syn-v21-0db00da1254b",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "5a3f3b27c9110e07616197ddef907cab788a6d06e06626303921e53ddc995a14",
+      "transactions": 71
+    },
+    {
+      "id": "syn-v21-bab334a010a8",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "32c97897dbeb48355932760ce139941b86e5e5d3efa05bde2359eb5a6fff6601",
+      "transactions": 116
+    },
+    {
+      "id": "syn-v21-562c16dc52ea",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "6e30dc87a770ffaf11260c98a108850c7bb0621b358c1dcdd35f19427f2697a3",
+      "transactions": 79
+    },
+    {
+      "id": "syn-v21-78474dd89b17",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "28bfceba0705bfe971740ef371cd8a259339b3004733f90ae2f9c4d564de297a",
+      "transactions": 124
+    },
+    {
+      "id": "syn-v21-0c008ea067f4",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "c3b104bf31a83fa219ec25e96d2f25bd98ed2802fabfbf360753ea2b196f7a74",
+      "transactions": 140
+    },
+    {
+      "id": "syn-v21-b9eb390d6357",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "95802d9c8e6c3ce4c091d0a610d0ed212c43d81b213594e916d707ddeb7b0933",
+      "transactions": 61
+    },
+    {
+      "id": "syn-v21-3cd36fdeed88",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "9b3ab9a37e1c14e8f83040e22af8ed1d087b63079e6f30162cfd1e737ff1a641",
+      "transactions": 62
+    },
+    {
+      "id": "syn-v21-1817c5b0fe24",
+      "tags": [
+        "mortgage-undisclosed",
+        "mortgage"
+      ],
+      "sha256": "838e4bcafe3ed0dcacdc5a59ccdce7a7830309f50f2e8eb658e23d5310e0c3d4",
+      "transactions": 174
+    },
+    {
+      "id": "syn-v21-16ae0ee85e03",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "d093c69861cd6953fecc32ac0e7d8c2fed4a463216318f741b495e320992840a",
+      "transactions": 132
+    },
+    {
+      "id": "syn-v21-847c87f8bdf8",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "a826ee01d20f6b774c368d1729ff244a8c319134387ed375efd7a99eec7332d4",
+      "transactions": 299
+    },
+    {
+      "id": "syn-v21-3f0e3e30c613",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "e9d232065f6826a045a8ca930be15d4e8b418c430b81932393b69bb4616eb6e1",
+      "transactions": 59
+    },
+    {
+      "id": "syn-v21-3e65fa252ea2",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "d68a07fc212c32db70177e5bbbdfb6a79c39f0dc3f76f99a7eb7b96312cc1d88",
+      "transactions": 249
+    },
+    {
+      "id": "syn-v21-d489e6cc6ff0",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "8cd83b6c4c772c51944d8859f58504208931a4652ccd1f49c1d60683ce4e1a24",
+      "transactions": 336
+    },
+    {
+      "id": "syn-v21-3223fd61a02f",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "ba901c361278dbfd47df9557deb987cd09c76b8322f8628f19cd76d6020685a9",
+      "transactions": 144
+    },
+    {
+      "id": "syn-v21-6807c5d72dea",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "ea9e395f7a4d2b7f62c94218d80de105e81035dfa7c15680a2e227876e4b8426",
+      "transactions": 130
+    },
+    {
+      "id": "syn-v21-c7c7f41ee2f3",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "df68dd8f9b102f0b37477d44187a120900d91c44bddf961ecc8546637e288dc6",
+      "transactions": 175
+    },
+    {
+      "id": "syn-v21-03f3674663df",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "8e04260c89e292e5e54461c54b3865dee981641121b795f70afef0620b4c40cc",
+      "transactions": 244
+    },
+    {
+      "id": "syn-v21-a508b3687ea9",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "9009adb98814e0ed2be43e9b93605c57979d046dec8aa32bd9cfdd988c6c82c6",
+      "transactions": 73
+    },
+    {
+      "id": "syn-v21-f093a9ff83c4",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "63cbdfb32203820b2f536170ef74c23e45b72894061e84b6bb95b12c4bfbff51",
+      "transactions": 73
+    },
+    {
+      "id": "syn-v21-bcc85b66a987",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "168048ca01dc5bd2a371d2442eee905229105522519e368b421b457b03c23c64",
+      "transactions": 123
+    },
+    {
+      "id": "syn-v21-8577f2788b07",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "c353c1734895291b15a65783f0247a8954b0fd8ff452428c6a00ede413808864",
+      "transactions": 179
+    },
+    {
+      "id": "syn-v21-d7ead5803d12",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "3f07ae6f11d249c39d8899407fdaf3dcf67b3b8d554a1c954f857d1a5c686fd4",
+      "transactions": 90
+    },
+    {
+      "id": "syn-v21-2df817a09c92",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "b681345a80c8605377850172e7e282c5f135718c9632710003ae963d24273725",
+      "transactions": 123
+    },
+    {
+      "id": "syn-v21-c0e1b5627f0c",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "4637a14511af2f416e698e140e9937d87e640e2362b9f07311beb77e5afaf0c3",
+      "transactions": 24
+    },
+    {
+      "id": "syn-v21-2d1813c04a1e",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "b2def417c999a58cdadcca9c453ac4e90596dad5f0c5522e83e13020055f669b",
+      "transactions": 52
+    },
+    {
+      "id": "syn-v21-2dcb84f670a3",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "8b4862bb2fc5631e936cf16bbbcfd4b67d364dc4a05b47babbc0826de5172c59",
+      "transactions": 263
+    },
+    {
+      "id": "syn-v21-6c97fd06f378",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "17596ce648961dcd329ff692e549052c585d5f8a171088f57a17e64d76aea16d",
+      "transactions": 155
+    },
+    {
+      "id": "syn-v21-7b4985449e2f",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "540f637312f0fb71610e4b0b9e62c4e4e9e9b35fd9bd3c773d155b096a002459",
+      "transactions": 145
+    },
+    {
+      "id": "syn-v21-ba78af9ce91f",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "c4d2818576c6f80c6df5aa744c059b1f50c3f2837f815ebfd6b3b88ac95d5f5d",
+      "transactions": 116
+    },
+    {
+      "id": "syn-v21-2fcedbe734d0",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "857ea608eab5419a336625dbfd60da84e8627f9da245c5d5f745d3770a0c8dc3",
+      "transactions": 323
+    },
+    {
+      "id": "syn-v21-2223ab25ec7f",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "9a9e3e188c44498d6a217d2d65deebacdcec30ca94dbbbba05dbbc73d4989352",
+      "transactions": 146
+    },
+    {
+      "id": "syn-v21-c552fa237e6f",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "9780d3930d3d2da89cf86e2c07a5ba5ea359af3627f0658639ce8d0149a6cf8e",
+      "transactions": 278
+    },
+    {
+      "id": "syn-v21-dd1c839581fc",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "f3597cb4a0921567bd0d19dc5f194cd10e75dfa7bff7f4a630f75c23af363493",
+      "transactions": 56
+    },
+    {
+      "id": "syn-v21-3799b7b00d47",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "b28ccff30cf5298ca21537efaf142c8942afc57a2ce2e182a6b3f1ed746dfcda",
+      "transactions": 155
+    },
+    {
+      "id": "syn-v21-1e7d11765418",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "407e6cc86531d37812a1a96dda5ac723caf3618348444558c42bc7c18eeb7eab",
+      "transactions": 121
+    },
+    {
+      "id": "syn-v21-bf17cbca5b77",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "ed728ad115e12fa9f8ebe37d4b131f769b32cef8cea777c8346fcb460e5a636e",
+      "transactions": 96
+    },
+    {
+      "id": "syn-v21-d2192acca70c",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "1a199d6b741876a5c86db28ec3ef7fa9b3cc9dc3c60cec420c9a15cdf0a6de49",
+      "transactions": 64
+    },
+    {
+      "id": "syn-v21-2842f2e1ed80",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "d2046d7115f7519e672338edde290925bd5819e94f97c3927d84ff71ace7dc89",
+      "transactions": 233
+    },
+    {
+      "id": "syn-v21-242b1843d0f4",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "75e1055c7594a8e78053bf255f9fe86e5ee94eb0d56dff05a69f64d51d813504",
+      "transactions": 76
+    },
+    {
+      "id": "syn-v21-209df1b09d3a",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "678d3c56861362599afb0d0865343c6f0e2cb5ee03de8a0f5cc521484abde61c",
+      "transactions": 256
+    },
+    {
+      "id": "syn-v21-fc09d4a45212",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "55603360818bd79bdebd5bb43b9a6044c6b0d525841f3012bf665c71cae26f2a",
+      "transactions": 122
+    },
+    {
+      "id": "syn-v21-e99e217c2ec5",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "13c0be909915287666f1d31917f7e201c9798fb1c084e1c41a5c7d69dabb0347",
+      "transactions": 62
+    },
+    {
+      "id": "syn-v21-d948d500d5c6",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "91a6cf078292b686df2fb95e2ba9b734c172d3908820231099426e20a90cf8a2",
+      "transactions": 126
+    },
+    {
+      "id": "syn-v21-6142487f9e28",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "ffb2bff054b509d3517efe1bdcdc8bdc3985a8715ec5bd4e34f24e748b449682",
+      "transactions": 62
+    },
+    {
+      "id": "syn-v21-b61d90bb952e",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "4104dc36991e711b234b83e6986bca5a516938fb0c68bea7a2ac73cd968cba7d",
+      "transactions": 78
+    },
+    {
+      "id": "syn-v21-ebdb8299737d",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "eed6f63627c420b1e3c95ac35bf5f9dbccfe4e9e3cdc97feea29e0c69332199f",
+      "transactions": 163
+    },
+    {
+      "id": "syn-v21-e36156677c88",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "2b3e6877c1cd6ee31016b48c98e1be6f3bc9e8f18f29f501e9d43fffca087245",
+      "transactions": 286
+    },
+    {
+      "id": "syn-v21-36d2f11b1ad9",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "60aa46bea064f5528f78c291ec1eb09f99b2e488bd599cc618f9f18b4a20e1b4",
+      "transactions": 146
+    },
+    {
+      "id": "syn-v21-39549b1e5eef",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "fa777118fa132463d90291dca107a262be8abe9d648e4ae6878f08831b9fd953",
+      "transactions": 78
+    },
+    {
+      "id": "syn-v21-64e74320ec32",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "b16f864babe6fd02648063ef82dd6d86b97cb95d811e9180a16329c457d06aa9",
+      "transactions": 146
+    },
+    {
+      "id": "syn-v21-56556aaf4c71",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "cc9d2704a31485177882e4d9e6e6abc39060c515852cda88de92df0716887306",
+      "transactions": 294
+    },
+    {
+      "id": "syn-v21-f0dcc5eae5ac",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "11530e4d2880a57656f3bccb06f55d8e8507c2658c4ac3d5291d42fb60df935e",
+      "transactions": 145
+    },
+    {
+      "id": "syn-v21-ea459b521ffb",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "8d60bd2821ff0d02f04561ffe1a104db26d728694fae9b253f8ae0d18718511b",
+      "transactions": 106
+    },
+    {
+      "id": "syn-v21-50c67e5144f2",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "5aec913c4cd15060798b62448427694e4d23ff7e35fe5dea7fa5d29d451e9ac0",
+      "transactions": 154
+    },
+    {
+      "id": "syn-v21-efc9d6a9c4ee",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "1791e0e922c3fba97a790718c5afc0894ecc06b1f0a5bb00ec1429b8edb8e770",
+      "transactions": 259
+    },
+    {
+      "id": "syn-v21-cbe1c79d789b",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "d8912853c3128bd0968e210d77b29c74db563a89bf8dd547ac881e7be9f7bc7f",
+      "transactions": 309
+    },
+    {
+      "id": "syn-v21-1b9b00aa7b86",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "d28f943d5ee7d63a2d76545ccd033ab8f2c3f2421463dcc3a38d4caa759a2534",
+      "transactions": 124
+    },
+    {
+      "id": "syn-v21-6065f2ec6946",
+      "tags": [
+        "mortgage-undisclosed",
+        "mortgage"
+      ],
+      "sha256": "ec69457605710d16f59814a36c2a57000406b4c43a858a1af9f3197e28c0a9a8",
+      "transactions": 69
+    },
+    {
+      "id": "syn-v21-49cba00c6b1d",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "4977abc0f241cef9881913d876e2abb034578a22037b198896ae220458c6522c",
+      "transactions": 148
+    },
+    {
+      "id": "syn-v21-a7dd3f26d27b",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "b2fe9a1deade1eb3a05c02e5bfa40c2049d8f888fd39f32d7c5c3200e2701829",
+      "transactions": 58
+    },
+    {
+      "id": "syn-v21-ca36ced6f1e2",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "49ffdcd6b73e91c4e7bf4ff7088cc359a110b303f852b8452a47c3b6fc477865",
+      "transactions": 70
+    },
+    {
+      "id": "syn-v21-5f5ecbb80ad7",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "381569d132db5db8c5815690479ff6ef5b6d637f959380944d4f06b1b2f05fea",
+      "transactions": 134
+    },
+    {
+      "id": "syn-v21-0d91043feb7f",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "41058c6a0b39d74eb59e2e8090f9695b83e5817a3935ceeee3611b5de54af8b6",
+      "transactions": 92
+    },
+    {
+      "id": "syn-v21-66cd7ea6b130",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "caf32fbe2a51988b40e831677172c649a6e2e75af5a6e33517cadadbb40fa1b5",
+      "transactions": 110
+    },
+    {
+      "id": "syn-v21-885b4d28c03a",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "e5d71de07c1e306cc896432925dc11aa063e698a2a2e9db91ad421597f518ecc",
+      "transactions": 359
+    },
+    {
+      "id": "syn-v21-852ed1f87442",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "f1bc815cd47092aad83df6a67667e5e4760423c245055926515fac06b9a5c685",
+      "transactions": 131
+    },
+    {
+      "id": "syn-v21-5db85924a2dc",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "764ab87b6463cfba42172240d8fecebeb5014e343ed9b1a50c6636e6fb895b9b",
+      "transactions": 170
+    },
+    {
+      "id": "syn-v21-c4cfd7bafb7f",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "a69ea5e461764d5a6162d063ca57afa50574e4c5c936c953690d31193ce2cf8f",
+      "transactions": 154
+    },
+    {
+      "id": "syn-v21-9a1f9ffb4390",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "cc704263616bd14c6f974cef8b437db140421a80086f985e47acf317fad1d28d",
+      "transactions": 130
+    },
+    {
+      "id": "syn-v21-15c77ef0feb6",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "33e0c36f33b67434f7a9b37b9d2d74f05760e572750b9285f5c81d9b9a162998",
+      "transactions": 260
+    },
+    {
+      "id": "syn-v21-7bde0a37b10c",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "38402a23ee110d44a5b96b5ae2cb4f5372cd0a2bdbabdc38bcda2e25a23cb9bb",
+      "transactions": 236
+    },
+    {
+      "id": "syn-v21-82c638cd680e",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "56af3ad77481becc50c5bc4b6c783f774dae73deb8bbb66bfb68cf1404131dcd",
+      "transactions": 137
+    },
+    {
+      "id": "syn-v21-d453cc3fe07c",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "b15683e0d2582b88d60371b1f592cdf0aff1c1c6f47a0fde5d54c52dad054ebc",
+      "transactions": 148
+    },
+    {
+      "id": "syn-v21-fad035cc8bc2",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "ce522666eca6f97f9047e0099af81736b4b0bdad9939eccd64d1e49a9ace73e8",
+      "transactions": 68
+    },
+    {
+      "id": "syn-v21-d9a3ff33fc16",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "e226942bc44a9044bef31443675857dcf883794e7a55baf82ac776a9a23d8ab2",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-b82bfbfa296e",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "8a2da608f44b0563b2f1828df9e79c35c97b7df391fab4fd6da37551aa750c24",
+      "transactions": 284
+    },
+    {
+      "id": "syn-v21-2fc660e11eb1",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "e914c67dbaf0b17b9ce73231a53e9b8739ca783a2d4e44a5ba915290d7ddd9fa",
+      "transactions": 150
+    },
+    {
+      "id": "syn-v21-e0c2a2eb8025",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "14da3d6d6aad112ae3fc9c5ef464a9511181f7beb7c0fdde76f0f7a4c2973c1a",
+      "transactions": 129
+    },
+    {
+      "id": "syn-v21-355750ded461",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "adffe3539a2b1a8a90860b15d53fd959bc94e332d7a45dbf5e7d48ec27f0761e",
+      "transactions": 66
+    },
+    {
+      "id": "syn-v21-6343d33ba397",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "a1189868c9b646a6a25ffc1f7ab04722eb6fce117dfb7bbdd5eca2c430af83bf",
+      "transactions": 140
+    },
+    {
+      "id": "syn-v21-b4d0d9189e73",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "470d7a6290eb6e720a2db6f587433163e318f9fbb29ed9c83857326ac9459ee2",
+      "transactions": 220
+    },
+    {
+      "id": "syn-v21-b149bb7d5cff",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "30df0ca48fd69eb68b590cea569d91ad64c546d1b788667b746d2c082af322e2",
+      "transactions": 118
+    },
+    {
+      "id": "syn-v21-847a726d7221",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "70256e73deb8637f3b2ea81de88f09440f126ce67b88bdeb61f9730387b52aa6",
+      "transactions": 79
+    },
+    {
+      "id": "syn-v21-fa0b0ce82bdc",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "58cacc513c59b84a0205cb02c6f6bca7bb8cb7d8e1d61ae7d3b15e12c16f44be",
+      "transactions": 62
+    },
+    {
+      "id": "syn-v21-d4be09c4a743",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "dfcf8d2e1988bcce4e20babba84f86b5b761629b57e9e4837c03f56064f1db60",
+      "transactions": 275
+    },
+    {
+      "id": "syn-v21-7815f6016389",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "cfa30fc1a995eff7a8ac784577c3e3d4532ee1fb1caa6c4e73c6523b59f0579e",
+      "transactions": 236
+    },
+    {
+      "id": "syn-v21-85b73963125a",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "9a1bcad4626cfaf938ba6c82c0192d28dc85a21aa89a8b7c927b72751de0641b",
+      "transactions": 123
+    },
+    {
+      "id": "syn-v21-8bd396344a58",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "1e1bac491b661d29f41db69a720a6d8f6834785970500e1d141b052b268f4264",
+      "transactions": 20
+    },
+    {
+      "id": "syn-v21-a2a3336e1245",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "ed8294712f02f4b0967abd58dbebc07da46c2c629aff8ca3759cd21bae58ab3e",
+      "transactions": 53
+    },
+    {
+      "id": "syn-v21-909219b135b2",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "449f2997b16a7fa290f66c6986fb65a242b8cbc620195da08d048f58ba09171d",
+      "transactions": 69
+    },
+    {
+      "id": "syn-v21-051812a00b71",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "2ed6eeee8a728443c1f803df1743e73c40fa83ed5530e5b16b155a79d936a0c0",
+      "transactions": 311
+    },
+    {
+      "id": "syn-v21-7096d2f54521",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "b713dff3684fc986e106c03b3497a9c75311428801568d20712f9f252b0e7cb8",
+      "transactions": 143
+    },
+    {
+      "id": "syn-v21-e9b0d9fbee92",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "5daf31b412a079a3c69d30d663d0d65a227b300f0cdd2f835ba0afc381c5dbcf",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-9fc197f7a6b3",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "01c9994a22b804a2d9ad495f54c40a75607513d7fba2c46e51d29f48b409147f",
+      "transactions": 262
+    },
+    {
+      "id": "syn-v21-2decdb7c2d69",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "03aba5370981a201a5d3482edeca6686250a8fe323fde74707f54295635f3fc2",
+      "transactions": 74
+    },
+    {
+      "id": "syn-v21-ad96ea025556",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "cea08a5dd9b468fd4f9b9b0963ae1823d427a6ede1ea14170e1af074bf10d16c",
+      "transactions": 312
+    },
+    {
+      "id": "syn-v21-be74708fcf5d",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "a008534326052895f9bd970a12d767cc69fe47f92005e96a2c998d47f6359a35",
+      "transactions": 74
+    },
+    {
+      "id": "syn-v21-415eb014b790",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "d6766beb48bd19aa72680bee73b7b370d9b378f00a0d49f6b50b2665fa647bb5",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-396c94537008",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "d035ad3176e49ee6e8709560c592c0b5f9f8738b08558a68e03a8c2b7b57dcf2",
+      "transactions": 259
+    },
+    {
+      "id": "syn-v21-bc0cc77c1adf",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "3963d1c080d6839d51b6e60447af5eaa7d7b024459c76ee6445b2d7d8fdb1e96",
+      "transactions": 298
+    },
+    {
+      "id": "syn-v21-a7589805a036",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "817185156549719b8d7b46bd6ceecefedd590313c664ca969434e9551bdccd5b",
+      "transactions": 129
+    },
+    {
+      "id": "syn-v21-a7875a0f0301",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "d998f3d3a1b4531e606467c6e5babcb72c678e3da3d84404522e3d36de4d3b2f",
+      "transactions": 118
+    },
+    {
+      "id": "syn-v21-01b510127565",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "fb989db9ab8c1d43b783508808ccdc019eb5b0dd9b264dcf242e660da489b6b9",
+      "transactions": 75
+    },
+    {
+      "id": "syn-v21-b564aed569e5",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "0fac452c4be5d2c8794d3b1ab0721f8344bfcece323be19d857a5b1c6844609b",
+      "transactions": 75
+    },
+    {
+      "id": "syn-v21-bd4aa80ecafa",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "395c114dfe2235fa7994e81fb2dd40e301478e8af905a99a1708986ba494d231",
+      "transactions": 116
+    },
+    {
+      "id": "syn-v21-0be79656e7e5",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "8d4117a39795c50f7eaa38b2b4ea316c80e2a05a979358f0d5cdf65b57929e2f",
+      "transactions": 289
+    },
+    {
+      "id": "syn-v21-715610698229",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "edf85752b310fce35707f96d0f504f6811a36ad0c1f04f18f6909f6a4e278534",
+      "transactions": 89
+    },
+    {
+      "id": "syn-v21-52d6cc001048",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "e24e573e9d9ce6c743811641e475041c30613cd93832674dc829c16ae8fc5157",
+      "transactions": 150
+    },
+    {
+      "id": "syn-v21-afe4e7440712",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "db488358f15cb9c5f272fb66fa85cc66b7abcca0f5b68fe0dd12d87a6f4c5ffe",
+      "transactions": 121
+    },
+    {
+      "id": "syn-v21-a682c58803ad",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "fff90babab641d10dd84986484aab5ccc273aaba98b60e5dafe1545567d82afd",
+      "transactions": 321
+    },
+    {
+      "id": "syn-v21-a406cf04cc4a",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "a0f7e20e6b462278109555ddef255fb02a78a6d4f06aceb743fb271fe411ba6b",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-a61e911a2f8e",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "4b3662fb5ecdf17b1dfb192ac2fb7f3e9fe89878f0e04a3014ac319a9e7f2c79",
+      "transactions": 68
+    },
+    {
+      "id": "syn-v21-5e020921ee94",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "74381c319caa6f9c30fcd96fd035cfbb5de56e27fadcb39f8e4f15d2e43a1cd4",
+      "transactions": 142
+    },
+    {
+      "id": "syn-v21-49e3d9ed5966",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "da81d3b3fbd900a5877b4977e06f3478bee7a29e2d11d725986532ceff066241",
+      "transactions": 52
+    },
+    {
+      "id": "syn-v21-fb3e89dbacae",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "0fcbf32a4385ee96682acf9e5fa0df56982343b3514e21d1cf66b5982a8c1ada",
+      "transactions": 149
+    },
+    {
+      "id": "syn-v21-f74a50c6021b",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "c069dad01dbc856474fe0e3879b10938bbf19df54e6d5bea3002f0baad4cb27e",
+      "transactions": 261
+    },
+    {
+      "id": "syn-v21-464fb72c053e",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "a41a4bf451723bbbc80d8ecf28554754882039c4d2463a648421e74524f88a6e",
+      "transactions": 362
+    },
+    {
+      "id": "syn-v21-a90eb405d43a",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "7a14007be9d6ab275bcd2a39747dfe857c77d02c134aa23674a0c23348f8687d",
+      "transactions": 283
+    },
+    {
+      "id": "syn-v21-eb6a87b7b10e",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "050c788a84a4be999e81f43aa33225034b35c0e9532ed862174585782c775299",
+      "transactions": 297
+    },
+    {
+      "id": "syn-v21-b6b1412a5b28",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "5b5a49d20d6d1f750be5e5b0ae6462609003c7ae9d41a1edc20dacbab698a63c",
+      "transactions": 18
+    },
+    {
+      "id": "syn-v21-495fee2ac98e",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "c83d8d6e581e2eed47b099c894fcd4939fd42180e5e4e568bfb72f1e9bff12e8",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-0b65923079ff",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "42a27b01548034c65664b26696f8ca5b6a794d260e68cfab4c712459edd7cc63",
+      "transactions": 62
+    },
+    {
+      "id": "syn-v21-7f67be0d5de9",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "344905067809503fd1e2b16e7c48f0ab7aa9087b50ac19a68ec423f3d1f0e93d",
+      "transactions": 68
+    },
+    {
+      "id": "syn-v21-37a2d88e48a6",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "40a6474a99934f416d8ef748e2dfc862bc9135b596738e3689aa20ef65abb79a",
+      "transactions": 138
+    },
+    {
+      "id": "syn-v21-c6522d4f7081",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "90e6601d8c7e1bcb50346bf1876f60dcee03cffac7c7be61f2c76531a9997e1d",
+      "transactions": 148
+    },
+    {
+      "id": "syn-v21-042a5dc1b931",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "00275b924bf5c558e7690ec934d18e8a70f40606521c98a1ada184d6e2411910",
+      "transactions": 299
+    },
+    {
+      "id": "syn-v21-77e4b2421923",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "939b1e6b927706cb632062c3147de3d224974f9a1c43975e5ce4fee512e8aeed",
+      "transactions": 313
+    },
+    {
+      "id": "syn-v21-d991a47ced02",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "e7b25e545a2d6e926653c9268b05250991a6685f5a2814662b832bc20371c46e",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-345dc958bdcf",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "98a33bc7c0abc90ad5af220a9a0683f5c2e8c88fcfcda3110dc365b2609b818a",
+      "transactions": 378
+    },
+    {
+      "id": "syn-v21-eeef783d0117",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "eb7cf35b45d655e53244d4b18a22507244ee6c1e745169fc4b6c10286e69298e",
+      "transactions": 68
+    },
+    {
+      "id": "syn-v21-a0972000535c",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "e6178bcc3ab9bdb59840422e9be94f4589fd08d8dfaf04c86a0f2acc0615dac7",
+      "transactions": 268
+    },
+    {
+      "id": "syn-v21-66f73a308c13",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "2d105a4289cc00c6354756ba248aaf95b84eccc2efcc340b2356eeb3ed972f71",
+      "transactions": 130
+    },
+    {
+      "id": "syn-v21-8f646aab4d36",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "23340e1f62321f01b55fd3d04ff85ce14d20d948eefa096e121297364081b5a8",
+      "transactions": 309
+    },
+    {
+      "id": "syn-v21-494ca7fa29f0",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "957738bab68b28b5822655e7beda68061b72cd12d75e2c2f3d47cf2e579db38d",
+      "transactions": 278
+    },
+    {
+      "id": "syn-v21-e050f679977d",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "6ba75ea6af24e779973b5f67c69f763e4dc0164868e8e590962d52c64bb7fbb1",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-7f647d967fda",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "6e898f0acb575159f83c08f93f15b92d9eb0804683d8988adac5cf219e0bebbf",
+      "transactions": 71
+    },
+    {
+      "id": "syn-v21-c6c5611c6b56",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "2c1cd39d8aad346e288db6e3823436fc1029fbcfef8885d406214a25e5f04592",
+      "transactions": 126
+    },
+    {
+      "id": "syn-v21-5f39c908dd2f",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "80ab465c6e6c4b2420b74990f4d43eb3876b53e7cb5cbad83f8aa9e384698730",
+      "transactions": 68
+    },
+    {
+      "id": "syn-v21-02b24056db88",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "1e5bf9a4202c427c015b356d2926d2bcc9c151428a1ffeef51c1c6ef1595c6ab",
+      "transactions": 349
+    },
+    {
+      "id": "syn-v21-7806640d1136",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "52d6a9599356095db25e0d5540113e990f1b4f3e6d92c6d8c88ef4ea092d5868",
+      "transactions": 144
+    },
+    {
+      "id": "syn-v21-db4fb1647cab",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "650ed8233cd54d111c3d318cbbf127b418bd2db4f1236db4831505ef2944e683",
+      "transactions": 53
+    },
+    {
+      "id": "syn-v21-2ea0300f235f",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "8df2794b0e54ff9a41db66a9799e7edf0d6873c06f1cc4b26065d15baa21a41f",
+      "transactions": 21
+    },
+    {
+      "id": "syn-v21-146682c7b3a1",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "ff0240c867c6406017d552002edd9913a95f9165adec6ead50ad9e9d51c5f4b5",
+      "transactions": 75
+    },
+    {
+      "id": "syn-v21-f86fd2d07711",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "88cabb3bf6bcb6913a74db0252130beb8a8bca476db791862ed4dcb53a3b5c8a",
+      "transactions": 136
+    },
+    {
+      "id": "syn-v21-7b6f01444593",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "4d2bb01094a49545198749a80ad247bb6c519bbec3611067ff8af3a4d6e39d77",
+      "transactions": 296
+    },
+    {
+      "id": "syn-v21-5f6fdcd1ba77",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "5e3293b0904692f4691c7dd0aee9fc6ea77ca4eb7b522a3afea7119deda11814",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-8cf830a9e704",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "9fd423fd548eb69acc5569611a442dbb796609ccace9d4a4e670b69a311342dc",
+      "transactions": 311
+    },
+    {
+      "id": "syn-v21-5a5f9e86ebb1",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "49673861450d2edb9d8ba58bf368327e7f704e84694aaa64663d5dc27290d0ff",
+      "transactions": 66
+    },
+    {
+      "id": "syn-v21-a1fcb909dc0c",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "da0b40251417b4440e2b5f8915a0d0dbe7f380789825d7128d83b1cb3d465345",
+      "transactions": 119
+    },
+    {
+      "id": "syn-v21-9088ac007f12",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "75f4d685044fdda71ed87ca72ba041b81f9bfc88c55528919c5326491d02f358",
+      "transactions": 72
+    },
+    {
+      "id": "syn-v21-d3683e415ec9",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "ed8b95b4c9b25c9824f2fac5daee39c4ea8862d9496ca2570e4f5924556ab301",
+      "transactions": 391
+    },
+    {
+      "id": "syn-v21-6e9d0e893fa7",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "fc9189e1867fb2026e2e4493af77f3e249cbc48d3d0cde9c1f2c8a87ec279624",
+      "transactions": 164
+    },
+    {
+      "id": "syn-v21-03ad57330bb3",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "ab300b49044a46dbc5312fd1b5fe82b72b3fd660c9a2c2ba10ebe4123ec5baf2",
+      "transactions": 286
+    },
+    {
+      "id": "syn-v21-8768df2dcd10",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "7491c8666c021aae765e8ccc0613671e109c49d908de1ebb8fe03e1c96b9bfa5",
+      "transactions": 83
+    },
+    {
+      "id": "syn-v21-bbe749435e1a",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "e756be4050665b98404e1da3169027c9245659ca453d23eaad4408e8c9a6ff80",
+      "transactions": 61
+    },
+    {
+      "id": "syn-v21-cfa7dfa18edf",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "59a4ca3396f8400b1dac1921d517bec0a0e580969bf36c1e8521386e12b2c0e0",
+      "transactions": 308
+    },
+    {
+      "id": "syn-v21-b3a49ca98b81",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "0799e986b8de31de4dde7e6f3522d4fd4813e0aac62e76a505bb788310ec8094",
+      "transactions": 63
+    },
+    {
+      "id": "syn-v21-03fbf9435b2d",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "ec6862b9488d251f20e406314cb0b11c81e5c8498bdce336f65283a9baba7335",
+      "transactions": 259
+    },
+    {
+      "id": "syn-v21-c1995cab55a0",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "d635f6d06b3e99cfdb391500b926e95b5e7aaa4d51704dc92b1ffb2ee8a583ff",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-230a15dfa841",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "6e258a178c5f04aad2da8103d5b12ac94084834f119d652c49d98d30ce90fcbe",
+      "transactions": 70
+    },
+    {
+      "id": "syn-v21-c2b840424f80",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "c37e1f6163ee0659e6fbad62ac0972e542b0f8457d9c1f80a839751026055ff2",
+      "transactions": 136
+    },
+    {
+      "id": "syn-v21-e286172ddecb",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "6c57fd989757026cc613baba8e6dd287363fd9b40c9323f94f6ed8486c0ff159",
+      "transactions": 148
+    },
+    {
+      "id": "syn-v21-2d7dce63145d",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "fa06a667274e3bdddf4f0b8fae251126ee4d1d67d58b8eb1acb39040dbbbed7a",
+      "transactions": 75
+    },
+    {
+      "id": "syn-v21-3e109e565a74",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "89c66a3b260f018e92ea186f5cf34525f7e3f15d21d96574f5f79de01f55045e",
+      "transactions": 79
+    },
+    {
+      "id": "syn-v21-bed5e96bb9ad",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "c694cd8d4488386db7be4140d83270c91d49ec35fbd3b5031d2400cbb169bad0",
+      "transactions": 137
+    },
+    {
+      "id": "syn-v21-2334a2573168",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "ca2222988e08a8b8b8d65888358c0f73749661da4c9e836b42eb675a25799440",
+      "transactions": 143
+    },
+    {
+      "id": "syn-v21-f3fb48a014ef",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "0903fa0a6e1da92275c4c730b294c36bd8cf709df4d70127286b403b07babf42",
+      "transactions": 129
+    },
+    {
+      "id": "syn-v21-8ef7d005212e",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "a6851bcff099d8cebe101f016a1f8ce751d6c5c4e4cc71eb5bde6eb2246a120b",
+      "transactions": 166
+    },
+    {
+      "id": "syn-v21-6ce56c9dc7aa",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "1f340cafeada622b5bee2f2a1bd1882f99aa7ec61e96d391d3da4c77a2b144ab",
+      "transactions": 78
+    },
+    {
+      "id": "syn-v21-4d824cda3a76",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "415f6fce171b8bc3d2ef0cebd9ce84153999ca9cfca32d7188334d7e8c39e66f",
+      "transactions": 135
+    },
+    {
+      "id": "syn-v21-36a8830bef2a",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "bbb27096efede28ddbd350fbed4a0935f7578dc5e19a7629f73c88169bc31117",
+      "transactions": 156
+    },
+    {
+      "id": "syn-v21-4e53b5047143",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "b882844029488fc32a0c01f838996d598f189abea0d5f19580335a1044abb219",
+      "transactions": 124
+    },
+    {
+      "id": "syn-v21-7653e9b8b7d1",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "c80751ab6dd5baecf2d872cb602e24320068f3b2819b964a0526e95d77924ade",
+      "transactions": 112
+    },
+    {
+      "id": "syn-v21-ed7e50f9288b",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "6210fa7c21b14ad05b05ca7fa7c86c00129b94ad15f0f78a198ac73a26f5039b",
+      "transactions": 117
+    },
+    {
+      "id": "syn-v21-2d9e904fe2b2",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "666f4082e3696fa940015fa7d9966e7b4396de2e3265693b78bcefc53e98720a",
+      "transactions": 125
+    },
+    {
+      "id": "syn-v21-0c89f1809a6b",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "0e6bdccd9912dca3676921a29dc5801c20ebfd5063f0e2518f9c3a1dccbfab3d",
+      "transactions": 223
+    },
+    {
+      "id": "syn-v21-c472f5737aec",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "b6b44ae75842c0112425ad7d410d1f8384279f70676586f5415c0cf492c5b5a5",
+      "transactions": 63
+    },
+    {
+      "id": "syn-v21-336b924ce54f",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "1140ab36ecd01148accd5cb567ec60472c82a7f49e143ee60f126dbd4ae73620",
+      "transactions": 125
+    },
+    {
+      "id": "syn-v21-9afb338b129e",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "c0dd97668ff4bd152bda6718cd6ee920a2342063ba398cc8d0658724a9ae1544",
+      "transactions": 243
+    },
+    {
+      "id": "syn-v21-aa2956d8645e",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "13ddef2ad31c836ff0bc813b32351f96815ac9a4d5f4bad8954e2c5c7de3501c",
+      "transactions": 113
+    },
+    {
+      "id": "syn-v21-c67d12eb6af6",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "cd27c9f7ced58c8137325402c67ba65cda1539f88507411e076420ea4e21af9d",
+      "transactions": 249
+    },
+    {
+      "id": "syn-v21-4a2a3d94e74a",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "a3806d72d20b098284c19bfec9958cd52f573d70f001b78e8f2ffaf0108a565f",
+      "transactions": 270
+    },
+    {
+      "id": "syn-v21-7e0dff2abba6",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "0fadc1239e20d4a7cf44e3ad9b9cc788689e8981315738981191951c9bf1b37e",
+      "transactions": 201
+    },
+    {
+      "id": "syn-v21-07723e3ada62",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "ce5e989d41bf2ed595f655d56824296a029f2cd52d261fd42f129f7df0cbb1d8",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-89706e38a0e6",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "d061b2c8c9b5e61303c1f870555827d5d66ab991ab9997b2d944c6a0c4ebdae5",
+      "transactions": 137
+    },
+    {
+      "id": "syn-v21-9ef1ecf6a349",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "96c751e1d3c8dc23d061f4fdce742640ba2911ca3a199febe385a01a3136aab6",
+      "transactions": 156
+    },
+    {
+      "id": "syn-v21-f926f148e2bf",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "124780e64e40148704b94f3880d5d8143f437b6bc19087f0c48be62ba16bfc38",
+      "transactions": 126
+    },
+    {
+      "id": "syn-v21-21d1512e30a9",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "54387c7fddc9e027a09d72d25784e47252e5a6cd5d85710043505c8947f10168",
+      "transactions": 287
+    },
+    {
+      "id": "syn-v21-00219d1f7251",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "cbc232ae6c9e43aa7dcb523c3b291b8118aab44f0d60391c1d6ec50e9c19ee2d",
+      "transactions": 62
+    },
+    {
+      "id": "syn-v21-916f2cb6fcb2",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "4b74bcbcbc38e8de9f30322bf4815fa31e643d73ec85877b78bf7da1627e0dfd",
+      "transactions": 273
+    },
+    {
+      "id": "syn-v21-cdae932ffa35",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "4ac0136b2f2d8adb917809d2fd8124813271fb9cae0a997afe2fe7930622dbea",
+      "transactions": 73
+    },
+    {
+      "id": "syn-v21-1565b85ed8f4",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "4079354c69edbbf38fd73469e119f33b8359ba663c2a75bfa9e25e0f7dab7bee",
+      "transactions": 138
+    },
+    {
+      "id": "syn-v21-0640004bf917",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "93d2017863e53f27819abb75b2d08b101eafd7b2727f09bf37ac4c7f502783da",
+      "transactions": 87
+    },
+    {
+      "id": "syn-v21-431d761f2d3c",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "6d1cc288e3aa66de6957d5713b7f3f857e050f2778b41943fd05eaec75570242",
+      "transactions": 75
+    },
+    {
+      "id": "syn-v21-a2f05cd3ffd2",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "4f9982dc847e1640dfbff01fde0d4a734789b47166c0fff32b3e328cf009048a",
+      "transactions": 243
+    },
+    {
+      "id": "syn-v21-97ebd2644a49",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "a0f2988fb6497f1c4a87938009dae31876dd56679dd185fb954965e0eb5d5dba",
+      "transactions": 348
+    },
+    {
+      "id": "syn-v21-8d0bddd319da",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "6ecaaf58746fda54f5f9f6681cb52508ca67c517ee100a0d9fc2f9b9c086a2c4",
+      "transactions": 75
+    },
+    {
+      "id": "syn-v21-298f7d8de7b6",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "d42cdaad12d238b08b2f5823320fa5d5f8c4088f6d330d27ca85292f14f95fde",
+      "transactions": 300
+    },
+    {
+      "id": "syn-v21-e44b49d0dd11",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "1a526ac27785778445ecf78b769c6df842e0d3a3b36fb363c9ddfb2e1a77ec73",
+      "transactions": 72
+    },
+    {
+      "id": "syn-v21-ae582fb99eae",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "ffa0c19fc64cc4a57e9ad63208c61b7c1c87668104cb89b91c5f4530ac8ae943",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-2f7208d957c4",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "d32f3980c26c42af32b6a6f899316e62505f36c55b8a3f1b46a76ac66dfb2a0c",
+      "transactions": 73
+    },
+    {
+      "id": "syn-v21-80b47c39e2cc",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "764363c478b516bff3af7a5c81054ebdfa369e1fde8cbc025d1524ad25257a44",
+      "transactions": 261
+    },
+    {
+      "id": "syn-v21-0b36168f1046",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "8c68d2742b245e5da831a54b5268d29ae3ff7d9cf94d275b77b2af7564f25280",
+      "transactions": 284
+    },
+    {
+      "id": "syn-v21-4911b9efa389",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "496449059b4183cd0d6d1226fd8bab648bf2df5096e639318c6f433aaa840941",
+      "transactions": 91
+    },
+    {
+      "id": "syn-v21-d2118ef5f67a",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "bafc73df9089be6a8b2e2da14ceeeb2381beae6a272a0837ad1f00912d614ec3",
+      "transactions": 243
+    },
+    {
+      "id": "syn-v21-9ac3358d5bbb",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "7e50a453998828565bc268ae16a70795b72e4a1580b3816e70e07d9f88286dfd",
+      "transactions": 148
+    },
+    {
+      "id": "syn-v21-8b8913d32708",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "82a7fbe9ab201eeb2511ff716f120a4950b86b6611008b43105910b18ff29f68",
+      "transactions": 70
+    },
+    {
+      "id": "syn-v21-6af8e229be07",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "862a295b9588d01802edb29561c46676b8f2680fc77633d8dbd0cd4c60049cbf",
+      "transactions": 219
+    },
+    {
+      "id": "syn-v21-f143265f642a",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "41a97fe322e31f5c5e8c88b9b5dcf4202460576161f501ecf419e6d7260faf55",
+      "transactions": 70
+    },
+    {
+      "id": "syn-v21-df5013820777",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "9bd8f5dd3a88b374045166efa134b4df96ad8b961e8970003ea8d5914c212e68",
+      "transactions": 231
+    },
+    {
+      "id": "syn-v21-dd1646a70441",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "84cc8736f5182bcb599f5473bc836fc396a54ca947f001a99bef6ca5ea82a7f8",
+      "transactions": 279
+    },
+    {
+      "id": "syn-v21-ce886d2a6e1f",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "f1f603ebb506bfa5c6d1c017ed7758d13c317ce2497e4a1448d2cdbfce5e793c",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-d5cb03c9a3a1",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "9f920a2787a0fafea13f2c65762cf05ea483329d4cc8d5bd79bd96c1e5449ffd",
+      "transactions": 162
+    },
+    {
+      "id": "syn-v21-36dbe309827b",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "fa781123929d265fddab25de4a89a187ce8e2790fbcdd74903086cff029490af",
+      "transactions": 143
+    },
+    {
+      "id": "syn-v21-4b63b7dd54ad",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "a3d2f1e2857353933ed89508bfd2e86c9ce669fe1d189271da500104d1350778",
+      "transactions": 144
+    },
+    {
+      "id": "syn-v21-cc021b2b655c",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "dea3ccf122403b90f72401de654b73cd8483608fd1e4bd1284b46c122682c8b9",
+      "transactions": 207
+    },
+    {
+      "id": "syn-v21-c894c19ba472",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "1add77a44a2fe08090e706ad422bc3417612f0feb2e8255cd10c522cd9949843",
+      "transactions": 258
+    },
+    {
+      "id": "syn-v21-9e204cac53dc",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "f33c72872b72912a69973f4334ee00104bdb7c41041200f56179dedae3ef4655",
+      "transactions": 125
+    },
+    {
+      "id": "syn-v21-d87a5226bd1b",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "5f77b8d370697a3fe5f942f962a90f1aaa91f48a0d8606c9e23eed05e952097f",
+      "transactions": 315
+    },
+    {
+      "id": "syn-v21-477ceb76b9f3",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "72bd1c3c5195ce15e7c4aa128c8fffa99855732d159bfba6934822d31c5e4b49",
+      "transactions": 73
+    },
+    {
+      "id": "syn-v21-90ce8cf90c35",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "72a4f3686632c95527051ed215cb39220881cb4450321281d2225ca06484f839",
+      "transactions": 281
+    },
+    {
+      "id": "syn-v21-1299b1ba82fe",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "151f396725f89d5b3d69a39e1cd114b47cc9257b670075312cf1b685fc968c71",
+      "transactions": 135
+    },
+    {
+      "id": "syn-v21-c0b7b276b70c",
+      "tags": [
+        "mortgage-undisclosed",
+        "mortgage"
+      ],
+      "sha256": "9dc6346e0efa78dd2e33b39cb62c35ed9a1d24a1e492ab86ca69249b04d9aa81",
+      "transactions": 135
+    },
+    {
+      "id": "syn-v21-fbe5ccbe6109",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "54fd563fdda501b1d48ea783d7330cf3c5b375053d3ae79fa4144a065239df5c",
+      "transactions": 136
+    },
+    {
+      "id": "syn-v21-5e16e03f54f0",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "37ad9d0a7c834963346327082eba53f18c63311c884eaddce701c48a3aefbd79",
+      "transactions": 298
+    },
+    {
+      "id": "syn-v21-92483b280ce9",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "44f4209e449a12010718bd0d20f02ddc11ba7d8ac9853b2010b5cc56bcb55236",
+      "transactions": 21
+    },
+    {
+      "id": "syn-v21-102236cf4387",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "19b8711ece42aad61e84bdfef99817c404374415ac14de163c8c3909320f13fb",
+      "transactions": 307
+    },
+    {
+      "id": "syn-v21-0f01933a74c9",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "eeabcd0c1b7226d5aad73e9e4998943045c399859129312fca694fb9778ac94b",
+      "transactions": 281
+    },
+    {
+      "id": "syn-v21-bfeb50afd286",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "00c7dbf3edd77e4ce1ace0d5343314a370eacebe4ba0ef82054855b3913f2cf1",
+      "transactions": 128
+    },
+    {
+      "id": "syn-v21-cdfbd6b2869a",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "234504d150e39d60b0a8643cbdd37c02ad6a2df2522b46dc79f7034290ebce0b",
+      "transactions": 293
+    },
+    {
+      "id": "syn-v21-2e7ad16722c2",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "eca0034cea8660b9427fcf01fa95b9d910e45e0094ab6415df387fc0fbb7e38a",
+      "transactions": 256
+    },
+    {
+      "id": "syn-v21-1443e68682e0",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "2881baf7566099c14b28cfdbc4c1d0fb1932f1762f62510345c0e88f97076f7d",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-be4d6f945e66",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "a9f1e83c8f7742d7899a334a7e825ea0d970531ff8a64058669cd73710763066",
+      "transactions": 283
+    },
+    {
+      "id": "syn-v21-4bbe7286d8e6",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "ab1f7be20b531cf79b7e4014c8397253948b5aa5d7bc33ab61fab2fc026c960a",
+      "transactions": 119
+    },
+    {
+      "id": "syn-v21-522e8ce03155",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "b53c1e62c2f7bb0e24f169de72ad06c265f19aa919b38fba24356e297e9723ba",
+      "transactions": 61
+    },
+    {
+      "id": "syn-v21-a9b5d78a8762",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "5a8c289395fd8f2240cf1330c486b272991a6d5c5b55437bd9fcdbfc0d89979c",
+      "transactions": 278
+    },
+    {
+      "id": "syn-v21-234071ac99a4",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "78cddeaf426a77d8ee3b0b32e71e941c3532534bdb447c6e53a9dd8217ec1d09",
+      "transactions": 243
+    },
+    {
+      "id": "syn-v21-752253aefee8",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "372a31cd9f9de5ec99a790c65038c7bc138ec7b49e0ab707d0c19fe9cc697ec2",
+      "transactions": 151
+    },
+    {
+      "id": "syn-v21-20422c2ef2a6",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "6d2b48be002e3103e46002b348ed68e00d028eb88f9a3059932bd06b8908ac02",
+      "transactions": 18
+    },
+    {
+      "id": "syn-v21-5e5184feb64d",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "c1364ddf85057e99d4ee55b1ce323fcac6de52bd6f811591df1d4af102cd99c5",
+      "transactions": 287
+    },
+    {
+      "id": "syn-v21-e57aafb1fd13",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "940a7e535cc028ef5b34c6f4fbf5ffb9681b39f7dc72c63fcfc812f666c973a3",
+      "transactions": 154
+    },
+    {
+      "id": "syn-v21-168a895caee6",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "c76f316924bf394cfc32a2786e17bd2284f4af6130a3561c5ff7872ea8802323",
+      "transactions": 243
+    },
+    {
+      "id": "syn-v21-30e224c0809f",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "a07f8b27c931f4731edcf07035a43f544ef9fe9129074661b967129a1fd79154",
+      "transactions": 132
+    },
+    {
+      "id": "syn-v21-27e75269f93b",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "8cbd73c6c77250cbe8ea1c561e2e7e936211cd5633e74472d40760f38d407491",
+      "transactions": 151
+    },
+    {
+      "id": "syn-v21-8277419f1fda",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "ddee673025d8af262bc4de67ffb6a89105298ae408fcd58d6c9eb9a7d7f69ba8",
+      "transactions": 95
+    },
+    {
+      "id": "syn-v21-8959d0e5eb47",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "1b5c88be8e5a74181043f49371b2c1f618c85165991c90aa75f1584a18554715",
+      "transactions": 269
+    },
+    {
+      "id": "syn-v21-979f9e58fe15",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "50b5d64209233cb372c49a42a35319f8c2f99d8e6b8f8c6e420432d2160d035f",
+      "transactions": 240
+    },
+    {
+      "id": "syn-v21-b4d20b7b0dd0",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "f5031059345a9d956188bff3a6719d1ba4aca715de660da6cd55f9b11b246d6b",
+      "transactions": 130
+    },
+    {
+      "id": "syn-v21-11783088fac7",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "fb7e50f868d318a030e76e022a6e37707bba148e574d11d5f1476307c6a16dce",
+      "transactions": 55
+    },
+    {
+      "id": "syn-v21-17990e28d3a0",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "1ea3c4948661e5ef66743d412fe6775ebbd954b2b30c7c54e446851c6b3eb279",
+      "transactions": 58
+    },
+    {
+      "id": "syn-v21-d88859765a68",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "c9319166e19d4e9b5bbba17074fab2ce0db39eb50671cb0cb4c78fd682fb7364",
+      "transactions": 89
+    },
+    {
+      "id": "syn-v21-d8793d241352",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "6e410da26263312ef172bf610cc5dfc26aa3296e788439529d71e55536dba7c7",
+      "transactions": 72
+    },
+    {
+      "id": "syn-v21-7150fa375eae",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "65b382a8cd2c4b117ec210a1ee077ba79e7ea62158d64ffd7f34eb89b9bc518e",
+      "transactions": 132
+    },
+    {
+      "id": "syn-v21-f1f8874f8a60",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "e2a9f0f1a6f5744b8800b7894ea54987d4341a7ba1e7fc381ee0c227870bf607",
+      "transactions": 156
+    },
+    {
+      "id": "syn-v21-3583c1183934",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "00132732cecb4cf3b32cda7db14b1023041c148781ae313fddf9f71de4d12397",
+      "transactions": 73
+    },
+    {
+      "id": "syn-v21-6e33f27389f2",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "1506ec6f61b4fec7f7f90d8dfe306618a4113d6101a5916c8d24ebee627373c2",
+      "transactions": 74
+    },
+    {
+      "id": "syn-v21-87ea87e4d7f2",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "f4aea197b69171164f2be6bb2faa0e459cc50b178866439ac24c6f937f3c0ce0",
+      "transactions": 122
+    },
+    {
+      "id": "syn-v21-b45aa4bf76d5",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "f009095c2b85f520477027566e08c01930dfdd3b0ef50ea919276d89404ebfbb",
+      "transactions": 273
+    },
+    {
+      "id": "syn-v21-051bcf154344",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "716e6453db2e22d3ee33f059b5a8584cb3530d680c8e216b2ca613faf0524976",
+      "transactions": 129
+    },
+    {
+      "id": "syn-v21-7ddbb35a21b6",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "ee5dfb9027750094ae3dc7b3e01d1f008adefb041dc5a87122c91259d321dbb2",
+      "transactions": 137
+    },
+    {
+      "id": "syn-v21-5f3a4ea02a7e",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "ca5f4c787d77bfadd9bafb085374c707612bd690b6d1e2c5a6367279d7bea74b",
+      "transactions": 88
+    },
+    {
+      "id": "syn-v21-7091a9c7ff1b",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "34086d2aa1f0516696ea2845c7541ddffafbc154931ad1982343583d3df09de2",
+      "transactions": 272
+    },
+    {
+      "id": "syn-v21-65c13a1774f6",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "f094865b96c7aab35aa0055015b22746405d751add04c9a650471f6fb785e6b4",
+      "transactions": 278
+    },
+    {
+      "id": "syn-v21-1089da1caa27",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "f7e780aff464e29ac551ad064d6cc4fb7cf01b290c0328717008500093edeedc",
+      "transactions": 289
+    },
+    {
+      "id": "syn-v21-75511aaacd71",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "92cff3cabe63812cb9e9513897292c04a5094f76df121bb8e5f778b0c86b6ae1",
+      "transactions": 62
+    },
+    {
+      "id": "syn-v21-84919339cbe0",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "0cb95666e0d4ff2d04f972654c320cf9e8b9ef5c367819f38c15f0b1e2a27db5",
+      "transactions": 64
+    },
+    {
+      "id": "syn-v21-0e383e5e0655",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "d27d4e933d3d17bbcb570d13bf61964c3c956f486895f0364a889b7efb10db24",
+      "transactions": 142
+    },
+    {
+      "id": "syn-v21-0e5e6b55e49c",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "c307bb8393c39b8be8d46d61c833ab9a864d374c7dfabae6047b8c6c29c26bdd",
+      "transactions": 156
+    },
+    {
+      "id": "syn-v21-949522badce4",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "9675885518e5979f3dfa1a1f7b2212b0337e324829b95943a7cd78ae944fdde6",
+      "transactions": 137
+    },
+    {
+      "id": "syn-v21-ebccb28e1497",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "b2b2149e8599b06a98a9b55b7cd1051fa5ef01c86c1540ce4264ed06d8fe0f60",
+      "transactions": 79
+    },
+    {
+      "id": "syn-v21-ccdae779a630",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "6ee72adc6daa821d1b280973e21df643d0145499ce8354b1d4e6f66ab6cdc11d",
+      "transactions": 77
+    },
+    {
+      "id": "syn-v21-932d4bd25f2d",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "bfeca6c648f4d0eadb9157462d9aea87e24680ee5cfaff386ad936918934d442",
+      "transactions": 68
+    },
+    {
+      "id": "syn-v21-f8007d7295a9",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "eae36657397ccfe3384e1f6db94a234f4f4022da31659c41c097243a79570d3f",
+      "transactions": 154
+    },
+    {
+      "id": "syn-v21-44dfb9686107",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "5565d5d26fc89932c1c9f6eaf7b8004508706db6b0d9f6f5f14bc67c11ea51f8",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-9bdb8f81f113",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "0e306d169225edf34a12555c307dbf9641ae737aff428fb9c67aaeb986e0b5ba",
+      "transactions": 91
+    },
+    {
+      "id": "syn-v21-794689daccf9",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "f9d970dcecc620810b838dcd280705d137860a71c2667ca12cae5f84db2fbd1a",
+      "transactions": 129
+    },
+    {
+      "id": "syn-v21-beaf0d76d1dc",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "630124bd7058f8c4b59d4624099a34a5bad3511d9e96313542a0fcb3f8bcc4f4",
+      "transactions": 81
+    },
+    {
+      "id": "syn-v21-35de875eef67",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "707fefb195ba18c419da80591ba562b056b69bfd45af7da5e585549e645723eb",
+      "transactions": 145
+    },
+    {
+      "id": "syn-v21-ebb5126c7426",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "4c1e86828e86860c6abb746e70b2bdc07073b6759bca945997d75ca45c477763",
+      "transactions": 233
+    },
+    {
+      "id": "syn-v21-4c72ecb7bcce",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "194e937bae7df1d2ca148424ef77a1d46ec2e9584e7817166cb1fc6d8663f2e9",
+      "transactions": 23
+    },
+    {
+      "id": "syn-v21-1480fc638581",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "f0647a8d6031f5bcdbeda6734da8c0c180b268cea13895bda31bdc9bd0b745a0",
+      "transactions": 310
+    },
+    {
+      "id": "syn-v21-1cb021b97074",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "2ffda01cd6e37af30f9fbdcfb9478ddad8dd8226a621c2ff4e8386409b9bb49d",
+      "transactions": 275
+    },
+    {
+      "id": "syn-v21-7443931d4894",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "8ede571059b7dccc6a1f5813db6c83bd65f6593edfb0fa9e73d91828a6fba594",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-a430bbe8b252",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "72ae5a8f11ccba35714e238ed344a10c248a104a0449e8285b4ca63da1a2c88c",
+      "transactions": 131
+    },
+    {
+      "id": "syn-v21-a9cb77aa292f",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "dae22f83424121bbb2b67fdd8fc69c09002e7273c645ac22947f4996de175ca2",
+      "transactions": 246
+    },
+    {
+      "id": "syn-v21-fe4f6ae80b34",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "513f9d6c6b15fb2a3bf0bd9511467c2fb3faa621fb01341b96b35ddce813a8dd",
+      "transactions": 145
+    },
+    {
+      "id": "syn-v21-90b576a00f3a",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "b36902e460216f6be66e6f902295501eda7c9564c47fec15f414ff527f49b2bc",
+      "transactions": 70
+    },
+    {
+      "id": "syn-v21-2f7da31e8ec5",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "af164d92a4b113e14e01180b8ceb732b438d4c894874d2bd39f6be5d50f4342e",
+      "transactions": 57
+    },
+    {
+      "id": "syn-v21-f6c2225ba7e9",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "d1b10cf1d05fa51cad849a088909ce1f00294ab5b4eaaba08df3f198edad1919",
+      "transactions": 260
+    },
+    {
+      "id": "syn-v21-f75d190cf19e",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "2c147fd16efbee435d3e8d0e552909b3851e233b78a8b5efc904790ac833e846",
+      "transactions": 258
+    },
+    {
+      "id": "syn-v21-d24d6bece121",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "fb0eff048d0f8ae9957124f90fcd4fb8df30907e2a0a6f91b4d240faca2998fa",
+      "transactions": 123
+    },
+    {
+      "id": "syn-v21-1c129b48d347",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "97eafc2f3f574e492536279af0998b33f94f410e4fab5f4795ad980a5f731a5f",
+      "transactions": 248
+    },
+    {
+      "id": "syn-v21-cfbc758720d2",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "552ab45fce0ec020dbe49e0746ef6d5e1b9af47a685442056d3913af8c81d7da",
+      "transactions": 143
+    },
+    {
+      "id": "syn-v21-9aea4b55f8a1",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "f4ff14e0cf5329c5ea17990ff809e4e95767a670131110660938ba574b5337d0",
+      "transactions": 283
+    },
+    {
+      "id": "syn-v21-388bf1c92d54",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "bee43ee2ff39b6b1450f003b7cfe84116793d438ffa0269bf20a80911cc4575a",
+      "transactions": 136
+    },
+    {
+      "id": "syn-v21-d5c2a10bede0",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "c2b058d6f52f08a207142f3c364949b48d78d69a21d63ecbed4f41190faaa0ee",
+      "transactions": 125
+    },
+    {
+      "id": "syn-v21-2cf10046d409",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "34c0cee79d770378dd19f6af81180c49a1a27e8141b2453f80e6e24caeddc923",
+      "transactions": 122
+    },
+    {
+      "id": "syn-v21-b157457e1b6f",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "d1a19453af178a6a951cef85bca3c6eb03b15c30f95cc5291d22cb4c11783223",
+      "transactions": 111
+    },
+    {
+      "id": "syn-v21-cc37fa045e2a",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "50091059c469cbc9280787490759455a99c935819acac44f2612523f1fa5e6b3",
+      "transactions": 233
+    },
+    {
+      "id": "syn-v21-347365702479",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "89e7aaaeb41852c8a21de9c821b3990c3c315ccb6f3430119531c60bada688be",
+      "transactions": 245
+    },
+    {
+      "id": "syn-v21-a6e6bc4ba54a",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "c6cb14e1991e71ce3cbe8a14fb00834cee61330a92e50fea618c731b2c1e5c18",
+      "transactions": 324
+    },
+    {
+      "id": "syn-v21-2177040d26c5",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "d53f9cc6e29768eaf8921804056150d8c8f43db9f673eba321cf5023acd39f34",
+      "transactions": 328
+    },
+    {
+      "id": "syn-v21-239c16c93fb4",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "3720fb934cc3bce472b658bf178de32215f4a6c8e15f2a173cd73b6fdf231580",
+      "transactions": 319
+    },
+    {
+      "id": "syn-v21-db2c2c6cd3df",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "5126c046be56e8624837f3dd896998e74d03a1e27ee82232d37aa37a0dfe8fd1",
+      "transactions": 307
+    },
+    {
+      "id": "syn-v21-5d34ac4bfde2",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "6ea2b9f1e459d27477583af7490d8a2e8366f924bc0dd092501ed8079f977f3d",
+      "transactions": 126
+    },
+    {
+      "id": "syn-v21-bc57b1881c99",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "164f4f0bd324245792985c3519f6203f4a6b42ca62bfef97333b20991653236c",
+      "transactions": 66
+    },
+    {
+      "id": "syn-v21-0621052cf300",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "a3497d508fc63930fcd3f0de8352f5f3121b7b48e891dcf9a34aa25d23682694",
+      "transactions": 288
+    },
+    {
+      "id": "syn-v21-7ef4911dd1dc",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "517e6bd2862550dd1fdb2ef352be811fc43ffc3ce8aadb4ca5457ab856ce0e9e",
+      "transactions": 222
+    },
+    {
+      "id": "syn-v21-8ac8ba690e3d",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "e3934af85191c155a7bb7c17917a70a848186fddda723e666cd1046f34f83e92",
+      "transactions": 247
+    },
+    {
+      "id": "syn-v21-86806a9ebe01",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "4edaf772d40472c0dd3c5050cba64ec875a94fb75926d0d959fd856b26d3d84d",
+      "transactions": 79
+    },
+    {
+      "id": "syn-v21-653d7f4d9a01",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "882034dfcb8fbc09a0f1af84c09a1d98c9e29522da4029f135e4ada420433ac3",
+      "transactions": 236
+    },
+    {
+      "id": "syn-v21-34aaa81e1203",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "79c35a5a50a784b9950ee36de07f17b3dd8ba8ff1ac12be47ec8bc271a065d58",
+      "transactions": 276
+    },
+    {
+      "id": "syn-v21-1b017b05c479",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "691bf96ef8753b952f2ae695a24a82fa757dda85d359e45595b8c6ed326199ac",
+      "transactions": 304
+    },
+    {
+      "id": "syn-v21-16b8724a646b",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "c0de6175edf026f1b1306f025a23abb2b00a7d9a01ae7926af75fce6c02514b2",
+      "transactions": 135
+    },
+    {
+      "id": "syn-v21-7f3f198018c0",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "e1a976e76c779abe3995f1441388b28954335e99c2c248a85d60fc0ecf8f1752",
+      "transactions": 148
+    },
+    {
+      "id": "syn-v21-ae7e14e57ef7",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "26bb16206fa566e980682c2eae24c7be2b8f68cd4e964d4ebcf33209cf92fae9",
+      "transactions": 199
+    },
+    {
+      "id": "syn-v21-64c474c70a30",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "10ca3f02ccde1c8e2f785466c0b4311791b46b1708d3918688e9c5c667ad9c19",
+      "transactions": 75
+    },
+    {
+      "id": "syn-v21-3a250d86128b",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "c5cee9a5cb7e36482e064a19de15b03bc7ff8b5f765071481f9c65768c5bac6f",
+      "transactions": 336
+    },
+    {
+      "id": "syn-v21-c7353fa9cd0d",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "bd9fd4ffa534a36d88dc175889f7d290883475036566f43f570012d66a9d02af",
+      "transactions": 53
+    },
+    {
+      "id": "syn-v21-da2012ceabd3",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "cf5b8135986a6a81889e6d09bcd62fa2d98f8eedf6236f52a43989a8af323b22",
+      "transactions": 125
+    },
+    {
+      "id": "syn-v21-9507578e6c7c",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "7633da8bedaee3295c29282fffe817d9b6bb18ebccb26b04b07f0239df96bd3e",
+      "transactions": 260
+    },
+    {
+      "id": "syn-v21-e3e782130ef4",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "9d3ae4486292d64e02252dae2d24d9e5e09dd1dba79d0f2542607449443e1f37",
+      "transactions": 23
+    },
+    {
+      "id": "syn-v21-1aad8e382f72",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "e115975c9389d7f7355c5d8e821536a04299ef2958d3d8bf58faf531cd63dc70",
+      "transactions": 254
+    },
+    {
+      "id": "syn-v21-0529792b993b",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "dd4ba982e1b8089ab2f707edcc7bbcc0931423b0577f8fbdf1a518e2afebbacb",
+      "transactions": 129
+    },
+    {
+      "id": "syn-v21-a834bd87173d",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "8fe549dece86b7b849a127474965d8b505162776b13e113ec1ac0f4f1bed24c1",
+      "transactions": 259
+    },
+    {
+      "id": "syn-v21-bb36cacfc73d",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "c967bae24ef86b23e22d68ed5f482e3ceeea70357a16a930c7ca443c8a21d0ed",
+      "transactions": 144
+    },
+    {
+      "id": "syn-v21-121437eb83ec",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "2bb0ab39f9c9b58ed7c799463aa2101e9b6b3169edf179cd3e685b41a03b524e",
+      "transactions": 58
+    },
+    {
+      "id": "syn-v21-4825bd1596c9",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "b25b6972d6ca0af6cf08b4a17cff4adcf357f60822ff25df773015dd50f81a3f",
+      "transactions": 56
+    },
+    {
+      "id": "syn-v21-c4672a1a88be",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "d0c677cfdc7b5b192b0434d5d8a62891b69ff9e6d127d9ad812b3fb049b9a217",
+      "transactions": 111
+    },
+    {
+      "id": "syn-v21-be42480607c1",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "ac9aa0d8c6ef8040e47647a42897548bf7216667ee4eaded2d26803ea348b2e9",
+      "transactions": 134
+    },
+    {
+      "id": "syn-v21-4fb19004b3c9",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "c9b0b74c5bb496f6d0d41f105f8657d9061f2021e1af5d38697963e79d4338f5",
+      "transactions": 63
+    },
+    {
+      "id": "syn-v21-10ec53153824",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "ab28c105597bbefdebaab7bc6c8571cd01278ed43726f9b41e137309d41500f9",
+      "transactions": 150
+    },
+    {
+      "id": "syn-v21-3b4e222f46d1",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "b9200173d18c5aa3edfbc9efa5787100114e7ac347ba2371a61b9fb57791aa5e",
+      "transactions": 22
+    },
+    {
+      "id": "syn-v21-d010edb457ec",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "24faf810032707b3ddc52be232e9e002f20b5d224d4712a60d5ed950daae9d09",
+      "transactions": 75
+    },
+    {
+      "id": "syn-v21-9a11edc8624d",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "c5a3f32a0fad6bb718e023dc37eb48c518a0daa0d64a1ea308274af0a7cb2184",
+      "transactions": 299
+    },
+    {
+      "id": "syn-v21-71da10dc2616",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "e7c7c8a8902c33fb9fe3d628573684bec3175abdac30ea5c4826b4dec01796f9",
+      "transactions": 307
+    },
+    {
+      "id": "syn-v21-4c6462e435cf",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "589d752bd9439fb9997f14176c1b01f22ef6c34ddbb1dc79c8498a144f15ec96",
+      "transactions": 242
+    },
+    {
+      "id": "syn-v21-7adaf6254883",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "b44dc7e0183479aebe27c2821d2a110d30a89c7898c1fd450d25806f49ac5f0f",
+      "transactions": 78
+    },
+    {
+      "id": "syn-v21-8f36f598963a",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "1b4798a50909315952a05d8637c8126bf145c422aa6ad26521b74a746be52395",
+      "transactions": 256
+    },
+    {
+      "id": "syn-v21-1c489f39f75f",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "9cdd67a91fc9b9fa1332fa6991189d84e981a8860d816e8f8f517699d01736bb",
+      "transactions": 81
+    },
+    {
+      "id": "syn-v21-eba3526cae0b",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "8b542d5338670002c9449af4682a6dd3e95d102861c04e82c8b3c4e75470f7c5",
+      "transactions": 303
+    },
+    {
+      "id": "syn-v21-09a8e29432eb",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "fd338a67c7180394dd9e7e4826863ee88b0a2550cd927ad90335b4ee54f42886",
+      "transactions": 220
+    },
+    {
+      "id": "syn-v21-3d90807f2303",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "f25681e18911610b9fecc3948ba3993e9f06e745269aa555b4b1c66a6c88bb5a",
+      "transactions": 81
+    },
+    {
+      "id": "syn-v21-fb0a86a51ab4",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "4eee87b3ac652d5dc2cdae65adc20f4a868443673d1c690debbdbdb28b7dd75f",
+      "transactions": 262
+    },
+    {
+      "id": "syn-v21-f7fd05db9199",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "393557bd17287ec1cced1d6748a2a3ea7d8b5bfc7f94a1fa883b8ccde98dcd41",
+      "transactions": 285
+    },
+    {
+      "id": "syn-v21-a9481c7be8df",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "2f9183acb97f0c2cf10bce8814d109182f4d1786a17150fb8b5aa11bfaf72b01",
+      "transactions": 248
+    },
+    {
+      "id": "syn-v21-c2ec923ef2af",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "1804b1bb1b1cd1301d360d3f8fb8ef21aecb652ec17fa6b05b6ce204cde3ab27",
+      "transactions": 62
+    },
+    {
+      "id": "syn-v21-a78f35122d35",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "c2343253e8375f7574eb5767acc89e64ff227d014094094f1deef0db4f74cf2a",
+      "transactions": 79
+    },
+    {
+      "id": "syn-v21-165cdaf04c59",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "b52bb0788f36a8cecb5aaf623fdc6be74e4c0d7dba647c982b1503da454ab4a6",
+      "transactions": 209
+    },
+    {
+      "id": "syn-v21-a516b647983e",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "0e028d8aeffbf703d430a093a9d56e1470c3f721ab8361624976f9d0993f8d28",
+      "transactions": 158
+    },
+    {
+      "id": "syn-v21-74cb4d6fac35",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "47b5ecf4a58fba0462753b939268d06965e5ce909adade1e80b187294a7cd4db",
+      "transactions": 113
+    },
+    {
+      "id": "syn-v21-f95ac5e76638",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "550558e018380feff865bf93a34cd45cb3ff44e0c0e1c5da34011f9624d77038",
+      "transactions": 159
+    },
+    {
+      "id": "syn-v21-10caa07ba105",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "549c8467a858eacbd07297880c2ef5023b585cb63b345fa768711aacd3aa549d",
+      "transactions": 300
+    },
+    {
+      "id": "syn-v21-29eb7ed3d2d2",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "d7eeb2064cb7a9897f2a47678ba28b8421032671c5de2b2147dbb19e6c5fb21c",
+      "transactions": 62
+    },
+    {
+      "id": "syn-v21-ad4d3e7a5327",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "d8e9e118fac335f77ea4c247a8eb4eb964aefdbe2a729999c39702452a18540e",
+      "transactions": 110
+    },
+    {
+      "id": "syn-v21-673fb8fcb700",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "91d84804c1ee243abaee5a5490adce08d3652fb5478ae0eb8ef85ccb69bfd707",
+      "transactions": 208
+    },
+    {
+      "id": "syn-v21-a73b0a851906",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "7d88a0b4d10dc4efd0553964b809c1deaa066a988edf0d71d74f5bd5f020c77a",
+      "transactions": 144
+    },
+    {
+      "id": "syn-v21-a07a06a1cded",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "a487380d0c50c6b54727a0ec789e1a65a9b6952395798221b337e37cf4b4455f",
+      "transactions": 56
+    },
+    {
+      "id": "syn-v21-5cb62ede872d",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "bd274d65cd9a5310d253feb24e768efe771a5f2a5b5461e4433010b2ab145f57",
+      "transactions": 248
+    },
+    {
+      "id": "syn-v21-33fbe61dfa12",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "da8d6d2032f90fe263a1cb402c04d2b54dc2f2cdb93c7de7cf72f10a1ed94898",
+      "transactions": 19
+    },
+    {
+      "id": "syn-v21-bd9e027b68a0",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "3962319b7dc422b9d589a4ee23cd72573dd3c46c8190aa3d1a746811a2af3de0",
+      "transactions": 299
+    },
+    {
+      "id": "syn-v21-c90dc1ef92e8",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "06e5e7da3f7ab594e28892b06ee04dd4fac02566176c4ea88d39cee308b69db1",
+      "transactions": 124
+    },
+    {
+      "id": "syn-v21-df98bf2faeb9",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "e5040428545f8ab590d2c53e43fd8033d7011496799421732070f473e026a6fb",
+      "transactions": 70
+    },
+    {
+      "id": "syn-v21-cc2055bffce4",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "2b6b5eebd35b03bd36ec006bda5af4782199e4c4c6fcd60b96166fc1c0d65d87",
+      "transactions": 118
+    },
+    {
+      "id": "syn-v21-ab572db5033a",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "25f326cc8eaccf7d00094f1d12e9b1d49595fb67180628c34cb6ade985aa1fa5",
+      "transactions": 247
+    },
+    {
+      "id": "syn-v21-2fceeba26f2e",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "32d405f1abe6fc83ce41e0079c18d13b49d99c6938d268255087acdadeb22a20",
+      "transactions": 64
+    },
+    {
+      "id": "syn-v21-15dec6eec51a",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "a17f49fdb9a5173b1a74254c634deab6f8b18bab840e9cd547283e8bfb3c8b4f",
+      "transactions": 179
+    },
+    {
+      "id": "syn-v21-2cc4a015cf03",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "a068a9a5983181811ea73f78a1f2afbe37ac48937637fd6a203835669ac6c0d9",
+      "transactions": 283
+    },
+    {
+      "id": "syn-v21-21bbea64ecb9",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "b21763fc6793dfb745c0d6625e4a49e3b72a7567a65626dad8c4ba6462c29711",
+      "transactions": 390
+    },
+    {
+      "id": "syn-v21-dd16746e05ff",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "4d6a1e40961d49b7afe13f6818ffc77a89de6ab99126b729eb24c7eb538239d0",
+      "transactions": 298
+    },
+    {
+      "id": "syn-v21-5fd4be2ed124",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "672a933a75b3a4911bef5adb9d5883b5d7d21a42078397bec69d24db933db040",
+      "transactions": 72
+    },
+    {
+      "id": "syn-v21-23d5a94ab946",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "936bd27541d8195818d59e1e2f314ce4c3450697abf6a7e732eb990cfd824bd6",
+      "transactions": 280
+    },
+    {
+      "id": "syn-v21-3ac1181d5201",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "dce6334af1c3dbfde7e0c416ecaa345554abb0f99049f624da5e2a631b322790",
+      "transactions": 283
+    },
+    {
+      "id": "syn-v21-a547ac6568bc",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "4cae818a37552e19137d6b200c706ffa6277125cb62fcb20908370c17dcefd73",
+      "transactions": 199
+    },
+    {
+      "id": "syn-v21-f60faa4d5924",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "d304d1d4579c8f8f7318de8b76e42a2319d046a93041733678e063e2a9dec59c",
+      "transactions": 287
+    },
+    {
+      "id": "syn-v21-98f5acd4e52a",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "1334103f703f100b592cf9a9d766779ac8ccf3b51ecf046e9696cc55c8b65d89",
+      "transactions": 137
+    },
+    {
+      "id": "syn-v21-a4872122e6e1",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "f613c21c33bd10936fa0aca811a6b4cccadf2ca7569bebd01a59fec00962d67d",
+      "transactions": 272
+    },
+    {
+      "id": "syn-v21-2a42e8999a07",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "7e803fb724eafd0040fb0f101b019ac78ed0c33df986c9de9ef779af79877efa",
+      "transactions": 260
+    },
+    {
+      "id": "syn-v21-01c9805f60ec",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "83b28b66987cbc496ec0452e30caa1effc5ad55accb6e21551e845d082b8ebb8",
+      "transactions": 287
+    },
+    {
+      "id": "syn-v21-50a1364027b0",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "dc945860631c18eef5bbd1938c0c07b3bff45cb6acecfed202fadf02c9019c20",
+      "transactions": 328
+    },
+    {
+      "id": "syn-v21-e34a2cd90114",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "b7fc7e3a24e3fb12f18a0862eedb76967788f395690da1e2809a9e9ab1530df8",
+      "transactions": 75
+    },
+    {
+      "id": "syn-v21-8a580417a4cb",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "3bf25f087f306586d80017337f09139577a6850a9b26753d533a4c8f8093c6bb",
+      "transactions": 124
+    },
+    {
+      "id": "syn-v21-11dfd3ee69aa",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "db044604d1d474638bf5ffd2c07d9937c2de7d9c27b642af5167e0f6580d5b89",
+      "transactions": 295
+    },
+    {
+      "id": "syn-v21-fb6b65129997",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "d7dae7d8a9cb1574cddfe49d11627b5e96a30eeca32f8d7bf6febca146093cd7",
+      "transactions": 250
+    },
+    {
+      "id": "syn-v21-0b8de2b042f2",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "b554a8a77845a8cb784ef23998a7e36f145ad4630852793c5ae00d9868d997ab",
+      "transactions": 115
+    },
+    {
+      "id": "syn-v21-3b8ae079d45d",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "c9d8d079c1e412008252f7b97671b129b30ffdada21fe52ab87a504ace93747d",
+      "transactions": 105
+    },
+    {
+      "id": "syn-v21-714d016ebed2",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "fc9be08edb47a88365bb0ea88ed85034e718d6217620f8ca79ad0dd2738e0b14",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-ef618e211aae",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "39b623ce6d3f939f2b19c038f0a03d80bcfa74c1b399d28df38b7b610ec570ed",
+      "transactions": 273
+    },
+    {
+      "id": "syn-v21-c49264d94a67",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "2bd88ab0a6824e8e78281e794b4d61423c482a779576131d245c438bc46c237e",
+      "transactions": 250
+    },
+    {
+      "id": "syn-v21-78aa26f87437",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "1e05f45258be31aff3cc16b470d415409504cc73452b830b2bbec2dcedba1be5",
+      "transactions": 372
+    },
+    {
+      "id": "syn-v21-fea5c70fbba0",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "6a7dd9d0e968ab8f1d18d28562ddbf5e2fd21906d779f225cfe8508f15a53a43",
+      "transactions": 55
+    },
+    {
+      "id": "syn-v21-4253ac4f3a38",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "fdcc35e1311d6f40528a437217e5d2fb4eda30955099cd5253a6ccd35fb467c5",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-e97b2f7b8501",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "be78aceccdcf83bb85c99e658b9412e720ce70f80787910b6d9baa7a5f0089bb",
+      "transactions": 74
+    },
+    {
+      "id": "syn-v21-587c1ed9a74f",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "819e6e62c86cca54ef9d3162a541192c44187c138dc95bf28ff65f1f7ebf44ee",
+      "transactions": 287
+    },
+    {
+      "id": "syn-v21-7eb0f18df087",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "bbad46f6c47e57e54f3f0759278b5b985c5a95a61a831b2ebbe488d32b5d1bc4",
+      "transactions": 121
+    },
+    {
+      "id": "syn-v21-4487d1be6c62",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "b8632e81ca3a906d0dfca5f76db20756f45c1744db83fff0fa04ad6ffbcc997e",
+      "transactions": 310
+    },
+    {
+      "id": "syn-v21-62683bfcfe32",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "719ea9f14829d509fddecc16740734b69a86d474059e63da96d6609aa97b4d75",
+      "transactions": 168
+    },
+    {
+      "id": "syn-v21-75f4b7a7a630",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "cfb99776f7c462387970cfeee8a7224d24ae30b9827ced7932e69aee55abdef7",
+      "transactions": 72
+    },
+    {
+      "id": "syn-v21-2ae3c72a7f90",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "7db0f412f6514b1cfdb2bb88acb8339e90b50ff08900a168725e016b70a9804e",
+      "transactions": 79
+    },
+    {
+      "id": "syn-v21-b15ff4889225",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "1e40d6a0bc069b051e79f4af990f833cb5649df4b2ab7d3a6710ceffb2638ec4",
+      "transactions": 148
+    },
+    {
+      "id": "syn-v21-07ca7f65be97",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "8d6eae6577045aa8a6a245c4059b1631e2dbc5168e09a953773448163b7395ab",
+      "transactions": 227
+    },
+    {
+      "id": "syn-v21-39779bedc2f4",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "97c48a5aab0aa7c28d385682b63bf119bc574e0ae6ec9cbadc861620e7c8101d",
+      "transactions": 106
+    },
+    {
+      "id": "syn-v21-125c1f23145e",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "b595f27ecd707525b325a4b26b8419546738f7fb164fbdfd729c932ee9c32f8e",
+      "transactions": 208
+    },
+    {
+      "id": "syn-v21-c1edea010568",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "367dc4710a0503d5015608a2e6e4170e8b02c855a961509279d386fb39a42ca3",
+      "transactions": 137
+    },
+    {
+      "id": "syn-v21-159dc6f598a9",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "08930d315bad86a92727d457bc2492aced2bf59b67e38ba63e3dd2a94242c426",
+      "transactions": 115
+    },
+    {
+      "id": "syn-v21-59b96621fe3f",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "953e7c1c8a1570a555f782252392b498f42c2b793e77729f09153288a6344481",
+      "transactions": 112
+    },
+    {
+      "id": "syn-v21-17dc047e5918",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "78f8a895e748f6d22c96b9a377d18bbd7f7389794dcffb301458c68f318beeef",
+      "transactions": 274
+    },
+    {
+      "id": "syn-v21-ac1d55d656a2",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "2e0b4e8789ae829ec361ab5a6ead377a7bf3d2c99a9ae07732e66c7000875560",
+      "transactions": 288
+    },
+    {
+      "id": "syn-v21-9ac91c9de8ae",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "246f326a9f3e7a214692d24ea740efc7c7749c67198b4c114485c26f2623007c",
+      "transactions": 363
+    },
+    {
+      "id": "syn-v21-1518ca536561",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "82f579114765229980e2a41912b31730547ffcdc066b3cf232b6492f4174ca58",
+      "transactions": 275
+    },
+    {
+      "id": "syn-v21-6729b2e0a461",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "ffd19a8229ee7297216ce21c58c0a0c16eb93146847d14fb1a0485cae126f5fe",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-ce37115951da",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "014e1fa11ca4522ba16a9bf69f1dbae97c369dbe725d5cce4afc650c17470dd0",
+      "transactions": 138
+    },
+    {
+      "id": "syn-v21-b9af4be8e33d",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "e9b90045ddc69339ce521c6ff3167bad64f7bac845574ff972f059bd4a947356",
+      "transactions": 143
+    },
+    {
+      "id": "syn-v21-301b596d05fe",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "de31fd9f413af6241c36a85336912a607cf37f5141bd797c7cc2072f570bf145",
+      "transactions": 266
+    },
+    {
+      "id": "syn-v21-72b28cf7c4f6",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "d34ea423f2b2011cd81b531266521d5c769f433df3824963be80c0732d7785d1",
+      "transactions": 61
+    },
+    {
+      "id": "syn-v21-c7640f005481",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "5fd607532a7ce901ba6ac0ebbdb4d5d204de5662c16a239a7a2bf8cfed246708",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-c997b0036318",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "43c17386e48d121f9d397aee7a801b7f219b38b9e07116d3a2caa79b5a6ccc99",
+      "transactions": 75
+    },
+    {
+      "id": "syn-v21-e591143aa031",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "4f85f4838b4bd54282fc10bdb9aedf653e2c110ddc60b34dd009c29e2240e219",
+      "transactions": 20
+    },
+    {
+      "id": "syn-v21-34868ee1f5fe",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "ee21a026fd2cad4a217206f43b8698a54decf60eff176a9e470b429b13ad468a",
+      "transactions": 71
+    },
+    {
+      "id": "syn-v21-fde4e50b2c2b",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "8b854fb237f13e2be8b4eda7bef937474131635e93df23f60b1c8a28fb677250",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-2853eb2110ea",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "cdcb19967d7a04f4fde4fad83a5733e83b6e1bc237ae588cf34375b816be5071",
+      "transactions": 147
+    },
+    {
+      "id": "syn-v21-a0abfb6929da",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "41f1e7250769ea19dc9afbdb5ed20a827325aa4309505a4ea2b6ecb4523b4375",
+      "transactions": 267
+    },
+    {
+      "id": "syn-v21-b658ff6f4d9f",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "74660279b83e7a3cf6d396a7651a66e205faca1c294b8e67d5719703b79a4a8b",
+      "transactions": 273
+    },
+    {
+      "id": "syn-v21-b3f6628d487d",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "01f70ceb114d4534ac0dee819877428bf3b1fb4dc6bf6b9ed873ddccbcbc8dca",
+      "transactions": 74
+    },
+    {
+      "id": "syn-v21-b83489312729",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "d8c65ed66f8bb55c8f079f3cd4c2d49a3cd12c417f3ec30ee1cb34e32dd9f0d6",
+      "transactions": 140
+    },
+    {
+      "id": "syn-v21-eeb4a9aa24d2",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "7c2eac4e58fafb2056efc17de54271a46a54498e724d0f78a23a6693f80dcfb8",
+      "transactions": 51
+    },
+    {
+      "id": "syn-v21-8d9722c3b34e",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "61f82cb22cebe1ab78f758929b85dab3875412a8d054095e88bf2f292592f010",
+      "transactions": 62
+    },
+    {
+      "id": "syn-v21-b63783ce4dea",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "86a79645b5920e9032da785e1de373e77e8e6825101817896558b650344069b2",
+      "transactions": 77
+    },
+    {
+      "id": "syn-v21-1974e4de7d76",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "3dff4f317a1c6ca78e1438811f3407852d41f6c7afe233535c53f6d74b8cb1c8",
+      "transactions": 236
+    },
+    {
+      "id": "syn-v21-a1c9752907a5",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "41ee49f8a937640886048e16702906d5bbb2a1774891359f2d140952ff6b0f19",
+      "transactions": 59
+    },
+    {
+      "id": "syn-v21-cf0fe14b171d",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "ba4c07cff145c3041ff6432db42c689257dc418dea9d8cdd6a6ea9649281a4e3",
+      "transactions": 280
+    },
+    {
+      "id": "syn-v21-d63b6bd6c101",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "8f86e0a8fd345dd626ad812631903b8aba911a889768f0ae9167020c6b7e038d",
+      "transactions": 78
+    },
+    {
+      "id": "syn-v21-76db5d5e2b97",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "125c19e6707ec8ff08d8408f409f731832d37a74cebddb823cbc0655b40c58fd",
+      "transactions": 69
+    },
+    {
+      "id": "syn-v21-23d7ee6bcfb4",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "3e61b96bb613954ccea25fc0d10abf451808db4cd4383ab534cfc03453d024cc",
+      "transactions": 130
+    },
+    {
+      "id": "syn-v21-9e0859b958ae",
+      "tags": [
+        "mortgage-undisclosed",
+        "mortgage"
+      ],
+      "sha256": "0afcd980434fd25ca1a605e0e001a297b7014dc0d6f8bad036cd8bb89ee7c85f",
+      "transactions": 68
+    },
+    {
+      "id": "syn-v21-250f276d7abc",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "6130f092e7c9a0974b7b5e4fa5cfdc7ad5578ee61fb7f91d5a1238f2743b8fc1",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-15f151218983",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "afa29ae2d140eab66a02f7e021e50232e053c068c1c0ffcc6d5a5b0c7b0a4f73",
+      "transactions": 111
+    },
+    {
+      "id": "syn-v21-f4142f3f9ce0",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "b68aef293974969f688e1969e3b1b5e8bb2f7345443df077fe3f012284bb4242",
+      "transactions": 150
+    },
+    {
+      "id": "syn-v21-d2ad96e1db6e",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "16f8184df438c8c54601af83f0831b66d340da2aab22c026e717305dde3527e8",
+      "transactions": 156
+    },
+    {
+      "id": "syn-v21-1d7bdd30ead5",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "30d67664f0e18e75bcdd0e6ff554757cb04744c19100fec218a5abdaa9c3c916",
+      "transactions": 73
+    },
+    {
+      "id": "syn-v21-5baa8d5e6dde",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "a97d7b1c67160ce1379117bc037bcb423e7f170f47fd31dbd7d778b2c4bfa42c",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-ecdb5abc875d",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "8d0ed9ffca4a80f1ca0d19cc47dc2cfd37062e790b04d397abab5e6dbb159395",
+      "transactions": 137
+    },
+    {
+      "id": "syn-v21-e7e53df59746",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "f40b948d8ef26abb8fe4dc3b7a42f8ceb37b96492dd84115ebc714e52bc24442",
+      "transactions": 243
+    },
+    {
+      "id": "syn-v21-7839a8ada1a8",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "2b5f5690418fa738b8d329a44edfc0ad525be2b39c460fb19a4f4d2944813c0a",
+      "transactions": 70
+    },
+    {
+      "id": "syn-v21-aba048ccf537",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "34353f9bba989b67409464b34e82fa603ad337c9f49e097883eba8dde5a41016",
+      "transactions": 283
+    },
+    {
+      "id": "syn-v21-aab57a4d3c32",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "d0d25cdc864a52e98dd65aa3310524fc9489975008a1b608847320fecf2013d5",
+      "transactions": 61
+    },
+    {
+      "id": "syn-v21-aa380001e388",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "dd48bcfaa26a7fd963674453f12c5bf24cd6ca55100914f173c227e10482e449",
+      "transactions": 74
+    },
+    {
+      "id": "syn-v21-4a2f3a1f1108",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "2bff3f6fa7e5884b3b5c7deab3cd64d8e5ca0dc5d585e71067ee24d63a47ee8a",
+      "transactions": 289
+    },
+    {
+      "id": "syn-v21-80efba7feaa5",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "16de40ee232f06b3f22ca0159f742f3a0c07728df278168273a0dfee2e10d675",
+      "transactions": 249
+    },
+    {
+      "id": "syn-v21-f6b3dca718f1",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "0e4b26d6e2a55c7d9f39332a7595e786c2e996a83f930475bf47608cc00f9c24",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-a98ab9663421",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "6941b882b133919306bed018a0c2351fe27c78c4b8d93ed3adf1ddc1133be6c5",
+      "transactions": 222
+    },
+    {
+      "id": "syn-v21-7749693a2a8c",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "6d86eb3851011b62822097fb7ea01e9f0d76ea26a0d18d97b31128a77e73140f",
+      "transactions": 276
+    },
+    {
+      "id": "syn-v21-cbba41991bf9",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "8e29081c921e89256063de0f164c8d7952da3aeb4da3cc02917c820e314e64b6",
+      "transactions": 135
+    },
+    {
+      "id": "syn-v21-4bd6fd36a91f",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "8ec78c13eb9899466d15a237f49e5232ac63e952cd4c96872bee89da7178df53",
+      "transactions": 325
+    },
+    {
+      "id": "syn-v21-d9fa5dbfda67",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "f7e7fc74899093bbb6e236fc81956981b64f1aaa754e5c5907077267d7ccf289",
+      "transactions": 70
+    },
+    {
+      "id": "syn-v21-7af6923f68bd",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "4bcdb8ff8d26224644284a5177f8c08879ea5c3853950f5b2e8539c696b54819",
+      "transactions": 131
+    },
+    {
+      "id": "syn-v21-b34640ab9bf9",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "f0025bf2bdb3564f37effc06d4ac000f002012987a4faf5a24caacbe486be231",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-9f536d2b7877",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "57272dd40cbb3accf93e389e7d255180630808330127d7d7e3ce418297f9a208",
+      "transactions": 151
+    },
+    {
+      "id": "syn-v21-a27801aaf356",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "02cc72ba4705e269076293e287a1b288624ee3d6d2344d7fa8f356f890c1dcee",
+      "transactions": 236
+    },
+    {
+      "id": "syn-v21-afb461d26508",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "dae98c1c126e7b5e5c4f03f2e8c97bcd1bbfd497113960e1468a04a75f145748",
+      "transactions": 83
+    },
+    {
+      "id": "syn-v21-ce0dc8519a92",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "46e937f73b0f2f3070a719127142c7942a26731899fd7b8e67d89844cece4d11",
+      "transactions": 143
+    },
+    {
+      "id": "syn-v21-d9920bb5737d",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "3d460e4e1c8bb63b1fb9ea10034635d49a2f637aa6bc0eca535f097935de40c0",
+      "transactions": 268
+    },
+    {
+      "id": "syn-v21-3af1a83f838c",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "0c28e824cb671b40ff70cb12934f7b05395bf9111d086b2fc88f0e0214374315",
+      "transactions": 297
+    },
+    {
+      "id": "syn-v21-c744a6a5f606",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "84a27109adaec8379b5591bdcbd51cbc2aeab06e8f8f8cd1e33316459b805665",
+      "transactions": 77
+    },
+    {
+      "id": "syn-v21-b3ca9ed94096",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "1ce595b02b22a0b9ca4275144c2a9f6480572138bc1f9a5642a95d164e712d3d",
+      "transactions": 125
+    },
+    {
+      "id": "syn-v21-8ffcbf23f206",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "3dbc7058e5888cfb766c3908549bd24f2cead97c0886c70d84aa5fcba332d933",
+      "transactions": 250
+    },
+    {
+      "id": "syn-v21-437e14161116",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "0f5568737b204ac161ff978d71e494c0acbf2fdd044a77359d8aac8a5cdf55bd",
+      "transactions": 130
+    },
+    {
+      "id": "syn-v21-b6b5639428ea",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "19648f2a53da09018198f2bb11babacee0cbc81ec263d6f233b8fa8e05bf90be",
+      "transactions": 263
+    },
+    {
+      "id": "syn-v21-488fbb18ed7b",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "e83dac25da03cc699fc8b3893b5e2dd2bf4aaa5615d51f4a70081547127558a3",
+      "transactions": 145
+    },
+    {
+      "id": "syn-v21-47a50877c9df",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "5b08e0c3066b0220f5589a2d91519a5ec9b645374effbb68d1ec96e08d3bc471",
+      "transactions": 105
+    },
+    {
+      "id": "syn-v21-c2b139d6b1f7",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "8ef87b954faf8395c27e35200f02b3b08ac9b52faff5697d73bbb0db9f920d8e",
+      "transactions": 297
+    },
+    {
+      "id": "syn-v21-0f5f77c34c2e",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "3f75a95f6142f3192bded1a88bdbde58c5546e059f1a237a40367abd6b9ad761",
+      "transactions": 246
+    },
+    {
+      "id": "syn-v21-24d163395243",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "f0d19a234f06157c4870afc6c26ee1f0e67c86d05a8bce22bcbf46bccbe99a73",
+      "transactions": 144
+    },
+    {
+      "id": "syn-v21-0d5d079b0a12",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "20ccfd89f13556426abe35cc29c33fe233cbbc6e56bae8f978e1e35b3ae95395",
+      "transactions": 77
+    },
+    {
+      "id": "syn-v21-a0d40df53f69",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "86a3c32a1af25d86a409a81ae4a0317aaf27c4a2bfc19c4ab771a193b6a44412",
+      "transactions": 142
+    },
+    {
+      "id": "syn-v21-2aa4feee01f1",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "a5fb8061b949813c678e16d3f39925989f2431ce156b24f22ceb733b6001678e",
+      "transactions": 79
+    },
+    {
+      "id": "syn-v21-b49eb7b96b26",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "8e5d967887d2a766d28b4adae2413c51b376f0f59529de9507f430c84d6036e0",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-b949736ee6ba",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "0b5ac15744255ab2117d54ad58de27feb61fe0fa8ef63637b2111a0782279ce2",
+      "transactions": 144
+    },
+    {
+      "id": "syn-v21-894658bc8d7b",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "a1e3a5bf3e2c014faabbef241271aed1e1cb9472dda2f270ca30d07881d9a5d7",
+      "transactions": 263
+    },
+    {
+      "id": "syn-v21-8af39e4fe793",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "832626ed6e8e2af5614290dfa04bb7eb8fb774c67475378a559b6856d56f6755",
+      "transactions": 68
+    },
+    {
+      "id": "syn-v21-9366af2979a3",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "2662977c84736141bd5d4388a868c83b1352f1dfe8fe36f4c9b5fae23456e437",
+      "transactions": 261
+    },
+    {
+      "id": "syn-v21-70f5df7fb2e2",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "76693b74a9b6c31621e4ff9da10a0c2ecb876bb1da7aaf66a3a4f4b9c17ef302",
+      "transactions": 182
+    },
+    {
+      "id": "syn-v21-38140d7e2a18",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "eea24f824717a185976966cff902b66fcb875cdebcba666b275e260396f870ce",
+      "transactions": 53
+    },
+    {
+      "id": "syn-v21-6db005d184a5",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "f6ed9589db06630562c71b200dc01972d4be9acd103bde4a85f40f5c5e55431c",
+      "transactions": 72
+    },
+    {
+      "id": "syn-v21-ac5d9b9ab1f7",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "2056382df81365f07cff9f8348b395b9ebf740438f6e803b7629dde59a4df5b3",
+      "transactions": 146
+    },
+    {
+      "id": "syn-v21-c742611eef5e",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "500e539e9e6b7924754a6b7cfa45a35b9165dc1f9cd2e41df41a2e05618097e3",
+      "transactions": 249
+    },
+    {
+      "id": "syn-v21-50a2fad8b3a9",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "091a684ca03c1463f09e31b0c85068b8fe1434f0f3e5135cb6c7447d96142245",
+      "transactions": 271
+    },
+    {
+      "id": "syn-v21-3003b036a570",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "2ce11f3182b4afb271205ca86f5d18e384ecd9881c60a63e819d301c15315d5a",
+      "transactions": 181
+    },
+    {
+      "id": "syn-v21-f4ba11b15563",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "4ce33dae936ff6e7e3ea03b099e94a2401b892f0183cc30a81723dd1952d1851",
+      "transactions": 258
+    },
+    {
+      "id": "syn-v21-6aff52e697eb",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "9408b9d748299275a76857d20c1e534d40d8a8f95927b53a4018540cf31dfc4b",
+      "transactions": 80
+    },
+    {
+      "id": "syn-v21-9f978d6d65a8",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "a7f38492c7feb7f518602964dffaa68f587b533a2338e285a271164c3fb6b65c",
+      "transactions": 272
+    },
+    {
+      "id": "syn-v21-ca6090350943",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "440eecd31732237bb8f1fe4fd4d28b332775074879759207967e4092fb8a0e2b",
+      "transactions": 263
+    },
+    {
+      "id": "syn-v21-942e08b68380",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "32887b254511e44cf9b7c2d4f50d0bd5b1a4e135f10305df5f122a04609285c7",
+      "transactions": 126
+    },
+    {
+      "id": "syn-v21-5f81ad406bf8",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "1493e53ad43a8f85326583c5755d34f0fa6dedf3582b2a84243a7c9ae54bd654",
+      "transactions": 297
+    },
+    {
+      "id": "syn-v21-7644e8448017",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "c24439152ac02988ccdeb61a785e02cd43ee345d593401e3d47bd02153c8f011",
+      "transactions": 261
+    },
+    {
+      "id": "syn-v21-209954dc26b6",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "d6c11cb10a7ff6a73ea87a8e3e25401e75a618d66fc0df397fbb20943338b9b4",
+      "transactions": 88
+    },
+    {
+      "id": "syn-v21-757ee6726dda",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "f0f24b034ce1cc6feb4c5d01530b93e4de7634a0eb68d25ed52d520d25232d9a",
+      "transactions": 80
+    },
+    {
+      "id": "syn-v21-83ddc11a5cf4",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "bd248ba4ed3feca1cea5b7a8436a6f0a80a09e3cf682538f598378dc580b98f2",
+      "transactions": 167
+    },
+    {
+      "id": "syn-v21-bc8437aba5c1",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "a685784d8aac6547c4f19174b53f64c8384f414c86ad40457d9b16fc544544eb",
+      "transactions": 130
+    },
+    {
+      "id": "syn-v21-fcd6d2fa902f",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "23025b1813d962b8791915251f0c5029954dd2e19f61cea1538834a4b17124df",
+      "transactions": 78
+    },
+    {
+      "id": "syn-v21-57622b13be9d",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "4136d0003188312b732fe2cc5f9d867a59bbc6dd2abe1e1b48b2f634a99fe550",
+      "transactions": 288
+    },
+    {
+      "id": "syn-v21-eb35038401a5",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "b0945386ae647bf8a065202b43db63abe66f308421fe7f3cfe8ad47b114733e4",
+      "transactions": 150
+    },
+    {
+      "id": "syn-v21-3241f12aebb3",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "57088c3a274d579d4bdce8f770a54ef870b4a8a6dad1697fbc76865ad3bb340d",
+      "transactions": 281
+    },
+    {
+      "id": "syn-v21-24f7bfad1b15",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "2e14656b98c088b9598b86a44a3f3917bbdcf4eb7f95db8801d408d6e36e3faf",
+      "transactions": 78
+    },
+    {
+      "id": "syn-v21-9859b6ce6599",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "af3a9f2a163f05e4e6be51de211e7fee07b9ec48c7892c5502dd5edd4f8cf292",
+      "transactions": 142
+    },
+    {
+      "id": "syn-v21-4b1f771839e6",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "c9fd9f77f66da9214c18763988e43814e02cbe882249e1d22cf84e89f586c743",
+      "transactions": 54
+    },
+    {
+      "id": "syn-v21-52704bde9621",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "d6beea6b8e99d6493c9e720881a80d230027a227c7706aa79b083615d60701aa",
+      "transactions": 147
+    },
+    {
+      "id": "syn-v21-a80f1473d4a2",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "dbecf9170901c6b83da67f224ea6595e34a2b4c791ebdaf9c54c4f03b641c268",
+      "transactions": 135
+    },
+    {
+      "id": "syn-v21-5509da3d646e",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "84526d04aa8be46c82d31c28c71e98c288086696661e6a84206e88ca1a3e3f2f",
+      "transactions": 136
+    },
+    {
+      "id": "syn-v21-8331b65eac48",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "da03b909ca200486dfe26aad6b081c509ceb55c23cde0dbb8d57ce5f37d7409c",
+      "transactions": 234
+    },
+    {
+      "id": "syn-v21-4b1b342e08d8",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "acea3a7347ac40106a8067ae2c566ac87ec0bc86d3bd0ec3197b696d92ad52f8",
+      "transactions": 145
+    },
+    {
+      "id": "syn-v21-a0ab42fca0b4",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "f4e0c43a45f891628b5baf24aa68ce00d614e65e5dfd322bd3d0563d817e4e1e",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-fc05f67f9f31",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "2a4307096b821ca4cd71aed0262ba0919b8038f5b5876a5644cf279017ca5260",
+      "transactions": 301
+    },
+    {
+      "id": "syn-v21-b4d741e3cccd",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "5327e1c6483f37a8c602a84648033d7e8a71c0ceca136cad2bf28708eab14b92",
+      "transactions": 144
+    },
+    {
+      "id": "syn-v21-808f1e5d1bc8",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "c82ce3210848204679502de28852ae91e60f7f52b97cb22331783609872d4ecd",
+      "transactions": 88
+    },
+    {
+      "id": "syn-v21-65226a6aa923",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "2cda9215ed2971b274dad88eaf8e0e9927ec51d8eae4a684be16b5dd13000877",
+      "transactions": 132
+    },
+    {
+      "id": "syn-v21-53ec96636d58",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "2a5deff6cccf9dc073ea3853023cbe6cacfc3b083992cedecb5c9121fc432aec",
+      "transactions": 79
+    },
+    {
+      "id": "syn-v21-cdd9ca8b67d7",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "eee3144549b068cdc65c44f63c0c4ccdce6c8c957a51415941390b7ce80bbc3c",
+      "transactions": 70
+    },
+    {
+      "id": "syn-v21-082764c8dfa2",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "ff3cb4d2eb4757df8f42f829b72d6e99177a31c11af05e1f00a9c4671811a8be",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-b25fc5c56834",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "d9683d392fd11ed44aec0bd6dc26dc5cbe62d273b62ce8bfc180f87fa42c0923",
+      "transactions": 257
+    },
+    {
+      "id": "syn-v21-23363284b6e6",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "567038c1e9c7c740462d52244a6d444d58febc8d024e014aa4609076d0e54056",
+      "transactions": 137
+    },
+    {
+      "id": "syn-v21-afe49a0f493f",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "b33c5eec28410fbf649db84d2a3a40028c0d1d53481bb6d06e7cd608e9bf0a29",
+      "transactions": 131
+    },
+    {
+      "id": "syn-v21-0327312ccb9f",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "f95950691cf1ab1ad97c26a5444cdb0b8e6a63ace30854f5c1653ec55c28c525",
+      "transactions": 69
+    },
+    {
+      "id": "syn-v21-6a9a1a8bfae8",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "d0b086df692ad429db6f7f75a2ec5e6f0d6a206ab76ae5f86bcff0f61678b901",
+      "transactions": 73
+    },
+    {
+      "id": "syn-v21-98a911ae2b82",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "0e7776a51fabde70a9724b04447a5446ad4ec4644013850c7e5dde6a87fc8dee",
+      "transactions": 27
+    },
+    {
+      "id": "syn-v21-61ced9eaa081",
+      "tags": [
+        "mortgage-undisclosed",
+        "mortgage"
+      ],
+      "sha256": "475a769127d5ceff19f10af53dafb545105a362a6a795f6849066a169934fa96",
+      "transactions": 256
+    },
+    {
+      "id": "syn-v21-93acd224f59c",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "31f38a48cf089a27042fbe9453cbb372145093f2b624c0c7fa0893e4c092a0cf",
+      "transactions": 59
+    },
+    {
+      "id": "syn-v21-55277b1be835",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "89a9ea1bee8446fde84442a1449257548943f22150e0eb1abc0b29d4f76897f2",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-e2637401b35c",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "712b1a18b7c10757cc47e31979bcd7fca6a368c2948f40d767235b9abe735025",
+      "transactions": 209
+    },
+    {
+      "id": "syn-v21-1c9e4a455da8",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "4069cf54ea922d680743eccbb58b18d33d3be38a78b64a8336c6ff3e70ac2ac8",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-60a6b45f4450",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "a63c5a517414813be9252c444c30dbee55583eccf57f4fa7daf21976d776de73",
+      "transactions": 124
+    },
+    {
+      "id": "syn-v21-547becaa04ce",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "e4febb749a573668299bd8699984d835748477467d9ddac2d8351b3094de48ec",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-fd8bb235afe7",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "8c7e6055a84101bce3d8b1ffc9e3ce1e646434a04377ed4bf46944b7ba02234b",
+      "transactions": 122
+    },
+    {
+      "id": "syn-v21-3f5e202ed847",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "8eab05fc2815327f79e04486ac25b4b7cdb46295d0068639977bdc976254901a",
+      "transactions": 287
+    },
+    {
+      "id": "syn-v21-199a6808ba87",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "67be84e5f0b54ba94430bdb53343dbbbdf0ee6b1cce7699f29525e7cb205b458",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-b396d2b09760",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "56e974394304c51077552742c04544e9c4f3a31fe818b256bc69fb626881ae66",
+      "transactions": 137
+    },
+    {
+      "id": "syn-v21-e269b2073990",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "9b0ffc7d043f28d9e3747edb868590878f66d90f6ac95e33c748aab31ce0a94b",
+      "transactions": 88
+    },
+    {
+      "id": "syn-v21-6963b43aeab0",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "93a7f6f32574a1a253d6a9b7f762d297c5c7afb18fbaa3aa690d398e275484b1",
+      "transactions": 86
+    },
+    {
+      "id": "syn-v21-27478f16b96c",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "e9ea3088846aec025040f0ce50f57f2707d55590e77f2e34291815efcce1ce91",
+      "transactions": 25
+    },
+    {
+      "id": "syn-v21-49af38e0e446",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "93c890ad95a40e32a4db5f8fb090f98c4f265f2ca9cc4ff9743428acaa6f3c7b",
+      "transactions": 167
+    },
+    {
+      "id": "syn-v21-59fe8b31531e",
+      "tags": [
+        "natural-declarations"
+      ],
+      "sha256": "2d30f6eb1c6cb9b469c8d2f40cd37f1653d87c1cd8648336471e1d0346d87fad",
+      "transactions": 297
+    },
+    {
+      "id": "syn-v21-6e4009447481",
+      "tags": [
+        "mortgage-undisclosed",
+        "mortgage"
+      ],
+      "sha256": "f2509185e4a16129c9ca9d50fe33c4b4b195bf50410212dd61d55460c413ab10",
+      "transactions": 68
+    },
+    {
+      "id": "syn-v21-a303887fda99",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "70c5cce1b7cf7f74bd98a5843644f8e929a852e568ad141f9fd99508317188ce",
+      "transactions": 359
+    },
+    {
+      "id": "syn-v21-68f1020e91a8",
+      "tags": [
+        "sacc"
+      ],
+      "sha256": "d913ef57acae4b82cb7a1315905f691f0049c06c69aa447ecc92b76b14a8c59e",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-4b06519ea17a",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "37dff89981193306eefe4246bb08f63fed1485d60cb91d085ec5e519904bce22",
+      "transactions": 311
+    },
+    {
+      "id": "syn-v21-35ccbeab0e5d",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "907f748502b7f2652bba99ab09bfe981c49db366bea975a6a751a503f1789438",
+      "transactions": 155
+    },
+    {
+      "id": "syn-v21-5be2fe1e2f1a",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "6cb08a99cd8f9c876ff8747b703975beb8434ac1dc38587ee19afe1baecb5f79",
+      "transactions": 72
+    },
+    {
+      "id": "syn-v21-d9ea328b00a7",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "e9a5c942032db3ca54840bd8955b56696cc426b808b50c0228fca68baaccd8ee",
+      "transactions": 128
+    },
+    {
+      "id": "syn-v21-cc84b190d9b5",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "18aec9c52b291b5ee49a723ad4b7155eadfaf74dabd6186da87d7ac29b74abdd",
+      "transactions": 66
+    },
+    {
+      "id": "syn-v21-66741e31e5d9",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "8f14ed1db2cad6119267935eddd54b267c004c20eed83d63b4e402ddebaaf752",
+      "transactions": 300
+    },
+    {
+      "id": "syn-v21-358d3b08f159",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "d75c5fe0e5d89bb32d568a11376f93daa31de9af2fe2ce5a5b6f596f0c819cc2",
+      "transactions": 286
+    },
+    {
+      "id": "syn-v21-a04a9d5b43b2",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "5214619f05c9efff6dfd672706a74aee3b405e5bb85cbe113b0320cdeb1dcca4",
+      "transactions": 273
+    },
+    {
+      "id": "syn-v21-321a5736e782",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "094f317790e846d85ba70ebcf17f439d3c035ce97359ff7c2462159932344bb9",
+      "transactions": 377
+    },
+    {
+      "id": "syn-v21-8e5130e32196",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "e7f5f5708484def6718536603501d96b7f648efa86f5d289df65ac9c21cca59a",
+      "transactions": 72
+    },
+    {
+      "id": "syn-v21-ee40f31ad29e",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "583abce8f35cb4b1ecaafaeb6d0f1ff9bc15fb0eb95b1bd283c7200dc00325c4",
+      "transactions": 119
+    },
+    {
+      "id": "syn-v21-0dec23805c05",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "293ea8c41e7a187041136d8eb4ec6f5e2024d4bb4708742ab065df7495e24b19",
+      "transactions": 73
+    },
+    {
+      "id": "syn-v21-cf1b0ad978c0",
+      "tags": [
+        "salaried",
+        "salaried-fixed"
+      ],
+      "sha256": "2062cc9087f52b2e0e3643dc68e22a4e5f91a0ee41aa4612d1c6326d022be2b6",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-e9a853a8d5cb",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "7f0001338df83c9ef2243f17ec27a2808c57954370e84e264a3c6018389c75bb",
+      "transactions": 141
+    },
+    {
+      "id": "syn-v21-0aa8ac5b6b6c",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "c95848c9cd58739b9c7a7c9137019e15bca856dec6f67bc77d76a67cfbd090e2",
+      "transactions": 105
+    },
+    {
+      "id": "syn-v21-253c76a03e9b",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "60e91d2f1a979bd35947d2ca42435151004047e094643f13178ea4f28b5ec31b",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-dba84917893f",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "02a85e35546981b7053b5cc6723eb57e5738f6f41b9e9209275649761b63ab06",
+      "transactions": 340
+    },
+    {
+      "id": "syn-v21-3fb69e6444a6",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "6b5830b81ff9fbec4075bac255c086758e88c4a073f69f0fd39d85372a19ebef",
+      "transactions": 271
+    },
+    {
+      "id": "syn-v21-06ae5dd56d84",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "b7756f48ef487f105f68544109503fd288ce9d44c34e7159727d45308a6f1270",
+      "transactions": 148
+    },
+    {
+      "id": "syn-v21-bf90490a7762",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "4fc009bc2435b7be7748e483e00746df72fc47eea9ee791844086d36561f7d9e",
+      "transactions": 226
+    },
+    {
+      "id": "syn-v21-6789d8d2e8f3",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "3e2fa05fec62fd06f0a788f8110402e36af5e27ac51203f5dfeb1e545392bf9f",
+      "transactions": 246
+    },
+    {
+      "id": "syn-v21-4d6cd6e07a69",
+      "tags": [
+        "bnpl"
+      ],
+      "sha256": "4589a866d152b112d9a40cd8c6754b5e45a46c76503dc311994f3621fe0f37b0",
+      "transactions": 237
+    },
+    {
+      "id": "syn-v21-993aa708e004",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "689d35528cc65262f9320027ab40731d94f636ea81dc872cd71cb914d5e2cb2f",
+      "transactions": 237
+    },
+    {
+      "id": "syn-v21-de3ce4bd3f9d",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "c6631d28130027b1d75e818843c1d90c8f9d766fee26225b308c87d424285529",
+      "transactions": 123
+    },
+    {
+      "id": "syn-v21-79dc0bba45a4",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "1cfd5cc448c9f0b5471a0498a91d784a396d3f1f68faf82bb52ad479c5a15461",
+      "transactions": 122
+    },
+    {
+      "id": "syn-v21-9bebf273336e",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "2638d7f91bf8ca464c9821036c6c8bc50dff76ea5eeca98e1a214addf9521afb",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-af1d473ec76c",
+      "tags": [
+        "dishonour-two-plus-recent"
+      ],
+      "sha256": "1694ea69c3e1519d2b483ce2da63d6428d885870374818a3d6e29ed14b07becc",
+      "transactions": 126
+    },
+    {
+      "id": "syn-v21-a98fcdcf6431",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "267ef7f75e3ff8764b607451f02bf4934627339f024a0c3bbc56f86ef90012b6",
+      "transactions": 148
+    },
+    {
+      "id": "syn-v21-0628ff604705",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "31db0d02928a872b60bff3c3f4db4244e2ebcd1f8dc82f238c83db71c53aa48e",
+      "transactions": 67
+    },
+    {
+      "id": "syn-v21-3286481e81b1",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "7185aa2fd51f0ac7c1516e9fa2883552ec279d6a4d916b59e65bfa21c3e0cfbf",
+      "transactions": 119
+    },
+    {
+      "id": "syn-v21-f0b4022b779f",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "71bd0443f563d813f5bcc25625d0d012d72a9f3ce95681737f823bc75fca351b",
+      "transactions": 275
+    },
+    {
+      "id": "syn-v21-68077bac9a74",
+      "tags": [
+        "mortgage-undisclosed",
+        "mortgage"
+      ],
+      "sha256": "803f06c3bad9af4ca7a5483889c956071708a9eb82d4ec94f917a089f70e0b03",
+      "transactions": 150
+    },
+    {
+      "id": "syn-v21-889e209ab63d",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "fecf9926d659c957b905ca9912b4a971b5107f0deea154dfa2a0ffdb14a5f710",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-8f5f9b89bcf4",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "e0002ecbd250f8d74f243d3ab20e732d84a65fd65b9c49171d8580140c137257",
+      "transactions": 70
+    },
+    {
+      "id": "syn-v21-618acd435aec",
+      "tags": [
+        "account-not-in-grant",
+        "undisclosed-personal-loan"
+      ],
+      "sha256": "cc15ca23dcc9d1c230b56cd7b38138a465b852349e01603765fb4d20a1e7d00c",
+      "transactions": 71
+    },
+    {
+      "id": "syn-v21-eb9062baf9b0",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "66627eb1679870eb824fa4b5035653a6d7a7bfd73e27b124d1e87eb39f61fb6a",
+      "transactions": 153
+    },
+    {
+      "id": "syn-v21-939cb102bb94",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "875ac5fe2c8a55743a723047c10750e5871aab92647476fb868325ae42fd4eb9",
+      "transactions": 312
+    },
+    {
+      "id": "syn-v21-79c6749ab845",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "70194484d916927169fa8872ad10f2f614df102ad70b5ed3ed89cc6f5444a301",
+      "transactions": 210
+    },
+    {
+      "id": "syn-v21-2a70f1a4394f",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "66612074c522dd13fb101ff894aebb86b66c61977f035d6afeef45952bf268a3",
+      "transactions": 128
+    },
+    {
+      "id": "syn-v21-7484e3e1899c",
+      "tags": [
+        "unseen-lenders"
+      ],
+      "sha256": "33ea8ba8d95256642a68866ea5cf8f44f0f07e4f90f02bacd96e37a6956a2de2",
+      "transactions": 330
+    },
+    {
+      "id": "syn-v21-a7ee7d539a2f",
+      "tags": [
+        "statement-feed"
+      ],
+      "sha256": "d6146f4512192cca951d7b0b7cd90de1864ea311a8dbe13d25f6bb0938b7b3dd",
+      "transactions": 64
+    },
+    {
+      "id": "syn-v21-509829e21cb6",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "overtime"
+      ],
+      "sha256": "1c6ef83613ac0e1c2959b226f87b682668fd7c51a7e37d1a56f7bfd60ac3cd6e",
+      "transactions": 132
+    },
+    {
+      "id": "syn-v21-1c47df1777f7",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "ce197514aadc1ec590a0e09e63946abfb66468cea9fccbe98c1f9e37232213b3",
+      "transactions": 73
+    },
+    {
+      "id": "syn-v21-191aebbfb53f",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "1a7bacd5faa16f76a9db62424e704b6834fbb73c165fc7560f256a7790e67dc6",
+      "transactions": 196
+    },
+    {
+      "id": "syn-v21-ce25ef8b363a",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "118ea511089d00c8d5385dbd7aef4c95dfad035962335bafb9c4bb8158e9e2d5",
+      "transactions": 66
+    },
+    {
+      "id": "syn-v21-dc0118227336",
+      "tags": [
+        "dishonour-old-only"
+      ],
+      "sha256": "9e37aa4c82e97b7a3889bb1779669711fb6a2ff346416bbad2227b1f17b6953a",
+      "transactions": 133
+    },
+    {
+      "id": "syn-v21-e2c5c85bbb24",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "8b9a347e81d863acc4e1d0025ff81234a922f80b42eef537be40d47c7699df92",
+      "transactions": 289
+    },
+    {
+      "id": "syn-v21-762c3c751e4d",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "d9cfd2d33ac0e6134e16769d2cfc7eed773ed6a7382f089b8afc2d5b2f1ae778",
+      "transactions": 136
+    },
+    {
+      "id": "syn-v21-c4387d49abbc",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "410660407bfe3dc0653458b3f50f0c076b373c48ca571575b90fe804c8333673",
+      "transactions": 57
+    },
+    {
+      "id": "syn-v21-7cf6055be073",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "4dce800b938d30a32dee3e1e3f10f36ab81d581b419ff558972774f9a15d9f69",
+      "transactions": 91
+    },
+    {
+      "id": "syn-v21-b0e68a1dda6f",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "b54592d796bed9385f9896053847c5957a04df0a9bc01b0b314a7adc48e7bbee",
+      "transactions": 133
+    },
+    {
+      "id": "syn-v21-dc6f9cc4b4c9",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "12b44122ef52337c9849438feaa4e1bcdceabe5f9e21c957207e43edeb796f2c",
+      "transactions": 151
+    },
+    {
+      "id": "syn-v21-8a5ab9ca5a66",
+      "tags": [
+        "benefits"
+      ],
+      "sha256": "0aef447af8dcb27f0fc8d4e562a7cfbbf46cf4162dd37b55a0633eefc7e13462",
+      "transactions": 72
+    },
+    {
+      "id": "syn-v21-86e80ee098b0",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "15348331a509f137d51490ebe4b8c5f94715e4147991713b2906f1467112fdce",
+      "transactions": 243
+    },
+    {
+      "id": "syn-v21-5a387dadced6",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "205aaf054b937a0f13947ef7152062e3ca2f6fbb937fe292cf7ec4526051f2df",
+      "transactions": 291
+    },
+    {
+      "id": "syn-v21-96cab451b393",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "744f4345b25a65dcf94044fcc5a75e07f311938d301bf4e3d349d3c92ef90dce",
+      "transactions": 311
+    },
+    {
+      "id": "syn-v21-c13c60b3ddc6",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "2caa54944d6efd06af5fc459926e5bf3177d90db8752b4f74cac6a8ab772efc9",
+      "transactions": 24
+    },
+    {
+      "id": "syn-v21-f22cc78f2984",
+      "tags": [
+        "coverage-gap"
+      ],
+      "sha256": "6c8a696cc9c0a57eb06e4468131b04b702b00a5612c042b988855701bcddbd3c",
+      "transactions": 292
+    },
+    {
+      "id": "syn-v21-70dddb3a31d6",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-over-time"
+      ],
+      "sha256": "8a4cd7bca434763fea974190f0586e3c7ff44cb97c30f8e618706311141048d9",
+      "transactions": 121
+    },
+    {
+      "id": "syn-v21-4317c3649bd0",
+      "tags": [
+        "undisclosed-card"
+      ],
+      "sha256": "45a32cc87ccb758261fcde1238a72210f916f740b637da9735641eb749d39fa2",
+      "transactions": 281
+    },
+    {
+      "id": "syn-v21-761912965b12",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "new-employer"
+      ],
+      "sha256": "d72e26c3e4eb15bd19150606b61e0ddd8f1190bd93dcaf9a32deb15d8821643f",
+      "transactions": 104
+    },
+    {
+      "id": "syn-v21-196baa61b151",
+      "tags": [
+        "reference-noise"
+      ],
+      "sha256": "359e12cf0069cbddce7cacf3fcf0ccafb875e70ef364a5bc9acf9ff21d9d00a8",
+      "transactions": 283
+    },
+    {
+      "id": "syn-v21-aee049e211b4",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "a6570a749be46376333d8589f6b405cada590130a6f762d24af6127366d68625",
+      "transactions": 272
+    },
+    {
+      "id": "syn-v21-27482dc9b4fd",
+      "tags": [
+        "dishonour-clean"
+      ],
+      "sha256": "1a55213120c90976ab320f24a82ab76654f9eb558d7e972daa295f503b3448fd",
+      "transactions": 256
+    },
+    {
+      "id": "syn-v21-ed9e32eb90bb",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "c79adfa5130c7e8e58f2d5dcc8ef3fa4ed4a8414c85e797457e4d6e60b35fef5",
+      "transactions": 271
+    },
+    {
+      "id": "syn-v21-82162449f8cf",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "fc79564588a5b1bf37c1644906e29724fbec95486c14b5ab93636ae95f60c462",
+      "transactions": 325
+    },
+    {
+      "id": "syn-v21-a0b96591a054",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "6eec1f44d207738bca5667f55ae28887d547bafb856db25b8e1990e9990ab2b3",
+      "transactions": 148
+    },
+    {
+      "id": "syn-v21-e77ffd83b7d2",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "bdde16959fabd72fb82c9a1f6365b789fa7fa2f4c41abd74bec024af9c7ae94a",
+      "transactions": 55
+    },
+    {
+      "id": "syn-v21-4dcbbcb9f6be",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "7ceaab95a9113bfdf9931422967fb63536f9b2e0dc2a8ef8733e04e2865b3803",
+      "transactions": 148
+    },
+    {
+      "id": "syn-v21-72e503b49f92",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "d00b3c831b3ce4b4363fc0cce3faeee5a48de5d60d66fa4e511dc2888709ab35",
+      "transactions": 208
+    },
+    {
+      "id": "syn-v21-83a6efb67283",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "967b3715c6c129828db350ca230352961c818810f2975e7e9d8add5dd3bfb39d",
+      "transactions": 58
+    },
+    {
+      "id": "syn-v21-54abddb0d745",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "760897609e189a2ba260a39d512c58e3057ebe2951b71d199e3f614ee4dae920",
+      "transactions": 247
+    },
+    {
+      "id": "syn-v21-ca7c5d6b84ed",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "3300760879cf84011f41eda535774c3c12a5c78130c3dde3bb6095fb3aa50ee9",
+      "transactions": 259
+    },
+    {
+      "id": "syn-v21-ffde448b0532",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "bd404b3ddc505fc59ec14a2241e14fb31b864ab8a992c120968615dfefdfa018",
+      "transactions": 25
+    },
+    {
+      "id": "syn-v21-f0bbf5f94c48",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "d6289e925a4e60483d8eb034735344569ec9b3311bdd234671d8e4de22cee8f7",
+      "transactions": 144
+    },
+    {
+      "id": "syn-v21-0fb429d1e39b",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "750398e40e9cd85f9404a0644f9d58bf2f0b07a5b99b31a81c2fef7a2cf823e9",
+      "transactions": 96
+    },
+    {
+      "id": "syn-v21-a5a2357fddc1",
+      "tags": [
+        "gambling"
+      ],
+      "sha256": "2ab814b80a8606748828281c91832a35b476b83d5e1616aff79c84127c653fa8",
+      "transactions": 73
+    },
+    {
+      "id": "syn-v21-73614323f115",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "e9ef33d9fdd7d9ab4378abd61c84fcc028a854ea203f1492972d7eff45e4e177",
+      "transactions": 140
+    },
+    {
+      "id": "syn-v21-f65d5711b818",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "95e16c2ea877341e332c254baad30ea7920ee93d7a1bca6f705667e1fd88d7fb",
+      "transactions": 121
+    },
+    {
+      "id": "syn-v21-04ef329b3964",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "3e36d7193474bf74bcaff39194e8a2d5a526a8370db587f8c70de0d937da42de",
+      "transactions": 152
+    },
+    {
+      "id": "syn-v21-7d3ea1b6796b",
+      "tags": [
+        "repaid-from-unshared"
+      ],
+      "sha256": "654e847bef73d6a161b7ecdfdf4af1b7c67d88393c57b858b22d196d2555b00b",
+      "transactions": 74
+    },
+    {
+      "id": "syn-v21-d110847dfeb0",
+      "tags": [
+        "mortgage"
+      ],
+      "sha256": "c5fdd6e1973bba033458580248fa8e7aa3200e1627476e6430881bff52a68a9f",
+      "transactions": 175
+    },
+    {
+      "id": "syn-v21-bbeab2966893",
+      "tags": [
+        "salaried",
+        "salaried-payer-drift",
+        "drift-across-banks"
+      ],
+      "sha256": "e1aa6b775e8a9efe01cae194eba41b2a0ddf4524a5ba05255ca025710d386243",
+      "transactions": 157
+    },
+    {
+      "id": "syn-v21-be66976b77f5",
+      "tags": [
+        "history-1-month"
+      ],
+      "sha256": "a517dd33a2d8ca7e35dc6d8e71d1a3d4f9f6632b083183412ebcb80f3c3e57ab",
+      "transactions": 21
+    },
+    {
+      "id": "syn-v21-9625a077800c",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "e6f1c3bbe49b95903435f15981aee611553d1d1d5f8359ea0299a2a773a0a1ce",
+      "transactions": 58
+    },
+    {
+      "id": "syn-v21-4c3a8855afd2",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "44949920e5c3a33b26e18f2c985b153890b6ec0f3b5dd3dd62c29398ba293ba8",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-d2ad4ae6ee56",
+      "tags": [
+        "mortgage-undisclosed",
+        "mortgage"
+      ],
+      "sha256": "20d26ce4050e49e961ec16025f97e283f55aa5e6ff4144fe50ff7ec5425733e3",
+      "transactions": 247
+    },
+    {
+      "id": "syn-v21-06668dbba4de",
+      "tags": [
+        "wage-advance"
+      ],
+      "sha256": "d8a47358ca762bc1c9b0ac31e7fb62b308b560757fa05ff455443925e94ffa28",
+      "transactions": 175
+    },
+    {
+      "id": "syn-v21-7b6b8739601a",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "d347b19fb0ea67bc16bfdec4828585a731330ece7723619d7a26d94317d54f98",
+      "transactions": 144
+    },
+    {
+      "id": "syn-v21-27bece32dca3",
+      "tags": [
+        "gig"
+      ],
+      "sha256": "ccc046b45fa84aa74a852f06451f7ee5e3c64e79c6532fcb35e880c561574604",
+      "transactions": 353
+    },
+    {
+      "id": "syn-v21-47f5f6f5c613",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "922d8a636f3d3adc11430dbf19631976500622f59ceb9a00b8c98fe122b0ffa7",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-96a0a815004c",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "942347109c0392d40df2dbdb21b0c71f638c3c334fef60f7e47a37fbfc21ed1f",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-a5dac13d9dc8",
+      "tags": [
+        "account-in-grant",
+        "undisclosed-car-loan"
+      ],
+      "sha256": "de137c05f560bd5f803cbe9e052cb0bdb94a447eb8795b99119d564b612df183",
+      "transactions": 166
+    },
+    {
+      "id": "syn-v21-62a3f2d4e35c",
+      "tags": [
+        "dishonour-one-recent"
+      ],
+      "sha256": "83720d929f6a69ead04da7f415e5249e151cce1d5abbeffbe15e8130a63d6de8",
+      "transactions": 56
+    },
+    {
+      "id": "syn-v21-7f2b5a120820",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "fadb27fe87fd9124f15a9d28b5918bd09614fd0416eb351ea7c6a52f1f942c8e",
+      "transactions": 65
+    },
+    {
+      "id": "syn-v21-f91dba73963c",
+      "tags": [
+        "no-card-biller-cue"
+      ],
+      "sha256": "01c1d93ed76f16bf0d8e407d2787b32fe956571a63b6a4dfc28d988e24274e80",
+      "transactions": 153
+    },
+    {
+      "id": "syn-v21-a9d7a52b12a8",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "d6c9a497c0136017e21a5f70398c15e73ea1ae2fe234d5af7141d5ba31f0647b",
+      "transactions": 70
+    },
+    {
+      "id": "syn-v21-497127509721",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "bonus"
+      ],
+      "sha256": "98d7e765ee3b1e67303e16ae38578d6e7d61b6e413ec83038efc469523bc5f19",
+      "transactions": 68
+    },
+    {
+      "id": "syn-v21-f1ab7589709f",
+      "tags": [
+        "salaried",
+        "salaried-irregular",
+        "pay-rise"
+      ],
+      "sha256": "350f60d8f66658fa1a2d1f5db5ee2db380f2b54a1bca1e9006b7230488771750",
+      "transactions": 231
+    },
+    {
+      "id": "syn-v21-4d15d326b186",
+      "tags": [
+        "variable-income"
+      ],
+      "sha256": "0e7231d48c17c931742c5af958000750dd3dce26358a5d634fecc3c4b1f0f853",
+      "transactions": 223
+    }
+  ]
+}
