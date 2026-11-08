@@ -391,7 +391,15 @@ describe("Ruling 5: one BNPL monthly figure", () => {
 // a rise. Rising is judged only when the shared history covers both windows.
 describe("LIA-05 rising needs history covering both 90-day windows", () => {
   it("a 3-month history of steady BNPL repayments is not rising (3-month request)", () => {
-    const r = run({ months: 3, lines: bnplLines("ZIP PAY", 60, 7) }, undefined, {}, 3);
+    // Every 14 days from 6 to 90 days ago, as syn-v1-0285: the payment at 90 days falls in the
+    // prior window, $60 against $360 in the last 90 days.
+    const lines = repeat(
+      7,
+      14,
+      { description: "ZIP PAY INSTALMENT", amount: -60, category: "bnpl" },
+      6,
+    );
+    const r = run({ months: 3, lines }, undefined, {}, 3);
     // Not red. One provider, not rising, is green, and green below the 6-month minimum stays
     // unverified (ruling 3: only amber and red show on a short history).
     expect(stateOf(r, "LIA-05")).toBe("unverified");
