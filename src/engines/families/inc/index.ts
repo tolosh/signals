@@ -19,7 +19,7 @@ export {
   type IncomeSignalsPolicy,
   type StreamType,
 } from "./config.js";
-export const INC_VERSION = "1.2.0";
+export const INC_VERSION = "1.2.1";
 
 export type IncApplication = {
   /** FR-C9; used only by INC-02 (INC-R3). */
@@ -97,6 +97,8 @@ type Ctx = {
   streams: TypedStream[];
   feed: Feed;
   gross_up: ((n: number) => number) | null;
+  /** Whether INC-09's final state is amber or red; INC-12 cross-references it only then. */
+  inc09Fires: boolean;
 };
 
 function evidenceOf(credits: Credit[]): RawSignal["evidence"] {
@@ -413,6 +415,11 @@ function crossReferenced(c: Ctx): { day: number; month: Month }[] {
 }
 
 function inc09(c: Ctx): Out {
+  // Fix 1 (re-review at cfa9d4f): with no income stream there is no basis to judge seasonality.
+  if (c.streams.length === 0)
+    return missing("INC-09", "Not verified: no regular income stream was found to judge", [
+      "Connect the account your regular pay goes into, or explain why it is missing",
+    ]);
   const all = creditsOf(c.streams);
   const { troughs } = troughMonths(c);
   const repayment = c.app.proposed_repayment_monthly ?? null;
@@ -427,11 +434,13 @@ function inc09(c: Ctx): Out {
       : state === "amber"
         ? `${troughs.length} month${troughs.length === 1 ? "" : "s"} fell below 60% of the annual average`
         : "Every month is at or above 60% of the annual average";
+  // N-1: the family reads SIG-16's regular streams, so bonuses and one-off credits aren't counted.
+  const basis = "regular income only";
   return out(
     "INC-09",
     state,
     `${troughs.length} trough month${troughs.length === 1 ? "" : "s"}`,
-    [base, ...links].join(". "),
+    [`${base} (${basis})`, ...links].join(". "),
     all,
   );
 }
@@ -496,22 +505,26 @@ function inc11(c: Ctx): Out {
  * stream's median pay. INC-12 reports them over its 6 months; INC-09 names those that fall in its
  * trough months (8 November 2026 ruling, replacing the 7 November add-back).
  */
-type Missed = { day: number; amount: number; stream: TypedStream };
+type Missed = { day: number; stream: TypedStream };
+/** The same calendar day `n` months after `day`, clamped to a shorter month's end. */
+const monthsAfter = (day: number, n: number) => lookbackStart(isoOf(day), -n) - 1;
 function missedPays(c: Ctx, months: number): Missed[] {
   const since = lookbackStart(isoOf(c.end), months);
   const out: Missed[] = [];
   for (const s of c.streams.filter((x) => x.type !== "gig_platform")) {
     const days = s.credits.map((x) => x.day);
+    // Fix 2 (re-review at cfa9d4f): a missed pay is dated to its expected day, and a monthly pay
+    // keeps its day of the month, so a pay due on 1 September is a September miss.
+    const expected = (from: number, j: number) =>
+      s.cadence === "monthly" ? monthsAfter(from, j) : Math.round(from + s.cycle_days * j);
     days.forEach((d, i) => {
       const prev = days[i - 1];
       if (prev === undefined || d - prev <= s.cycle_days * 1.5) return;
       const k = Math.round((d - prev) / s.cycle_days) - 1;
-      for (let j = 1; j <= k; j++)
-        out.push({ day: Math.round(prev + s.cycle_days * j), amount: s.median_amount, stream: s });
+      for (let j = 1; j <= k; j++) out.push({ day: expected(prev, j), stream: s });
     });
     const overdue = Math.floor((c.end - s.last - s.cycle_days * 0.5) / s.cycle_days);
-    for (let j = 1; j <= overdue; j++)
-      out.push({ day: Math.round(s.last + s.cycle_days * j), amount: s.median_amount, stream: s });
+    for (let j = 1; j <= overdue; j++) out.push({ day: expected(s.last, j), stream: s });
   }
   return out.filter((m) => m.day >= since).sort((a, b) => a.day - b.day);
 }
@@ -522,10 +535,29 @@ function inc12(c: Ctx): Out {
   const missed = missedPays(c, T.interruption_window_months).map((m) => m.day);
   const recent = missed.some((d) => d >= c.end - T.interruption_recent_days);
   const state = missed.length >= 2 || recent ? "red" : missed.length === 1 ? "amber" : "green";
-  // 8 November 2026 ruling: name each INC-09 trough month that holds a missed pay. The evidence
-  // already covers that month, as it spans INC-12's 6 months.
-  const troughLinks = [...new Set(crossReferenced(c).map((x) => monthOf(x.month)))].map(
-    (m) => `${m} is a trough month in INC-09`,
+  // 8 November 2026 ruling, with the cfa9d4f fixes: only when INC-09 is amber or red, name each
+  // trough month that holds a missed pay, and add that month's transactions to the evidence.
+  const linked = c.inc09Fires ? crossReferenced(c) : [];
+  const linkedMonths = [...new Map(linked.map((x) => [monthOf(x.month), x.month])).values()];
+  // Each of INC-09's 12 months ends on the as-of date's day, so a month is named by its dates: a
+  // label like "2025-12" would point at the wrong calendar month (closing check, 8 November).
+  const troughLinks = linkedMonths.map(
+    (m) => `${isoOf(m.from)} to ${isoOf(m.to)} is a trough month in INC-09`,
+  );
+  const base = creditsOf(regular).filter((x) => x.day >= since);
+  const seen = new Set(base.map((x) => x.transactionId));
+  const monthLines: Credit[] = c.feed.accounts.flatMap((a) =>
+    a.transactions
+      .map((t) => ({
+        day: dayOf(t.postingDateTime ?? t.valueDateTime ?? ""),
+        amount: Number(t.amount),
+        transactionId: t.transactionId,
+        account: a.account.accountId,
+      }))
+      .filter(
+        (t) =>
+          !seen.has(t.transactionId) && linkedMonths.some((m) => t.day >= m.from && t.day <= m.to),
+      ),
   );
   return out(
     "INC-12",
@@ -537,7 +569,9 @@ function inc12(c: Ctx): Out {
           `Pay was expected but not received around ${missed.map(isoOf).join(", ")}`,
           ...troughLinks,
         ].join(". "),
-    creditsOf(regular).filter((x) => x.day >= since),
+    [...base, ...monthLines].sort(
+      (a, b) => a.day - b.day || (a.transactionId < b.transactionId ? -1 : 1),
+    ),
   );
 }
 
@@ -638,27 +672,32 @@ export function assessInc(input: IncInput): IncResult {
     streams: found.streams,
     feed: input.feed,
     gross_up: input.gross_up ?? null,
+    inc09Fires: false,
   };
 
-  const outs = EVALUATORS.map((evaluate) => evaluate(ctx));
-  const signals = applyEvidence(
-    outs.map((o) => o.raw),
-    evidence,
-  ).map((s, i): Signal => {
-    const gap = outs[i]?.missing;
-    if (!gap || s.state === "unverified") return s;
-    return {
-      ...s,
-      state: "unverified",
-      value: null,
-      reason: gap.reason,
-      confidence: "low",
-      evidence_quality: {
-        ...s.evidence_quality,
-        resolve_with: [...new Set([...gap.resolve, ...s.evidence_quality.resolve_with])],
-      },
-    };
-  });
+  const finalise = (outs: Out[]): Signal[] =>
+    applyEvidence(
+      outs.map((o) => o.raw),
+      evidence,
+    ).map((s, i): Signal => {
+      const gap = outs[i]?.missing;
+      if (!gap || s.state === "unverified") return s;
+      return {
+        ...s,
+        state: "unverified",
+        value: null,
+        reason: gap.reason,
+        confidence: "low",
+        evidence_quality: {
+          ...s.evidence_quality,
+          resolve_with: [...new Set([...gap.resolve, ...s.evidence_quality.resolve_with])],
+        },
+      };
+    });
+  // INC-09's final state decides whether INC-12 cross-references it (fix 3, cfa9d4f).
+  const inc09State = finalise([inc09(ctx)])[0]?.state;
+  ctx.inc09Fires = inc09State === "amber" || inc09State === "red";
+  const signals = finalise(EVALUATORS.map((evaluate) => evaluate(ctx)));
 
   const income = found.streams.map((s) => {
     const shading = config.shading[s.type];

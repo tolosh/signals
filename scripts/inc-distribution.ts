@@ -1,17 +1,17 @@
 // SIG-41: family 1 INC states across synthetic set v1, by variant tag. Writes a run record under
 // research/runs/. Usage: npx tsx scripts/inc-distribution.ts [--lookback history|6]
+//        [--out research/runs] [--allow-dirty]
 //   history (default): the requested lookback is max(3, history months), the proxy the SIG-39
 //                      review found circular for EQ-03; kept so records compare across versions
 //   6:                 a 6-month request for everyone (the D22 default), as a sensitivity
-// The record stores its arguments, refuses a dirty working tree and never overwrites a record.
+// SIG-56 shared helpers: the record stores its command, arguments and commit, the tree must be
+// clean, and an existing record is never overwritten.
 // Production defaults: no gross-up (SIG-46 on hold, so INC-02 is unverified), no occupation pay
-// bands and no application data, which set v1 does not carry. The requested lookback is taken as
-// max(3, history months), as in the SIG-39 D22 re-run, because set v1 records no request.
+// bands and no application data, which set v1 does not carry.
 // Expected from ground truth: set v1's salaried pay has zero variability (SIG-16), so the
 // salaried base group should show no amber or red INC signal.
-import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import type { Feed } from "../src/engines/evidence/index.js";
 import { assessInc, INC_VERSION } from "../src/engines/families/inc/index.js";
 import {
@@ -20,17 +20,23 @@ import {
   population,
   serialise,
 } from "../src/research/generator/index.js";
+import {
+  gitState,
+  manifestSeed,
+  parseRunArgs,
+  provenance,
+  requireCleanTree,
+  writeNew,
+} from "./lib/run-record.js";
 
-const args = process.argv.slice(2);
-const lookbackArg = args.includes("--lookback") ? args[args.indexOf("--lookback") + 1] : "history";
+const args = parseRunArgs();
+const git = gitState();
+requireCleanTree(git.status, args.allowDirty);
+const lookbackArg = args.values.lookback ?? "history";
 if (lookbackArg !== "history" && lookbackArg !== "6")
   throw new Error("Usage: --lookback history|6");
-const dirty = execFileSync("git", ["status", "--porcelain"], { encoding: "utf8" }).trim();
-if (dirty) throw new Error(`Uncommitted changes; commit before recording engine.commit:\n${dirty}`);
 
-const manifest = JSON.parse(
-  readFileSync("research/datasets/synthetic-v1.manifest.json", "utf8"),
-) as { set: string; seed: number; set_sha256: string };
+const manifest = manifestSeed();
 const hash = createHash("sha256");
 const byTag: Record<
   string,
@@ -59,18 +65,15 @@ for (const spec of population(manifest.seed)) {
 const setSha = hash.digest("hex");
 if (setSha !== manifest.set_sha256)
   throw new Error(`set hash ${setSha} does not match the manifest`);
-const commit = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
 const created_at = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 const run_id = `${created_at.slice(0, 10)}-${manifest.set}-inc-family-v${INC_VERSION}${lookbackArg === "6" ? "-request-6" : ""}`;
-const out = `research/runs/${run_id}.json`;
-if (existsSync(out)) throw new Error(`${out} exists; records are never overwritten`);
 const record = {
   run_id,
   created_at,
   ticket: "SIG-41",
-  command: `npx tsx scripts/inc-distribution.ts ${args.join(" ")}`.trim(),
+  ...provenance("scripts/inc-distribution.ts", args, git),
   dataset: { set: manifest.set, seed: manifest.seed, set_sha256: setSha },
-  engine: { name: "inc-family", version: INC_VERSION, commit },
+  engine: { name: "inc-family", version: INC_VERSION, commit: git.commit },
   input: {
     as_of: AS_OF_DATE,
     lookback_months: lookbackArg === "6" ? 6 : "max(3, history months)",
@@ -81,7 +84,7 @@ const record = {
   by_tag: byTag,
   salaried_base_amber_or_red: salariedFlags,
 };
-writeFileSync(out, `${JSON.stringify(record, null, 2)}\n`);
+writeNew(join(args.out, `${run_id}.json`), `${JSON.stringify(record, null, 2)}\n`);
 console.log(
   JSON.stringify(
     { run_id, salaried_base_amber_or_red: salariedFlags.length, tags: Object.keys(byTag) },

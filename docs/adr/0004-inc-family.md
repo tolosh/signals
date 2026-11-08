@@ -16,6 +16,12 @@ event once is a roll-up question for phase 2 (D13). INC engine 1.2.0.
 
 - **Why:** the add-back could hide a real dip (both reviews found cases), and its 12-month search
   counted pays that INC-12, which reports 6 months, never shows.
+- **INC 1.2.1 (fixes from the re-review at `cfa9d4f`):** with no income stream INC-09 is
+  `unverified` with `resolve_with`, never green; a missed pay is dated to its expected day, and a
+  monthly pay keeps its day of the month (a pay due 1 September is a September miss); INC-12 names
+  the trough month only when INC-09 is amber or red, and then adds that month's transactions to
+  its evidence; INC-09's reason says it judges regular income only (N-1).
+  INC-12 names each such month by its dates, because INC-09's months end on the as-of day.
 - **How "links that month" is done:** the signal's `evidence` block holds counts and a period, not
   links, so INC-12 names the month in its reason. Its evidence period already spans the month,
   because it covers INC-12's 6 months.
