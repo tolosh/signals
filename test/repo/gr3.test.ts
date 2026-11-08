@@ -226,19 +226,112 @@ describe("GR-3: every engine entry is blind to sensitive lines", () => {
   });
 });
 
-describe("G-1, pending ruling: observed living expenses still count Enrich's healthcare (AF-E1)", () => {
-  it("is the one engine whose output moves with a healthcare debit, and only by that debit", () => {
-    const run = (x: typeof base) =>
-      deriveObservedExpenses({
-        feed: x.feed,
-        categories: x.categories,
+// D29 (Decision Record; GR-3, Product Specification §9.2; SIG-42 ruling 2, 8 November 2026,
+// 16:36). Health spending counts towards the living-expense total (AF-E1) as an aggregate amount
+// only: never itemised, labelled or used to judge. Religious, union and political spending, and
+// payees Enrich marks sensitive, are not living expenses and never enter the totals.
+const isHealthLine = (l: Line) =>
+  l.category === "healthcare" || (l.mcc !== undefined && ["5912", "8011"].includes(l.mcc));
+const HOSPITAL: Line = {
+  ago: 30,
+  description: "ST VINCENTS HOSPITAL",
+  amount: -8000,
+  category: "healthcare",
+};
+const expensesOf = (x: typeof base) =>
+  deriveObservedExpenses({
+    feed: x.feed,
+    categories: x.categories,
+    as_of: AS_OF,
+    lookback_months: 6,
+    one_off_threshold_aud: 5000,
+  });
+
+describe("D29: observed living expenses", () => {
+  it("religious, union and political spending, and Enrich-marked payees, never enter them", () => {
+    const others = applicant(SENSITIVE.filter((l) => !isHealthLine(l)));
+    expect(canon(expensesOf(others))).toBe(canon(expensesOf(base)));
+  });
+  it("health counts towards basic, the living-expense total, and moves nothing else", () => {
+    const health = applicant([
+      ...SENSITIVE.filter((l) => l.amount < 0 && isHealthLine(l)),
+      HOSPITAL,
+    ]);
+    const a = expensesOf(base);
+    const b = expensesOf(health);
+    expect(b.basic_monthly).toBeGreaterThan(a.basic_monthly);
+    expect(b.living_monthly).toBeGreaterThan(a.living_monthly);
+    expect(b.committed_monthly).toBe(a.committed_monthly);
+    expect(b.discretionary_monthly).toBe(a.discretionary_monthly);
+  });
+  it("health is never itemised: a large health debit isn't listed as a one-off", () => {
+    const b = expensesOf(applicant([HOSPITAL]));
+    expect(b.one_offs).toEqual([]);
+    expect(b.basic_monthly).toBeGreaterThan(expensesOf(base).basic_monthly);
+  });
+});
+
+describe("D29: no breakdown, trace line or reason names a sensitive category", () => {
+  const everything = applicant([...SENSITIVE, HOSPITAL]);
+  const baseIds = new Set(base.feed.accounts[0]?.transactions.map((t) => t.transactionId));
+  const sensitiveIds = (everything.feed.accounts[0]?.transactions ?? [])
+    .map((t) => t.transactionId)
+    .filter((id) => !baseIds.has(id));
+  const WORDS =
+    /medic|pharm|health|relig|union|politic|parish|church|chemist|hospital|donation|priceline/i;
+  const outputs: [string, unknown][] = [
+    ["observed living expenses", expensesOf(everything)],
+    [
+      "evidence",
+      assessEvidence({
+        feed: everything.feed,
+        feed_type: "cdr",
         as_of: AS_OF,
         lookback_months: 6,
-        one_off_threshold_aud: 5000,
-      });
-    const withHealth = applicant(SENSITIVE.filter((l) => l.category === "healthcare"));
-    expect(run(withHealth).basic_monthly).toBeGreaterThan(run(base).basic_monthly);
-    expect(run(withHealth).discretionary_monthly).toBe(run(base).discretionary_monthly);
+        categories: everything.categories,
+      }),
+    ],
+    [
+      "INC",
+      assessInc({
+        feed: everything.feed,
+        feed_type: "cdr",
+        as_of: AS_OF,
+        lookback_months: 6,
+        categories: everything.categories,
+      }),
+    ],
+    [
+      "LIA",
+      assessLia({
+        feed: everything.feed,
+        feed_type: "cdr",
+        as_of: AS_OF,
+        lookback_months: 6,
+        categories: everything.categories,
+        application: { declared_liabilities: [] },
+      }),
+    ],
+    [
+      "observed income",
+      deriveIncome({
+        feed: everything.feed,
+        as_of: AS_OF,
+        lookback_months: 6,
+        min_occurrences: 3,
+        categories: everything.categories,
+      }),
+    ],
+  ];
+  it.each(outputs)("%s: no sensitive category code, word or transaction ID", (_name, out) => {
+    const text = JSON.stringify(out);
+    for (const code of SENSITIVE_CATEGORIES) expect(text).not.toContain(`"${code}"`);
+    expect(text).not.toMatch(WORDS);
+    for (const id of sensitiveIds) expect(text).not.toContain(id);
+  });
+  it("the check isn't vacuous: the inputs carry every sensitive kind", () => {
+    expect(sensitiveIds.length).toBeGreaterThan(50);
+    expect(JSON.stringify(everything)).toMatch(WORDS);
   });
 });
 
@@ -250,7 +343,7 @@ describe("GR-3 static scan: modules under src/engines/ that read transactions", 
       "SIG-18's detector at 1.0.0, unchanged; LIA-01 calls it with the gated feed",
     "engines/families/inc/streams.ts": "called only by assessInc, with the gated feed",
     "engines/affordability/observed-expenses.ts":
-      "G-1, pending ruling: AF-E1 counts health in living expenses",
+      "D29: health counts in the living-expense total as an aggregate; the rest is removed",
   };
   const files = (dir: string): string[] =>
     readdirSync(dir).flatMap((f) => {
