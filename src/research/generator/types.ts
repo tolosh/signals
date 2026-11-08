@@ -2,6 +2,9 @@
 
 export const GENERATOR_VERSION = "1.0.0";
 export const GROUND_TRUTH_SCHEMA_VERSION = "1.0.0";
+/** Set v2 (SIG-54): an applicant whose spec has a `v2` block is generated at 2.0.0. */
+export const GENERATOR_VERSION_V2 = "2.0.0";
+export const GROUND_TRUTH_SCHEMA_VERSION_V2 = "2.0.0";
 /** The fixed end of every history window; the generator never reads the clock. */
 export const AS_OF_DATE = "2026-10-31";
 
@@ -21,6 +24,39 @@ export type LiabilitySpec = {
   repayment?: number;
   cadence?: Cadence;
   provider?: string;
+  // Set v2 (SIG-54, from the SIG-18 review). All optional; absent, the liability is as in v1.
+  /** Repaid from an account outside the grant: real, but no repayment is visible. */
+  paid_from_unshared?: boolean;
+  /** How the application names the lender, when not as the feed does ("Commonwealth Bank"). */
+  declared_as?: string;
+  /** The lender narrative carries a reference or customer number. */
+  narrative_ref?: boolean;
+  /** False: a card's BPAY biller name and narrative don't say "credit card". */
+  biller_cue?: boolean;
+  /** A lender absent from SIG-18's runs and from SIG-57's alias table. */
+  unseen_lender?: boolean;
+  mortgage?: { purpose: "owner_occupier" | "investor"; feature: "offset" | "redraw" | "none" };
+};
+
+/** Set v2 (SIG-54): what generator 2.0.0 adds to a spec. */
+export type V2Spec = {
+  /** The lender's requested lookback, drawn independently of the history held (D22). */
+  requested_lookback: 3 | 6 | 12;
+  /** Gross is the input, and net follows through the tax table (SIG-46 ruling). */
+  gross_primary?: boolean;
+  tax_year?: string;
+  pay?: {
+    /** Each pay has this chance of carrying overtime of `amount` (net). */
+    overtime?: { share: number; amount: number };
+    /** One pay carries a bonus of `amount` (net). */
+    bonus?: { amount: number };
+    /** From `after_days` into the window, pay changes (a rise, or a new employer). */
+    change?: { after_days: number; net_per_pay: number; payer?: string };
+  };
+  /** The same employer under a second descriptor, later in the window or at a second bank. */
+  payer_drift?: { mode: "over_time" | "across_banks"; alias: string };
+  /** Dishonours on these days before the as-of date. */
+  dishonours?: { days_ago: number[] };
 };
 
 /** Everything that shapes one applicant. Scenarios for later tickets are overrides of this. */
@@ -46,6 +82,8 @@ export type ApplicantSpec = {
     dishonours: number;
     positive: { rent_on_time: boolean; cards_cleared_in_full: boolean; savings_monthly: number };
   };
+  /** Set v2 only. */
+  v2?: V2Spec;
 };
 
 type DeepPartial<T> = T extends (infer U)[]
@@ -159,6 +197,54 @@ export type GroundTruth = {
     };
   };
   surplus_monthly: number;
+  /** Schema 2.0.0 additions (set v2). Absent at 1.0.0. */
+  v2?: V2Truth;
+};
+
+export type V2Truth = {
+  request: { lookback_months: number };
+  /** Gross to net through the tax table; null when gross isn't the input (gig, benefits). */
+  tax: {
+    gross_annual: number;
+    tax: number;
+    medicare_levy: number;
+    net_annual: number;
+    tax_table: string;
+  } | null;
+  payers: { payer: string; aliases: string[]; from: string; to: string }[];
+  pay_events: {
+    kind: "overtime" | "bonus" | "change";
+    date: string;
+    transaction_id: string | null;
+    amount: number;
+  }[];
+  /** Pay actually received over the window, a monthly mean; net_monthly is the rate at as-of. */
+  received_net_monthly: number;
+  dishonour_events: { date: string; days_ago: number; recent: boolean; transaction_id: string }[];
+  bpay: {
+    transaction_id: string | null;
+    biller_name: string;
+    biller_code: string;
+    kind: "bill" | "card_repayment";
+    item: string | null;
+    true_group: "committed" | "basic" | "discretionary" | null;
+    true_category: string | null;
+  }[];
+  liabilities: {
+    id: string;
+    lender: string;
+    declared_as: string | null;
+    unseen_lender: boolean;
+    paid_from_account_id: string;
+    paid_from_shared: boolean;
+    repayment_transaction_ids: string[];
+    narrative_ref: string | null;
+    biller_cue: boolean;
+    mortgage: {
+      purpose: "owner_occupier" | "investor";
+      feature: "offset" | "redraw" | "none";
+    } | null;
+  }[];
 };
 
 export type GeneratedApplicant = {
