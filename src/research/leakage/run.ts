@@ -13,6 +13,8 @@ import {
 } from "../generator/index.js";
 import { extractUnits, loadPreregistration, PREREGISTRATION, runLeakage, caught } from "./index.js";
 import type { Scores } from "./classifiers.js";
+import { generateSetV22 } from "../generator/v22/index.js";
+import { UNSEEN_PROVIDERS_V22 } from "../generator/v22/catalog.js";
 import { unseenLendersInCode, validityChecks, type Check } from "./validity.js";
 
 export type SetName = "v2" | "v2.1" | "v2.2";
@@ -22,7 +24,7 @@ export const MANIFESTS: Record<SetName, string> = {
   "v2.2": "research/datasets/synthetic-v2.2.manifest.json",
 };
 
-/** Generators by set; set v2.2's is added when it is built, after the pre-registration. */
+/** Generators by set (set v2.2's was added when it was built, after the pre-registration). */
 export const GENERATORS: Partial<
   Record<SetName, (seed: number) => { applicants: GeneratedApplicant[]; unseen: string[] }>
 > = {
@@ -33,6 +35,10 @@ export const GENERATORS: Partial<
   "v2.1": (seed) => ({
     applicants: populationV2(seed, "2.1").map((s) => generateApplicant(s, seed)),
     unseen: Object.values(UNSEEN_PROVIDERS_V21).flat(),
+  }),
+  "v2.2": (seed) => ({
+    applicants: generateSetV22(seed),
+    unseen: Object.values(UNSEEN_PROVIDERS_V22).flat(),
   }),
 };
 

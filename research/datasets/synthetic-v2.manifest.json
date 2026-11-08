@@ -1,5 +1,11 @@
 {
   "set": "synthetic-v2",
+  "withdrawn": {
+    "from_experiments": true,
+    "date": "2026-11-08",
+    "reason": "the feed leaks the truth labels (the set v2 review of 8 November 2026 at b0dad35); no experiment may score on this set. Published versions are immutable, so the set stays and still regenerates to its hash",
+    "by": "SIG-54 (Colin); superseded by SIG-60 set v2.2"
+  },
   "seed": 54,
   "generator_version": "2.0.0",
   "ground_truth_schema_version": "2.0.0",
