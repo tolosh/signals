@@ -469,7 +469,11 @@ export function assessLia(input: LiaInput): LiaResult {
     );
   const nowOut = outflow(end - 90, end);
   const priorOut = outflow(end - 180, end - 90);
-  const rising = priorOut > 0 && nowOut > priorOut * (1 + cfg.bnpl_rising);
+  // Rising compares two 90-day windows, so it is judged only when the shared history covers both:
+  // otherwise the first days of a short history read as a low prior window.
+  const dataStart = lines.reduce((m, l) => Math.min(m, l.day), Infinity);
+  const rising =
+    dataStart <= end - 180 && priorOut > 0 && nowOut > priorOut * (1 + cfg.bnpl_rising);
   // One monthly figure for a BNPL in LIA-01 and LIA-05 (review ruling 5): the detector's
   // cadence-based monthly where the provider's repayments recur, otherwise its last 90 days / 3.
   const bnplMonthly = round2(
