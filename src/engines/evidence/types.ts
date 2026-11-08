@@ -43,6 +43,11 @@ export type EvidenceInput = {
    * 3 (default, SIG-55 ruling): as 2, and any silence over 60 days is a gap (E-10).
    */
   eq_version?: 1 | 2 | 3;
+  /**
+   * Enrich category by transaction id, when the caller has it. GR-3: lines in a sensitive
+   * category, or with a sensitive MCC, are removed before any check reads the feed.
+   */
+  categories?: Readonly<Record<string, string>>;
 };
 
 export type CheckResult = "pass" | "partial" | "fail";

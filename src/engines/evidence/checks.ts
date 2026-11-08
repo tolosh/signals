@@ -3,6 +3,7 @@
 // and return pass, partial or fail. Thresholds for EQ-03 are Amendment 2's; the EQ-02
 // "regular and material" test is interpretation E-2, recorded on SIG-39 for ruling.
 import { DEFINITIONS_VERSION } from "../signals/definitions.js";
+import { withoutSensitive } from "../sensitive.js";
 import { DAYS_PER_MONTH, dayOf, isoOf, lookbackStart } from "./dates.js";
 import type { EvidenceCheck, EvidenceContext, EvidenceInput, FeedTransaction } from "./types.js";
 
@@ -71,6 +72,8 @@ export const DEFAULT_LOOKBACK_MONTHS = 6;
 export const MIN_LOOKBACK_MONTHS = 3;
 
 export function assessEvidence(input: EvidenceInput): EvidenceContext {
+  // GR-3: sensitive spending is removed before anything is read.
+  const feed = withoutSensitive(input.feed, input.categories);
   const lookback = input.lookback_months ?? DEFAULT_LOOKBACK_MONTHS;
   if (!Number.isInteger(lookback) || lookback < MIN_LOOKBACK_MONTHS)
     throw new Error(`The requested lookback must be at least 3 months (D22); got ${lookback}`);
@@ -78,7 +81,7 @@ export function assessEvidence(input: EvidenceInput): EvidenceContext {
   const start = lookbackStart(input.as_of, lookback);
   const windowDays = end - start + 1;
 
-  const lines: Line[] = input.feed.accounts.flatMap((acc) =>
+  const lines: Line[] = feed.accounts.flatMap((acc) =>
     acc.transactions
       .map((t) => ({
         account: acc.account.accountId,
@@ -128,12 +131,12 @@ export function assessEvidence(input: EvidenceInput): EvidenceContext {
   // Own-account transfers: matched by BSB and account number where the narrative carries them;
   // otherwise a debit and a credit of the same amount on the same day in two shared accounts.
   const sharedKeys = new Set(
-    input.feed.accounts
+    feed.accounts
       .map((a) => `${a.detail?.data?.bsb ?? ""}${a.detail?.data?.accountNumber ?? ""}`)
       .filter((k) => k.length > 6),
   );
   const sharedBanks = new Set(
-    input.feed.accounts.map((a) => (a.detail?.data?.bsb ?? "").slice(0, 2)).filter(Boolean),
+    feed.accounts.map((a) => (a.detail?.data?.bsb ?? "").slice(0, 2)).filter(Boolean),
   );
   type Unmatched = { key: string; bank: string; last4: string; first: number; lines: Line[] };
   const unmatched = new Map<string, Unmatched>();
@@ -297,7 +300,7 @@ export function assessEvidence(input: EvidenceInput): EvidenceContext {
     checks: [eq01, eq02, eq03],
     primary_income_account_shared: eq01.result === "pass",
     income_account_ids: incomeAccounts,
-    shared_account_ids: input.feed.accounts.map((a) => a.account.accountId).sort(),
+    shared_account_ids: feed.accounts.map((a) => a.account.accountId).sort(),
     transaction_count: inWindow.length,
     unshared_own_accounts: accounts.length,
     institutions_without_shared_account: new Set(

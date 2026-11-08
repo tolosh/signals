@@ -8,6 +8,7 @@
 import { applyEvidence, assessEvidence } from "../../evidence/index.js";
 import { dayOf, isoOf } from "../../evidence/dates.js";
 import type { FeedTransaction, RawSignal, Signal } from "../../evidence/index.js";
+import { withoutSensitive } from "../../sensitive.js";
 import type { FeedType } from "../../signals/definitions.js";
 import {
   detectLiabilities,
@@ -189,15 +190,17 @@ const nothing = (id: string, reason: string): RawSignal => ({
 export function assessLia(input: LiaInput): LiaResult {
   const cfg: LiaConfig = { ...LIA_DEFAULTS, ...input.config };
   const lookback = input.lookback_months ?? 6;
+  // GR-3: sensitive spending is removed before anything is read, the detector included.
+  const feed = withoutSensitive(input.feed, input.categories);
   const ctx = assessEvidence({
-    feed: input.feed,
+    feed,
     feed_type: input.feed_type,
     as_of: input.as_of,
     lookback_months: lookback,
   });
   const end = dayOf(input.as_of);
   const windowStart = dayOf(ctx.window.start);
-  const lines: Line[] = input.feed.accounts
+  const lines: Line[] = feed.accounts
     .filter(
       (a) =>
         (a.account.productCategory ?? "TRANS_AND_SAVINGS_ACCOUNTS") ===
@@ -218,7 +221,7 @@ export function assessLia(input: LiaInput): LiaResult {
 
   // LIA-01 Undisclosed liabilities (L-1): SIG-18's detector, then the assessed surplus.
   const detected = detectLiabilities({
-    feed: input.feed,
+    feed,
     categories: input.categories,
     declared: input.application.declared_liabilities,
     as_of: input.as_of,

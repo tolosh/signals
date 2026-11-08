@@ -259,7 +259,10 @@ describe("GR-3 static scan: modules under src/engines/ that read transactions", 
     });
   const readers = files("src/engines")
     .map((p) => p.replace(/\\/g, "/").replace(/^src\//, ""))
-    .filter((p) => /\.transactions\b/.test(readFileSync(`src/${p}`, "utf8")));
+    .filter((p) =>
+      // `.transactions`, or destructured in a for-of: `for (const { transactions } of ...)`.
+      /\.transactions\b|\btransactions\s*\}\s*of\b/.test(readFileSync(`src/${p}`, "utf8")),
+    );
 
   it("every reader not on the list imports and applies withoutSensitive", () => {
     const ungated = readers.filter((p) => {
