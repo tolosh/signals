@@ -39,9 +39,10 @@ export type EvidenceInput = {
   /**
    * The EQ method version to apply (EQ-R6), so an earlier assessment replays unchanged.
    * 1: EQ-03 coverage runs from the first transaction to the as-of date (E-4).
-   * 2 (default, SIG-55): days inside a silence longer than the gap threshold are uncovered.
+   * 2 (SIG-55): days inside a silence longer than the gap threshold are uncovered.
+   * 3 (default, SIG-55 ruling): as 2, and any silence over 60 days is a gap (E-10).
    */
-  eq_version?: 1 | 2;
+  eq_version?: 1 | 2 | 3;
 };
 
 export type CheckResult = "pass" | "partial" | "fail";
@@ -59,7 +60,7 @@ export type EvidenceCheck = {
 export type EvidenceContext = {
   definitions_version: number;
   /** The EQ method version applied (EQ-R6). */
-  eq_version: 1 | 2;
+  eq_version: 1 | 2 | 3;
   as_of: string;
   lookback_months: number;
   window: { start: string; end: string };
