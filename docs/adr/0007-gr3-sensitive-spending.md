@@ -1,6 +1,23 @@
 # ADR 0007: GR-3, sensitive spending excluded from every signal input
 
-Status: proposed (SIG-42 review ruling 2, 8 November 2026). G-1 to G-3 await a ruling.
+Status: ruled (Colin, 8 November 2026, on SIG-42). G-1 is ruled as Decision Record **D29**;
+G-2 and G-3 are accepted. The interpretations below are kept as they were recorded.
+
+## Rulings, 8 November 2026
+
+- **D29 (G-1).** Sensitive categories never feed any signal, any decisioning or scorecard input,
+  or anything shown or explained per category. Health spending still counts towards the
+  living-expense total (AF-E1) as an aggregate amount only: never broken out, labelled or used to
+  judge. Religious, union and political spending, and payees Enrich marks sensitive, are not
+  living expenses and don't enter the totals. As built: observed living expenses 1.1.0 count a
+  health line (Enrich's `healthcare`, or a medical or pharmacy MCC) in basic, never as a one-off;
+  the other sensitive lines are removed first. `test/repo/gr3.test.ts` checks that no breakdown,
+  trace line or reason from any engine names a sensitive category, word or transaction ID.
+  Mutation checks: without the removal, 2 tests fail; without the health aggregate, 3 fail.
+- **G-2 accepted.** Until Enrich has a sensitive marker, the gate uses `healthcare`, the reserved
+  codes and the MCC list. Raised with Enrich as **ENR-31** (a sensitive-payee flag), linked to
+  ENR-30.
+- **G-3 accepted** as a candidate, versioned with the definitions (`SENSITIVE_METHOD_VERSION`).
 
 ## Context
 
