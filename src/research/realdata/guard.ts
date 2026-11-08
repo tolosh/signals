@@ -36,7 +36,7 @@ export const VOCABULARY: ReadonlySet<string> = new Set([
   "exploratory",
   "confirmatory",
   "engineering-reported",
-  // signal and roll-up states, decisioning queues (GR-1: no approve or decline)
+  // signal and roll-up states, decisioning queues (GR-1 queue names only)
   "green",
   "amber",
   "red",
