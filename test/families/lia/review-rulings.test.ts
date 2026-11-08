@@ -218,3 +218,54 @@ describe("Ruling 1: T2 and T7 with natural-form declarations", () => {
       expect(["amber", "red"], id).not.toContain(stateOf(r, id));
   });
 });
+
+// Ruling 3: findings show; absence needs history (EQ method 4, through EQ-R4).
+describe("Ruling 3: on a 3-month history at a 3-month request", () => {
+  const short = (lines: Line[]) => run({ months: 3, lines }, undefined, {}, 3);
+  it("an undisclosed card shows LIA-01 amber", () => {
+    expect(
+      stateOf(
+        short(
+          repeat(3, 30, {
+            description: "BPAY NAB CREDIT CARD PAYMENT",
+            amount: -180,
+            category: "transfer",
+            billerName: "NAB CREDIT CARD",
+          }),
+        ),
+        "LIA-01",
+      ),
+    ).toBe("amber");
+  });
+  it("recent SACC repayments show LIA-03 red", () => {
+    expect(
+      stateOf(
+        short(
+          repeat(4, 14, {
+            description: "CASH CONVERTERS LOAN REPAYMENT",
+            amount: -95,
+            category: "sacc_loan",
+          }),
+        ),
+        "LIA-03",
+      ),
+    ).toBe("red");
+  });
+  it("with nothing found, LIA-01 to LIA-05 stay unverified, not none_observed", () => {
+    const r = short([]);
+    for (const id of ["LIA-01", "LIA-02", "LIA-03", "LIA-04", "LIA-05"])
+      expect(stateOf(r, id), id).toBe("unverified");
+  });
+  it("at a 6-month request, EQ-03 still caps the same card", () => {
+    const r = run({
+      months: 3,
+      lines: repeat(3, 30, {
+        description: "BPAY NAB CREDIT CARD PAYMENT",
+        amount: -180,
+        category: "transfer",
+        billerName: "NAB CREDIT CARD",
+      }),
+    });
+    expect(stateOf(r, "LIA-01")).toBe("unverified");
+  });
+});
