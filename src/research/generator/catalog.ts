@@ -160,3 +160,78 @@ export const EMPLOYER_ALIASES: Record<string, string> = {
   "CITY OF SYDNEY": "COUNCIL CITY OF SYD SAL",
   "ORBIT RETAIL GROUP": "ORBIT RETAIL GRP PAY",
 };
+
+// --- Set v2.1 (SIG-54 review, 8 November 2026) -------------------------------------------------
+
+/**
+ * Lenders the detector hasn't seen, for set v2.1. None may appear in src/ or in any test outside
+ * the generator (test/research/v21/leakage.test.ts scans for them). Set v2's HUMM, KLARNA and
+ * CASHD were in the engines' own advance and loan rules, so 2.1 replaces them.
+ */
+export const UNSEEN_PROVIDERS_V21: Record<string, readonly string[]> = {
+  credit_card: ["BANKWEST", "ING", "HSBC"],
+  personal_loan: ["WISR", "LATITUDE", "NOW FINANCE"],
+  car_loan: ["PEPPER MONEY", "ANGLE AUTO FINANCE"],
+  bnpl: ["PAYRIGHT", "BUNDLL"],
+  sacc: ["SUNSHINE LOANS", "MONEYME"],
+  wage_advance: ["EARND", "HASTEE"],
+};
+
+/**
+ * Set v2.1: names an applicant would write that genuinely differ from the feed's (a different
+ * leading word), not the feed name plus a suffix. The natural-declarations group draws from
+ * these lenders.
+ */
+export const NATURAL_NAMES_V21: Record<string, string> = {
+  ...NATURAL_NAMES,
+  CBA: "Commonwealth Bank",
+  NAB: "National Australia Bank",
+  ANZ: "Australia and New Zealand Banking Group",
+  SOCIETYONE: "Society One",
+  PLENTI: "RateSetter",
+  MONEY3: "Money 3",
+  "ZIP PAY": "zipPay",
+  AFTERPAY: "After Pay",
+  PAYRIGHT: "Payright Pty Ltd",
+  BUNDLL: "Bundll Pty Ltd",
+  HASTEE: "Hastee Pay",
+};
+export const GENUINELY_DIFFERENT_V21: Record<string, readonly string[]> = {
+  credit_card: ["CBA", "NAB", "ANZ"],
+  personal_loan: ["SOCIETYONE", "PLENTI"],
+  car_loan: ["MONEY3"],
+  bnpl: ["ZIP PAY", "AFTERPAY"],
+};
+
+/** Set v2.1: ways a payroll system renames an employer, so drift pairs aren't a fixed few. */
+export const PAYER_RENAMES_V21: readonly ((employer: string) => string)[] = [
+  (e) => `${e.replace(/ PTY LTD$/, "")} P/L PAYROLL`,
+  (e) => `PAYROLL ${e.split(" ").slice(0, 2).join(" ")}`,
+  (e) => `${e.split(" ")[0] ?? e} WAGES`,
+  (e) => `KEYPAY ${e.replace(/ PTY LTD$/, "")}`,
+  (e) =>
+    `${e
+      .replace(/[AEIOU]/g, "")
+      .replace(/\s+/g, " ")
+      .slice(0, 18)
+      .trim()} SAL`,
+  (e) => `ADP ${e.split(" ")[0] ?? e} PAY`,
+];
+
+/** Set v2.1: second-bank everyday accounts, with their BSB and display name. */
+export const SECOND_BANKS_V21: readonly { bsb: string; display: string }[] = [
+  { bsb: "733000", display: "Everyday" },
+  { bsb: "012003", display: "Access Advantage" },
+  { bsb: "083004", display: "Classic Banking" },
+  { bsb: "633000", display: "Smart Access" },
+  { bsb: "484799", display: "Complete Freedom" },
+];
+
+/** Set v2.1: a dishonour fee varies by bank, in amount and narrative. */
+export const DISHONOUR_FEES_V21: readonly { amount: number; description: string }[] = [
+  { amount: 9, description: "DISHONOUR FEE" },
+  { amount: 10, description: "DD RETURN FEE" },
+  { amount: 12.5, description: "RETURNED PAYMENT FEE" },
+  { amount: 15, description: "HONOUR FEE" },
+  { amount: 20, description: "OUTWARD DISHONOUR FEE" },
+];

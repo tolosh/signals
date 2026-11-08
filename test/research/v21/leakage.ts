@@ -81,9 +81,15 @@ export function billerCodes(set: GeneratedApplicant[]): {
   let cueInNoCue = 0;
   for (const a of set) {
     const noCue = a.truth.tags.includes("no-card-biller-cue");
+    // The issuer is the truth's lender for the liability this repayment belongs to.
+    const lenderOf = new Map(
+      (a.truth.v2?.liabilities ?? []).flatMap((l) =>
+        l.repayment_transaction_ids.map((id) => [id, l.lender] as const),
+      ),
+    );
     for (const b of a.truth.v2?.bpay ?? []) {
       if (b.kind !== "card_repayment") continue;
-      const issuer = b.biller_name.split(" ")[0] ?? b.biller_name;
+      const issuer = lenderOf.get(b.transaction_id ?? "") ?? b.biller_name;
       issuers.set(b.biller_code, (issuers.get(b.biller_code) ?? new Set()).add(issuer));
       if (noCue && /\bCARDS?\b/i.test(b.biller_name)) cueInNoCue++;
     }

@@ -6,7 +6,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import * as gen from "../../../src/research/generator/index.js";
-import { UNSEEN_PROVIDERS } from "../../../src/research/generator/catalog.js";
+import { UNSEEN_PROVIDERS_V21 } from "../../../src/research/generator/catalog.js";
 import {
   billerCodes,
   declarations,
@@ -121,7 +121,9 @@ describe("7. Unseen lenders appear nowhere in src/ or the tests, outside the gen
       return statSync(p).isDirectory() ? files(p) : /\.(ts|json)$/.test(p) ? [p] : [];
     });
   it("no unseen lender name is in engine code, mock code or tests outside test/research/", () => {
-    const names = Object.values(UNSEEN_PROVIDERS).flat();
+    // Set v2.1's list. Set v2's HUMM, KLARNA and CASHD are in the engines' own advance and loan
+    // rules (the review's L1), so set v2.1 uses lenders the code has never named.
+    const names = Object.values(UNSEEN_PROVIDERS_V21).flat();
     const scanned = [...files("src"), ...files("test")]
       .map((p) => p.replace(/\\/g, "/"))
       .filter((p) => !p.startsWith("src/research/") && !p.startsWith("test/research/"));

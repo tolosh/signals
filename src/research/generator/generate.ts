@@ -10,6 +10,9 @@ import {
   PROVIDERS,
   STATES,
   SUBSCRIPTIONS,
+  SECOND_BANKS_V21,
+  DISHONOUR_FEES_V21,
+  NATURAL_NAMES_V21,
   SUBURBS,
   TELCO,
   type Merchant,
@@ -20,8 +23,10 @@ import {
   AS_OF_DATE,
   GENERATOR_VERSION,
   GENERATOR_VERSION_V2,
+  GENERATOR_VERSION_V21,
   GROUND_TRUTH_SCHEMA_VERSION,
   GROUND_TRUTH_SCHEMA_VERSION_V2,
+  GROUND_TRUTH_SCHEMA_VERSION_V21,
   type ApplicantSpec,
   type Cadence,
   type FeedAccount,
@@ -136,6 +141,10 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
   // Set v2 (SIG-54). Every v2 branch below is guarded, and every v2 draw comes from its own
   // "v2:" stream, so a spec without a v2 block generates exactly as in v1.
   const v2 = spec.v2;
+  // Set v2.1 (generator 2.1.0; SIG-54 review direction). Every 2.1 branch is guarded by v21 and
+  // draws from "v21:" streams, so set v2 regenerates unchanged.
+  const v21 = v2?.variant === "2.1";
+  const q = (key: string) => r(`v21:${key}`);
   const v2Tax =
     v2?.gross_primary && spec.income.gross_annual > 0
       ? netFromGross(spec.income.gross_annual, taxTable(v2.tax_year ?? "2026-27"))
@@ -145,7 +154,13 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
     ? round2(v2Tax.net_annual / PAYS[spec.income.cadence])
     : spec.income.net_per_pay;
   const change = v2?.pay?.change;
-  const currentPerPay = change ? change.net_per_pay : basePerPay;
+  const driftFactor =
+    v21 && v2?.payer_drift?.mode === "over_time" ? 1 + q("drift-factor").int(10, 40) / 1000 : 1;
+  const currentPerPay = change
+    ? change.net_per_pay
+    : driftFactor !== 1
+      ? round2(basePerPay * driftFactor)
+      : basePerPay;
   const currentPayer = change?.payer ?? spec.income.payer;
   const suburb = r("suburb").pick(SUBURBS);
   const pos = (m: Merchant, store: number) =>
@@ -199,16 +214,19 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
     accounts.push(acc);
     return acc;
   });
-  const secondBank = v2?.payer_drift?.mode === "across_banks" ? `${id}-evd2` : null;
+  const acrossBanks = v2?.payer_drift?.mode === "across_banks";
+  // Set v2.1: a quarter of applicants bank with a second institution too, under varied names.
+  const secondBank = acrossBanks || (v21 && q("second-bank").chance(0.25)) ? `${id}-evd2` : null;
+  const secondBankOf = v21 ? q("second-bank-which").pick(SECOND_BANKS_V21) : null;
   if (secondBank)
     accounts.push({
       id: secondBank,
       shared: true,
       category: "TRANS_AND_SAVINGS_ACCOUNTS",
       product: "Everyday Account",
-      display: "Everyday (second bank)",
+      display: secondBankOf ? secondBankOf.display : "Everyday (second bank)",
       openingCents: toCents(r("v2:open-second").int(200, 2000)),
-      bsb: "733000",
+      bsb: secondBankOf ? secondBankOf.bsb : "733000",
     });
 
   // Income.
@@ -229,9 +247,27 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
   const drift = streamType === "salary" ? v2?.payer_drift : undefined;
   const driftDay = start + Math.floor((end - start) / 2);
   const payEvents: { kind: "overtime" | "bonus" | "change"; entry: Entry; amount: number }[] = [];
+  const splitShare = v21 ? q("split").int(20, 50) / 100 : 0;
   const payers = new Map<string, { aliases: string[]; from: number; to: number }>();
   let receivedCents = 0;
   let changeLogged = false;
+  // Set v2.1: the pay reference depends on the payer's bank and payroll; some carry none.
+  const refFormat = v21
+    ? q("pay-ref").pick(["date", "none", "wages", "payroll", "date"] as const)
+    : "date";
+  const refRng = q("pay-ref-drop");
+  const payrollId = `${q("payroll-id").int(100000, 999999)}`;
+  const MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+  const payRef = (day: number, alias: boolean): string => {
+    if (!v21) return `PAY ${toIso(day)}`;
+    const iso = toIso(day);
+    if (alias) return `SAL ${iso.slice(8, 10)}${iso.slice(5, 7)}`;
+    if (refFormat === "none" || refRng.chance(0.15)) return "";
+    if (refFormat === "wages")
+      return `WAGES ${iso.slice(8, 10)}${MON[Number(iso.slice(5, 7)) - 1]}`;
+    if (refFormat === "payroll") return `PAYROLL ${payrollId}`;
+    return `PAY ${iso}`;
+  };
   for (const [k, day] of payDays.entries()) {
     const changed = day >= changeDay;
     const payer = changed && change?.payer ? change.payer : spec.income.payer;
@@ -245,13 +281,40 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
           ? `${payer} PAYOUT`
           : `SALARY ${payer}`;
     let account = incomeAccount;
-    if (drift?.mode === "over_time" && day >= driftDay) description = drift.alias;
-    if (drift?.mode === "across_banks" && secondBank && k % 2 === 1) {
+    let alias = false;
+    if (drift?.mode === "over_time" && day >= driftDay) {
       description = drift.alias;
-      account = secondBank;
+      alias = true;
+      if (v21) cents = Math.round(cents * driftFactor);
+    }
+    if (drift?.mode === "across_banks" && secondBank && (v21 || k % 2 === 1)) {
+      if (v21) {
+        // Set v2.1: a share of every pay goes to the second bank, under the alias.
+        const part = Math.round(cents * splitShare);
+        cents -= part;
+        add({
+          account: secondBank,
+          day,
+          cents: part,
+          type: "TRANSFER_INCOMING",
+          description: drift.alias,
+          reference: payRef(day, true),
+        });
+        receivedCents += part;
+        const seenAlias = payers.get(payer) ?? { aliases: [], from: day, to: day };
+        if (!seenAlias.aliases.includes(drift.alias)) seenAlias.aliases.push(drift.alias);
+        payers.set(payer, seenAlias);
+      } else {
+        description = drift.alias;
+        account = secondBank;
+        alias = true;
+      }
     }
     const events: { kind: "overtime" | "bonus" | "change"; amount: number }[] = [];
-    if (overtime && overtimeRng.chance(overtime.share)) {
+    // Set v2.1: an applicant tagged overtime always has some (syn-v2-0073 had none).
+    const lastChance =
+      v21 && k === payDays.length - 1 && !payEvents.some((e) => e.kind === "overtime");
+    if (overtime && (overtimeRng.chance(overtime.share) || lastChance)) {
       cents += toCents(overtime.amount);
       events.push({ kind: "overtime", amount: overtime.amount });
     }
@@ -269,7 +332,7 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
       cents,
       type: "TRANSFER_INCOMING",
       description,
-      reference: `PAY ${toIso(day)}`,
+      reference: payRef(day, alias),
     };
     add(payEntry);
     for (const e of events) payEvents.push({ ...e, entry: payEntry });
@@ -299,6 +362,20 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
         reference: "SWEEP",
       });
     }
+  }
+
+  if (v21 && q("payback").chance(0.35)) {
+    const pb = q("payback-days");
+    const friend = pb.pick(["J NGUYEN", "S PATEL", "M SMITH", "L CHEN", "A BROWN"]);
+    for (const day of schedule(pb, "monthly", start, end))
+      add({
+        account: everyday,
+        day,
+        cents: toCents(pb.int(20, 200)),
+        type: "TRANSFER_INCOMING",
+        description: `TRANSFER FROM ${friend}`,
+        reference: `PAY ${toIso(day)}`,
+      });
   }
 
   // Expenses. Monthly equivalents are expected values: mean amount x cadence factor.
@@ -340,7 +417,13 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
     };
 
   spend("groceries", "basic", "weekly", 180 * scale, shop(GROCERY));
-  spend("fuel", "basic", "fortnightly", 75 * scale, shop(FUEL));
+  spend(
+    "fuel",
+    "basic",
+    "fortnightly",
+    75 * scale,
+    shop(FUEL, v21 && secondBank && !acrossBanks ? secondBank : everyday),
+  );
   spend(
     "dining",
     "discretionary",
@@ -400,12 +483,61 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
     );
   }
 
+  // Set v2.1: direct debits that aren't loans, and ordinary bank fees.
+  if (v21 && q("gym").chance(0.6)) {
+    const brand = q("gym-brand").pick(["ANYTIME FITNESS", "JETTS", "SNAP FITNESS", "F45"]);
+    spend(
+      "gym",
+      "discretionary",
+      "monthly",
+      q("gym-fee").int(15, 70),
+      (day, cents) =>
+        add({
+          account: everyday,
+          day,
+          cents,
+          type: "DIRECT_DEBIT",
+          description: `${brand} MEMBERSHIP`,
+        }),
+      0,
+    );
+  }
+  if (v21 && q("car-insurance").chance(0.45)) {
+    const insurer = q("car-insurer").pick(["AAMI", "BUDGET DIRECT", "YOUI", "NRMA"]);
+    spend(
+      "car_insurance_monthly",
+      "committed",
+      "monthly",
+      q("car-insurance-fee").int(60, 160),
+      (day, cents) =>
+        add({
+          account: everyday,
+          day,
+          cents,
+          type: "DIRECT_DEBIT",
+          description: `${insurer} INSURANCE`,
+        }),
+      0,
+    );
+  }
+  if (v21 && q("account-fee").chance(0.55))
+    spend(
+      "account_fee",
+      "discretionary",
+      "monthly",
+      q("account-fee-amount").pick([4, 5, 6]),
+      (day, cents) =>
+        add({ account: everyday, day, cents, type: "FEE", description: "ACCOUNT KEEPING FEE" }),
+      0,
+    );
+
   // Commitments, including quarterly and annual items.
   const bpayEntries: { entry: Entry; kind: "bill" | "card_repayment"; item: string | null }[] = [];
   const commitments: GroundTruth["commitments"] = spec.commitments.map((c) => {
     const rng = r(`commitment:${c.kind}`);
     const days = schedule(rng, c.cadence, start, end);
     const telco = c.kind === "telco" ? rng.pick(TELCO) : undefined;
+    const telcoByDebit = v21 && telco !== undefined && q("telco-dd").chance(0.5);
     const biller = BILLERS[c.kind];
     for (const day of days) {
       if (telco)
@@ -413,7 +545,7 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
           account: everyday,
           day,
           cents: -toCents(c.amount),
-          type: "PAYMENT",
+          type: telcoByDebit ? "DIRECT_DEBIT" : "PAYMENT",
           description: `${telco.descriptor} ${suburb} AUS`,
           merchant: telco,
         });
@@ -463,10 +595,15 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
     const provider = l.provider ?? r(`provider:${i}`).pick(PROVIDERS[l.type] ?? ["LENDER"]);
     const limit = l.limit ?? (d.limit || null);
     const balance = l.balance ?? d.balance;
-    const repayment =
+    const baseRepayment =
       l.type === "credit_card"
         ? (l.repayment ?? Math.max(d.repayment, 0.03 * (limit ?? 0)))
         : (l.repayment ?? d.repayment);
+    // Set v2.1: a non-card repayment is drawn per applicant, from 60% to 160% of the type's typical.
+    const repayment =
+      v21 && l.type !== "credit_card"
+        ? round2(baseRepayment * (0.6 + q(`repayment:${i}`).int(0, 1000) / 1000))
+        : baseRepayment;
     const cadence: Cadence =
       l.type === "wage_advance" ? spec.income.cadence : (l.cadence ?? d.cadence);
     const shared = l.account_shared ?? false;
@@ -522,13 +659,24 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
       const cents = toCents(repayment);
       if (l.type === "credit_card") {
         const b = BILLERS.credit_card ?? { name: "CREDIT CARD PAYMENT", code: "613711" };
+        // Set v2.1: each issuer has its own biller code; without the cue, the biller name is the
+        // issuer's legal or brand name, with no "CARD" in it.
+        const issuerCode = v21 ? issuerBillerCode(provider) : b.code;
+        const plain = (NATURAL_NAMES_V21[provider] ?? provider).toUpperCase();
         const paid: Entry = {
           account: payFrom,
           day,
           cents: -cents,
           type: "PAYMENT",
-          description: cue ? `BPAY ${named} CREDIT CARD PAYMENT` : `BPAY ${named} CARDS`,
-          biller: { name: cue ? `${provider} ${b.name}` : `${provider} CARDS`, code: b.code },
+          description: cue
+            ? `BPAY ${named} CREDIT CARD PAYMENT`
+            : v21
+              ? `BPAY ${plain}`
+              : `BPAY ${named} CARDS`,
+          biller: {
+            name: cue ? `${provider} ${b.name}` : v21 ? plain : `${provider} CARDS`,
+            code: issuerCode,
+          },
         };
         add(paid);
         repaymentEntries.push(paid);
@@ -664,13 +812,39 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
   const dishonourEntries: { entry: Entry; daysAgo: number }[] = [];
   const dated = v2?.dishonours?.days_ago;
   if (dated) {
+    const bankFee = v21 ? q("dishonour-fee").pick(DISHONOUR_FEES_V21) : null;
     for (const daysAgo of dated) {
+      const day = end - daysAgo;
+      if (v21) {
+        // Set v2.1: a dishonour is a direct debit that is returned, and the bank's fee for it.
+        const payee = q(`dishonour-payee:${daysAgo}`).pick([
+          "ORIGIN ENERGY",
+          "AAMI INSURANCE",
+          "TELSTRA",
+          "JETTS",
+        ]);
+        const attempted = toCents(q(`dishonour-amount:${daysAgo}`).int(40, 300));
+        add({
+          account: everyday,
+          day,
+          cents: -attempted,
+          type: "DIRECT_DEBIT",
+          description: `${payee} DIRECT DEBIT`,
+        });
+        add({
+          account: everyday,
+          day,
+          cents: attempted,
+          type: "TRANSFER_INCOMING",
+          description: `DIRECT DEBIT RETURNED ${payee}`,
+        });
+      }
       const fee: Entry = {
         account: everyday,
-        day: end - daysAgo,
-        cents: -1500,
+        day,
+        cents: bankFee ? -toCents(bankFee.amount) : -1500,
         type: "FEE",
-        description: "DISHONOUR FEE",
+        description: bankFee ? bankFee.description : "DISHONOUR FEE",
       };
       add(fee);
       dishonourEntries.push({ entry: fee, daysAgo });
@@ -700,8 +874,12 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
   const gambling = items.find((i) => i.name === "gambling");
 
   const truth: GroundTruth = {
-    schema_version: v2 ? GROUND_TRUTH_SCHEMA_VERSION_V2 : GROUND_TRUTH_SCHEMA_VERSION,
-    generator_version: v2 ? GENERATOR_VERSION_V2 : GENERATOR_VERSION,
+    schema_version: v21
+      ? GROUND_TRUTH_SCHEMA_VERSION_V21
+      : v2
+        ? GROUND_TRUTH_SCHEMA_VERSION_V2
+        : GROUND_TRUTH_SCHEMA_VERSION,
+    generator_version: v21 ? GENERATOR_VERSION_V21 : v2 ? GENERATOR_VERSION_V2 : GENERATOR_VERSION,
     applicant_id: id,
     seed,
     tags: [...spec.tags],
@@ -764,7 +942,10 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
     const windowMonths = (end - start + 1) / (365.25 / 12);
     const v2truth: V2Truth = {
       request: { lookback_months: v2.requested_lookback },
-      tax: v2Tax,
+      tax:
+        v21 && v2Tax && change?.gross_annual
+          ? { ...v2Tax, gross_annual_after_change: change.gross_annual }
+          : v2Tax,
       payers: [...payers.entries()].map(([payer, p]) => ({
         payer,
         aliases: p.aliases,
@@ -810,7 +991,8 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
         .map((l) => ({
           type: l.type,
           provider: v2
-            ? (liabilityV2.find((x) => x.id === l.id)?.declared_as ?? l.provider)
+            ? (liabilityV2.find((x) => x.id === l.id)?.declared_as ??
+              (v21 && q(`declared-case:${l.id}`).chance(0.6) ? titleCase(l.provider) : l.provider))
             : l.provider,
           repayment_monthly: l.monthly_commitment,
         })),
@@ -924,3 +1106,16 @@ export function serialise(a: GeneratedApplicant): string {
 }
 
 export { EMPLOYERS };
+
+/** Set v2.1: "ZIP PAY" as an applicant might type it, "Zip Pay". */
+const titleCase = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/(^|[\s-])([a-z])/g, (_m, sep: string, c: string) => sep + c.toUpperCase());
+
+/** Set v2.1: a card issuer's own synthetic BPAY biller code, the same for every applicant. */
+function issuerBillerCode(issuer: string): string {
+  let h = 0;
+  for (const ch of issuer) h = (h * 31 + ch.charCodeAt(0)) % 900_000;
+  return String(100_000 + h);
+}

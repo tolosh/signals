@@ -5,6 +5,9 @@ export const GROUND_TRUTH_SCHEMA_VERSION = "1.0.0";
 /** Set v2 (SIG-54): an applicant whose spec has a `v2` block is generated at 2.0.0. */
 export const GENERATOR_VERSION_V2 = "2.0.0";
 export const GROUND_TRUTH_SCHEMA_VERSION_V2 = "2.0.0";
+/** Set v2.1 (SIG-54 review): opaque IDs, realistic amounts, references, billers and fees. */
+export const GENERATOR_VERSION_V21 = "2.1.0";
+export const GROUND_TRUTH_SCHEMA_VERSION_V21 = "2.1.0";
 /** The fixed end of every history window; the generator never reads the clock. */
 export const AS_OF_DATE = "2026-10-31";
 
@@ -40,6 +43,11 @@ export type LiabilitySpec = {
 
 /** Set v2 (SIG-54): what generator 2.0.0 adds to a spec. */
 export type V2Spec = {
+  /**
+   * Set v2.1 (generator 2.1.0, SIG-54 review direction): every 2.1 change is guarded by this, and
+   * draws from its own "v21:" streams, so a 2.0 spec generates exactly as set v2.
+   */
+  variant?: "2.1";
   /** The lender's requested lookback, drawn independently of the history held (D22). */
   requested_lookback: 3 | 6 | 12;
   /** Gross is the input, and net follows through the tax table (SIG-46 ruling). */
@@ -51,7 +59,7 @@ export type V2Spec = {
     /** One pay carries a bonus of `amount` (net). */
     bonus?: { amount: number };
     /** From `after_days` into the window, pay changes (a rise, or a new employer). */
-    change?: { after_days: number; net_per_pay: number; payer?: string };
+    change?: { after_days: number; net_per_pay: number; payer?: string; gross_annual?: number };
   };
   /** The same employer under a second descriptor, later in the window or at a second bank. */
   payer_drift?: { mode: "over_time" | "across_banks"; alias: string };
@@ -210,6 +218,8 @@ export type V2Truth = {
     medicare_levy: number;
     net_annual: number;
     tax_table: string;
+    /** Set v2.1: gross after a pay rise or a change of employer, when there is one. */
+    gross_annual_after_change?: number;
   } | null;
   payers: { payer: string; aliases: string[]; from: string; to: string }[];
   pay_events: {

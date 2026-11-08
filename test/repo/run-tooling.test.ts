@@ -30,13 +30,12 @@ const RECORD_SCRIPTS = [
   "eq-unverified.ts",
   "lia-detect.ts",
   "generate-synthetic.ts",
+  // On the helpers since the set v2 review (8 November 2026).
+  "generate-synthetic-v2.ts",
 ];
-/**
- * generate-synthetic-v2.ts writes set v2, which is under independent review at b0dad35 (SIG-54):
- * it is left as it is until that review is posted. The .mjs files are build and CI tools.
- */
+/** The .mjs files are build and CI tools, not run scripts. */
 const OWN_EQUIVALENT: string[] = [];
-const EXEMPT = ["generate-synthetic-v2.ts", "build-mock-lambda.mjs", "check-pr-title.mjs"];
+const EXEMPT = ["build-mock-lambda.mjs", "check-pr-title.mjs"];
 
 describe("SIG-56 T1: a run never overwrites a record", () => {
   it("writeNew refuses an existing file and writes nothing", () => {
