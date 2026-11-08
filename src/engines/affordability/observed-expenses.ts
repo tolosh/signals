@@ -4,10 +4,16 @@
 // a single committed or basic debit above the one-off threshold is excluded from the average
 // and listed for the officer. The category mapping and method are pre-registered in
 // research/preregistrations/SIG-17.json. Pure: categories are an input (D3).
+// D29 (GR-3, §9.2): health spending counts towards basic, as an aggregate only: it is never a
+// one-off, an unmapped key or anything else itemised. Religious, union and political spending,
+// and payees Enrich marks sensitive, are not living expenses and are removed before anything is
+// read (1.1.0; set v1 has no such lines, so SIG-17's records are unchanged).
+import { isHealth, isSensitive } from "../sensitive.js";
 
 export type ExpenseTransaction = {
   accountId: string;
   transactionId: string;
+  merchantCategoryCode?: string;
   type: string;
   description: string;
   postingDateTime?: string;
@@ -28,7 +34,7 @@ export type ObservedExpenseInput = {
 type Group = "committed" | "basic" | "discretionary";
 type Exclusion = "own_account_and_savings" | "debt_repayments" | "other";
 
-export const OBSERVED_EXPENSES_METHOD_VERSION = "1.0.0";
+export const OBSERVED_EXPENSES_METHOD_VERSION = "1.1.0";
 
 const GROUPS: Record<string, Group> = {
   rent: "committed",
@@ -113,10 +119,17 @@ export function deriveObservedExpenses(input: ObservedExpenseInput): ObservedExp
     for (const t of acc.transactions) {
       const day = dayOf(t.postingDateTime ?? t.valueDateTime ?? "");
       if (!Number.isFinite(day) || day < start || day > end) continue;
+      // D29: sensitive lines other than health are removed before anything is read.
+      const health = isHealth(t, input.categories);
+      if (!health && isSensitive(t, input.categories)) continue;
       first = Math.min(first, day);
       const cents = Math.round(Number(t.amount) * 100);
       if (cents >= 0) continue;
       const amount = -cents / 100;
+      if (health) {
+        totals.basic += amount;
+        continue;
+      }
       if (BSB_NUMBER.test(t.description)) {
         excluded.own_account_and_savings++;
         continue;

@@ -51,6 +51,22 @@ export const SENSITIVE_MCCS: Readonly<Record<string, string>> = Object.freeze({
 
 type Tx = { transactionId: string; merchantCategoryCode?: string };
 
+/** Medical and pharmacy: the codes and MCCs D29 lets into the living-expense total, unitemised. */
+const HEALTH_CATEGORIES: ReadonlySet<string> = new Set(["healthcare", "medical", "pharmacy"]);
+const isHealthMcc = (mcc: string | undefined) =>
+  mcc !== undefined && /^(medical|pharmacy)/.test(SENSITIVE_MCCS[mcc] ?? "");
+
+/**
+ * D29: a sensitive line that is health spending (medical or pharmacy). It counts towards the
+ * living-expense total as an aggregate only; it never feeds a signal or a decisioning input.
+ */
+export function isHealth(t: Tx, categories?: Readonly<Record<string, string>>): boolean {
+  const category = categories?.[t.transactionId];
+  if (category !== undefined && SENSITIVE_CATEGORIES.has(category))
+    return HEALTH_CATEGORIES.has(category);
+  return isHealthMcc(t.merchantCategoryCode);
+}
+
 /** True when GR-3 excludes the transaction: by its Enrich category, or by its MCC. */
 export function isSensitive(t: Tx, categories?: Readonly<Record<string, string>>): boolean {
   const category = categories?.[t.transactionId];
