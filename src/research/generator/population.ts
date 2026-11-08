@@ -40,7 +40,7 @@ const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 
 /** Deep merge for specs; arrays are replaced, not merged. */
-function merge<T>(base: T, over: unknown): T {
+export function merge<T>(base: T, over: unknown): T {
   if (!isObject(over) || !isObject(base)) return (over === undefined ? base : over) as T;
   const out: Record<string, unknown> = { ...base };
   for (const [k, v] of Object.entries(over)) out[k] = merge(out[k], v);

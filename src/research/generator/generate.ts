@@ -15,10 +15,13 @@ import {
   type Merchant,
 } from "./catalog.js";
 import { stream, type Rng } from "./rng.js";
+import { netFromGross, taxTable } from "./tax.js";
 import {
   AS_OF_DATE,
   GENERATOR_VERSION,
+  GENERATOR_VERSION_V2,
   GROUND_TRUTH_SCHEMA_VERSION,
+  GROUND_TRUTH_SCHEMA_VERSION_V2,
   type ApplicantSpec,
   type Cadence,
   type FeedAccount,
@@ -27,6 +30,7 @@ import {
   type LiabilitySpec,
   type LiabilityType,
   type Transaction,
+  type V2Truth,
 } from "./types.js";
 
 const MONTHLY_FACTOR: Record<Cadence, number> = {
@@ -93,6 +97,8 @@ type Entry = {
   reference?: string;
   merchant?: Merchant;
   biller?: { name: string; code: string };
+  /** The transaction ID, set when the feed is built (shared accounts only). */
+  id?: string;
 };
 
 type Account = {
@@ -103,11 +109,13 @@ type Account = {
   display: string;
   openingCents: number;
   limitCents?: number;
+  /** Set v2: a second data holder's BSB (payer drift across banks). */
+  bsb?: string;
 };
 
 const LIABILITY_DEFAULTS: Record<
   LiabilityType,
-  Required<Omit<LiabilitySpec, "type" | "provider" | "declared" | "account_shared">>
+  Required<Pick<LiabilitySpec, "limit" | "balance" | "repayment" | "cadence">>
 > = {
   credit_card: { limit: 6000, balance: 2400, repayment: 180, cadence: "monthly" },
   personal_loan: { limit: 0, balance: 15000, repayment: 450, cadence: "monthly" },
@@ -125,6 +133,20 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
   const entries: Entry[] = [];
   const add = (e: Entry) => entries.push(e);
   const cdr = spec.feed === "cdr";
+  // Set v2 (SIG-54). Every v2 branch below is guarded, and every v2 draw comes from its own
+  // "v2:" stream, so a spec without a v2 block generates exactly as in v1.
+  const v2 = spec.v2;
+  const v2Tax =
+    v2?.gross_primary && spec.income.gross_annual > 0
+      ? netFromGross(spec.income.gross_annual, taxTable(v2.tax_year ?? "2026-27"))
+      : null;
+  const PAYS = { weekly: 52, fortnightly: 26, monthly: 12 } as const;
+  const basePerPay = v2Tax
+    ? round2(v2Tax.net_annual / PAYS[spec.income.cadence])
+    : spec.income.net_per_pay;
+  const change = v2?.pay?.change;
+  const currentPerPay = change ? change.net_per_pay : basePerPay;
+  const currentPayer = change?.payer ?? spec.income.payer;
   const suburb = r("suburb").pick(SUBURBS);
   const pos = (m: Merchant, store: number) =>
     `${m.descriptor} ${store} ${suburb} ${STATES[suburb]} AUS`;
@@ -177,6 +199,17 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
     accounts.push(acc);
     return acc;
   });
+  const secondBank = v2?.payer_drift?.mode === "across_banks" ? `${id}-evd2` : null;
+  if (secondBank)
+    accounts.push({
+      id: secondBank,
+      shared: true,
+      category: "TRANS_AND_SAVINGS_ACCOUNTS",
+      product: "Everyday Account",
+      display: "Everyday (second bank)",
+      openingCents: toCents(r("v2:open-second").int(200, 2000)),
+      bsb: "733000",
+    });
 
   // Income.
   const typeOf = {
@@ -189,22 +222,62 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
   const payDays = schedule(r("pay"), spec.income.cadence, start, end);
   const sweepNumber = `${r("sweep").int(10, 99)}${r("sweep-number").int(1000, 9999)}`;
   const payRng = r("pay-amount");
-  for (const day of payDays) {
-    const cents = toCents(payRng.jitter(spec.income.net_per_pay, spec.income.variability));
-    const description =
+  const changeDay = change ? start + change.after_days : Infinity;
+  const overtime = v2?.pay?.overtime;
+  const overtimeRng = r("v2:overtime");
+  const bonusIndex = v2?.pay?.bonus ? r("v2:bonus").int(0, Math.max(0, payDays.length - 1)) : -1;
+  const drift = streamType === "salary" ? v2?.payer_drift : undefined;
+  const driftDay = start + Math.floor((end - start) / 2);
+  const payEvents: { kind: "overtime" | "bonus" | "change"; entry: Entry; amount: number }[] = [];
+  const payers = new Map<string, { aliases: string[]; from: number; to: number }>();
+  let receivedCents = 0;
+  let changeLogged = false;
+  for (const [k, day] of payDays.entries()) {
+    const changed = day >= changeDay;
+    const payer = changed && change?.payer ? change.payer : spec.income.payer;
+    let cents = toCents(
+      payRng.jitter(changed && change ? change.net_per_pay : basePerPay, spec.income.variability),
+    );
+    let description =
       streamType === "benefit"
         ? "SERVICES AUSTRALIA CENTRELINK"
         : streamType === "gig"
-          ? `${spec.income.payer} PAYOUT`
-          : `SALARY ${spec.income.payer}`;
-    add({
-      account: incomeAccount,
+          ? `${payer} PAYOUT`
+          : `SALARY ${payer}`;
+    let account = incomeAccount;
+    if (drift?.mode === "over_time" && day >= driftDay) description = drift.alias;
+    if (drift?.mode === "across_banks" && secondBank && k % 2 === 1) {
+      description = drift.alias;
+      account = secondBank;
+    }
+    const events: { kind: "overtime" | "bonus" | "change"; amount: number }[] = [];
+    if (overtime && overtimeRng.chance(overtime.share)) {
+      cents += toCents(overtime.amount);
+      events.push({ kind: "overtime", amount: overtime.amount });
+    }
+    if (k === bonusIndex && v2?.pay?.bonus) {
+      cents += toCents(v2.pay.bonus.amount);
+      events.push({ kind: "bonus", amount: v2.pay.bonus.amount });
+    }
+    if (changed && change && !changeLogged) {
+      changeLogged = true;
+      events.push({ kind: "change", amount: change.net_per_pay });
+    }
+    const payEntry: Entry = {
+      account,
       day,
       cents,
       type: "TRANSFER_INCOMING",
       description,
       reference: `PAY ${toIso(day)}`,
-    });
+    };
+    add(payEntry);
+    for (const e of events) payEvents.push({ ...e, entry: payEntry });
+    receivedCents += cents;
+    const seen = payers.get(payer) ?? { aliases: [], from: day, to: day };
+    if (!seen.aliases.includes(description)) seen.aliases.push(description);
+    seen.to = day;
+    payers.set(payer, seen);
     // An unshared salary account sweeps to the everyday account the next day. The lender sees
     // only an own-account transfer, identified by BSB and number, never the word salary.
     if (incomeAccount !== everyday && day + 1 <= end) {
@@ -328,6 +401,7 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
   }
 
   // Commitments, including quarterly and annual items.
+  const bpayEntries: { entry: Entry; kind: "bill" | "card_repayment"; item: string | null }[] = [];
   const commitments: GroundTruth["commitments"] = spec.commitments.map((c) => {
     const rng = r(`commitment:${c.kind}`);
     const days = schedule(rng, c.cadence, start, end);
@@ -343,16 +417,18 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
           description: `${telco.descriptor} ${suburb} AUS`,
           merchant: telco,
         });
-      else if (biller)
-        add({
+      else if (biller) {
+        const bill: Entry = {
           account: everyday,
           day,
           cents: -toCents(c.amount),
           type: "PAYMENT",
           description: `BPAY ${biller.name}`,
           biller,
-        });
-      else
+        };
+        add(bill);
+        bpayEntries.push({ entry: bill, kind: "bill", item: `commitment:${c.kind}` });
+      } else
         add({
           account: everyday,
           day,
@@ -379,6 +455,9 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
 
   // Liabilities.
   const cleared = spec.behaviours.positive.cards_cleared_in_full;
+  const liabilityV2: (Omit<V2Truth["liabilities"][number], "repayment_transaction_ids"> & {
+    entries: Entry[];
+  })[] = [];
   const liabilityItems: GroundTruth["liabilities"]["items"] = spec.liabilities.map((l, i) => {
     const d = LIABILITY_DEFAULTS[l.type];
     const provider = l.provider ?? r(`provider:${i}`).pick(PROVIDERS[l.type] ?? ["LENDER"]);
@@ -392,6 +471,32 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
       l.type === "wage_advance" ? spec.income.cadence : (l.cadence ?? d.cadence);
     const shared = l.account_shared ?? false;
     const loanAccount = `${id}-l${i + 1}`;
+    // Set v2: where repayments come from, the narrative's reference, and the card biller cue.
+    let payFrom = everyday;
+    if (l.paid_from_unshared) {
+      payFrom = `${id}-p${i + 1}`;
+      accounts.push({
+        id: payFrom,
+        shared: false,
+        category: "TRANS_AND_SAVINGS_ACCOUNTS",
+        product: "Other Bank Account",
+        display: `Other ${i + 1}`,
+        openingCents: 0,
+      });
+    }
+    const ref = l.narrative_ref ? `${r(`v2:ref:${i}`).int(10_000_000, 99_999_999)}` : null;
+    const named = ref ? `${provider} ${ref}` : provider;
+    const cue = l.biller_cue ?? true;
+    const repaymentEntries: Entry[] = [];
+    if (l.mortgage?.feature === "offset")
+      accounts.push({
+        id: `${id}-off${i + 1}`,
+        shared: true,
+        category: "TRANS_AND_SAVINGS_ACCOUNTS",
+        product: "Mortgage Offset",
+        display: "Offset",
+        openingCents: toCents(r(`v2:offset:${i}`).int(5_000, 60_000)),
+      });
     if (shared) {
       accounts.push({
         id: l.type === "credit_card" ? cardAccount : loanAccount,
@@ -417,14 +522,17 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
       const cents = toCents(repayment);
       if (l.type === "credit_card") {
         const b = BILLERS.credit_card ?? { name: "CREDIT CARD PAYMENT", code: "613711" };
-        add({
-          account: everyday,
+        const paid: Entry = {
+          account: payFrom,
           day,
           cents: -cents,
           type: "PAYMENT",
-          description: `BPAY ${provider} CREDIT CARD PAYMENT`,
-          biller: { name: `${provider} ${b.name}`, code: b.code },
-        });
+          description: cue ? `BPAY ${named} CREDIT CARD PAYMENT` : `BPAY ${named} CARDS`,
+          biller: { name: cue ? `${provider} ${b.name}` : `${provider} CARDS`, code: b.code },
+        };
+        add(paid);
+        repaymentEntries.push(paid);
+        bpayEntries.push({ entry: paid, kind: "card_repayment", item: null });
         if (shared)
           add({
             account: cardAccount,
@@ -434,13 +542,15 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
             description: "PAYMENT RECEIVED THANK YOU",
           });
       } else if (l.type === "bnpl") {
-        add({
-          account: everyday,
+        const paid: Entry = {
+          account: payFrom,
           day,
           cents: -cents,
           type: "DIRECT_DEBIT",
-          description: `${provider} INSTALMENT`,
-        });
+          description: `${named} INSTALMENT`,
+        };
+        add(paid);
+        repaymentEntries.push(paid);
       } else if (l.type === "wage_advance") {
         add({
           account: everyday,
@@ -449,21 +559,25 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
           type: "TRANSFER_INCOMING",
           description: `${provider} ADVANCE`,
         });
-        add({
-          account: everyday,
+        const paid: Entry = {
+          account: payFrom,
           day,
           cents: -cents,
           type: "DIRECT_DEBIT",
-          description: `${provider} REPAYMENT`,
-        });
+          description: `${named} REPAYMENT`,
+        };
+        add(paid);
+        repaymentEntries.push(paid);
       } else {
-        add({
-          account: everyday,
+        const paid: Entry = {
+          account: payFrom,
           day,
           cents: -cents,
           type: "DIRECT_DEBIT",
-          description: `${provider} LOAN REPAYMENT`,
-        });
+          description: `${named} LOAN REPAYMENT`,
+        };
+        add(paid);
+        repaymentEntries.push(paid);
         if (shared)
           add({
             account: loanAccount,
@@ -484,6 +598,18 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
       });
     }
     const revolvingCleared = l.type === "credit_card" && cleared;
+    liabilityV2.push({
+      id: `liab-${i + 1}`,
+      lender: provider,
+      declared_as: l.declared_as ?? null,
+      unseen_lender: l.unseen_lender ?? false,
+      paid_from_account_id: payFrom,
+      paid_from_shared: payFrom === everyday,
+      narrative_ref: ref,
+      biller_cue: cue,
+      mortgage: l.mortgage ?? null,
+      entries: repaymentEntries,
+    });
     return {
       id: `liab-${i + 1}`,
       type: l.type,
@@ -535,18 +661,35 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
 
   // Dishonours.
   const dishonourRng = r("dishonours");
-  for (let i = 0; i < spec.behaviours.dishonours; i++) {
-    add({
-      account: everyday,
-      day: start + dishonourRng.int(0, end - start),
-      cents: -1500,
-      type: "FEE",
-      description: "DISHONOUR FEE",
-    });
+  const dishonourEntries: { entry: Entry; daysAgo: number }[] = [];
+  const dated = v2?.dishonours?.days_ago;
+  if (dated) {
+    for (const daysAgo of dated) {
+      const fee: Entry = {
+        account: everyday,
+        day: end - daysAgo,
+        cents: -1500,
+        type: "FEE",
+        description: "DISHONOUR FEE",
+      };
+      add(fee);
+      dishonourEntries.push({ entry: fee, daysAgo });
+    }
+  } else {
+    for (let i = 0; i < spec.behaviours.dishonours; i++) {
+      add({
+        account: everyday,
+        day: start + dishonourRng.int(0, end - start),
+        cents: -1500,
+        type: "FEE",
+        description: "DISHONOUR FEE",
+      });
+    }
   }
+  const dishonourCount = dated ? dated.length : spec.behaviours.dishonours;
 
   // Ground truth.
-  const streamMonthly = round2(spec.income.net_per_pay * MONTHLY_FACTOR[spec.income.cadence]);
+  const streamMonthly = round2(currentPerPay * MONTHLY_FACTOR[spec.income.cadence]);
   const group = (g: "committed" | "basic" | "discretionary") =>
     round2(items.filter((i) => i.group === g).reduce((s, i) => s + i.monthly_equivalent, 0));
   const committed = group("committed");
@@ -557,8 +700,8 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
   const gambling = items.find((i) => i.name === "gambling");
 
   const truth: GroundTruth = {
-    schema_version: GROUND_TRUTH_SCHEMA_VERSION,
-    generator_version: GENERATOR_VERSION,
+    schema_version: v2 ? GROUND_TRUTH_SCHEMA_VERSION_V2 : GROUND_TRUTH_SCHEMA_VERSION,
+    generator_version: v2 ? GENERATOR_VERSION_V2 : GENERATOR_VERSION,
     applicant_id: id,
     seed,
     tags: [...spec.tags],
@@ -578,9 +721,9 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
       streams: [
         {
           type: streamType,
-          payer: spec.income.payer,
+          payer: currentPayer,
           cadence: spec.income.cadence,
-          net_per_pay: spec.income.net_per_pay,
+          net_per_pay: currentPerPay,
           variability: spec.income.variability,
           net_monthly: streamMonthly,
           account_id: incomeAccount,
@@ -599,17 +742,64 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
     liabilities: { repayments_monthly: repayments, items: liabilityItems },
     behaviours: {
       gambling_monthly: gambling ? gambling.monthly_equivalent : null,
-      dishonours: spec.behaviours.dishonours,
+      dishonours: dishonourCount,
       positive: {
         rent_on_time: spec.expenses.rent_monthly > 0 && spec.behaviours.positive.rent_on_time,
         cards_cleared_in_full: cleared,
         savings_growing: savingsMonthly > 0,
         savings_monthly: savingsMonthly,
-        no_dishonours: spec.behaviours.dishonours === 0,
+        no_dishonours: dishonourCount === 0,
       },
     },
     surplus_monthly: round2(streamMonthly - total - repayments),
   };
+
+  const feed = buildFeed(
+    accounts.filter((a) => a.shared),
+    entries,
+    cdr,
+    r("feed"),
+  );
+  if (v2) {
+    const windowMonths = (end - start + 1) / (365.25 / 12);
+    const v2truth: V2Truth = {
+      request: { lookback_months: v2.requested_lookback },
+      tax: v2Tax,
+      payers: [...payers.entries()].map(([payer, p]) => ({
+        payer,
+        aliases: p.aliases,
+        from: toIso(p.from),
+        to: toIso(p.to),
+      })),
+      pay_events: payEvents.map((e) => ({
+        kind: e.kind,
+        date: toIso(e.entry.day),
+        transaction_id: e.entry.id ?? null,
+        amount: e.amount,
+      })),
+      received_net_monthly: round2(receivedCents / 100 / windowMonths),
+      dishonour_events: dishonourEntries.map(({ entry, daysAgo }) => ({
+        date: toIso(entry.day),
+        days_ago: daysAgo,
+        recent: daysAgo <= 90,
+        transaction_id: entry.id ?? "",
+      })),
+      bpay: bpayEntries.map(({ entry, kind, item }) => ({
+        transaction_id: entry.id ?? null,
+        biller_name: entry.biller?.name ?? "",
+        biller_code: entry.biller?.code ?? "",
+        kind,
+        item,
+        true_group: kind === "bill" ? "committed" : null,
+        true_category: kind === "card_repayment" ? "transfer" : null,
+      })),
+      liabilities: liabilityV2.map(({ entries: paid, ...l }) => ({
+        ...l,
+        repayment_transaction_ids: paid.flatMap((e) => (e.id ? [e.id] : [])),
+      })),
+    };
+    truth.v2 = v2truth;
+  }
 
   return {
     truth,
@@ -619,16 +809,13 @@ export function generateApplicant(spec: ApplicantSpec, seed: number): GeneratedA
         .filter((l) => l.declared)
         .map((l) => ({
           type: l.type,
-          provider: l.provider,
+          provider: v2
+            ? (liabilityV2.find((x) => x.id === l.id)?.declared_as ?? l.provider)
+            : l.provider,
           repayment_monthly: l.monthly_commitment,
         })),
     },
-    feed: buildFeed(
-      accounts.filter((a) => a.shared),
-      entries,
-      cdr,
-      r("feed"),
-    ),
+    feed,
   };
 }
 
@@ -647,9 +834,10 @@ function buildFeed(
       .sort(
         (a, b) => a.day - b.day || a.description.localeCompare(b.description) || a.cents - b.cents,
       );
-    const transactions: Transaction[] = own.map((e, i) =>
-      toTransaction(e, `${acc.id}-t${String(i + 1).padStart(5, "0")}`, cdr),
-    );
+    const transactions: Transaction[] = own.map((e, i) => {
+      e.id = `${acc.id}-t${String(i + 1).padStart(5, "0")}`;
+      return toTransaction(e, e.id, cdr);
+    });
     const number = `${rng.int(1000, 9999)}`;
     const account = {
       accountId: acc.id,
@@ -675,7 +863,11 @@ function buildFeed(
     return {
       account,
       detail: {
-        data: { ...account, bsb: "062000", accountNumber: `1${rng.int(1000000, 9999999)}` },
+        data: {
+          ...account,
+          bsb: acc.bsb ?? "062000",
+          accountNumber: `1${rng.int(1000000, 9999999)}`,
+        },
         links: { self: `${BASE}/${acc.id}` },
         meta: {},
       },
