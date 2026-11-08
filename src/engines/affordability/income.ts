@@ -3,7 +3,7 @@
 // refunds, loan disbursements, advances, interest and repayments received are never income.
 // The method and its parameters are pre-registered in research/preregistrations/SIG-16.json.
 // Pure: no clock, no randomness, relative imports only (D3).
-import { withoutSensitive } from "../sensitive.js";
+import { SENSITIVE_METHOD_VERSION, withoutSensitive } from "../sensitive.js";
 
 export type IncomeTransaction = {
   accountId: string;
@@ -47,6 +47,8 @@ export type Exclusion =
   | "repayment_received"
   | "not_a_transaction_account";
 export type IncomeResult = {
+  /** The GR-3 gate applied to the feed (SENSITIVE_METHOD_VERSION). */
+  gr3_gate_version: string;
   net_monthly: number;
   streams: IncomeStream[];
   excluded: Record<Exclusion, number>;
@@ -54,7 +56,9 @@ export type IncomeResult = {
   unmatched_credits: number;
 };
 
-export const INCOME_METHOD_VERSION = "1.0.0";
+// 1.0.1 (SIG-42 re-review direction 8): the GR-3 gate's output change since #40 is versioned, and
+// the gate's version is recorded on the result. Nothing else changed.
+export const INCOME_METHOD_VERSION = "1.0.1";
 
 const CADENCE_BANDS: [Cadence, number, number, number][] = [
   ["weekly", 5, 9, 52 / 12],
@@ -183,6 +187,7 @@ export function deriveIncome(input: IncomeInput): IncomeResult {
   }
   const total = streams.reduce((s, x) => s + x.monthly, 0);
   return {
+    gr3_gate_version: SENSITIVE_METHOD_VERSION,
     net_monthly: Math.round(total * 100) / 100,
     streams,
     excluded,

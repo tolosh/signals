@@ -56,7 +56,7 @@ describe("Fix 2: missed pays for the add-back are found over INC-09's 12 months"
 
 describe("Fix 3: the engine version", () => {
   it("is 1.2.0 since the 8 November ruling (1.1.0 carried the superseded add-back)", () => {
-    expect(INC_VERSION).toBe("1.2.1");
+    expect(INC_VERSION).toBe("1.2.2");
   });
 });
 

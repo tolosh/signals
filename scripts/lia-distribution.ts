@@ -7,6 +7,7 @@
 import { join } from "node:path";
 import { EQ_METHOD_VERSION } from "../src/engines/evidence/index.js";
 import { LIA_VERSION, assessLia, type LiaFeed } from "../src/engines/families/lia/index.js";
+import { SENSITIVE_METHOD_VERSION } from "../src/engines/sensitive.js";
 import { AS_OF_DATE } from "../src/research/generator/index.js";
 import { loadSet } from "../src/research/liabilities-score.js";
 import {
@@ -72,6 +73,7 @@ const record = {
     name: "lia-family",
     version: LIA_VERSION,
     eq_method_version: EQ_METHOD_VERSION,
+    gr3_gate_version: SENSITIVE_METHOD_VERSION,
     commit: git.commit,
   },
   categoriser: { ...enrich, source: "research/enrich/synthetic-v1-categories.json" },

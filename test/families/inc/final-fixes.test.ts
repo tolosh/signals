@@ -88,5 +88,6 @@ describe("Fix 5: INC-09 says it judges regular income only (N-1)", () => {
 });
 
 describe("Fix 7: the engine version", () => {
-  it("is 1.2.1", () => expect(INC_VERSION).toBe("1.2.1"));
+  it("is 1.2.2 (1.2.1, with the GR-3 gate versioned: SIG-42 re-review)", () =>
+    expect(INC_VERSION).toBe("1.2.2"));
 });
