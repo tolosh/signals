@@ -1,9 +1,11 @@
 // SIG-42: family 3 LIA states across synthetic set v1, by variant tag. A sanity run of the
 // apparatus, not an experiment: the scored tests are the scripted cases in test/families/lia/.
-// Usage: npx tsx scripts/lia-distribution.ts [--out research/runs] [--allow-dirty]
-// Production defaults; a 6-month request for everyone (the D22 default); declarations from the
-// application; no assessed surplus (set v1's application carries none), so LIA-01 is at most amber.
+// Usage: npx tsx scripts/lia-distribution.ts [--request 6] [--out research/runs] [--allow-dirty]
+// Production defaults; one assumed lender request for everyone, 6 months by default (the D22
+// default; set v1 records no request); declarations from the application; no assessed surplus.
+// From 1.2.0, LIA-01 is amber at most whatever the surplus (SIG-42 review ruling 1).
 import { join } from "node:path";
+import { EQ_METHOD_VERSION } from "../src/engines/evidence/index.js";
 import { LIA_VERSION, assessLia, type LiaFeed } from "../src/engines/families/lia/index.js";
 import { AS_OF_DATE } from "../src/research/generator/index.js";
 import { loadSet } from "../src/research/liabilities-score.js";
@@ -16,6 +18,8 @@ import {
 } from "./lib/run-record.js";
 
 const args = parseRunArgs();
+const request = Number(args.values.request ?? "6");
+if (!Number.isInteger(request) || request < 3) throw new Error("--request must be 3 or more");
 const git = gitState();
 requireCleanTree(git.status, args.allowDirty);
 const { manifest, applicants, categories, enrich } = loadSet();
@@ -44,7 +48,7 @@ for (const a of applicants) {
     feed,
     feed_type: a.truth.feed_type,
     as_of: AS_OF_DATE,
-    lookback_months: 6,
+    lookback_months: request,
     categories,
     application: { declared_liabilities: app.declared_liabilities },
   });
@@ -57,18 +61,23 @@ for (const a of applicants) {
 }
 
 const created_at = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
-const run_id = `${created_at.slice(0, 10)}-${manifest.set}-lia-family-v${LIA_VERSION}`;
+const run_id = `${created_at.slice(0, 10)}-${manifest.set}-lia-family-v${LIA_VERSION}${request === 6 ? "" : `-request-${request}`}`;
 const record = {
   run_id,
   created_at,
   ticket: "SIG-42",
   ...provenance("scripts/lia-distribution.ts", args, git),
   dataset: { set: manifest.set, seed: manifest.seed, set_sha256: manifest.set_sha256 },
-  engine: { name: "lia-family", version: LIA_VERSION, commit: git.commit },
+  engine: {
+    name: "lia-family",
+    version: LIA_VERSION,
+    eq_method_version: EQ_METHOD_VERSION,
+    commit: git.commit,
+  },
   categoriser: { ...enrich, source: "research/enrich/synthetic-v1-categories.json" },
   input: {
     as_of: AS_OF_DATE,
-    lookback_months: 6,
+    lookback_months: request,
     application: "declared liabilities from set v1; no assessed surplus",
   },
   by_tag: byTag,
