@@ -88,3 +88,75 @@ export const PROVIDERS: Record<string, readonly string[]> = {
   sacc: ["CASH CONVERTERS", "NIMBLE"],
   wage_advance: ["BEFOREPAY", "MYPAYNOW"],
 };
+
+// --- Set v2 (SIG-54) ---------------------------------------------------------------------------
+
+/**
+ * Lenders absent from SIG-18's runs (set v1's PROVIDERS) and, by this listing, from any alias
+ * table SIG-57 pre-registers: SIG-57 must not add these names, or the unseen-lender group stops
+ * testing what it was built for. The manifest records them.
+ */
+export const UNSEEN_PROVIDERS: Record<string, readonly string[]> = {
+  credit_card: ["BANKWEST", "ING", "HSBC"],
+  personal_loan: ["WISR", "LATITUDE", "NOW FINANCE"],
+  car_loan: ["PEPPER MONEY", "ANGLE AUTO FINANCE"],
+  bnpl: ["HUMM", "KLARNA"],
+  sacc: ["SUNSHINE LOANS", "MONEYME"],
+  wage_advance: ["CASHD", "EARND"],
+};
+
+/** How an applicant names a lender on an application, as opposed to how the feed does. */
+export const NATURAL_NAMES: Record<string, string> = {
+  CBA: "Commonwealth Bank",
+  WESTPAC: "Westpac Banking Corporation",
+  NAB: "National Australia Bank",
+  ANZ: "ANZ Bank",
+  SOCIETYONE: "SocietyOne Australia",
+  PLENTI: "Plenti Finance",
+  HARMONEY: "Harmoney Australia",
+  MONEY3: "Money3 Corporation",
+  "MACQUARIE LEASING": "Macquarie Leasing Pty Ltd",
+  FIRSTMAC: "Firstmac Limited",
+  "CBA HOME LOAN": "Commonwealth Bank home loan",
+  "WESTPAC HOME LOAN": "Westpac home loan",
+  AFTERPAY: "Afterpay Pty Ltd",
+  "ZIP PAY": "Zip Co",
+  "CASH CONVERTERS": "Cash Converters Personal Finance",
+  NIMBLE: "Nimble Australia",
+  BEFOREPAY: "Beforepay Group",
+  MYPAYNOW: "MyPayNow",
+  BANKWEST: "Bankwest",
+  ING: "ING Australia",
+  HSBC: "HSBC Bank Australia",
+  WISR: "Wisr Finance",
+  LATITUDE: "Latitude Financial Services",
+  "NOW FINANCE": "NOW Finance Group",
+  "PEPPER MONEY": "Pepper Money Ltd",
+  "ANGLE AUTO FINANCE": "Angle Auto Finance",
+  HUMM: "humm group",
+  KLARNA: "Klarna Australia",
+  "SUNSHINE LOANS": "Sunshine Loans Pty Ltd",
+  MONEYME: "MoneyMe Financial Group",
+  CASHD: "CashD Pty Ltd",
+  EARND: "Earnd Pty Ltd",
+};
+/** The kind of credit, as an applicant adds it after the lender's name. */
+export const NATURAL_SUFFIX: Record<string, string> = {
+  credit_card: " credit card",
+  personal_loan: " personal loan",
+  car_loan: " car loan",
+  mortgage: "",
+  bnpl: "",
+  sacc: "",
+  wage_advance: "",
+};
+
+/** The same employer under a second descriptor (payer-name drift, SIG-16). */
+export const EMPLOYER_ALIASES: Record<string, string> = {
+  "ACME CONSULTING PTY LTD": "ACME CONSULTING P/L PAYROLL",
+  "HARBOUR LOGISTICS": "HARBOUR LOGISTICS P/L WAGES",
+  "NORTHSIDE HEALTH": "NTHSIDE HEALTH SVC PAY",
+  "BLUEGUM CONSTRUCTIONS": "BLUEGUM CONST PAYROLL",
+  "CITY OF SYDNEY": "COUNCIL CITY OF SYD SAL",
+  "ORBIT RETAIL GROUP": "ORBIT RETAIL GRP PAY",
+};

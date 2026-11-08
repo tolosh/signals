@@ -25,6 +25,7 @@ const RECORD_SCRIPTS = [
   "enrich-categorise-set.ts",
   "lia-distribution.ts",
   "inc-distribution.ts",
+  "enrich-sample-v2.ts",
 ];
 /**
  * Already meet the standard with their own code, and belong to runs under independent review at
@@ -32,7 +33,12 @@ const RECORD_SCRIPTS = [
  * generate-synthetic.ts writes the set itself, checked by its hash, not a run record.
  */
 const OWN_EQUIVALENT = ["eq-unverified.ts", "lia-detect.ts"];
-const EXEMPT = ["generate-synthetic.ts", "build-mock-lambda.mjs", "check-pr-title.mjs"];
+const EXEMPT = [
+  "generate-synthetic.ts",
+  "generate-synthetic-v2.ts",
+  "build-mock-lambda.mjs",
+  "check-pr-title.mjs",
+];
 
 describe("SIG-56 T1: a run never overwrites a record", () => {
   it("writeNew refuses an existing file and writes nothing", () => {
