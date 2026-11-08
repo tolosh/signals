@@ -34,6 +34,7 @@ const record = {
   ...result,
   generated_by: provenance("scripts/leakage.ts", args, git),
 };
-const path = join(args.out, `2026-11-09-sig60-leakage-${set}.json`);
+const created = new Date().toISOString().slice(0, 10);
+const path = join(args.out, `${created}-sig60-leakage-${set}.json`);
 writeNew(path, `${JSON.stringify(record, null, 2)}\n`);
 console.log(JSON.stringify({ path, verdict: record.verdict }));
