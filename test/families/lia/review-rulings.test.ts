@@ -269,3 +269,103 @@ describe("Ruling 3: on a 3-month history at a 3-month request", () => {
     expect(stateOf(r, "LIA-01")).toBe("unverified");
   });
 });
+
+// Ruling 4: R1 clean-ups. Underscores separate words; boundaries are Unicode-aware, so an
+// accented letter is a letter; LIA-02 reads the reference; LIA-03's 12-month read and the
+// shared-accounts rule (L-7) are pinned.
+const credit = (description: string, reference?: string): Line[] => [
+  { ago: 20, description, amount: 2000, ...(reference ? { reference } : {}) },
+];
+const privateTransfers = (description: string): Line[] =>
+  repeat(2, 30, { description, amount: -100, type: "TRANSFER_OUTGOING" });
+
+describe("Ruling 4: keyword boundaries", () => {
+  it("an underscore separates words: LOAN_REPAY matches (LIA-06, behind the flag)", () => {
+    expect(
+      stateOf(
+        run({ lines: privateTransfers("TRANSFER TO J SMITH LOAN_REPAY") }, undefined, {
+          private_loans: "detect",
+        }),
+        "LIA-06",
+      ),
+    ).toBe("amber");
+  });
+  it("an underscore separates words: ACME_LOAN is a disbursement (LIA-02)", () => {
+    expect(stateOf(run({ lines: credit("ACME_LOAN") }), "LIA-02")).toBe("amber");
+  });
+  for (const word of ["JOSÉLOAN", "ACMÉLOAN"])
+    it(`an accented letter is a letter: "${word}" is not a disbursement`, () => {
+      expect(stateOf(run({ lines: credit(`${word} REFUND`) }), "LIA-02")).toBe("none_observed");
+    });
+  it('an accented letter is a letter: "ŻIOU" is not a private-loan repayment', () => {
+    expect(
+      stateOf(
+        run({ lines: privateTransfers("TRANSFER TO ŻIOU") }, undefined, {
+          private_loans: "detect",
+        }),
+        "LIA-06",
+      ),
+    ).toBe("none_observed");
+  });
+  it("an accented word next to a keyword still leaves it whole: JOSÉ LOAN matches", () => {
+    expect(stateOf(run({ lines: credit("JOSÉ LOAN") }), "LIA-02")).toBe("amber");
+  });
+});
+
+describe("Ruling 4: LIA-02 reads the reference", () => {
+  it("a credit whose reference says DRAWDOWN is a disbursement", () => {
+    expect(stateOf(run({ lines: credit("ACME FINANCE", "DRAWDOWN 88123") }), "LIA-02")).toBe(
+      "amber",
+    );
+  });
+  it("a near miss in the reference is not", () => {
+    expect(stateOf(run({ lines: credit("ACME FINANCE", "DRAWDOWNS 88123") }), "LIA-02")).toBe(
+      "none_observed",
+    );
+  });
+});
+
+describe("Ruling 4: LIA-03 and the shared-accounts rule, pinned", () => {
+  const saccAt = (first: number, extra: Partial<Line> = {}): Line[] =>
+    repeat(
+      4,
+      14,
+      {
+        description: "CASH CONVERTERS LOAN REPAYMENT",
+        amount: -95,
+        category: "sacc_loan",
+        ...extra,
+      },
+      first,
+    );
+  it("LIA-03 reads 12 months at a 6-month request: SACC repaid 9 months ago is amber", () => {
+    expect(stateOf(run({ lines: saccAt(270) }), "LIA-03")).toBe("amber");
+  });
+  it("and SACC repaid 13 months ago, outside the 12, isn't seen", () => {
+    expect(stateOf(run({ months: 15, lines: saccAt(400) }), "LIA-03")).toBe("none_observed");
+  });
+  it("lines on a card account in the grant are not read (L-7)", () => {
+    const r = run({
+      lines: saccAt(10, { account: "acc-card" }),
+      accounts: [
+        {
+          accountId: "acc-card",
+          productCategory: "CRED_AND_CHRG_CARDS",
+          productName: "NAB CREDIT CARD",
+        },
+      ],
+    });
+    expect(stateOf(r, "LIA-03")).toBe("none_observed");
+  });
+  it("a line naming a BSB and account number is not read (L-7)", () => {
+    expect(
+      stateOf(
+        run({ lines: saccAt(10, { description: "CASH CONVERTERS 062-000 12345678" }) }),
+        "LIA-03",
+      ),
+    ).toBe("none_observed");
+  });
+  it("the same SACC repayments on the shared transaction account are red", () => {
+    expect(stateOf(run({ lines: saccAt(10) }), "LIA-03")).toBe("red");
+  });
+});
