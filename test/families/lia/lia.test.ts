@@ -208,9 +208,8 @@ describe("LIA-01 is built on SIG-18's detector, and says how far to trust it", (
   it("states the template dependence and how it matches the application, at medium confidence", () => {
     const s = signal(run({ lines: loan("SOCIETYONE") }), "LIA-01");
     expect(s.confidence).toBe("medium");
-    expect(s.reason).toMatch(
-      /by provider name, or by type and repayment amount when the names differ/,
-    );
+    // 1.3.0 wording (re-review ruling): only an exact name counts as declared.
+    expect(s.reason).toMatch(/Only an exact provider name counts as declared/);
     expect(s.reason).toMatch(/synthetic/);
     expect(s.evidence_quality.review_required).toBe(true);
   });

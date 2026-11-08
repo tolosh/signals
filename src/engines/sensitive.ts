@@ -5,7 +5,25 @@
 // below, and test/repo/gr3.test.ts enforces it. Interpretations G-1 to G-3 are in
 // docs/adr/0007-gr3-sensitive-spending.md. Pure: no clock, no randomness, relative imports (D3).
 
-export const SENSITIVE_METHOD_VERSION = "1.0.0";
+/**
+ * 1.1.0 (SIG-42 re-review direction 5, 8 November 2026): a liability repayment is never removed
+ * as sensitive spending, whatever its merchant code. Each engine records this version.
+ */
+export const SENSITIVE_METHOD_VERSION = "1.1.0";
+
+/**
+ * Enrich categories for repayments of a loan, card, BNPL, SACC, mortgage or wage advance. They
+ * are credit, not spending, so the gate never removes them (a BNPL repayment for a dental bill
+ * carries the dentist's MCC, but it is still a liability the lender must see).
+ */
+export const LIABILITY_CATEGORIES: ReadonlySet<string> = new Set([
+  "loan_repayment",
+  "credit_card",
+  "bnpl",
+  "sacc_loan",
+  "mortgage",
+  "wage_advance",
+]);
 
 /**
  * Enrich category codes that are sensitive. Enrich taxonomy 1.4 has one: `healthcare`, which
@@ -62,14 +80,19 @@ const isHealthMcc = (mcc: string | undefined) =>
  */
 export function isHealth(t: Tx, categories?: Readonly<Record<string, string>>): boolean {
   const category = categories?.[t.transactionId];
+  if (category !== undefined && LIABILITY_CATEGORIES.has(category)) return false;
   if (category !== undefined && SENSITIVE_CATEGORIES.has(category))
     return HEALTH_CATEGORIES.has(category);
   return isHealthMcc(t.merchantCategoryCode);
 }
 
-/** True when GR-3 excludes the transaction: by its Enrich category, or by its MCC. */
+/**
+ * True when GR-3 excludes the transaction: by its Enrich category, or by its MCC. A liability
+ * repayment is never excluded (1.1.0).
+ */
 export function isSensitive(t: Tx, categories?: Readonly<Record<string, string>>): boolean {
   const category = categories?.[t.transactionId];
+  if (category !== undefined && LIABILITY_CATEGORIES.has(category)) return false;
   if (category !== undefined && SENSITIVE_CATEGORIES.has(category)) return true;
   return t.merchantCategoryCode !== undefined && t.merchantCategoryCode in SENSITIVE_MCCS;
 }

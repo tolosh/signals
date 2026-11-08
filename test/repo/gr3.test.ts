@@ -333,9 +333,16 @@ describe("GR-3 over-exclusion: liability repayments are never sensitive", () => 
         categories: x.categories,
         application: { declared_liabilities: [] },
       });
+    // Every signal and liability as without the MCC. Only the evidence block's field-population
+    // share differs, because the MCC is one more populated field.
+    const read = (r: ReturnType<typeof run>) =>
+      canon({
+        signals: r.signals.map(({ id, state, value, reason }) => ({ id, state, value, reason })),
+        liabilities: r.liabilities,
+      });
     const plain = run(repayments());
     expect(plain.signals.find((s) => s.id === "LIA-03")?.state).toBe("red");
-    expect(canon(run(repayments("8021")))).toBe(canon(plain));
+    expect(read(run(repayments("8021")))).toBe(read(plain));
   });
   it("observed living expenses don't count them as health", () => {
     expect(canon(expensesOf(repayments("8021")))).toBe(canon(expensesOf(repayments())));

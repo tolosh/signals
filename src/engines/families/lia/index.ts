@@ -4,11 +4,15 @@
 // through the evidence-quality layer (SIG-39), so absence is never proof (EQ-R2). Interpretations
 // L-1 to L-8 are in docs/adr/0006-lia-family.md, ruled 8 November 2026 (SIG-42) with two changes:
 // keywords match whole words only, and three thresholds are candidate workspace defaults (1.1.0).
+// 1.3.0 follows the short re-review at 11e2ef4 (Colin, 8 November 2026, 19:40): a fuzzy match to a
+// declaration is amber "possibly declared", never green; strict matching (exact types, closest
+// amount, one-to-one, duplicates removed); reasons name the lender, not the narrative (D29); LIA
+// reads within the requested lookback (LIA-03 keeps 12 months); text is NFC before keywords.
 // Pure: categories and the application are inputs; no clock, no randomness, relative imports (D3).
-import { applyEvidence, assessEvidence } from "../../evidence/index.js";
+import { applyEvidence, assessEvidence, EQ_THRESHOLDS } from "../../evidence/index.js";
 import { dayOf, isoOf } from "../../evidence/dates.js";
 import type { FeedTransaction, RawSignal, Signal } from "../../evidence/index.js";
-import { withoutSensitive } from "../../sensitive.js";
+import { SENSITIVE_METHOD_VERSION, withoutSensitive } from "../../sensitive.js";
 import type { FeedType } from "../../signals/definitions.js";
 import {
   detectLiabilities,
@@ -18,7 +22,7 @@ import {
   type DetectedLiability,
 } from "../../liabilities/index.js";
 
-export const LIA_VERSION = "1.2.0";
+export const LIA_VERSION = "1.3.0";
 
 /** A shared-account feed with the fields both the evidence layer and the detector read. */
 export type LiaFeed = {
@@ -119,6 +123,8 @@ export type LiaInput = {
 };
 export type LiaResult = {
   version: string;
+  /** The GR-3 gate applied to the feed (SENSITIVE_METHOD_VERSION). */
+  gr3_gate_version: string;
   detector: { method_version: string; min_occurrences: number; amount_tolerance: number };
   signals: Signal[];
   liabilities: DetectedLiability[];
@@ -131,24 +137,28 @@ type Line = {
   amount: number;
   t: LiaFeed["accounts"][number]["transactions"][number];
 };
-/** Declared liability types, by detector family (the detector's own mapping, SIG-18 1.0.0). */
-const DECLARED_FAMILY: Readonly<Record<string, DetectedLiability["family"]>> = Object.freeze({
-  credit_card: "credit_card",
-  car_loan: "loan",
-  personal_loan: "loan",
-  loan: "loan",
-  bnpl: "bnpl",
-  sacc: "sacc",
-  wage_advance: "wage_advance",
-});
+/**
+ * The exact type of a liability found (re-review ruling 2: car, personal, card, BNPL, SACC,
+ * mortgage and so on are all different types). The detector's "loan" family is split by what the
+ * data says: the loan account's product name, or the repayments' narratives. A loan the data
+ * doesn't type stays "loan", which matches only a declaration typed "loan".
+ */
+const LOAN_TYPES: readonly [string, RegExp][] = [
+  ["car_loan", /\b(CAR|AUTO|VEHICLE|MOTOR)\b/],
+  ["personal_loan", /\bPERSONAL\b/],
+  ["mortgage", /\b(MORTGAGE|HOME LOAN)\b/],
+];
 export const LIA06_PARKED = "Private-loan detection is not yet supported on categorised data";
 const BSB_NUMBER = /\b\d{3}-?\d{3}\s+\d{6,10}\b/;
+/** Text for keyword matching: NFC first, so a combining accent joins its letter (1.3.0). */
+const upper = (text: string) => text.normalize("NFC").toUpperCase();
 // Keywords match whole words only, case-insensitively (the text is upper-cased first), so OWEN,
 // LOANS4U and BIOU don't match (SIG-42 ruling 1). A word is a run of Unicode letters and digits:
 // an underscore or punctuation separates words, and an accented letter is a letter, so LOAN_REPAY
-// matches and JOSÉLOAN doesn't (review ruling 4). The tests in test/families/lia/ pin each case.
+// matches and JOSÉLOAN doesn't (review ruling 4). A combining mark counts as part of its letter
+// too, after NFC (1.3.0). The tests in test/families/lia/ pin each case.
 const keywords = (...words: string[]) =>
-  new RegExp(`(?<![\\p{L}\\p{N}])(${words.join("|")})(?![\\p{L}\\p{N}])`, "u");
+  new RegExp(`(?<![\\p{L}\\p{M}\\p{N}])(${words.join("|")})(?![\\p{L}\\p{M}\\p{N}])`, "u");
 const DISBURSEMENT = keywords("LOAN", "DISBURSEMENT", "DRAWDOWN");
 const PRIVATE_REPAYMENT = keywords("LOAN", "REPAY", "REPAYMENT", "OWED", "OWE", "IOU");
 const EXTRA_WORDS = new Set([
@@ -165,6 +175,13 @@ const providerOf = (text: string) =>
     .split(" ")
     .filter((w) => w && !EXTRA_WORDS.has(w))
     .join(" ");
+/**
+ * D29 (re-review direction 6): text names the lender, never the narrative. A BNPL narrative names
+ * the lender and then the merchant ("HUMM SMILE DENTAL"), so a BNPL is named by its first word.
+ * Other lenders' narratives name only the lender; digits and references are already gone.
+ */
+const lenderOf = (family: DetectedLiability["family"] | "bnpl", provider: string) =>
+  family === "bnpl" ? (provider.split(" ")[0] ?? provider) : provider;
 const sum = (xs: number[]) => xs.reduce((s, x) => s + x, 0);
 const round2 = (x: number) => Math.round(x * 100) / 100;
 const median = (xs: number[]) => {
@@ -225,7 +242,9 @@ export function assessLia(input: LiaInput): LiaResult {
   });
   const end = dayOf(input.as_of);
   const windowStart = dayOf(ctx.window.start);
-  const lines: Line[] = feed.accounts
+  const inWindow = (l: { day: number }) => l.day >= windowStart;
+  // Every line up to the as-of date; LIA-03 reads 12 months of these, the rest only the window.
+  const allLines: Line[] = feed.accounts
     .filter(
       (a) =>
         (a.account.productCategory ?? "TRANS_AND_SAVINGS_ACCOUNTS") ===
@@ -241,15 +260,27 @@ export function assessLia(input: LiaInput): LiaResult {
       })),
     )
     .filter((l) => Number.isFinite(l.day) && l.day <= end && !BSB_NUMBER.test(l.t.description));
+  // 1.3.0 (re-review direction 7): LIA reads within the requested lookback.
+  const lines = allLines.filter(inWindow);
   const cat = (l: Line) => input.categories[l.id] ?? "";
-  const inWindow = (l: Line) => l.day >= windowStart;
+  const lineDay = (t: { postingDateTime?: string; valueDateTime?: string }) =>
+    dayOf(t.postingDateTime ?? t.valueDateTime ?? "");
+  const windowFeed = {
+    ...feed,
+    accounts: feed.accounts.map((a) => ({
+      ...a,
+      transactions: a.transactions.filter((t) => lineDay(t) >= windowStart),
+    })),
+  };
 
-  // LIA-01 Undisclosed liabilities (L-1): SIG-18's detector, unchanged; then the declaration
-  // fallback (review ruling 1). A liability the detector couldn't match by name is "possibly
-  // declared: review" when a declaration of the same type, not already matched, has a repayment
-  // within declared_amount_tolerance of it; one declaration matches one liability.
+  // LIA-01 Undisclosed liabilities (L-1): SIG-18's detector, unchanged, on the window; then the
+  // declaration fallback, strict from 1.3.0 (re-review ruling). A liability the detector couldn't
+  // match by name is "possibly declared" when a declaration of exactly its type, not already
+  // matched, has a repayment within declared_amount_tolerance of it. Duplicate declarations are
+  // removed first; pairs are made closest amount first, one-to-one. A possible match is amber with
+  // review: only an exact name (or, after SIG-57, an alias-table name) is green.
   const detected = detectLiabilities({
-    feed,
+    feed: windowFeed,
     categories: input.categories,
     declared: input.application.declared_liabilities,
     as_of: input.as_of,
@@ -257,57 +288,91 @@ export function assessLia(input: LiaInput): LiaResult {
     amount_tolerance: cfg.amount_tolerance,
   });
   const caveat =
-    "Detection rests on lender names in the narratives (tested on synthetic, template-written data only). It matches the application by provider name, or by type and repayment amount when the names differ; check each item against the application";
-  const declaredList = input.application.declared_liabilities.map((d, i) => ({
-    i,
-    d,
-    family: DECLARED_FAMILY[d.type],
-    name: normaliseProvider(d.provider),
-  }));
+    "Detection rests on lender names in the narratives (tested on synthetic, template-written data only). Only an exact provider name counts as declared; a liability of a declared type and repayment under another name is possibly declared, to confirm with the applicant";
+  const byId = new Map(allLines.map((l) => [l.id, l]));
+  const productNames = new Map(
+    feed.accounts.map((a) => [a.account.accountId, a.account.productName ?? ""]),
+  );
+  const typeOf = (d: DetectedLiability): string => {
+    if (d.family !== "loan") return d.family;
+    const text = upper(
+      [
+        ...d.account_ids.map((id) => productNames.get(id) ?? ""),
+        ...d.evidence.map((id) => byId.get(id)?.t.description ?? ""),
+      ].join(" "),
+    );
+    const types = LOAN_TYPES.filter(([, re]) => re.test(text)).map(([type]) => type);
+    return types.length === 1 ? (types[0] as string) : "loan";
+  };
+  const seen = new Set<string>();
+  const declaredList = input.application.declared_liabilities.flatMap((d, i) => {
+    const name = normaliseProvider(d.provider);
+    const key = `${d.type}|${name}|${d.repayment_monthly ?? ""}`;
+    if (seen.has(key)) return [];
+    seen.add(key);
+    return [{ i, d, name }];
+  });
+  const DECLARED_FAMILY: Readonly<Record<string, DetectedLiability["family"]>> = {
+    credit_card: "credit_card",
+    car_loan: "loan",
+    personal_loan: "loan",
+    loan: "loan",
+    bnpl: "bnpl",
+    sacc: "sacc",
+    wage_advance: "wage_advance",
+  };
   const used = new Set<number>();
   for (const l of detected.liabilities.filter((x) => x.declared)) {
     const exact = declaredList.find(
-      (x) => !used.has(x.i) && x.family === l.family && x.name === l.provider,
+      (x) => !used.has(x.i) && DECLARED_FAMILY[x.d.type] === l.family && x.name === l.provider,
     );
     if (exact) used.add(exact.i);
   }
-  const possibly: { liability: DetectedLiability; declared: DeclaredLiability }[] = [];
-  const undisclosed: DetectedLiability[] = [];
-  for (const l of detected.undisclosed) {
-    const monthly = l.monthly;
-    const candidates =
-      monthly === null
-        ? []
-        : declaredList
-            .filter(
-              (x) =>
-                !used.has(x.i) &&
-                x.family === l.family &&
-                x.d.repayment_monthly !== undefined &&
-                x.d.repayment_monthly > 0 &&
-                Math.abs(monthly - x.d.repayment_monthly) <=
-                  cfg.declared_amount_tolerance * x.d.repayment_monthly + 1e-9,
-            )
-            .sort(
-              (a, b) =>
-                Math.abs(monthly - (a.d.repayment_monthly ?? 0)) -
-                  Math.abs(monthly - (b.d.repayment_monthly ?? 0)) || a.i - b.i,
-            );
-    const match = candidates[0];
-    if (match) {
-      used.add(match.i);
-      possibly.push({ liability: l, declared: match.d });
-    } else undisclosed.push(l);
-  }
-  const byId = new Map(lines.map((l) => [l.id, l]));
+  const keyOf = (d: DetectedLiability) => `${d.family}|${d.provider}`;
+  const pairs = detected.undisclosed.flatMap((l) =>
+    l.monthly === null
+      ? []
+      : declaredList
+          .filter(
+            (x) =>
+              !used.has(x.i) &&
+              x.d.type === typeOf(l) &&
+              x.d.repayment_monthly !== undefined &&
+              x.d.repayment_monthly > 0 &&
+              Math.abs((l.monthly as number) - x.d.repayment_monthly) <=
+                cfg.declared_amount_tolerance * x.d.repayment_monthly + 1e-9,
+          )
+          .map((x) => ({
+            l,
+            x,
+            diff: Math.abs((l.monthly as number) - (x.d.repayment_monthly as number)),
+          })),
+  );
+  pairs.sort(
+    (a, b) =>
+      a.diff - b.diff ||
+      (keyOf(a.l) < keyOf(b.l) ? -1 : keyOf(a.l) > keyOf(b.l) ? 1 : 0) ||
+      a.x.i - b.x.i,
+  );
+  const matched = new Map<DetectedLiability, DeclaredLiability>();
+  for (const { l, x } of pairs)
+    if (!matched.has(l) && !used.has(x.i)) {
+      matched.set(l, x.d);
+      used.add(x.i);
+    }
+  const possibly = detected.undisclosed
+    .filter((l) => matched.has(l))
+    .map((l) => ({ liability: l, declared: matched.get(l) as DeclaredLiability }));
+  const undisclosed = detected.undisclosed.filter((l) => !matched.has(l));
   const linesOf = (ls: DetectedLiability[]) =>
     ls.flatMap((d) => d.evidence.map((e) => byId.get(e)).filter((x): x is Line => x !== undefined));
-  const kind = (d: DetectedLiability) => d.family.replace("_", " ");
+  const kind = (d: DetectedLiability) => typeOf(d).replace("_", " ");
+  const nameOf = (d: DetectedLiability) => lenderOf(d.family, d.provider);
   const describe = (d: DetectedLiability) =>
-    `${d.provider} (${kind(d)}${d.monthly ? `, $${d.monthly} a month` : ""})`;
+    `${nameOf(d)} (${kind(d)}${d.monthly ? `, $${d.monthly} a month` : ""})`;
   const possiblyText = possibly.map(
     (p) =>
-      `${describe(p.liability)} may be the declared "${p.declared.provider}" ${p.declared.type.replace("_", " ")} ($${p.declared.repayment_monthly} a month): the names differ, the type matches and the repayment is within ${Math.round(cfg.declared_amount_tolerance * 100)}%, so it is possibly declared: review`,
+      `${describe(p.liability)}. Possibly the declared ${p.declared.provider.trim()} ($${p.declared.repayment_monthly} a month): confirm with the applicant`,
   );
   const counts = [
     ...(undisclosed.length > 0 ? [`${undisclosed.length} undisclosed`] : []),
@@ -336,7 +401,7 @@ export function assessLia(input: LiaInput): LiaResult {
           )
         : raw(
             "LIA-01",
-            undisclosed.length > 0 ? "amber" : "green",
+            "amber",
             counts,
             [
               ...(undisclosed.length > 0
@@ -350,15 +415,15 @@ export function assessLia(input: LiaInput): LiaResult {
               review_reason:
                 undisclosed.length > 0
                   ? "A liability in the shared data is missing from the application"
-                  : "A liability in the shared data may match a declared one under a different name",
+                  : "A liability in the shared data may be a declared one under another name: confirm with the applicant",
               resolve_with: [
                 ...undisclosed.map(
                   (d) =>
-                    `The applicant's confirmation of the ${d.provider} ${kind(d)}, added to the application`,
+                    `The applicant's confirmation of the ${nameOf(d)} ${kind(d)}, added to the application`,
                 ),
                 ...possibly.map(
                   (p) =>
-                    `Confirm whether ${p.liability.provider} is the declared "${p.declared.provider}" ${p.declared.type.replace("_", " ")}`,
+                    `The applicant's confirmation that ${nameOf(p.liability)} is the declared ${p.declared.provider.trim()}`,
                 ),
               ],
             },
@@ -372,9 +437,8 @@ export function assessLia(input: LiaInput): LiaResult {
   );
   const disbursements = lines.filter(
     (l) =>
-      inWindow(l) &&
       l.amount > 0 &&
-      (DISBURSEMENT.test(`${l.t.description} ${l.t.reference ?? ""}`.toUpperCase()) ||
+      (DISBURSEMENT.test(upper(`${l.t.description} ${l.t.reference ?? ""}`)) ||
         lenderProviders.has(providerOf(l.t.description))),
   );
   const recent = disbursements.filter((l) => l.day > end - cfg.stacking_window_days);
@@ -396,7 +460,7 @@ export function assessLia(input: LiaInput): LiaResult {
 
   // LIA-03 Payday and SACC (L-3): repayments categorised sacc_loan, over 12 months.
   const saccStart = Math.min(windowStart, end - Math.round(cfg.sacc_lookback_months * 30.4375));
-  const sacc = lines.filter((l) => l.day >= saccStart && l.amount < 0 && cat(l) === "sacc_loan");
+  const sacc = allLines.filter((l) => l.day >= saccStart && l.amount < 0 && cat(l) === "sacc_loan");
   const saccBy = new Map<string, Line[]>();
   for (const l of sacc)
     saccBy.set(providerOf(l.t.description), [
@@ -432,11 +496,9 @@ export function assessLia(input: LiaInput): LiaResult {
       .map((l) => providerOf(l.t.description)),
   );
   const advances = lines.filter(
-    (l) => inWindow(l) && l.amount > 0 && advanceProviders.has(providerOf(l.t.description)),
+    (l) => l.amount > 0 && advanceProviders.has(providerOf(l.t.description)),
   );
-  const advanceRepayments = lines.filter(
-    (l) => inWindow(l) && l.amount < 0 && cat(l) === "wage_advance",
-  );
+  const advanceRepayments = lines.filter((l) => l.amount < 0 && cat(l) === "wage_advance");
   const last90 = advances
     .filter((l) => l.day > end - 90)
     .map((l) => l.day)
@@ -458,32 +520,31 @@ export function assessLia(input: LiaInput): LiaResult {
           [...advances, ...advanceRepayments],
         );
 
-  // LIA-05 BNPL (L-5): distinct providers and monthly outflow.
-  const bnpl = lines.filter((l) => inWindow(l) && l.amount < 0 && cat(l) === "bnpl");
-  const bnplProviders = new Set(bnpl.map((l) => providerOf(l.t.description)));
+  // LIA-05 BNPL (L-5): distinct lenders and monthly outflow, within the requested lookback.
+  const bnpl = lines.filter((l) => l.amount < 0 && cat(l) === "bnpl");
+  const bnplLender = (l: Line) => lenderOf("bnpl", providerOf(l.t.description));
+  const bnplProviders = new Set(bnpl.map(bnplLender));
   const outflow = (from: number, to: number) =>
-    -sum(
-      lines
-        .filter((l) => l.amount < 0 && cat(l) === "bnpl" && l.day > from && l.day <= to)
-        .map((l) => l.amount),
-    );
+    -sum(bnpl.filter((l) => l.day > from && l.day <= to).map((l) => l.amount));
   const nowOut = outflow(end - 90, end);
   const priorOut = outflow(end - 180, end - 90);
-  // Rising compares two 90-day windows, so it is judged only when the shared history covers both:
-  // otherwise the first days of a short history read as a low prior window.
+  // Rising compares two 90-day windows, so it is judged only when both lie inside the requested
+  // lookback, and the shared history inside it covers the earlier window as EQ-03 judges cover
+  // (window_pass, 90%). From 1.3.0 a line outside the lookback no longer counts as history.
   const dataStart = lines.reduce((m, l) => Math.min(m, l.day), Infinity);
-  const rising =
-    dataStart <= end - 180 && priorOut > 0 && nowOut > priorOut * (1 + cfg.bnpl_rising);
+  const priorCovered =
+    windowStart <= end - 180 && dataStart <= end - 90 - Math.ceil(90 * EQ_THRESHOLDS.window_pass);
+  const rising = priorCovered && priorOut > 0 && nowOut > priorOut * (1 + cfg.bnpl_rising);
   // One monthly figure for a BNPL in LIA-01 and LIA-05 (review ruling 5): the detector's
-  // cadence-based monthly where the provider's repayments recur, otherwise its last 90 days / 3.
+  // cadence-based monthly where the lender's repayments recur, otherwise its last 90 days / 3.
   const bnplMonthly = round2(
     sum(
       [...bnplProviders].map((p) => {
-        const ids = new Set(bnpl.filter((l) => providerOf(l.t.description) === p).map((l) => l.id));
-        const recurring = detected.liabilities.find(
+        const ids = new Set(bnpl.filter((l) => bnplLender(l) === p).map((l) => l.id));
+        const recurring = detected.liabilities.filter(
           (d) => d.family === "bnpl" && d.monthly !== null && d.evidence.some((e) => ids.has(e)),
         );
-        if (recurring?.monthly) return recurring.monthly;
+        if (recurring.length > 0) return sum(recurring.map((d) => d.monthly as number));
         return -sum(bnpl.filter((l) => ids.has(l.id) && l.day > end - 90).map((l) => l.amount)) / 3;
       }),
     ),
@@ -507,11 +568,10 @@ export function assessLia(input: LiaInput): LiaResult {
   // LIA-06 Private loans (L-6): repeat transfers to an individual with a repayment reference.
   const privateLines = lines.filter(
     (l) =>
-      inWindow(l) &&
       l.amount < 0 &&
       !cat(l) &&
       /^TRANSFER/.test(l.t.type) &&
-      PRIVATE_REPAYMENT.test(`${l.t.description} ${l.t.reference ?? ""}`.toUpperCase()),
+      PRIVATE_REPAYMENT.test(upper(`${l.t.description} ${l.t.reference ?? ""}`)),
   );
   const privateBy = new Map<string, Line[]>();
   for (const l of privateLines)
@@ -554,12 +614,16 @@ export function assessLia(input: LiaInput): LiaResult {
 
   return {
     version: LIA_VERSION,
+    gr3_gate_version: SENSITIVE_METHOD_VERSION,
     detector: {
       method_version: LIABILITY_METHOD_VERSION,
       min_occurrences: cfg.min_occurrences,
       amount_tolerance: cfg.amount_tolerance,
     },
     signals: applyEvidence([lia01, lia02, lia03, lia04, lia05, lia06], ctx),
-    liabilities: detected.liabilities,
+    // D29: a BNPL is named by its lender here too, never by the merchant in its narrative.
+    liabilities: detected.liabilities.map((d) =>
+      d.family === "bnpl" ? { ...d, provider: lenderOf(d.family, d.provider) } : d,
+    ),
   };
 }

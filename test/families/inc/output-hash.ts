@@ -15,6 +15,17 @@ import {
 
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
 
+/**
+ * INC 1.2.2 (SIG-42 re-review direction 8) changed only its version and added the GR-3 gate's
+ * version; both are set back to 1.2.1's form here, so the hashes below still prove every other
+ * byte of the output is unchanged.
+ */
+const as121 = (r: ReturnType<typeof assessInc>) => {
+  const rest: Partial<typeof r> = { ...r };
+  delete rest.gr3_gate_version;
+  return { ...rest, version: "1.2.1" };
+};
+
 /** One sha256 over the INC result of every set v1 applicant, one JSON line each. */
 export function setV1Hash(lookback: "history" | 6): string {
   const { seed } = JSON.parse(
@@ -29,9 +40,9 @@ export function setV1Hash(lookback: "history" | 6): string {
       as_of: AS_OF_DATE,
       lookback_months: lookback === 6 ? 6 : Math.max(3, a.truth.history.months),
     });
-    hash.update(JSON.stringify(r)).update("\n");
+    hash.update(JSON.stringify(as121(r))).update("\n");
   }
   return hash.digest("hex");
 }
 
-export const asmIncomeHash = () => sha(JSON.stringify(incResult()));
+export const asmIncomeHash = () => sha(JSON.stringify(as121(incResult())));
