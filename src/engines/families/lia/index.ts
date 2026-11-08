@@ -144,9 +144,13 @@ const DECLARED_FAMILY: Readonly<Record<string, DetectedLiability["family"]>> = O
 export const LIA06_PARKED = "Private-loan detection is not yet supported on categorised data";
 const BSB_NUMBER = /\b\d{3}-?\d{3}\s+\d{6,10}\b/;
 // Keywords match whole words only, case-insensitively (the text is upper-cased first), so OWEN,
-// LOANS4U and BIOU don't match (SIG-42 ruling 1). test/families/lia/rulings.test.ts pins each.
-const DISBURSEMENT = /\b(LOAN|DISBURSEMENT|DRAWDOWN)\b/;
-const PRIVATE_REPAYMENT = /\b(LOAN|REPAY|REPAYMENT|OWED|OWE|IOU)\b/;
+// LOANS4U and BIOU don't match (SIG-42 ruling 1). A word is a run of Unicode letters and digits:
+// an underscore or punctuation separates words, and an accented letter is a letter, so LOAN_REPAY
+// matches and JOSÉLOAN doesn't (review ruling 4). The tests in test/families/lia/ pin each case.
+const keywords = (...words: string[]) =>
+  new RegExp(`(?<![\\p{L}\\p{N}])(${words.join("|")})(?![\\p{L}\\p{N}])`, "u");
+const DISBURSEMENT = keywords("LOAN", "DISBURSEMENT", "DRAWDOWN");
+const PRIVATE_REPAYMENT = keywords("LOAN", "REPAY", "REPAYMENT", "OWED", "OWE", "IOU");
 const EXTRA_WORDS = new Set([
   "DISBURSEMENT",
   "DRAWDOWN",
@@ -370,7 +374,7 @@ export function assessLia(input: LiaInput): LiaResult {
     (l) =>
       inWindow(l) &&
       l.amount > 0 &&
-      (DISBURSEMENT.test(l.t.description.toUpperCase()) ||
+      (DISBURSEMENT.test(`${l.t.description} ${l.t.reference ?? ""}`.toUpperCase()) ||
         lenderProviders.has(providerOf(l.t.description))),
   );
   const recent = disbursements.filter((l) => l.day > end - cfg.stacking_window_days);
