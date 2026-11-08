@@ -23,16 +23,22 @@ export const EQ_THRESHOLDS = Object.freeze({
   /** EQ-R4 (E-4): a signal's history is met at 90% of its stated months, as for EQ-03. */
   history_tolerance: 0.9,
   /**
-   * EQ-03 gaps (SIG-55, E-10, candidates for ruling): a silence between active days is a gap
-   * when it is longer than this many days and more than this multiple of each adjacent silence,
-   * so a change of cadence (fortnightly to monthly pay) is not read as missing data.
+   * EQ-03 gaps (SIG-55, E-10, ruled 8 November 2026; all three are candidates): a silence between
+   * active days is a gap when it is longer than gap_min_days and more than gap_rhythm_multiple
+   * times each adjacent silence, so a change of cadence (fortnightly to monthly pay) is not read
+   * as missing data; and, from method 3, any silence longer than gap_ceiling_days is a gap
+   * whatever its neighbours, so two long holes side by side are both found.
    */
   gap_min_days: 21,
   gap_rhythm_multiple: 1.5,
+  gap_ceiling_days: 60,
 });
 
-/** The EQ method version (EQ-R6). Version 2 (SIG-55) measures EQ-03 by the days covered. */
-export const EQ_METHOD_VERSION = 2;
+/**
+ * The EQ method version (EQ-R6). Version 2 (SIG-55) measures EQ-03 by the days covered; version 3
+ * (SIG-55 ruling, E-10) adds the 60-day ceiling.
+ */
+export const EQ_METHOD_VERSION = 3;
 
 /** "062-000 123456" or "062000 123456": a BSB and account number in a transfer narrative. */
 const BSB_NUMBER = /\b(\d{3})-?(\d{3})\s+(\d{6,10})\b/;
@@ -90,7 +96,8 @@ export function assessEvidence(input: EvidenceInput): EvidenceContext {
   const eqVersion = input.eq_version ?? EQ_METHOD_VERSION;
   // EQ-03 coverage. Version 1 (E-4): from the first transaction in the window to the as-of date.
   // Version 2 (SIG-55): the same, less every silence longer than the gap threshold, measured
-  // across the whole feed (E-9). A silence is judged against its neighbours (E-10).
+  // across the whole feed (E-9). A silence is judged against its neighbours (E-10). Version 3
+  // (E-10 as ruled): a silence over the 60-day ceiling is a gap whatever its neighbours.
   const activeDays = [...new Set(inWindow.map((l) => l.day))].sort((a, b) => a - b);
   // Each silence runs from one active day to the next; the last runs to the as-of date.
   const silences: { from: number; to: number; days: number }[] = activeDays.map((d, i) => {
@@ -103,10 +110,11 @@ export function assessEvidence(input: EvidenceInput): EvidenceContext {
       const neighbours = [silences[i - 1]?.days, silences[i + 1]?.days].filter(
         (n): n is number => n !== undefined,
       );
-      const isGap =
-        sil.to >= sil.from &&
+      const relative =
         sil.days > EQ_THRESHOLDS.gap_min_days &&
         neighbours.every((n) => sil.days > EQ_THRESHOLDS.gap_rhythm_multiple * n);
+      const ceiling = eqVersion >= 3 && sil.days > EQ_THRESHOLDS.gap_ceiling_days;
+      const isGap = sil.to >= sil.from && (relative || ceiling);
       if (isGap) gaps.push({ from: sil.from, to: sil.to });
     });
   const gapDays = gaps.reduce((s, g) => s + (g.to - g.from + 1), 0);
