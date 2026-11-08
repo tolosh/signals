@@ -385,3 +385,20 @@ describe("Ruling 5: one BNPL monthly figure", () => {
     expect(run({}).version).toBe("1.2.0");
   });
 });
+
+// Found while re-running set v1 at a 3-month request (syn-v1-0285): LIA-05's "rising" compared the
+// last 90 days with a prior 90 days the history barely reached, so a few days at the edge read as
+// a rise. Rising is judged only when the shared history covers both windows.
+describe("LIA-05 rising needs history covering both 90-day windows", () => {
+  it("a 3-month history of steady BNPL repayments is not rising (3-month request)", () => {
+    const r = run({ months: 3, lines: bnplLines("ZIP PAY", 60, 7) }, undefined, {}, 3);
+    expect(stateOf(r, "LIA-05")).toBe("green");
+  });
+  it("a 12-month history whose BNPL outflow rose is still red", () => {
+    const lines = [
+      ...repeat(6, 14, { description: "AFTERPAY INSTALMENT", amount: -40, category: "bnpl" }, 100),
+      ...bnplLines("AFTERPAY", 120, 6),
+    ];
+    expect(stateOf(run({ lines }), "LIA-05")).toBe("red");
+  });
+});
