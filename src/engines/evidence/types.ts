@@ -99,6 +99,12 @@ export type RawSignal = {
   unrecognised_adverse: number;
   resolve_with?: string[];
   review_reason?: string | null;
+  /**
+   * An input the signal needs is absent, such as an occupation or a stated salary (EQ-R4; N-13,
+   * moved from the INC family by SIG-41 ruling 4). The layer makes the signal unverified with
+   * this reason and resolve_with, unless an evidence check already caps it (ADR 0002, E-11).
+   */
+  missing_input?: { reason: string; resolve_with: string[] } | null;
 };
 
 export type EvidenceQuality = {

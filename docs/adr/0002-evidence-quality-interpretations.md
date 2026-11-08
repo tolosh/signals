@@ -62,3 +62,18 @@ feed as a 49% window (seen on the INC-13 amber script), so it was not used.
 
 **Set v1 is unchanged:** every EQ-03 result at the 6-month request is the same under methods 1
 and 2, and 138 of 380 are still unverified. Set v1 has no mid-window gaps.
+
+## SIG-41 ruling 4: missing inputs in the layer (EQ-R4), for ruling
+
+N-13 (ADR 0004) moved from the INC family into the layer. An evaluator that lacks an input it
+needs (an occupation, a pay band, a stated salary, the gross-up, the household's earners, a
+regular income stream) sets `missing_input` on its output, and the layer makes the signal
+`unverified` with that reason and `resolve_with`, under EQ-R4 ("the accounts or feed it needs").
+
+| ID   | Question                                     | The engine does (proposed)                                                                                                                                                                                                                                                                                                                                                                     |
+| ---- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| E-11 | A missing input and an evidence cap together | **The evidence cap wins and the missing input adds nothing**: no reason and no `resolve_with`. This is what INC did before the move, so INC's output is byte-identical (the ruling's condition). The cost: an officer asked to share 12 months of history isn't also told the occupation is missing until the history is shared. Merging both is a later change that would alter INC's output. |
+
+The move doesn't change `EQ_METHOD_VERSION`: no existing input changes its result. INC's output is
+byte-identical over set v1 at both SIG-41 lookbacks and over the mock's `asm_income`
+(`test/families/inc/n13-identity.test.ts`, hashes taken at `d2e59a0`).

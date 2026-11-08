@@ -42,6 +42,8 @@ event once is a roll-up question for phase 2 (D13). INC engine 1.2.0.
 4. **N-13.** It stays in the INC family for now. After SIG-39 closes, it moves into the
    evidence-quality layer as part of EQ-R4, in a separate PR, and INC's output must be
    byte-identical before and after.
+   **Done 8 November 2026:** the layer applies it (`missing_input`; ADR 0002, E-11), and INC's
+   output hashes are unchanged over set v1 and `asm_income` (`test/families/inc/n13-identity.test.ts`).
 
 N-1 to N-6, N-8, N-10 to N-12 and N-14 stand as recorded. The caveat on N-2: gig payers are
 recognised only from the synthetic fixtures' list until Enrich keeps its own, so any INC-10 result
