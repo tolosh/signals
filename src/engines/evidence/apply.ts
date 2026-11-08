@@ -58,6 +58,14 @@ function caps(def: SignalDefinition, raw: RawSignal, ctx: EvidenceContext): Cap[
       resolve: eq02.resolve_with,
       review: "Transfers to accounts outside the grant could hide what this signal looks for",
     });
+  // EQ-R4, "the accounts or feed it needs" (N-13, E-11): an input the evaluator needs is absent.
+  // It applies only when no evidence check caps the signal, whose reason and resolve_with stand.
+  if (out.length === 0 && raw.missing_input)
+    out.push({
+      reason: raw.missing_input.reason,
+      resolve: raw.missing_input.resolve_with,
+      review: null,
+    });
   return out;
 }
 

@@ -85,8 +85,8 @@ const BANDS: [string, number, number, number][] = [
 const bandOf = (gap: number) => BANDS.find(([, lo, hi]) => gap >= lo && gap <= hi);
 const gapsOf = (cs: Credit[]) => cs.slice(1).map((c, i) => c.day - (cs[i]?.day ?? c.day));
 
-/** An evaluator's result; `missing` means an input the signal needs is absent (N-13). */
-type Out = { raw: RawSignal; missing?: { reason: string; resolve: string[] } };
+/** An evaluator's result. An absent input is `raw.missing_input`, capped by the layer (N-13). */
+type Out = { raw: RawSignal };
 
 type Ctx = {
   end: number;
@@ -134,10 +134,8 @@ function out(
     },
   };
 }
-const missing = (id: string, reason: string, resolve: string[]): Out => ({
-  ...out(id, "green", null, reason, []),
-  missing: { reason, resolve },
-});
+const missing = (id: string, reason: string, resolve: string[]): Out =>
+  out(id, "green", null, reason, [], { missing_input: { reason, resolve_with: resolve } });
 
 const largest = (xs: TypedStream[]) =>
   [...xs].sort((a, b) => b.monthly - a.monthly || (a.payer < b.payer ? -1 : 1))[0];
@@ -675,25 +673,12 @@ export function assessInc(input: IncInput): IncResult {
     inc09Fires: false,
   };
 
+  // Missing inputs (N-13) are capped by the evidence-quality layer under EQ-R4 (SIG-41 ruling 4).
   const finalise = (outs: Out[]): Signal[] =>
     applyEvidence(
       outs.map((o) => o.raw),
       evidence,
-    ).map((s, i): Signal => {
-      const gap = outs[i]?.missing;
-      if (!gap || s.state === "unverified") return s;
-      return {
-        ...s,
-        state: "unverified",
-        value: null,
-        reason: gap.reason,
-        confidence: "low",
-        evidence_quality: {
-          ...s.evidence_quality,
-          resolve_with: [...new Set([...gap.resolve, ...s.evidence_quality.resolve_with])],
-        },
-      };
-    });
+    );
   // INC-09's final state decides whether INC-12 cross-references it (fix 3, cfa9d4f).
   const inc09State = finalise([inc09(ctx)])[0]?.state;
   ctx.inc09Fires = inc09State === "amber" || inc09State === "red";
