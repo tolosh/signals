@@ -1,8 +1,13 @@
 // Family 3 LIA fixtures for the mock (SIG-42): asm_liabilities carries the six LIA signals,
 // computed by the real engine from a synthetic scripted feed, so the fixture cannot drift from the
-// code. The applicant is salaried and declares one personal loan (repaid on time); an NAB card
-// repaid by BPAY isn't declared (LIA-01 amber), two BNPL providers are in use (LIA-05 amber), and
-// a lender paid out a loan 40 days ago (LIA-02 amber). No real data.
+// code. The applicant is salaried and declares one personal loan, SocietyOne, repaid on time.
+// LIA 1.2.0 output:
+//   LIA-01 amber, 3 undisclosed: an NAB card repaid by BPAY ($180 a month), Afterpay ($130) and
+//     Zip ($97.50), $407.50 a month in all; the assessed surplus isn't read (review ruling 1);
+//   LIA-02 amber: a lender (Plenti) paid out a loan 40 days ago;
+//   LIA-05 amber: two BNPL providers, $227.50 a month, the same figures as in LIA-01;
+//   LIA-03 and LIA-04 none_observed; LIA-06 unverified, parked (review ruling 2).
+// No real data.
 import { dayOf, isoOf } from "../engines/evidence/dates.js";
 import { assessLia, type LiaFeed } from "../engines/families/lia/index.js";
 

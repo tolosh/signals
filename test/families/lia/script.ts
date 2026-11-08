@@ -105,4 +105,6 @@ export function signal(r: LiaResult, id: string) {
   return s;
 }
 export const stateOf = (r: LiaResult, id: string) => signal(r, id).state;
+/** LIA-06 is parked (SIG-42 review ruling 2); its 1.1.0 rules run only behind this flag. */
+export const DETECT_PRIVATE = { private_loans: "detect" } as const;
 export const LIA_IDS = ["LIA-01", "LIA-02", "LIA-03", "LIA-04", "LIA-05", "LIA-06"] as const;

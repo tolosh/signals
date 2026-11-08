@@ -40,9 +40,16 @@ export type EvidenceInput = {
    * The EQ method version to apply (EQ-R6), so an earlier assessment replays unchanged.
    * 1: EQ-03 coverage runs from the first transaction to the as-of date (E-4).
    * 2 (SIG-55): days inside a silence longer than the gap threshold are uncovered.
-   * 3 (default, SIG-55 ruling): as 2, and any silence over 60 days is a gap (E-10).
+   * 3 (SIG-55 ruling): as 2, and any silence over 60 days is a gap (E-10).
+   * 4 (default, SIG-42 review ruling 3): as 3 for the checks; a signal that found something
+   *   amber or red shows below its minimum history (EQ-R4); absence still needs it.
    */
-  eq_version?: 1 | 2 | 3;
+  eq_version?: 1 | 2 | 3 | 4;
+  /**
+   * Enrich category by transaction id, when the caller has it. GR-3: lines in a sensitive
+   * category, or with a sensitive MCC, are removed before any check reads the feed.
+   */
+  categories?: Readonly<Record<string, string>>;
 };
 
 export type CheckResult = "pass" | "partial" | "fail";
@@ -60,7 +67,7 @@ export type EvidenceCheck = {
 export type EvidenceContext = {
   definitions_version: number;
   /** The EQ method version applied (EQ-R6). */
-  eq_version: 1 | 2 | 3;
+  eq_version: 1 | 2 | 3 | 4;
   as_of: string;
   lookback_months: number;
   window: { start: string; end: string };

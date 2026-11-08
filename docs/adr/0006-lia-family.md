@@ -1,8 +1,56 @@
 # ADR 0006: Family 3 LIA, hidden and stacked credit
 
 Status: ruled (Colin, 8 November 2026, on SIG-42). L-1 to L-8 stand as recorded, with the two
-changes below. Where a ruling changes an interpretation, the ruling wins, and the interpretation is
-kept as it was recorded. The engine is at 1.1.0.
+changes below, and the independent review's rulings of the same day (1.2.0, below). Where a ruling
+changes an interpretation, the ruling wins, and the interpretation is kept as it was recorded. The
+engine is at 1.2.0.
+
+## Independent review rulings, 8 November 2026 (LIA 1.2.0)
+
+The review at `516a5af` reproduced the work with four discrepancies (SIG-42, 12:39). The rulings,
+as built:
+
+1. **LIA-01 matching.**
+   - When names differ but the type matches and the detected repayment is within 15% of a
+     declared repayment (`declared_amount_tolerance`, a candidate), the liability is "possibly
+     declared: review", not undisclosed.
+   - One declaration matches one liability, and an exact name match keeps its declaration.
+   - Possibly declared on its own is green with review required. The reason names both names.
+   - **LIA-01 is amber at most**, and the assessed surplus isn't read, until SIG-57 (aliases) is
+     Supported and SIG-58 wires the surplus. That supersedes L-1's red.
+   - SIG-18's detector is unchanged at 1.0.0.
+2. **GR-3 and LIA-06.**
+   - The GR-3 gate and its repo-wide test are in ADR 0007.
+   - **LIA-06 is parked.** It returns `unverified`, "Private-loan detection is not yet supported
+     on categorised data" (as a missing input, so an evidence cap's reason still wins), until
+     Enrich supplies a private-transfer category that excludes sensitive payees (ENR-30).
+   - The 1.1.0 rules and their tests stay behind `private_loans: "detect"`, which a lender's
+     policy can't set.
+3. **Findings show; absence needs history.**
+   - This is EQ method 4, through EQ-R4 (ADR 0002, E-12). A LIA signal that found something,
+     amber or red, shows below its 6-month minimum when the evidence checks allow. Nothing found
+     still needs the minimum.
+   - With E-12 the waiver applies to presence signals only, and INC's output is byte-identical.
+   - Because LIA-05 can now show on a short history, its "rising" is judged only when the
+     history covers both 90-day windows. Without that, a 3-month history read its first days as
+     a low prior window (syn-v1-0285 in set v1).
+4. **Keywords.**
+   - A keyword is whole when no Unicode letter or digit touches it. So an underscore separates
+     words (LOAN_REPAY), and an accented letter is a letter (JOSÉLOAN doesn't match).
+   - LIA-02 reads the reference.
+   - Tests pin LIA-03's 12-month read and L-7: shared transaction and savings accounts only, and
+     no BSB-account lines.
+5. **Housekeeping.**
+   - LIA-05's monthly figure uses LIA-01's method: the detector's cadence-based monthly where
+     repayments recur, otherwise the last 90 days divided by 3.
+   - The mock fixture's header is corrected.
+   - `lia-detect.ts`, `eq-unverified.ts` and `generate-synthetic.ts` use the shared run-record
+     helpers.
+
+Set v1 records at 1.2.0:
+
+- `research/runs/2026-11-08-synthetic-v1-lia-family-v1.2.0.json`, at a 6-month request.
+- `research/runs/2026-11-08-synthetic-v1-lia-family-v1.2.0-request-3.json`, at a 3-month request.
 
 ## Rulings, 8 November 2026
 

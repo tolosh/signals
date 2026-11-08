@@ -6,6 +6,7 @@
 import { applyEvidence, assessEvidence } from "../../evidence/index.js";
 import { dayOf, isoOf, lookbackStart } from "../../evidence/dates.js";
 import type { EvidenceContext, Feed, RawSignal, Signal } from "../../evidence/index.js";
+import { withoutSensitive } from "../../sensitive.js";
 import type { FeedType } from "../../signals/definitions.js";
 import { INC_DEFAULTS, INC_THRESHOLDS as T, type IncConfig } from "./config.js";
 import { SALARY_LIKE, streamsOf, type Credit, type Streams, type TypedStream } from "./streams.js";
@@ -44,6 +45,8 @@ export type IncInput = {
    * on hold (ruling 7 November 2026), so production passes none and INC-02 is unverified (D24).
    */
   gross_up?: ((netMonthly: number) => number) | null;
+  /** Enrich category by transaction id, when known; GR-3 lines are removed first. */
+  categories?: Readonly<Record<string, string>>;
 };
 
 /** The income table, in the contract's AffordabilityTrace.income row shape. */
@@ -651,14 +654,16 @@ const EXCLUSION_STEPS: Record<keyof Streams["excluded"], string> = {
 
 export function assessInc(input: IncInput): IncResult {
   const config: IncConfig = { ...INC_DEFAULTS, ...input.config } as IncConfig;
+  // GR-3: sensitive spending is removed before anything is read.
+  const feed = withoutSensitive(input.feed, input.categories);
   const evidence: EvidenceContext = assessEvidence({
-    feed: input.feed,
+    feed,
     feed_type: input.feed_type,
     as_of: input.as_of,
     ...(input.lookback_months === undefined ? {} : { lookback_months: input.lookback_months }),
   });
-  const found = streamsOf(input.feed, input.as_of, config);
-  const days = input.feed.accounts.flatMap((a) =>
+  const found = streamsOf(feed, input.as_of, config);
+  const days = feed.accounts.flatMap((a) =>
     a.transactions.map((t) => dayOf(t.postingDateTime ?? t.valueDateTime ?? "")),
   );
   const ctx: Ctx = {
@@ -668,7 +673,7 @@ export function assessInc(input: IncInput): IncResult {
     app: input.application ?? {},
     config,
     streams: found.streams,
-    feed: input.feed,
+    feed,
     gross_up: input.gross_up ?? null,
     inc09Fires: false,
   };

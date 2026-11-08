@@ -1,8 +1,12 @@
 // SIG-12: writes synthetic set v1 and its manifest (seed, versions, per-applicant and set hashes).
 // The applicant files are reproducible from the seed and are not committed; the manifest is.
-// Usage: npx tsx scripts/generate-synthetic.ts [--seed 42] [--out research/datasets/synthetic-v1]
+// The seed comes from the committed manifest (research/datasets/synthetic-v1.manifest.json).
+// Usage: npx tsx scripts/generate-synthetic.ts [--out research/datasets/synthetic-v1]
+//        [--allow-dirty]
+// On the shared run-record helpers since the SIG-42 review ruling (8 November 2026). The output
+// folder is cleared first, as before, so each file is new; the manifest records how it was made.
 import { createHash } from "node:crypto";
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import {
   GENERATOR_VERSION,
@@ -12,13 +16,20 @@ import {
   population,
   serialise,
 } from "../src/research/generator/index.js";
+import {
+  gitState,
+  manifestSeed,
+  parseRunArgs,
+  provenance,
+  requireCleanTree,
+  writeNew,
+} from "./lib/run-record.js";
 
-const arg = (name: string, fallback: string) => {
-  const i = process.argv.indexOf(`--${name}`);
-  return i > 0 ? (process.argv[i + 1] ?? fallback) : fallback;
-};
-const seed = Number(arg("seed", "42"));
-const out = arg("out", "research/datasets/synthetic-v1");
+const args = parseRunArgs(process.argv.slice(2), "research/datasets/synthetic-v1");
+const git = gitState();
+requireCleanTree(git.status, args.allowDirty);
+const { seed } = manifestSeed();
+const out = args.out;
 const sha256 = (text: string) => createHash("sha256").update(text).digest("hex");
 
 rmSync(out, { recursive: true, force: true });
@@ -29,7 +40,7 @@ const applicants = population(seed).map((spec) => {
   const generated = generateApplicant(spec, seed);
   const text = serialise(generated);
   set.update(text).update("\n");
-  writeFileSync(join(out, "applicants", `${spec.id}.json`), text);
+  writeNew(join(out, "applicants", `${spec.id}.json`), text);
   return {
     id: spec.id,
     tags: spec.tags,
@@ -53,7 +64,10 @@ const manifest = {
   set_sha256: set.digest("hex"),
   files: applicants,
 };
-writeFileSync(join(out, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+writeNew(
+  join(out, "manifest.json"),
+  `${JSON.stringify({ ...manifest, generated_by: provenance("scripts/generate-synthetic.ts", args, git) }, null, 2)}\n`,
+);
 console.log(
   JSON.stringify({
     out,

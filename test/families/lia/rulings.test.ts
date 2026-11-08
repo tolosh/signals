@@ -11,7 +11,7 @@ import {
   liaConfigFromPolicy,
 } from "../../../src/engines/families/lia/index.js";
 import { loadContract, schemaValidator } from "../../contract/helpers.js";
-import { repeat, run, stateOf, type Line } from "./script.js";
+import { repeat, run, stateOf, type Line, DETECT_PRIVATE } from "./script.js";
 
 /** One credit from a lender the detector hasn't seen, so only the keyword can make it a disbursement. */
 const credit = (description: string): Line[] => [{ ago: 20, description, amount: 2000 }];
@@ -54,27 +54,40 @@ describe("Ruling 1: LIA-06 keywords match whole words only", () => {
   ];
   for (const [keyword, positive, nearMiss] of cases) {
     it(`${keyword}: "${positive}" is a private-loan repayment`, () => {
-      expect(stateOf(run({ lines: transfers(positive) }), "LIA-06")).toBe("amber");
+      expect(
+        stateOf(run({ lines: transfers(positive) }, undefined, DETECT_PRIVATE), "LIA-06"),
+      ).toBe("amber");
     });
     it(`${keyword}: "${nearMiss}" is not`, () => {
-      expect(stateOf(run({ lines: transfers(nearMiss) }), "LIA-06")).toBe("none_observed");
+      expect(
+        stateOf(run({ lines: transfers(nearMiss) }, undefined, DETECT_PRIVATE), "LIA-06"),
+      ).toBe("none_observed");
     });
   }
   it("the reference is read too, case-insensitively", () => {
-    expect(stateOf(run({ lines: transfers("TRANSFER TO J SMITH", "iou") }), "LIA-06")).toBe(
-      "amber",
-    );
-    expect(stateOf(run({ lines: transfers("TRANSFER TO J SMITH", "biou") }), "LIA-06")).toBe(
-      "none_observed",
-    );
+    expect(
+      stateOf(
+        run({ lines: transfers("TRANSFER TO J SMITH", "iou") }, undefined, DETECT_PRIVATE),
+        "LIA-06",
+      ),
+    ).toBe("amber");
+    expect(
+      stateOf(
+        run({ lines: transfers("TRANSFER TO J SMITH", "biou") }, undefined, DETECT_PRIVATE),
+        "LIA-06",
+      ),
+    ).toBe("none_observed");
   });
   it("punctuation separates words; a digit doesn't (ADR 0006 ruling 1)", () => {
-    expect(stateOf(run({ lines: transfers("TRANSFER TO J SMITH LOAN-REPAY") }), "LIA-06")).toBe(
-      "amber",
-    );
-    expect(stateOf(run({ lines: transfers("TRANSFER TO LOAN4U") }), "LIA-06")).toBe(
-      "none_observed",
-    );
+    expect(
+      stateOf(
+        run({ lines: transfers("TRANSFER TO J SMITH LOAN-REPAY") }, undefined, DETECT_PRIVATE),
+        "LIA-06",
+      ),
+    ).toBe("amber");
+    expect(
+      stateOf(run({ lines: transfers("TRANSFER TO LOAN4U") }, undefined, DETECT_PRIVATE), "LIA-06"),
+    ).toBe("none_observed");
   });
 });
 
@@ -125,10 +138,13 @@ describe("Ruling 2: the candidate thresholds are workspace defaults a lender can
 
   it("a lender's lower monthly mean makes LIA-06 red", () => {
     const lines = transfers("TRANSFER TO J SMITH LOAN").map((l) => ({ ...l, amount: -200 }));
-    expect(stateOf(run({ lines }), "LIA-06")).toBe("amber");
+    expect(stateOf(run({ lines }, undefined, DETECT_PRIVATE), "LIA-06")).toBe("amber");
     expect(
       stateOf(
-        run({ lines }, undefined, liaConfigFromPolicy({ private_large_monthly: 100 })),
+        run({ lines }, undefined, {
+          ...DETECT_PRIVATE,
+          ...liaConfigFromPolicy({ private_large_monthly: 100 }),
+        }),
         "LIA-06",
       ),
     ).toBe("red");
@@ -139,10 +155,13 @@ describe("Ruling 2: the candidate thresholds are workspace defaults a lender can
       { ago: 35, description: "TRANSFER TO J SMITH LOAN", amount: -100, type: "TRANSFER_OUTGOING" },
       { ago: 5, description: "TRANSFER TO J SMITH LOAN", amount: -130, type: "TRANSFER_OUTGOING" },
     ];
-    expect(stateOf(run({ lines }), "LIA-06")).toBe("red");
+    expect(stateOf(run({ lines }, undefined, DETECT_PRIVATE), "LIA-06")).toBe("red");
     expect(
       stateOf(
-        run({ lines }, undefined, liaConfigFromPolicy({ private_increasing: 0.5 })),
+        run({ lines }, undefined, {
+          ...DETECT_PRIVATE,
+          ...liaConfigFromPolicy({ private_increasing: 0.5 }),
+        }),
         "LIA-06",
       ),
     ).toBe("amber");
@@ -165,5 +184,5 @@ describe("Ruling 2: the candidate thresholds are workspace defaults a lender can
 });
 
 describe("version", () => {
-  it("is 1.1.0", () => expect(LIA_VERSION).toBe("1.1.0"));
+  it("is 1.2.0", () => expect(LIA_VERSION).toBe("1.2.0"));
 });

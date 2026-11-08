@@ -157,11 +157,11 @@ describe("SIG-55 T5 and EQ-R6: deterministic and versioned", () => {
 
   // Updated by the SIG-55 ruling (8 November 2026): the current method is 3 (the 60-day ceiling,
   // test/engines/evidence/gap-ceiling.test.ts); version 1 still replays.
-  it("the method is version 3 and recorded; version 1 replays the earlier first-transaction rule", () => {
-    expect(EQ_METHOD_VERSION).toBe(3);
+  it("the method is version 4 (SIG-42 ruling 3) and recorded; version 1 replays the earlier first-transaction rule", () => {
+    expect(EQ_METHOD_VERSION).toBe(4);
     const gapped = input(hole(base, "2026-07-01", "2026-07-31"));
     const now = assessEvidence(gapped);
-    expect(now.eq_version).toBe(3);
+    expect(now.eq_version).toBe(4);
     const then = assessEvidence({ ...gapped, eq_version: 1 });
     expect(then.eq_version).toBe(1);
     expect(eq03(then.checks).result).toBe("pass");

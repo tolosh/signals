@@ -3,6 +3,7 @@
 // refunds, loan disbursements, advances, interest and repayments received are never income.
 // The method and its parameters are pre-registered in research/preregistrations/SIG-16.json.
 // Pure: no clock, no randomness, relative imports only (D3).
+import { withoutSensitive } from "../sensitive.js";
 
 export type IncomeTransaction = {
   accountId: string;
@@ -26,6 +27,8 @@ export type IncomeInput = {
   as_of: string;
   lookback_months: number;
   min_occurrences: number;
+  /** Enrich category by transaction id, when known; GR-3 lines are removed first. */
+  categories?: Readonly<Record<string, string>>;
 };
 export type Cadence = "weekly" | "fortnightly" | "monthly";
 export type IncomeStream = {
@@ -106,7 +109,9 @@ type Line = {
 export function deriveIncome(input: IncomeInput): IncomeResult {
   const end = dayOf(input.as_of);
   const start = lookbackStart(input.as_of, input.lookback_months);
-  const lines: Line[] = input.feed.accounts.flatMap((acc) =>
+  // GR-3: sensitive spending is removed before anything is read.
+  const feed = withoutSensitive(input.feed, input.categories);
+  const lines: Line[] = feed.accounts.flatMap((acc) =>
     acc.transactions
       .map((t) => ({
         account: acc.account.accountId,
