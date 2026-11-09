@@ -44,9 +44,10 @@ export function setV1Hash(lookback: "history" | 6): { hash: string; versions: st
       as_of: AS_OF_DATE,
       lookback_months: lookback === 6 ? 6 : Math.max(3, a.truth.history.months),
     });
+    versions.add(`${r.version}|${r.gr3_gate_version}`);
     hash.update(JSON.stringify(as121(r))).update("\n");
   }
-  return hash.digest("hex");
+  return { hash: hash.digest("hex"), versions: [...versions] };
 }
 
 export const asmIncomeHash = () => sha(JSON.stringify(as121(incResult())));
