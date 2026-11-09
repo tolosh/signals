@@ -66,6 +66,8 @@ export type EvidenceCheck = {
 /** Assessment-level evidence, computed once and applied to every signal. */
 export type EvidenceContext = {
   definitions_version: number;
+  /** The GR-3 gate applied to the feed (SENSITIVE_METHOD_VERSION). */
+  gr3_gate_version: string;
   /** The EQ method version applied (EQ-R6). */
   eq_version: 1 | 2 | 3 | 4;
   as_of: string;

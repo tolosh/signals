@@ -11,12 +11,16 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { deriveIncome } from "../../src/engines/affordability/income.js";
-import { deriveObservedExpenses } from "../../src/engines/affordability/observed-expenses.js";
+import { INCOME_METHOD_VERSION, deriveIncome } from "../../src/engines/affordability/income.js";
+import {
+  OBSERVED_EXPENSES_METHOD_VERSION,
+  deriveObservedExpenses,
+} from "../../src/engines/affordability/observed-expenses.js";
 import { dayOf, isoOf } from "../../src/engines/evidence/dates.js";
 import { assessEvidence } from "../../src/engines/evidence/index.js";
-import { assessInc } from "../../src/engines/families/inc/index.js";
-import { assessLia } from "../../src/engines/families/lia/index.js";
+import { INC_VERSION, assessInc } from "../../src/engines/families/inc/index.js";
+import { LIA_VERSION, assessLia } from "../../src/engines/families/lia/index.js";
+import * as gate from "../../src/engines/sensitive.js";
 import {
   SENSITIVE_CATEGORIES,
   SENSITIVE_MCCS,
@@ -128,6 +132,9 @@ const SENSITIVE: Line[] = [
     type: "TRANSFER_OUTGOING",
     reference: "REPAY",
   })),
+  // A loan from a religious organisation (Enrich's category): LIA-02 reads a LOAN credit as a
+  // disbursement, so with the gate off LIA moves (SIG-42 re-review, K1).
+  { ago: 40, description: "ST MARYS PARISH LOAN 22817", amount: 5000, category: "religious" },
   // MCC only: no Enrich category.
   ...monthly(6, 13, { description: "UNITED WORKERS UNION DUES", amount: -48, mcc: "8699" }),
   ...monthly(3, 17, { description: "PARTY DONATION", amount: -250, mcc: "8651" }),
@@ -171,6 +178,14 @@ describe("GR-3 exclusion list", () => {
     ).toHaveLength(base.feed.accounts[0]?.transactions.length ?? -1);
   });
 });
+
+// The same lines with their marks taken off (no category, no MCC): each engine must move, or the
+// byte-identical checks below would pass with the gate off (SIG-42 re-review, K1).
+const unmarked = applicant(
+  SENSITIVE.map(({ category, mcc, ...l }) =>
+    category === undefined && mcc === undefined ? l : { ...l, category: "transfer" },
+  ),
+);
 
 describe("GR-3: every engine entry is blind to sensitive lines", () => {
   const both = <T>(f: (x: typeof base) => T) => [canon(f(base)), canon(f(withSensitive))];
@@ -223,6 +238,114 @@ describe("GR-3: every engine entry is blind to sensitive lines", () => {
       } as Parameters<typeof deriveIncome>[0]),
     );
     expect(b).toBe(a);
+  });
+  // Non-vacuity: unmarked, the same lines move every engine, so a gate made a no-op fails above.
+  const lia = (x: typeof base) =>
+    assessLia({
+      feed: x.feed,
+      feed_type: "cdr",
+      as_of: AS_OF,
+      lookback_months: 6,
+      categories: x.categories,
+      application: { declared_liabilities: [] },
+    });
+  it.each([
+    [
+      "evidence",
+      (x: typeof base) =>
+        assessEvidence({ feed: x.feed, feed_type: "cdr", as_of: AS_OF, lookback_months: 6 }),
+    ],
+    [
+      "INC",
+      (x: typeof base) =>
+        assessInc({
+          feed: x.feed,
+          feed_type: "cdr",
+          as_of: AS_OF,
+          lookback_months: 6,
+          categories: x.categories,
+        } as Parameters<typeof assessInc>[0]),
+    ],
+    ["LIA", lia],
+    [
+      "observed income",
+      (x: typeof base) =>
+        deriveIncome({
+          feed: x.feed,
+          as_of: AS_OF,
+          lookback_months: 6,
+          min_occurrences: 3,
+          categories: x.categories,
+        } as Parameters<typeof deriveIncome>[0]),
+    ],
+  ] as const)("%s: the same lines, unmarked, change the output", (_name, f) => {
+    expect(canon(f(unmarked))).not.toBe(canon(f(base)));
+  });
+  it("LIA in particular: the unmarked parish loan is a disbursement (LIA-02 amber)", () => {
+    expect(lia(unmarked).signals.find((s) => s.id === "LIA-02")?.state).toBe("amber");
+    expect(lia(withSensitive).signals.find((s) => s.id === "LIA-02")?.state).toBe("none_observed");
+  });
+});
+
+// SIG-42 re-review direction 5 (19:40): a liability repayment is never removed as sensitive
+// spending. The gate applies to spending lines; lines Enrich categorises as a loan, card, BNPL,
+// SACC, mortgage or wage-advance repayment stay, whatever their merchant code.
+const LIABILITY_CATEGORIES = [
+  "loan_repayment",
+  "credit_card",
+  "bnpl",
+  "sacc_loan",
+  "mortgage",
+  "wage_advance",
+];
+describe("GR-3 over-exclusion: liability repayments are never sensitive", () => {
+  it.each(LIABILITY_CATEGORIES)("%s with a medical MCC is not removed", (category) => {
+    expect(isSensitive({ transactionId: "a", merchantCategoryCode: "8021" }, { a: category })).toBe(
+      false,
+    );
+  });
+  it("a sensitive category still is: healthcare with no MCC", () => {
+    expect(isSensitive({ transactionId: "a" }, { a: "healthcare" })).toBe(true);
+  });
+  const repayments = (mcc?: string) =>
+    applicant([
+      ...monthly(6, 5, {
+        description: "HUMM SMILE DENTAL 88123",
+        amount: -120,
+        category: "bnpl",
+        ...(mcc ? { mcc } : {}),
+      }),
+      ...Array.from({ length: 6 }, (_, i) => ({
+        ago: 6 + i * 14,
+        description: "CASH CONVERTERS LOAN 7781",
+        amount: -95,
+        category: "sacc_loan",
+        ...(mcc ? { mcc } : {}),
+      })),
+    ]);
+  it("LIA reads a BNPL and a SACC repayment carrying a dental MCC exactly as without it", () => {
+    const run = (x: typeof base) =>
+      assessLia({
+        feed: x.feed,
+        feed_type: "cdr",
+        as_of: AS_OF,
+        lookback_months: 6,
+        categories: x.categories,
+        application: { declared_liabilities: [] },
+      });
+    // Every signal and liability as without the MCC. Only the evidence block's field-population
+    // share differs, because the MCC is one more populated field.
+    const read = (r: ReturnType<typeof run>) =>
+      canon({
+        signals: r.signals.map(({ id, state, value, reason }) => ({ id, state, value, reason })),
+        liabilities: r.liabilities,
+      });
+    const plain = run(repayments());
+    expect(plain.signals.find((s) => s.id === "LIA-03")?.state).toBe("red");
+    expect(read(run(repayments("8021")))).toBe(read(plain));
+  });
+  it("observed living expenses don't count them as health", () => {
+    expect(canon(expensesOf(repayments("8021")))).toBe(canon(expensesOf(repayments())));
   });
 });
 
@@ -330,8 +453,161 @@ describe("D29: no breakdown, trace line or reason names a sensitive category", (
     for (const id of sensitiveIds) expect(text).not.toContain(id);
   });
   it("the check isn't vacuous: the inputs carry every sensitive kind", () => {
+    expect(SENSITIVE.some((l) => l.description.includes("PARISH LOAN"))).toBe(true);
     expect(sensitiveIds.length).toBeGreaterThan(50);
     expect(JSON.stringify(everything)).toMatch(WORDS);
+  });
+});
+
+// SIG-42 re-review direction 6 (D29): reasons and traces name the provider or lender, never the
+// raw narrative. Every narrative here carries more than a name (a reference or a merchant), and
+// none may appear in any engine's output; nor may the merchant behind a BNPL (an unmarked dental
+// practice, which G-2 can't catch).
+describe("D29: no output echoes a raw narrative", () => {
+  const lines: Line[] = [
+    ...monthly(12, 4, { description: "SALARY BETA LOGISTICS REF 0042117", amount: 900 }),
+    ...Array.from({ length: 13 }, (_, i) => ({
+      ago: 5 + i * 14,
+      description: "HUMM SMILE DENTAL 88123",
+      amount: -45,
+      category: "bnpl",
+    })),
+    ...Array.from({ length: 13 }, (_, i) => ({
+      ago: 6 + i * 14,
+      description: "AFTERPAY JB HI-FI 4411",
+      amount: -30,
+      category: "bnpl",
+    })),
+    ...monthly(6, 8, {
+      description: "BPAY CBA CREDIT CARD 4417",
+      amount: -180,
+      category: "transfer",
+    }),
+    ...monthly(6, 9, {
+      description: "SOCIETYONE PERSONAL LOAN 88123",
+      amount: -450,
+      category: "loan_repayment",
+    }),
+    { ago: 30, description: "PLENTI DISBURSEMENT 55121", amount: 5000 },
+    ...Array.from({ length: 6 }, (_, i) => ({
+      ago: 10 + i * 14,
+      description: "CASH CONVERTERS LOAN 7781",
+      amount: -95,
+      category: "sacc_loan",
+    })),
+    ...Array.from({ length: 6 }, (_, i) => ({
+      ago: 12 + i * 14,
+      description: "BEFOREPAY ADVANCE 2231",
+      amount: 200,
+    })),
+    ...Array.from({ length: 6 }, (_, i) => ({
+      ago: 11 + i * 14,
+      description: "BEFOREPAY REPAYMENT 2231",
+      amount: -210,
+      category: "wage_advance",
+    })),
+  ];
+  const x = applicant(lines);
+  const narratives = [
+    ...new Set((x.feed.accounts[0]?.transactions ?? []).map((t) => t.description)),
+  ].filter((d) => /\d/.test(d));
+  const outputs: [string, unknown][] = [
+    ["observed living expenses", expensesOf(x)],
+    [
+      "evidence",
+      assessEvidence({ feed: x.feed, feed_type: "cdr", as_of: AS_OF, lookback_months: 6 }),
+    ],
+    [
+      "INC",
+      assessInc({
+        feed: x.feed,
+        feed_type: "cdr",
+        as_of: AS_OF,
+        lookback_months: 6,
+        categories: x.categories,
+      } as Parameters<typeof assessInc>[0]),
+    ],
+    [
+      "LIA",
+      assessLia({
+        feed: x.feed,
+        feed_type: "cdr",
+        as_of: AS_OF,
+        lookback_months: 6,
+        categories: x.categories,
+        application: { declared_liabilities: [] },
+      }),
+    ],
+    [
+      "observed income",
+      deriveIncome({
+        feed: x.feed,
+        as_of: AS_OF,
+        lookback_months: 6,
+        min_occurrences: 3,
+        categories: x.categories,
+      } as Parameters<typeof deriveIncome>[0]),
+    ],
+  ];
+  it.each(outputs)("%s: no narrative, and no merchant behind a BNPL", (_name, out) => {
+    const text = JSON.stringify(out).toUpperCase();
+    for (const n of narratives) expect(text).not.toContain(n.toUpperCase());
+    expect(text).not.toMatch(/SMILE|DENTAL|JB HI/);
+  });
+  it("the check isn't vacuous: LIA names the lenders", () => {
+    const text = JSON.stringify(outputs.find(([n]) => n === "LIA")?.[1]);
+    for (const lender of ["HUMM", "AFTERPAY", "SOCIETYONE", "CASH CONVERTERS"])
+      expect(text).toContain(lender);
+    expect(narratives.length).toBeGreaterThan(8);
+  });
+});
+
+// SIG-42 re-review direction 8: the gate's version is part of each engine's recorded inputs, and
+// the engines whose output it changed are bumped.
+describe("GR-3 gate version", () => {
+  it("is 1.1.0: liability repayments are no longer removed", () => {
+    expect(gate.SENSITIVE_METHOD_VERSION).toBe("1.1.0");
+  });
+  it("is recorded by every engine that reads the gate", () => {
+    const v = { gr3_gate_version: gate.SENSITIVE_METHOD_VERSION };
+    expect(
+      assessEvidence({ feed: base.feed, feed_type: "cdr", as_of: AS_OF, lookback_months: 6 }),
+    ).toMatchObject(v);
+    expect(
+      assessInc({
+        feed: base.feed,
+        feed_type: "cdr",
+        as_of: AS_OF,
+        lookback_months: 6,
+        categories: base.categories,
+      } as Parameters<typeof assessInc>[0]),
+    ).toMatchObject(v);
+    expect(
+      assessLia({
+        feed: base.feed,
+        feed_type: "cdr",
+        as_of: AS_OF,
+        lookback_months: 6,
+        categories: base.categories,
+        application: { declared_liabilities: [] },
+      }),
+    ).toMatchObject(v);
+    expect(
+      deriveIncome({
+        feed: base.feed,
+        as_of: AS_OF,
+        lookback_months: 6,
+        min_occurrences: 3,
+        categories: base.categories,
+      } as Parameters<typeof deriveIncome>[0]),
+    ).toMatchObject(v);
+    expect(expensesOf(base)).toMatchObject(v);
+  });
+  it("bumps INC to 1.2.2, observed income to 1.0.1, LIA to 1.3.0 and observed expenses to 1.1.1", () => {
+    expect(INC_VERSION).toBe("1.2.2");
+    expect(INCOME_METHOD_VERSION).toBe("1.0.1");
+    expect(LIA_VERSION).toBe("1.3.0");
+    expect(OBSERVED_EXPENSES_METHOD_VERSION).toBe("1.1.1");
   });
 });
 
@@ -350,12 +626,32 @@ describe("GR-3 static scan: modules under src/engines/ that read transactions", 
       const p = join(dir, f);
       return statSync(p).isDirectory() ? files(p) : p.endsWith(".ts") ? [p] : [];
     });
+  // `.transactions`; `["transactions"]` or `?.["transactions"]`; or destructured anywhere: in a
+  // for-of, a declaration or a parameter, `{ transactions }` or `{ transactions: tx }`.
+  const READS =
+    /\.transactions\b|\[\s*["'`]transactions["'`]\s*\]|\{[^{}]*\btransactions\b[^{}]*\}\s*(?:of\b|=(?!>)|:|\)|,)/;
   const readers = files("src/engines")
     .map((p) => p.replace(/\\/g, "/").replace(/^src\//, ""))
-    .filter((p) =>
-      // `.transactions`, or destructured in a for-of: `for (const { transactions } of ...)`.
-      /\.transactions\b|\btransactions\s*\}\s*of\b/.test(readFileSync(`src/${p}`, "utf8")),
-    );
+    .filter((p) => READS.test(readFileSync(`src/${p}`, "utf8")));
+
+  it.each([
+    "for (const a of feed.accounts) use(a.transactions);",
+    'const tx = account["transactions"];',
+    "const tx = account?.['transactions'];",
+    "for (const { transactions } of feed.accounts) use(transactions);",
+    "const { account, transactions } = a;",
+    "const { transactions: tx } = a;",
+    "feed.accounts.map(({ account, transactions }) => transactions.length);",
+    "function f({ transactions }: Acc) { return transactions; }",
+  ])("the scan finds a reader written as: %s", (snippet) => {
+    expect(READS.test(snippet)).toBe(true);
+  });
+  it.each(['const label = "transactions";', "type T = { transactions: Tx[] };", "// transactions"])(
+    "and doesn't flag: %s",
+    (snippet) => {
+      expect(READS.test(snippet)).toBe(false);
+    },
+  );
 
   it("every reader not on the list imports and applies withoutSensitive", () => {
     const ungated = readers.filter((p) => {

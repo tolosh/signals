@@ -192,7 +192,7 @@ describe("8 November ruling: every real trough is amber or red, whatever pays we
 });
 
 describe("8 November ruling: the engine version", () => {
-  it("is 1.2.1 (the cfa9d4f re-review fixes)", () => {
-    expect(INC_VERSION).toBe("1.2.1");
+  it("is 1.2.2 (1.2.1's fixes, with the GR-3 gate versioned: SIG-42 re-review)", () => {
+    expect(INC_VERSION).toBe("1.2.2");
   });
 });

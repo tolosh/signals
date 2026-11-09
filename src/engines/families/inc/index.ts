@@ -6,7 +6,7 @@
 import { applyEvidence, assessEvidence } from "../../evidence/index.js";
 import { dayOf, isoOf, lookbackStart } from "../../evidence/dates.js";
 import type { EvidenceContext, Feed, RawSignal, Signal } from "../../evidence/index.js";
-import { withoutSensitive } from "../../sensitive.js";
+import { SENSITIVE_METHOD_VERSION, withoutSensitive } from "../../sensitive.js";
 import type { FeedType } from "../../signals/definitions.js";
 import { INC_DEFAULTS, INC_THRESHOLDS as T, type IncConfig } from "./config.js";
 import { SALARY_LIKE, streamsOf, type Credit, type Streams, type TypedStream } from "./streams.js";
@@ -20,7 +20,9 @@ export {
   type IncomeSignalsPolicy,
   type StreamType,
 } from "./config.js";
-export const INC_VERSION = "1.2.1";
+// 1.2.2 (SIG-42 re-review direction 8): the GR-3 gate's output change since #40 is versioned, and
+// the gate's version is recorded on the result. Nothing else changed.
+export const INC_VERSION = "1.2.2";
 
 export type IncApplication = {
   /** FR-C9; used only by INC-02 (INC-R3). */
@@ -61,6 +63,8 @@ export type IncomeRow = {
 
 export type IncResult = {
   version: string;
+  /** The GR-3 gate applied to the feed (SENSITIVE_METHOD_VERSION). */
+  gr3_gate_version: string;
   signals: Signal[];
   income: IncomeRow[];
   net_monthly: number;
@@ -703,6 +707,7 @@ export function assessInc(input: IncInput): IncResult {
   const assessed = round(sum(income.map((r) => r.assessed_amount)));
   return {
     version: INC_VERSION,
+    gr3_gate_version: SENSITIVE_METHOD_VERSION,
     signals,
     income,
     net_monthly: found.net_monthly,

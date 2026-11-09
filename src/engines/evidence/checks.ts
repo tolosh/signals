@@ -3,7 +3,7 @@
 // and return pass, partial or fail. Thresholds for EQ-03 are Amendment 2's; the EQ-02
 // "regular and material" test is interpretation E-2, recorded on SIG-39 for ruling.
 import { DEFINITIONS_VERSION } from "../signals/definitions.js";
-import { withoutSensitive } from "../sensitive.js";
+import { SENSITIVE_METHOD_VERSION, withoutSensitive } from "../sensitive.js";
 import { DAYS_PER_MONTH, dayOf, isoOf, lookbackStart } from "./dates.js";
 import type { EvidenceCheck, EvidenceContext, EvidenceInput, FeedTransaction } from "./types.js";
 
@@ -291,6 +291,7 @@ export function assessEvidence(input: EvidenceInput): EvidenceContext {
 
   return {
     definitions_version: DEFINITIONS_VERSION,
+    gr3_gate_version: SENSITIVE_METHOD_VERSION,
     eq_version: eqVersion,
     as_of: isoOf(end),
     lookback_months: lookback,

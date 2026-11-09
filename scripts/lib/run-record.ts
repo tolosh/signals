@@ -4,10 +4,18 @@
 // Seeds come from the manifest (manifestSeed), never from the script.
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, relative, resolve, sep } from "node:path";
+import {
+  assertGuarded,
+  declaresRealSource,
+  mentionsRealSource,
+  type GuardOptions,
+} from "../../src/research/realdata/guard.js";
 
 export const DEFAULT_OUT = "research/runs";
 export const DEFAULT_MANIFEST = "research/datasets/synthetic-v1.manifest.json";
+/** SIG-61: where real-data run records go. Git-ignored; it exists only in the secure environment. */
+export const REALDATA_OUT = "realdata/runs";
 
 export type RunArgs = {
   /** The arguments as given, flags without a value as "true". */
@@ -69,12 +77,54 @@ export function provenance(script: string, args: RunArgs, git: GitState): Proven
   };
 }
 
-/** Writes a new file, creating its folder. An existing file is never overwritten. */
-export function writeNew(path: string, content: string): void {
+function writeFileNew(path: string, content: string): void {
   if (existsSync(path))
     throw new Error(`${path} exists; records are never overwritten. Use --out for a re-run.`);
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, content);
+}
+
+/**
+ * Writes a new file, creating its folder. An existing file is never overwritten. Content that
+ * names a real source (SIG-61) is refused: a real-data record is written with writeRunRecord,
+ * through the T2 guard.
+ */
+export function writeNew(path: string, content: string): void {
+  if (mentionsRealSource(content))
+    throw new Error(
+      "This content names a real data source; real-data records are written with " +
+        "writeRunRecord, through the T2 guard (ADR 0008).",
+    );
+  writeFileNew(path, content);
+}
+
+const underRealdata = (path: string): boolean => {
+  const rel = relative(resolve("realdata"), resolve(path));
+  return rel !== "" && !rel.startsWith("..") && !rel.startsWith(sep) && !/^[A-Za-z]:/.test(rel);
+};
+
+/**
+ * SIG-61: writes a JSON run record. A record that declares a real source (REAL_SOURCES in
+ * src/research/realdata/guard.ts) passes the T2 guard first, and goes under realdata/ only, which
+ * is git-ignored: real-data records never enter the repository. A synthetic record is written as
+ * writeNew writes it.
+ */
+export function writeRunRecord(
+  path: string,
+  record: Record<string, unknown>,
+  options: GuardOptions = {},
+): void {
+  const content = `${JSON.stringify(record, null, 2)}\n`;
+  if (!declaresRealSource(record)) {
+    writeNew(path, content);
+    return;
+  }
+  if (!underRealdata(path))
+    throw new Error(
+      `A real-data record is written under realdata/ only, never into the repository (${REALDATA_OUT}).`,
+    );
+  assertGuarded(record, options);
+  writeFileNew(path, content);
 }
 
 export type Manifest = {

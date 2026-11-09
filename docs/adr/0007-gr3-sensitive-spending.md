@@ -19,6 +19,37 @@ G-2 and G-3 are accepted. The interpretations below are kept as they were record
   ENR-30.
 - **G-3 accepted** as a candidate, versioned with the definitions (`SENSITIVE_METHOD_VERSION`).
 
+## Short re-review direction, 8 November 2026, 19:40 (gate 1.1.0)
+
+The re-review at `11e2ef4` found the GR-3 test couldn't catch an LIA regression, scan gaps, over-
+exclusion, sensitive names in shown text, and unversioned output changes. As built, tests first:
+
+- **An LIA case that fails with the gate off.** A loan from a parish (Enrich's `religious`),
+  which LIA-02 reads as a disbursement when unmarked. A non-vacuity test runs every engine on the
+  same lines with their marks taken off and expects each output to change.
+- **Scan gaps closed.** The static scan also finds `a["transactions"]` (and `?.[...]`) and
+  `transactions` destructured in a for-of, a declaration or a parameter; tests pin each form and
+  three it mustn't flag.
+- **Over-exclusion.** A line Enrich categorises as a loan, card, BNPL, SACC, mortgage or
+  wage-advance repayment (`LIABILITY_CATEGORIES`) is never sensitive, whatever its MCC, so a BNPL
+  repayment for a dental bill stays in LIA and is a debt repayment in observed expenses, not
+  health. Credits are still gated in both directions: GR-3 excludes sensitive lines from every
+  input, and a refund from a pharmacy is one (interpretation, for the re-check).
+- **D29 text.** No engine's output echoes a raw narrative: a test feeds narratives carrying
+  references and a BNPL merchant, and none appears in any output. LIA names a BNPL by its lender
+  (ADR 0006). INC and observed income name a payer by the narrative's words with digits,
+  references and punctuation removed; an unmarked union paying income is still named (G-2).
+- **Versions.** The gate is 1.1.0, and every engine that applies it records `gr3_gate_version`:
+  evidence, INC, LIA, observed income and observed expenses. INC is 1.2.2 and observed income
+  1.0.1: only their version and that field changed (INC's set v1 and `asm_income` hashes match
+  1.2.1 with both set back). Observed expenses is 1.1.1. LIA is 1.3.0.
+
+**Mutation checks at 1.1.0** (`test/repo/gr3.test.ts`, 52 tests): the gate made a no-op, 9 fail;
+the liability exemption removed, 8 fail; a BNPL named by its narrative, 1 fails.
+
+**Corrected count:** with the gate made a no-op at #40, **4** of the 10 tests failed, not 5 as
+recorded below.
+
 ## Context
 
 Product Specification §9.2, GR-3: spending at medical providers, pharmacies, religious
@@ -46,7 +77,7 @@ input, including payees Enrich marks sensitive, with a mutation check.
   - runs a static scan, so that any module under `src/engines/` that reads transactions must
     apply the gate or be on a short list with a reason.
 - **Mutation check:** with the filter made a no-op, 5 of the 10 tests fail (the list check and
-  all four engines).
+  all four engines). _(Corrected by the re-review: 4 of the 10; see above.)_
 - **Set v1 has no sensitive lines** (no `healthcare` category, no sensitive MCC). So every set v1
   output is unchanged, and INC's output hashes over set v1 and `asm_income` are byte-identical.
 

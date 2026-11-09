@@ -14,6 +14,7 @@ import { createHash } from "node:crypto";
 import { join } from "node:path";
 import type { Feed } from "../src/engines/evidence/index.js";
 import { assessInc, INC_VERSION } from "../src/engines/families/inc/index.js";
+import { SENSITIVE_METHOD_VERSION } from "../src/engines/sensitive.js";
 import {
   AS_OF_DATE,
   generateApplicant,
@@ -73,7 +74,12 @@ const record = {
   ticket: "SIG-41",
   ...provenance("scripts/inc-distribution.ts", args, git),
   dataset: { set: manifest.set, seed: manifest.seed, set_sha256: setSha },
-  engine: { name: "inc-family", version: INC_VERSION, commit: git.commit },
+  engine: {
+    name: "inc-family",
+    version: INC_VERSION,
+    gr3_gate_version: SENSITIVE_METHOD_VERSION,
+    commit: git.commit,
+  },
   input: {
     as_of: AS_OF_DATE,
     lookback_months: lookbackArg === "6" ? 6 : "max(3, history months)",

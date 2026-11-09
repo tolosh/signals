@@ -8,7 +8,10 @@
 // one-off, an unmapped key or anything else itemised. Religious, union and political spending,
 // and payees Enrich marks sensitive, are not living expenses and are removed before anything is
 // read (1.1.0; set v1 has no such lines, so SIG-17's records are unchanged).
-import { isHealth, isSensitive } from "../sensitive.js";
+// 1.1.1 (SIG-42 re-review direction 5): on gate 1.1.0 a liability repayment is never health or
+// sensitive, so a BNPL repayment with a dental MCC is a debt repayment again; the gate's version
+// is recorded on the result. Set v1 has no such lines.
+import { SENSITIVE_METHOD_VERSION, isHealth, isSensitive } from "../sensitive.js";
 
 export type ExpenseTransaction = {
   accountId: string;
@@ -34,7 +37,7 @@ export type ObservedExpenseInput = {
 type Group = "committed" | "basic" | "discretionary";
 type Exclusion = "own_account_and_savings" | "debt_repayments" | "other";
 
-export const OBSERVED_EXPENSES_METHOD_VERSION = "1.1.0";
+export const OBSERVED_EXPENSES_METHOD_VERSION = "1.1.1";
 
 const GROUPS: Record<string, Group> = {
   rent: "committed",
@@ -90,6 +93,8 @@ function lookbackStart(asOf: string, months: number): number {
 const round2 = (x: number) => Math.round(x * 100) / 100;
 
 export type ObservedExpenses = {
+  /** The GR-3 gate applied (SENSITIVE_METHOD_VERSION). */
+  gr3_gate_version: string;
   committed_monthly: number;
   basic_monthly: number;
   discretionary_monthly: number;
@@ -163,6 +168,7 @@ export function deriveObservedExpenses(input: ObservedExpenseInput): ObservedExp
   const committed = monthly(totals.committed);
   const basic = monthly(totals.basic);
   return {
+    gr3_gate_version: SENSITIVE_METHOD_VERSION,
     committed_monthly: committed,
     basic_monthly: basic,
     discretionary_monthly: monthly(totals.discretionary),
