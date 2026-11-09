@@ -1,6 +1,6 @@
 # Readiness checklist: team members' own real data (Stage A)
 
-SIG-61, ADR 0008 (as amended 9 November 2026). Colin's ruling (10:50 on 9 November 2026):
+SIG-61, ADR 0008 (as amended and ruled 9 November 2026). Colin's ruling (10:50 on 9 November 2026):
 **team testing starts when every item is built.** Each row says what exists in the repository
 today, with the file evidence, as found on 9 November 2026. The obligations come from SIG-61 and
 the hypothesis page on Confluence; this page doesn't restate them.
@@ -27,26 +27,30 @@ stack (`infra/realdata-stack.ts`) is written and tested and has never been deplo
 
 ## Still needed before the first team member connects
 
-| #   | Item                                                                                       | State         | Who                                     |
-| --- | ------------------------------------------------------------------------------------------ | ------------- | --------------------------------------- |
-| N-1 | Which consent model applies: onward disclosure (openfeed's published terms) or sponsored   | **open**      | Colin, with Biza (SIG-61 comment 40194) |
-| N-2 | The disclosure purpose registered with openfeed names the comparison with declared figures | **open**      | Colin                                   |
-| N-3 | openfeed production app registration: client ID, the client key's public JWK, redirect URI | **open**      | Colin                                   |
-| N-4 | The account to deploy into (ADR 0008 section 1: a separate account preferred)              | **open**      | Colin                                   |
-| N-5 | Deploy the secure environment (`infra/realdata-stack.ts`)                                  | **not built** | Claude Code, on Colin's go-ahead        |
-| N-6 | The truth-capture form (posts to the truth store)                                          | **not built** | Lovable                                 |
-| N-7 | Issue each team member a private invite token                                              | **not built** | Colin; a short script, on go-ahead      |
-| N-8 | Purge on the retention date (30 days after connection, a candidate)                        | **not built** | Claude Code                             |
-| N-9 | Small-cell suppression in the guard (the SIG-16 pre-registration applies its own rule)     | **not built** | Claude Code, if Colin wants it in code  |
+| #    | Item                                                                                                                          | State                                      | Who                                    |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------- |
+| N-1  | The consent model: **ruled 16:32**, openfeed's onward-disclosure terms; no CDR claims (ADR 0008 A9)                           | **done**: guard, sweep test                | Colin (ruled); Claude Code             |
+| N-2  | The disclosure purpose names the comparison with declared figures: text drafted (`DISCLOSURE_PURPOSE` v1)                     | **open**: registering it                   | Colin                                  |
+| N-3  | openfeed production app registration: client ID, the client key's public JWK, redirect URI                                    | **open**                                   | Colin                                  |
+| N-4  | The account: **ruled 16:32**, the existing Signals account, isolated by IAM, KMS and resource policy (ADR 0008 A10)           | **built, not deployed**                    | Claude Code                            |
+| N-5  | Deploy the secure environment (`infra/realdata-stack.ts`), not before N-3                                                     | **not built**                              | Claude Code, on Colin's go-ahead       |
+| N-6  | The truth-capture form (posts to the truth store): [SIG-62](https://moroku.atlassian.net/browse/SIG-62)                       | **not built**                              | Lovable                                |
+| N-6b | The secure environment's endpoint that receives the form, writing only to the truth store                                     | **not built**                              | Claude Code                            |
+| N-7  | Issue each team member a private invite token                                                                                 | **not built**                              | Colin; a short script, on go-ahead     |
+| N-8  | Purge on the retention date (30 days after connection, a candidate)                                                           | **not built**                              | Claude Code                            |
+| N-9  | Small-cell suppression in the guard (the SIG-16 pre-registration applies its own rule)                                        | **not built**                              | Claude Code, if Colin wants it in code |
+| N-10 | APP 5 collection notice at connection: placeholder 0.1 shown before openfeed, version recorded with the consent (`notice.ts`) | **built, not deployed**; wording not final | Legal to finalise                      |
+| N-11 | Legal check of the collection notice and the purpose wording                                                                  | **open**                                   | Colin, with legal                      |
+| N-12 | Moroku's privacy policy covers Signals, including APP 12 and 13 access and correction                                         | **open**                                   | Colin, with legal                      |
 
 ## Out of scope for Stage A
 
 The first version of this checklist had rows for the sponsor disclosures, Moroku's own consumer
 dashboard and separately managed collection, use and disclosure consents. They assumed Moroku runs
-the CDR consent. Under the 10:50 ruling openfeed does, so Signals builds none of them. If Biza
-confirms a sponsored arrangement instead (N-1), they come back.
+the CDR consent. Under the 10:50 ruling openfeed does, and the 16:32 ruling (N-1) confirms Moroku
+is not a sponsored affiliate, so Signals builds none of them.
 
 ## Complete when
 
-Every row in Colin's list is built and deployed, and N-1 to N-8 are done. Today: rows 3 and 8
+Every row in Colin's list is built and deployed, and N-1 to N-8 (with N-6b) and N-10 to N-12 are done. Today: rows 3 and 8
 built and in CI; rows 1, 2, 4, 5 and 7 built, not deployed; row 6 built except its form.

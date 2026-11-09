@@ -3,9 +3,9 @@
 // remains. The receipt holds counts per store, the date and the outcome, never the consumer
 // reference or any personal data, so it can be kept as a run record through the T2 guard.
 //
-// De-identified research data is out of scope: once data is de-identified under a de-identification
-// consent (CDR Rules 1.7, 4.15) it can't be linked back to the person, so it can't be deleted, and
-// the consumer is told so when they consent. That path is pending Colin's consent-route decision.
+// Nothing is ever de-identified or kept for research (ruling N-1, 9 November 2026: openfeed's
+// onward-disclosure terms apply and its flow captures no de-identification consent), so every
+// record a person has is in scope.
 import { assertConsumerRef, STORES, type ConsumerStore, type StoreName } from "./stores.js";
 
 export const RECEIPT_SCHEMA_VERSION = "1.0.0";

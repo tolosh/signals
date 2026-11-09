@@ -25,7 +25,7 @@ Every store the environment holds, one interface (`src/research/realdata/stores.
 
 | Store              | What it holds                                                                   |
 | ------------------ | ------------------------------------------------------------------------------- |
-| `raw_grant_data`   | The grant and the CDR data collected under it                                   |
+| `raw_grant_data`   | The grant and the data received under it through openfeed                       |
 | `derived_features` | Features and engine outputs derived from that data                              |
 | `truth_capture`    | The person's truth-capture declarations (T4)                                    |
 | `run_inputs`       | Run inputs and caches that hold that person's records                           |
@@ -34,10 +34,10 @@ Every store the environment holds, one interface (`src/research/realdata/stores.
 `deleteConsumer` refuses to run unless all five are given. In the secure environment each is
 its own S3 bucket, with versioning off, so a deleted record is gone at once.
 
-**Out of scope by law: de-identified research data.** Data de-identified under a
-de-identification consent (CDR Rules 1.7, 4.15) can't be linked back to the person, so it can't be
-deleted. openfeed's flow captures no de-identification consent (SIG-61 comment 40194), so
-Stage A keeps nothing de-identified: everything is in scope.
+**Everything is in scope.** Nothing is ever de-identified or kept for research: openfeed's flow
+captures no de-identification consent (SIG-61 comment 40194), and ruling N-1 (9 November 2026)
+confirms that openfeed's onward-disclosure terms apply, so the data is held under the Privacy Act
+and destroyed under APP 11.2 once its purpose is served.
 
 ## Steps
 
