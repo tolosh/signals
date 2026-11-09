@@ -39,7 +39,7 @@ const RECORD_SCRIPTS = [
 ];
 /** The .mjs files are build and CI tools, not run scripts. */
 const OWN_EQUIVALENT: string[] = [];
-const EXEMPT = ["build-mock-lambda.mjs", "check-pr-title.mjs"];
+const EXEMPT = ["build-mock-lambda.mjs", "build-realdata-lambda.mjs", "check-pr-title.mjs"];
 
 describe("SIG-56 T1: a run never overwrites a record", () => {
   it("writeNew refuses an existing file and writes nothing", () => {

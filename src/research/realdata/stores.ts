@@ -1,13 +1,22 @@
 // SIG-61 T3: the stores the secure processing environment would hold for a real-data run
 // (ADR 0008). Every store is keyed by an opaque consumer reference, so one person's records can be
 // found and deleted in every store. The in-memory and local-filesystem stores here are the test
-// implementations; the S3 ones in the secure environment are design only and not built.
+// implementations; the secure environment's is S3Store (s3-store.ts), one SSE-KMS bucket per
+// store. openfeed_grants holds each person's grant link: the
+// grant ID, its revision, the consent record and the sealed refresh token, so deleting a person
+// removes the link and the token with their data.
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 /** Every store the environment holds. The deletion procedure covers all of them. */
-export const STORES = ["raw_grant_data", "derived_features", "truth_capture", "run_inputs"] as const;
+export const STORES = [
+  "raw_grant_data",
+  "derived_features",
+  "truth_capture",
+  "run_inputs",
+  "openfeed_grants",
+] as const;
 export type StoreName = (typeof STORES)[number];
 
 /** An opaque consumer reference, issued in the secure environment. It names no one. */
@@ -29,6 +38,8 @@ export interface ConsumerStore {
   count(consumerRef: string): Promise<number>;
   /** Removes every record for the consumer; returns how many were removed. Idempotent. */
   deleteConsumer(consumerRef: string): Promise<number>;
+  /** The consumers the store holds records for (the revocation poller reads openfeed_grants). */
+  listConsumers(): Promise<string[]>;
 }
 
 export class MemoryStore implements ConsumerStore {
@@ -53,6 +64,9 @@ export class MemoryStore implements ConsumerStore {
     this.byConsumer.delete(consumerRef);
     return n;
   }
+  async listConsumers(): Promise<string[]> {
+    return [...this.byConsumer.keys()].sort();
+  }
 }
 
 /**
@@ -76,6 +90,8 @@ export class FileStore implements ConsumerStore {
     const dir = this.dir(consumerRef);
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, `${recordId}.json`), JSON.stringify(record));
+    // The opaque reference, beside the folder, so listConsumers can name it.
+    writeFileSync(`${dir}.ref`, consumerRef);
   }
   async get(consumerRef: string): Promise<unknown[]> {
     const dir = this.dir(consumerRef);
@@ -91,6 +107,15 @@ export class FileStore implements ConsumerStore {
   async deleteConsumer(consumerRef: string): Promise<number> {
     const n = await this.count(consumerRef);
     rmSync(this.dir(consumerRef), { recursive: true, force: true });
+    rmSync(`${this.dir(consumerRef)}.ref`, { force: true });
     return n;
+  }
+  async listConsumers(): Promise<string[]> {
+    const dir = join(this.root, this.name);
+    if (!existsSync(dir)) return [];
+    return readdirSync(dir)
+      .filter((f) => f.endsWith(".ref"))
+      .map((f) => readFileSync(join(dir, f), "utf8"))
+      .sort();
   }
 }

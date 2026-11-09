@@ -80,7 +80,7 @@ for (const kind of ["memory", "filesystem"] as Kind[]) {
       await deleteConsumer(stores, A, AT);
       const again = await deleteConsumer(stores, A, AT);
       expect(again.status).toBe("complete");
-      expect(again.stores.map((s) => s.deleted)).toEqual([0, 0, 0, 0]);
+      expect(again.stores.map((s) => s.deleted)).toEqual(STORES.map(() => 0));
     });
   });
 }

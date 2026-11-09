@@ -1,8 +1,10 @@
 # ADR 0008: the secure processing environment for real CDR data (Stage A)
 
-Status: proposed (SIG-61, 9 November 2026). **Design only.** No AWS resource described here
-exists. What is built is listed under "What is built in this repository". Two items are open
-for Colin: the consent route, and legal sign-off on the consent wording.
+Status: proposed (SIG-61, 9 November 2026), **amended the same day** after Colin's 10:50
+ruling (see "Amendment"), and **ruled at 16:32** on the consent model and the account (see
+"Rulings, 16:32" at the end). The later section wins where they differ. No AWS resource described here
+exists: the secure environment's stack is written and tested (`infra/realdata-stack.ts`) but not
+deployed. What is built is listed under "What is built in this repository" and in the amendment.
 
 Source of truth: the hypothesis page ("Moroku Signals — Hypothesis, Experiment and Evaluation",
 Confluence ENG space, H0 and Stage A), the Decision Record, and SIG-61 with Colin's rulings of
@@ -135,7 +137,7 @@ wording is also **pending**. Until both land:
 ## Truth capture (T4)
 
 Team members declare their own pay and liabilities so a real-data run can be scored against
-them: `research/schemas/truth-capture-v1.schema.json` and `src/research/realdata/truth-capture.ts`.
+them: `research/schemas/truth-capture-v2.schema.json` (2.0.0; see the amendment) and `src/research/realdata/truth-capture.ts`.
 Structured fields only, no free text, unknown fields rejected. Employer and lender are normalised
 names held only in the truth store; the T2 guard rejects any record holding them. A capture form
 is a **Lovable follow-up**; no UI is built here.
@@ -157,3 +159,181 @@ is a **Lovable follow-up**; no UI is built here.
 - The consent flow naming the sponsor, the consumer dashboard, and separate collection, use and
   disclosure consents. See `docs/runbooks/real-data-readiness.md` for each item's state.
 - Small-cell suppression in code.
+
+## Amendment, 9 November 2026 (Colin's 10:50 ruling; SIG-61 comment 40194)
+
+Colin cleared SIG-61 to proceed: openfeed handles the CDR side (consent, dashboard, revocation),
+team members connect under production, and Moroku owns the data once it is in Signals. This
+amendment records what changed. Sections 1 to 8 above are kept as first recorded.
+
+### A1. The consent model, as openfeed's published terms describe it
+
+Recorded on SIG-61 (comment 40194) from openfeed's Terms of Service, OpenAPI spec and developer
+docs, read 9 November 2026:
+
+- Biza is the accredited data recipient; the consumer's CDR arrangement is Biza's.
+- The app receives an **onward disclosure** grant from openfeed's disclosure screen. The data
+  then "ceases to be CDR Data" and is held under the **Privacy Act** and the APPs (cl 3.1, 4.2).
+- Use is limited to the purpose the consumer agreed to (cl 4.1). There is **no
+  de-identification consent and no research consent**.
+
+This differs from the context above (Moroku as sponsored affiliate). Colin is asked to confirm
+with Biza which model applies. Until then the code follows openfeed's published terms:
+`src/research/realdata/consent.ts` holds the model; every consent record gets the
+**purge-after-comparison** rule (the person's own assessment and the comparison with their
+declared truths, then purge); research retention always refuses; the consent basis is
+`openfeed-onward-disclosure`. Section 8's de-identification path stays closed.
+
+### A2. Storage (supersedes the versioning in section 2)
+
+- S3 with SSE-KMS, **one bucket per store** (raw grant data, derived features, truth capture,
+  run inputs, openfeed grant links) plus a **control** bucket for the revocation queue and the
+  connections in progress. `src/research/realdata/s3-store.ts`.
+- Two customer-managed keys, rotated: the **data key** and the **truth key** (truth capture only).
+  Every write names the bucket's key, and the bucket policy refuses any other. TLS only, Block
+  Public Access, bucket keys on.
+- **Versioning off.** Section 2's "versioning on with a short noncurrent-version expiry" can't
+  meet the 24-hour purge: S3 lifecycle runs asynchronously, so a noncurrent version can outlive
+  the window. With versioning off a deleted record is gone at once.
+- Nothing real goes in DynamoDB (section 2; ADR 0005 keeps DynamoDB for the mock).
+- The openfeed refresh token is sealed with KMS (the data key, the consumer reference as
+  encryption context) and kept in the grant link, so deleting the person removes it.
+
+### A3. Access logs, as built
+
+- CloudTrail with log-file validation: management events (every KMS use) and data events on the
+  store buckets. S3 server access logs for every store bucket. Both go to a private, TLS-only,
+  versioned log bucket, kept 400 days (SSE-S3, which access-log delivery requires).
+- Section 3's organisation trail into a separate log account with object lock is **not** built:
+  it needs the account decision (section 1), which is Colin's.
+
+### A4. Ingestion
+
+- openfeed's client-credentials tokens can only list grants; data needs the person's own
+  DPoP-bound token. So ingestion runs **once, while the person connects**: PAR with PKCE S256,
+  private_key_jwt (PS256, signed in KMS), the code exchanged for DPoP-bound tokens, then the
+  grant's accounts and 12 months of transactions into the raw grant data store.
+  `src/connectors/openfeed/`, `src/research/realdata/connect.ts` and `ingest.ts`.
+- Minimised: only the fields the engines read; display names and masked numbers are dropped;
+  account detail (which carries the unmasked account number) is never requested.
+- All or nothing: any failure deletes everything written for the person; a revocation part-way
+  through purges at once.
+- Invites: each team member gets a private invite token; their opaque consumer reference is
+  derived from it one way, so the environment holds no table of people.
+
+### A5. Revocation, as built (section 7)
+
+- Every 5 minutes the poller lists the app's grants. A grant that disappears, or whose revision
+  changes and can't be confirmed ACTIVE with the person's sealed refresh token, is treated as
+  revoked: **fail closed**. A 403 `disclosure_grant_required` anywhere else is treated the same.
+- A revoked person is queued with the detection time and purged at once through `deleteConsumer`.
+  A failed purge is retried on every poll. Alarms: **PurgeOverdue** (still queued 24 hours after
+  detection) and **DetectionAtRisk** (the grant list unreadable for more than 10 minutes, or the
+  poller silent). `src/research/realdata/revocation.ts`, `infra/realdata-stack.ts`.
+
+### A6. Retention
+
+- `RETENTION_DAYS` = 30 (a candidate, for Colin): a person's data is purged 30 days after
+  connection at the latest, even if their comparison isn't done. The purge date is recorded with
+  the grant link. The job that purges on that date is **not built** (see the readiness checklist).
+
+### A7. Logs and CI
+
+- The real-data and openfeed code writes output only through `realdataLog`, which puts every line
+  through the T2 guard (`src/research/realdata/log.ts`); `test/repo/realdata-logging.test.ts`
+  checks there is no other output. Tests use invented data only.
+- `.gitignore` now ignores `/realdata/` only. It was `realdata/`, which also ignored the source
+  and test folders of that name; the T2 test now checks they are tracked.
+
+### A8. What is built now, and what isn't
+
+Built and tested, not deployed: the openfeed connector (against a fake openfeed); the consent
+model; ingestion; the connect flow; the revocation poller and its state; the S3 stores; the KMS
+signer and sealer; the guarded logger; the Lambda entry points (`infra/realdata-lambda.ts`); the
+secure environment's stack; truth capture 2.0.0; the SIG-16 team-grants pre-registration.
+
+Not built: the deployment itself (Colin's go-ahead, the account, openfeed's production
+registration); the purge-by-date job; the truth-capture form (Lovable); small-cell suppression in
+the guard (the SIG-16 pre-registration applies its own rule); the separate log account. The
+readiness checklist (`docs/runbooks/real-data-readiness.md`) has each item's state.
+
+## Rulings, 9 November 2026 at 16:32 (Colin, SIG-61 comment 40198)
+
+These correct the basis this ADR started from. Sections 1 to 8 and the amendment above are kept as
+recorded; this section wins where they differ.
+
+### A9. N-1: openfeed's onward-disclosure terms apply
+
+- **The context's basis is superseded.** Moroku is not a sponsored affiliate. Moroku doesn't seek
+  or manage CDR consents (Division 4.3), and there are no sponsor disclosures, consumer dashboard
+  or separate collection, use and disclosure consents for Moroku to build. A1 is confirmed.
+- **Data disclosed to Signals is held under the Privacy Act 1988 and the APPs** (openfeed terms
+  cl 3.1, 4.2). Where this ADR says "real CDR data" for what Signals holds, read "real consented
+  data received through openfeed".
+- **Section 8 is closed, not pending.** There is no de-identification or research consent, so the
+  research-retention gate stays closed: each person's data is used for their own assessment and
+  the comparison with their declared truths, then purged. The guard accepts one consent basis,
+  `openfeed-onward-disclosure`; the two CDR bases are removed (`src/research/realdata/guard.ts`).
+- **No CDR claims anywhere a user sees** (cl 4.4(a)). `test/repo/no-cdr-claims.test.ts` sweeps the
+  contract, the mock and its fixtures, the engines and the connect pages, with a planted negative
+  control. Lovable's UI copy is outside this repo; the N-6 Lovable ticket asks for the same sweep.
+  For lender-facing material, the accurate line is "consented open banking data received through
+  openfeed".
+- **Moroku's Privacy Act duties:**
+  - **APP 5 collection notice at the point of connection.** A placeholder for legal to finalise,
+    version 0.1 (`src/research/realdata/notice.ts`). It covers each APP 5.2 matter and says the
+    data is handled under the Privacy Act, not the CDR rules. `GET /connect/start` shows it before
+    openfeed (`connectStartStep`); `startConnect` refuses unless the current version was
+    acknowledged, and the version shown is recorded on the consent record (`notice_version`).
+  - **N-2, the disclosure purpose.** `DISCLOSURE_PURPOSE` version 1 names the comparison with the
+    person's declared figures. Colin registers it with openfeed; the consent record carries its
+    version.
+  - **Privacy policy** covering Signals, and **APP 12 and 13** access and correction: legal's and
+    Colin's. The notice points to the policy. No access or correction process is built.
+  - **APP 11** security and destruction: this ADR.
+  - A short **legal check** of the notice and the purpose wording comes before the first team
+    member connects (it replaces the earlier "consent wording" item).
+
+### A10. N-4: the existing Signals account (supersedes section 1's separate account)
+
+The secure environment deploys into the existing Signals account (932027117528, the mock's
+account), in ap-southeast-2. Separation is by IAM, KMS and resource policy
+(`infra/realdata-stack.ts`):
+
+- **Three named real-data roles**, one per function: `moroku-signals-realdata-poll`, `-start` and
+  `-callback`. Each sits under the **permissions boundary** `moroku-signals-realdata-boundary`,
+  which allows only S3 data actions on the real-data buckets, use of the real-data keys, and
+  writing to the `/moroku-signals/realdata/` log groups; no IAM or STS. Whatever is attached to a
+  real-data role later, it can't reach further.
+- **Dedicated buckets that deny every other principal.** Each store bucket and the control bucket
+  denies S3 data actions (get, put, delete, list, multipart, restore, replicate) to any principal
+  whose ARN isn't one of the three roles. That is the guard against an accidental grant: an
+  administrator policy attached to the mock, dev or CI role still can't read real data. Each also
+  denies non-TLS access to everyone, the roles included, and any write not under its own key.
+- **Dedicated customer-managed keys that deny every other principal.** The data, truth and two
+  signing keys deny use (encrypt, decrypt, re-encrypt, data keys, sign, verify, MAC, grants) to any
+  principal but the three roles. The account keeps key administration (policy, rotation,
+  description, deletion schedule, `GetPublicKey` for openfeed registration, N-3), not use. Every
+  administrative change is a CloudTrail management event.
+- **CloudTrail data events** on the real-data buckets' objects, management events (every KMS use),
+  log-file validation, and S3 server access logs, into a private, TLS-only, versioned log bucket
+  in the same account. Section 3's separate log account with object lock is not built.
+- **Tests:** `test/infra/realdata-isolation.test.ts` evaluates the synthesised bucket and key
+  policies for the mock's Lambda role, a dev SSO administrator, the CDK deploy and CloudFormation
+  roles, a CI role, a look-alike role name, an IAM user and the account root: each is denied every
+  data and key action. The real-data roles are not, except without TLS. It also checks the mock
+  stack names nothing of the secure environment, and that the only other role (EventBridge
+  Scheduler's) can only invoke a function. Mutation check: with the deny statements made to match
+  no one, 17 of its 28 tests fail.
+- **Section 4's break-glass role is not built.** With every other principal denied, a human reaches
+  real data only if an administrator changes a bucket or key policy, which CloudTrail records. A
+  break-glass role (MFA, time-limited, alarmed) added to the exception list would be its own
+  ticket.
+- **Not built from sections 1 and 3:** the VPC with a NAT egress allow-list (the functions run
+  outside a VPC), the service control policy, and the alarm on key use by another principal (the
+  key policies now refuse that use outright).
+
+### A11. Deployment
+
+Not before Colin confirms openfeed production registration (N-3: the client ID, the redirect URI
+and the client key's public JWK, read from KMS after deploy). Then on Colin's go-ahead (N-5).
