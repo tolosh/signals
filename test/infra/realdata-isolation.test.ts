@@ -107,6 +107,12 @@ const keyPolicies = () =>
       .KeyPolicy.Statement,
   }));
 
+/** The roles functions run as: the real-data roles. */
+const lambdaRoles = () =>
+  Object.values(template().findResources("AWS::IAM::Role")).filter((r) =>
+    JSON.stringify(r).includes('"lambda.amazonaws.com"'),
+  );
+
 const S3_DATA = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:ListBucket"];
 const KMS_USE = [
   "kms:Decrypt",
@@ -125,10 +131,29 @@ describe("N-4: the real-data roles", () => {
       "moroku-signals-realdata-start",
       "moroku-signals-realdata-callback",
     ]);
-    const roles = Object.values(template().findResources("AWS::IAM::Role")).map(
+    const roles = lambdaRoles().map(
       (r) => (r as { Properties: { RoleName?: string } }).Properties.RoleName,
     );
     expect(roles.sort()).toEqual([...REAL_DATA_ROLES].sort());
+  });
+
+  it("has one other role, EventBridge Scheduler's, which can only invoke a function", () => {
+    // (Added when the first run found it: the test had assumed every role was a function's.)
+    const others = Object.entries(template().findResources("AWS::IAM::Role")).filter(
+      ([, r]) => !JSON.stringify(r).includes('"lambda.amazonaws.com"'),
+    );
+    expect(others).toHaveLength(1);
+    const [id, role] = others[0]!;
+    expect(JSON.stringify(role)).toContain('"scheduler.amazonaws.com"');
+    const policies = Object.values(template().findResources("AWS::IAM::Policy")).filter((p) =>
+      JSON.stringify((p as { Properties: Json }).Properties.Roles).includes(`"${id}"`),
+    );
+    const actions = policies.flatMap((p) =>
+      (
+        p as { Properties: { PolicyDocument: { Statement: Statement[] } } }
+      ).Properties.PolicyDocument.Statement.flatMap((st) => list(st.Action)),
+    );
+    expect(actions).toEqual(["lambda:InvokeFunction"]);
   });
 
   it("each sits under the real-data permissions boundary", () => {
@@ -137,7 +162,7 @@ describe("N-4: the real-data roles", () => {
       .filter(([, p]) => JSON.stringify(p).includes("moroku-signals-realdata-boundary"))
       .map(([id]) => id);
     expect(ids).toHaveLength(1);
-    for (const r of Object.values(template().findResources("AWS::IAM::Role")))
+    for (const r of lambdaRoles())
       expect(JSON.stringify((r as { Properties: Json }).Properties.PermissionsBoundary)).toContain(
         ids[0],
       );

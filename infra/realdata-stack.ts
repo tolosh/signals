@@ -14,6 +14,12 @@
 // - CloudTrail: management events (every KMS use) and data events on the store buckets, with
 //   log-file validation, plus S3 server access logs, into a private, TLS-only, versioned bucket.
 // - The poller every 5 minutes; the connect and callback functions behind an HTTP API.
+// - Isolation inside the existing Signals account (ruling N-4, 9 November 2026; ADR 0008 A9):
+//   three named real-data roles, one per function, under a permissions boundary that allows only
+//   these buckets, keys and log groups. Every store bucket denies its data, and every key denies
+//   its use, to any principal but those roles, so no other role in the account can be granted
+//   access by accident, whatever its own policies say. The account keeps key administration (every
+//   change is in CloudTrail), not key use.
 // - Alarms on PurgeOverdue and DetectionAtRisk. DetectionAtRisk also fires when the poller's
 //   metric goes missing, so a stopped poller isn't silent. Both go to an SNS topic Colin subscribes
 //   to.
@@ -23,7 +29,16 @@ import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations
 import { CfnTrail, Trail } from "aws-cdk-lib/aws-cloudtrail";
 import { Alarm, ComparisonOperator, Metric, TreatMissingData } from "aws-cdk-lib/aws-cloudwatch";
 import { SnsAction } from "aws-cdk-lib/aws-cloudwatch-actions";
-import { AnyPrincipal, Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
+import {
+  AccountRootPrincipal,
+  AnyPrincipal,
+  Effect,
+  ManagedPolicy,
+  PolicyDocument,
+  PolicyStatement,
+  Role,
+  ServicePrincipal,
+} from "aws-cdk-lib/aws-iam";
 import { Key, KeySpec, KeyUsage } from "aws-cdk-lib/aws-kms";
 import { Code, Function as LambdaFunction, Runtime } from "aws-cdk-lib/aws-lambda";
 import { FilterPattern, LogGroup, MetricFilter, RetentionDays } from "aws-cdk-lib/aws-logs";
@@ -42,8 +57,56 @@ export type RealDataProps = StackProps & {
 
 const NAMESPACE = "MorokuSignals/RealData";
 
-/** Stub, tests first. */
-export const REAL_DATA_ROLES: string[] = [];
+/** The only principals that may read real data or use its keys: one role per function. */
+export const REAL_DATA_ROLES = [
+  "moroku-signals-realdata-poll",
+  "moroku-signals-realdata-start",
+  "moroku-signals-realdata-callback",
+] as const;
+type Handler = "poll" | "start" | "callback";
+
+/** S3 actions on stored data: denied to every principal but the real-data roles. */
+const S3_DATA_ACTIONS = [
+  "s3:GetObject*",
+  "s3:PutObject*",
+  "s3:DeleteObject*",
+  "s3:ListBucket*",
+  "s3:ListMultipartUploadParts",
+  "s3:AbortMultipartUpload",
+  "s3:RestoreObject",
+  "s3:ReplicateObject",
+  "s3:ReplicateDelete",
+];
+/** KMS key use: denied to every principal but the real-data roles. */
+const KMS_USE_ACTIONS = [
+  "kms:Encrypt",
+  "kms:Decrypt",
+  "kms:ReEncrypt*",
+  "kms:GenerateDataKey*",
+  "kms:Sign",
+  "kms:Verify",
+  "kms:GenerateMac",
+  "kms:VerifyMac",
+  "kms:CreateGrant",
+];
+/** Key administration, kept by the account; no use. kms:Get* covers GetPublicKey (N-3). */
+const KMS_ADMIN_ACTIONS = [
+  "kms:Describe*",
+  "kms:List*",
+  "kms:Get*",
+  "kms:PutKeyPolicy",
+  "kms:Enable*",
+  "kms:Disable*",
+  "kms:Update*",
+  "kms:Revoke*",
+  "kms:Delete*",
+  "kms:CreateAlias",
+  "kms:TagResource",
+  "kms:UntagResource",
+  "kms:ScheduleKeyDeletion",
+  "kms:CancelKeyDeletion",
+  "kms:RotateKeyOnDemand",
+];
 
 export class SignalsRealDataStack extends Stack {
   constructor(scope: Construct, id: string, props: RealDataProps) {
@@ -51,14 +114,46 @@ export class SignalsRealDataStack extends Stack {
     if (props.env?.region !== "ap-southeast-2")
       throw new Error("The secure environment is in ap-southeast-2 (Sydney) only");
 
+    const roleArns = REAL_DATA_ROLES.map((n) => `arn:aws:iam::${this.account}:role/${n}`);
+    const onlyRealDataRoles = { ArnNotLike: { "aws:PrincipalArn": roleArns } };
+    const keyPolicy = (use: string[]) =>
+      new PolicyDocument({
+        statements: [
+          new PolicyStatement({
+            sid: "AccountAdministersNotUses",
+            principals: [new AccountRootPrincipal()],
+            actions: KMS_ADMIN_ACTIONS,
+            resources: ["*"],
+          }),
+          new PolicyStatement({
+            sid: "RealDataRolesUse",
+            principals: [new AccountRootPrincipal()],
+            actions: [...use, "kms:DescribeKey"],
+            resources: ["*"],
+            conditions: { ArnLike: { "aws:PrincipalArn": roleArns } },
+          }),
+          new PolicyStatement({
+            sid: "NoOtherPrincipalUses",
+            effect: Effect.DENY,
+            principals: [new AnyPrincipal()],
+            actions: KMS_USE_ACTIONS,
+            resources: ["*"],
+            conditions: onlyRealDataRoles,
+          }),
+        ],
+      });
+    const dataUse = ["kms:Encrypt", "kms:Decrypt", "kms:ReEncrypt*", "kms:GenerateDataKey*"];
+
     const dataKey = new Key(this, "DataKey", {
       description: "Signals real data: the store buckets and sealed refresh tokens (SIG-61)",
       enableKeyRotation: true,
+      policy: keyPolicy(dataUse),
       removalPolicy: RemovalPolicy.RETAIN,
     });
     const truthKey = new Key(this, "TruthKey", {
       description: "Signals real data: the truth-capture bucket (SIG-61)",
       enableKeyRotation: true,
+      policy: keyPolicy(dataUse),
       removalPolicy: RemovalPolicy.RETAIN,
     });
     const signingKey = (name: string, description: string) =>
@@ -66,6 +161,7 @@ export class SignalsRealDataStack extends Stack {
         description,
         keySpec: KeySpec.RSA_3072,
         keyUsage: KeyUsage.SIGN_VERIFY,
+        policy: keyPolicy(["kms:Sign", "kms:GetPublicKey"]),
         removalPolicy: RemovalPolicy.RETAIN,
       });
     const clientKey = signingKey("OpenfeedClientKey", "openfeed private_key_jwt client assertion");
@@ -97,6 +193,17 @@ export class SignalsRealDataStack extends Stack {
           ? { lifecycleRules: [{ prefix: "connect/", expiration: Duration.days(expireDays) }] }
           : {}),
       });
+      // N-4: no principal but the real-data roles reads, writes, lists or deletes stored data.
+      b.addToResourcePolicy(
+        new PolicyStatement({
+          sid: "OnlyRealDataRoles",
+          effect: Effect.DENY,
+          principals: [new AnyPrincipal()],
+          actions: S3_DATA_ACTIONS,
+          resources: [b.bucketArn, b.arnForObjects("*")],
+          conditions: onlyRealDataRoles,
+        }),
+      );
       b.addToResourcePolicy(
         new PolicyStatement({
           effect: Effect.DENY,
@@ -151,9 +258,44 @@ export class SignalsRealDataStack extends Stack {
       api: "https://api.openfeed.au",
     };
     const api = new HttpApi(this, "ConnectApi", { apiName: "moroku-signals-realdata-connect" });
-    const fn = (name: string, handler: string) => {
-      const logGroup = new LogGroup(this, `${name}Logs`, { retention: RetentionDays.ONE_MONTH });
+
+    // The permissions boundary: the most any real-data role can ever be granted.
+    const logGroupArn = `arn:aws:logs:${this.region}:${this.account}:log-group:/moroku-signals/realdata/*`;
+    const boundary = new ManagedPolicy(this, "RealDataBoundary", {
+      managedPolicyName: "moroku-signals-realdata-boundary",
+      statements: [
+        new PolicyStatement({
+          actions: S3_DATA_ACTIONS,
+          resources: Object.values(buckets).flatMap((b) => [b.bucketArn, b.arnForObjects("*")]),
+        }),
+        new PolicyStatement({
+          actions: [...dataUse, "kms:DescribeKey"],
+          resources: [dataKey.keyArn, truthKey.keyArn],
+        }),
+        new PolicyStatement({
+          actions: ["kms:Sign", "kms:GetPublicKey", "kms:DescribeKey"],
+          resources: [clientKey.keyArn, dpopKey.keyArn],
+        }),
+        new PolicyStatement({
+          actions: ["logs:CreateLogStream", "logs:PutLogEvents"],
+          resources: [logGroupArn, `${logGroupArn}:*`],
+        }),
+      ],
+    });
+    const fn = (name: string, handler: Handler) => {
+      const logGroup = new LogGroup(this, `${name}Logs`, {
+        logGroupName: `/moroku-signals/realdata/${handler}`,
+        retention: RetentionDays.ONE_MONTH,
+      });
+      const role = new Role(this, `${name}Role`, {
+        roleName: `moroku-signals-realdata-${handler}`,
+        assumedBy: new ServicePrincipal("lambda.amazonaws.com"),
+        permissionsBoundary: boundary,
+        description: `Signals real data: the ${handler} function only (SIG-61, N-4)`,
+      });
+      logGroup.grantWrite(role);
       const f = new LambdaFunction(this, name, {
+        role,
         runtime: Runtime.NODEJS_22_X,
         handler: `index.${handler}`,
         code: Code.fromAsset(props.assetPath),
