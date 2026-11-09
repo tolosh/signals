@@ -1,0 +1,766 @@
+{
+  "ticket": "SIG-60",
+  "registered_at": "2026-11-09",
+  "status": "FROZEN 2026-11-09, before any change to the generator for set v2.2. Not to be edited after the first run on set v2.2; a change is a new pre-registration, recorded as a deviation",
+  "purpose": "T7 and T8. The adversarial leakage test: for every truth label, no generic classifier on feed features may recover the label beyond its base rate by more than the margin below, except through the label's intended evidence. Sets v2 (c190552d…) and v2.1 (819d9e21…) are the negative controls and must fail on every channel their reviews found (channels, below).",
+  "units": {
+    "applicant": "one applicant. Applicant features read the feed without the lines of a dishonour event (the bounced debit, its return and its fee), which are that label's intended evidence",
+    "liability": "one ground-truth liability with at least one repayment line in the feed (a visible liability); features of its repayment lines, plus the applicant's features",
+    "declaration": "one declared liability in the application, linked to the truth's liability",
+    "line": "one transaction, plus a few applicant features (ids, account counts, history, request)"
+  },
+  "classifiers": {
+    "split": "one split by applicant: SHA-256 of the applicant ID decides the half. Every classifier is fitted on the training half and scored on the held-out half only, so lines of one applicant never train and test at once, and the held-out labels are independent of the fitted rule (pooled cross-validation was tried while drafting and rejected: its pooled counts are correlated across folds, and on noise its stump rule false-alarmed at 1.1% for a nominal 0.1%)",
+    "stump": "one feature, one threshold or category (top 20), either side. Thresholds: every distinct value when a feature has at most 64, else its 64-quantiles. Chosen on the training half by the binomial z of its precision over the base rate, among rules flagging at least 10% of the training positives; scored on the held-out half",
+    "tree": "CART on Gini impurity, depth 3, at least 10 units a leaf, the stump's thresholds and categories; the score is the leaf's positive rate",
+    "logistic": "L2-penalised logistic regression (lambda 0.01), numeric features standardised and clipped at 5 with a missing indicator, categorical one-hot on the top 20; 300 gradient steps at rate 0.5 from zero",
+    "per_family": "the tree and the stump are also run on each family's features alone, so a leak is attributed to the families that carry it"
+  },
+  "margins": {
+    "auc_max": 0.6,
+    "auc_z": 3.09,
+    "stump_lift": 1.5,
+    "stump_min_recall": 0.1,
+    "stump_p": 0.001,
+    "twin_max_base": 0.5
+  },
+  "margin_rules": {
+    "auc": "a leak when the better of the tree's and the logistic's held-out AUC exceeds 0.60 and its z against the null (Hanley-McNeil standard error at AUC 0.5, on the held-out half's counts) exceeds 3.09 (one-sided p < 0.001)",
+    "stump": "a leak when the stump's held-out precision exceeds min(1.5 × base, base + (1 − base)/2), at the held-out half's base rate, its recall is at least 0.10, and the exact binomial probability of at least that many positives among the units it flags, at that base rate, is below 0.001",
+    "twins": "for a twin label (one whose labelled units must be generated like their unlabelled twins), a leak when more than half the pool is labelled: the label then has no unlabelled twins to hide among",
+    "power": "the p gates stop chance alone flagging small groups. Calibration on noise (600 random labels at base 2.5%, 10% and 30%, 30 features): 0 false alarms for either rule. Power is that of the held-out half: with 10 held-out positives in 400 units a perfect stump is flagged at any recall from 0.1, and the AUC rule needs about 0.80. The record states n and positives per label, overall and held out"
+  },
+  "row_cap": 12000,
+  "row_cap_rule": "a pool larger than 12,000 units is cut to the 12,000 with the lowest SHA-256 of their unit ID (deterministic, label-blind)",
+  "families": {
+    "applicant_ids": ["app_id_numeric_suffix", "app_id_rank", "app_id_inverted_counter"],
+    "record_ids": [
+      "app_account_id_max_index",
+      "app_account_id_suffixes",
+      "lia_loan_account_index",
+      "lia_txn_id_numeric",
+      "line_id_numeric",
+      "line_id_rank_vs_chrono"
+    ],
+    "accounts": [
+      "app_n_shared_accounts",
+      "app_n_transaction_accounts",
+      "app_n_bsbs",
+      "app_second_account_display",
+      "app_second_account_bsb",
+      "app_second_account_lines",
+      "app_second_account_credit_share",
+      "line_account_category",
+      "line_account_display",
+      "line_account_bsb",
+      "line_account_is_primary"
+    ],
+    "liability_accounts": ["app_has_loan_account", "app_has_card_account", "lia_account_in_grant"],
+    "split": ["app_n_pay_accounts", "app_second_account_pay_share"],
+    "pay_amount": [
+      "app_pay_step_ratio",
+      "app_pay_cv",
+      "app_pay_distinct_share",
+      "app_pay_max_over_median",
+      "app_pay_count"
+    ],
+    "pay_descriptor": ["app_n_pay_descriptors", "app_pay_descriptor_shape"],
+    "pay_reference": ["app_pay_ref_share", "app_pay_ref_shape", "app_nonpay_credit_payref_share"],
+    "fees": ["app_n_fees", "app_max_fee", "app_n_fees_ge9", "app_n_fee_descriptions"],
+    "obligations": [
+      "app_n_direct_debits",
+      "app_n_bpay",
+      "app_n_recurring_payees",
+      "app_dd_cents_share",
+      "app_dd_amount_mean_log"
+    ],
+    "declaration": [
+      "app_n_declared",
+      "app_declared_upper_share",
+      "app_declared_type_suffix_share",
+      "app_declared_legal_suffix_share",
+      "app_declared_types",
+      "app_declared_repayment_log",
+      "lia_declared",
+      "decl_case",
+      "decl_type_suffix",
+      "decl_legal_suffix",
+      "decl_tokens",
+      "decl_length",
+      "decl_type",
+      "decl_repayment_log"
+    ],
+    "declaration_identity": [
+      "app_declared_different_share",
+      "decl_first_token_equal",
+      "decl_first_token"
+    ],
+    "flows": [
+      "app_credits_per_month",
+      "app_debits_per_month",
+      "app_pos_share",
+      "app_history_months",
+      "app_months_with_lines",
+      "app_request_lookback",
+      "app_closing_balance_log"
+    ],
+    "narrative_shape": [
+      "app_long_digit_run_share",
+      "app_date_like_share",
+      "lia_digit_run",
+      "line_digit_run",
+      "line_date_like"
+    ],
+    "timing": [
+      "app_weekend_share",
+      "lia_dom",
+      "lia_weekday",
+      "line_dom",
+      "line_weekday",
+      "line_days_before_end"
+    ],
+    "order": ["line_day_position"],
+    "type": ["lia_line_type", "line_type"],
+    "liability_type": ["lia_liability_type"],
+    "amount_magnitude": ["lia_amount_log", "lia_amount_cv", "line_amount_log"],
+    "cents": ["lia_cents", "lia_round_dollar", "line_cents", "line_round_dollar"],
+    "amount_reuse": ["lia_amount_reuse", "line_amount_reuse"],
+    "cadence": ["lia_cadence_days", "line_recurrence"],
+    "payee_identity": [
+      "lia_template",
+      "lia_first_word",
+      "lia_biller_code",
+      "lia_biller_name",
+      "line_template",
+      "line_first_word",
+      "line_biller_code",
+      "line_biller_name",
+      "line_merchant"
+    ],
+    "biller_structure": [
+      "lia_has_biller",
+      "lia_names_per_code",
+      "line_names_per_code",
+      "line_codes_per_name"
+    ],
+    "reference": ["lia_ref_shape", "line_ref_shape", "line_ref_empty"],
+    "pairing": ["line_reversal_nearby", "line_fee_nearby"]
+  },
+  "labels": [
+    {
+      "id": "A-undisclosed",
+      "unit": "applicant",
+      "pool": "applicants with at least one visible liability",
+      "label": "at least one visible liability is undisclosed (declared = false)",
+      "intended_evidence": [
+        "declaration",
+        "declaration_identity",
+        "obligations",
+        "liability_accounts",
+        "flows"
+      ],
+      "intended_evidence_in_words": "a recurring repayment to a lender absent from the declaration: the declaration, and the liabilities the feed shows (recurring obligations, loan or card accounts, and the outflows they add)",
+      "twin": true
+    },
+    {
+      "id": "A-dishonour",
+      "unit": "applicant",
+      "pool": "applicants with at least one direct debit",
+      "label": "at least one dishonour",
+      "intended_evidence": [],
+      "intended_evidence_in_words": "the dishonour event's own lines (the bounced debit's return and the fee), which are removed before applicant features are read",
+      "twin": true
+    },
+    {
+      "id": "A-drift-over-time",
+      "unit": "applicant",
+      "pool": "salaried applicants with a single employer over the window",
+      "label": "the employer's pay is renamed part-way through the window",
+      "intended_evidence": ["pay_descriptor"],
+      "intended_evidence_in_words": "pay credits under a second descriptor",
+      "twin": true
+    },
+    {
+      "id": "A-drift-across-banks",
+      "unit": "applicant",
+      "pool": "salaried applicants with a single employer whose pay lands in two or more shared accounts",
+      "label": "the second bank shows the employer under a different descriptor",
+      "intended_evidence": ["pay_descriptor", "split"],
+      "intended_evidence_in_words": "pay at two banks under two descriptors",
+      "twin": true
+    },
+    {
+      "id": "A-irregular-pay",
+      "unit": "applicant",
+      "pool": "salaried applicants with a single employer",
+      "label": "overtime, a bonus or a pay rise (and no payer drift)",
+      "intended_evidence": ["pay_amount"],
+      "intended_evidence_in_words": "the pay amounts",
+      "twin": true
+    },
+    {
+      "id": "A-natural-group",
+      "unit": "applicant",
+      "pool": "applicants with two or more declared liabilities",
+      "label": "in the natural-declarations group",
+      "intended_evidence": ["declaration_identity"],
+      "intended_evidence_in_words": "declared names that genuinely differ from the feed's lender names",
+      "twin": true
+    },
+    {
+      "id": "A-repaid-from-unshared",
+      "unit": "applicant",
+      "pool": "all applicants",
+      "label": "a liability is repaid from an account outside the grant",
+      "intended_evidence": ["declaration"],
+      "intended_evidence_in_words": "a declared liability with no repayment in the feed (nothing, if it is undisclosed)",
+      "twin": true
+    },
+    {
+      "id": "L-undisclosed",
+      "unit": "liability",
+      "pool": "visible liabilities",
+      "label": "undisclosed",
+      "intended_evidence": ["declaration", "declaration_identity"],
+      "intended_evidence_in_words": "the lender is absent from the declaration",
+      "twin": true
+    },
+    {
+      "id": "L-undisclosed:credit_card",
+      "unit": "liability",
+      "pool": "visible credit cards",
+      "label": "undisclosed",
+      "intended_evidence": ["declaration", "declaration_identity"],
+      "intended_evidence_in_words": "the lender is absent from the declaration",
+      "twin": true
+    },
+    {
+      "id": "L-undisclosed:personal_loan",
+      "unit": "liability",
+      "pool": "visible personal loans",
+      "label": "undisclosed",
+      "intended_evidence": ["declaration", "declaration_identity"],
+      "intended_evidence_in_words": "the lender is absent from the declaration",
+      "twin": true
+    },
+    {
+      "id": "L-undisclosed:car_loan",
+      "unit": "liability",
+      "pool": "visible car loans",
+      "label": "undisclosed",
+      "intended_evidence": ["declaration", "declaration_identity"],
+      "intended_evidence_in_words": "the lender is absent from the declaration",
+      "twin": true
+    },
+    {
+      "id": "L-undisclosed:mortgage",
+      "unit": "liability",
+      "pool": "visible mortgages",
+      "label": "undisclosed",
+      "intended_evidence": ["declaration", "declaration_identity"],
+      "intended_evidence_in_words": "the lender is absent from the declaration",
+      "twin": true
+    },
+    {
+      "id": "L-undisclosed:bnpl",
+      "unit": "liability",
+      "pool": "visible BNPL",
+      "label": "undisclosed",
+      "intended_evidence": ["declaration", "declaration_identity"],
+      "intended_evidence_in_words": "the lender is absent from the declaration",
+      "twin": true
+    },
+    {
+      "id": "L-undisclosed:sacc",
+      "unit": "liability",
+      "pool": "visible SACC loans",
+      "label": "undisclosed",
+      "intended_evidence": ["declaration", "declaration_identity"],
+      "intended_evidence_in_words": "the lender is absent from the declaration",
+      "twin": true
+    },
+    {
+      "id": "L-undisclosed:wage_advance",
+      "unit": "liability",
+      "pool": "visible wage advances",
+      "label": "undisclosed",
+      "intended_evidence": ["declaration", "declaration_identity"],
+      "intended_evidence_in_words": "the lender is absent from the declaration",
+      "twin": true
+    },
+    {
+      "id": "L-unseen-lender",
+      "unit": "liability",
+      "pool": "visible liabilities",
+      "label": "the lender is one the detector hasn't seen",
+      "intended_evidence": ["payee_identity", "biller_structure"],
+      "intended_evidence_in_words": "the lender's name and biller",
+      "twin": true
+    },
+    {
+      "id": "L-narrative-reference",
+      "unit": "liability",
+      "pool": "visible liabilities",
+      "label": "the lender narrative carries a reference or customer number",
+      "intended_evidence": ["narrative_shape", "payee_identity", "reference"],
+      "intended_evidence_in_words": "the narrative and reference text",
+      "twin": true
+    },
+    {
+      "id": "L-no-card-cue",
+      "unit": "liability",
+      "pool": "visible credit cards",
+      "label": "the repayment's biller name and narrative don't say card",
+      "intended_evidence": ["payee_identity", "biller_structure"],
+      "intended_evidence_in_words": "the biller name and narrative",
+      "twin": true
+    },
+    {
+      "id": "L-account-in-grant",
+      "unit": "liability",
+      "pool": "visible cards, personal and car loans, and mortgages",
+      "label": "the liability's own account is in the grant",
+      "intended_evidence": ["liability_accounts", "record_ids", "accounts", "flows"],
+      "intended_evidence_in_words": "the loan or card account in the feed, its ID, and the lines it adds",
+      "twin": true
+    },
+    {
+      "id": "D-natural-form",
+      "unit": "declaration",
+      "pool": "declared liabilities",
+      "label": "the declared name genuinely differs from the feed's lender: it can't be reduced to it by case, spacing, punctuation, company suffixes or loan-type words (validity.ts genuinelyDifferent)",
+      "intended_evidence": ["declaration_identity"],
+      "intended_evidence_in_words": "the declared name's words against the feed's lender",
+      "twin": true
+    },
+    {
+      "id": "T-repayment",
+      "unit": "line",
+      "pool": "outgoing direct debits, BPAY payments, and payments without a merchant",
+      "label": "a liability repayment",
+      "intended_evidence": ["payee_identity", "amount_magnitude", "cadence"],
+      "intended_evidence_in_words": "who is paid, how much, and how regularly",
+      "twin": false
+    },
+    {
+      "id": "T-pay",
+      "unit": "line",
+      "pool": "incoming credits, except transfers between the applicant's own shared accounts",
+      "label": "a pay credit",
+      "intended_evidence": ["payee_identity", "amount_magnitude", "cadence"],
+      "intended_evidence_in_words": "who pays, how much, and how regularly",
+      "twin": false
+    },
+    {
+      "id": "T-card-repayment",
+      "unit": "line",
+      "pool": "BPAY payments",
+      "label": "a credit-card repayment",
+      "intended_evidence": ["payee_identity", "amount_magnitude", "cadence"],
+      "intended_evidence_in_words": "the biller, the amount and its regularity",
+      "twin": false
+    },
+    {
+      "id": "T-dishonour-fee",
+      "unit": "line",
+      "pool": "fees that aren't periodic (a fee whose narrative and amount recur in at least 3 months and half the applicant's months is periodic)",
+      "label": "a dishonour fee",
+      "intended_evidence": ["payee_identity", "pairing"],
+      "intended_evidence_in_words": "the fee's narrative, and the returned debit beside it",
+      "twin": true
+    },
+    {
+      "id": "T-bounced-debit",
+      "unit": "line",
+      "pool": "outgoing direct debits (set v2.2 only: sets v2 and v2.1 generate no bounced debit)",
+      "label": "the debit bounced",
+      "intended_evidence": ["pairing"],
+      "intended_evidence_in_words": "the return of the same amount, and the fee beside it",
+      "twin": true
+    },
+    {
+      "id": "T-drift-line-main",
+      "unit": "line",
+      "pool": "pay credits of salaried single-employer applicants, in the account that receives most of their pay",
+      "label": "the credit is under the drifted descriptor",
+      "intended_evidence": ["payee_identity"],
+      "intended_evidence_in_words": "the descriptor",
+      "twin": true
+    },
+    {
+      "id": "T-drift-line-second",
+      "unit": "line",
+      "pool": "pay credits of salaried single-employer applicants, in any other account",
+      "label": "the credit is under the drifted descriptor",
+      "intended_evidence": ["payee_identity"],
+      "intended_evidence_in_words": "the descriptor",
+      "twin": true
+    }
+  ],
+  "validity_checks": {
+    "V1-drift-pairs": "at least 20 distinct (employer, drifted descriptor) pairs across the drift groups (set v2 review, L6)",
+    "V2-natural-forms": "at least 70% of the natural-declarations group's declared names genuinely differ from the feed's lender (set v2 review direction 6; v2.1 review L5). Reported, not gated: how many appear in another applicant's narratives",
+    "V3-dishonour-timing": "every dishonour posts on banking days (Mon to Fri, not a national public holiday): the debit, its return 1 to 3 banking days later in the same account for the same amount, and the fee on the return's day or up to 2 banking days after (v2.1 review L6)",
+    "V4-no-honour-fee": "no fee narrative reads HONOUR FEE (v2.1 review L6)",
+    "V5-account-fees": "account-keeping fees are realistic and varied: at least 3 distinct monthly amounts, at least 30% of applicants with none, and at least 20% of those charged with a waived month (SIG-60 section 5)",
+    "V6-unseen-lenders": "no unseen-lender name of the set appears in src/ or in a test outside the generator's own (set v2 review L1)"
+  },
+  "pass_rule": {
+    "set_v2.2": "every label present (at least one positive) and within margin, and every validity check passes",
+    "negative_controls": "sets v2 and v2.1 are each caught on every channel listed for them below. A control that isn't caught on a listed channel fails T7, and no v2.2 result stands"
+  },
+  "channels": [
+    {
+      "set": "v2",
+      "id": "V2-1",
+      "finding": "IDs encode the group (contiguous blocks, syn-v2-NNNN), including undisclosed mortgages",
+      "caught_by": [
+        {
+          "label": "A-dishonour",
+          "family": "applicant_ids"
+        },
+        {
+          "label": "L-undisclosed:mortgage",
+          "family": "applicant_ids"
+        }
+      ]
+    },
+    {
+      "set": "v2",
+      "id": "V2-2",
+      "finding": "Type and amount identify loans without the lender: every direct debit is a repayment, at fixed amounts per type",
+      "caught_by": [
+        {
+          "label": "T-repayment",
+          "family": "type"
+        },
+        {
+          "label": "T-repayment",
+          "family": "amount_reuse"
+        }
+      ]
+    },
+    {
+      "set": "v2",
+      "id": "V2-3",
+      "finding": "PAY yyyy-mm-dd on every income credit and nothing else",
+      "caught_by": [
+        {
+          "label": "T-pay",
+          "family": "reference"
+        }
+      ]
+    },
+    {
+      "set": "v2",
+      "id": "V2-4",
+      "finding": "One biller code for every card issuer",
+      "caught_by": [
+        {
+          "label": "T-card-repayment",
+          "family": "biller_structure"
+        }
+      ]
+    },
+    {
+      "set": "v2",
+      "id": "V2-5",
+      "finding": "Only the drift-across-banks group has a second Everyday account",
+      "caught_by": [
+        {
+          "label": "A-drift-across-banks",
+          "family": "twins"
+        },
+        {
+          "label": "T-drift-line-second",
+          "family": "twins"
+        }
+      ]
+    },
+    {
+      "set": "v2",
+      "id": "V2-6",
+      "finding": "Mixed-case lender names only in the natural and unseen-lender groups' declarations",
+      "caught_by": [
+        {
+          "label": "A-natural-group",
+          "family": "declaration"
+        },
+        {
+          "label": "D-natural-form",
+          "family": "declaration"
+        }
+      ]
+    },
+    {
+      "set": "v2",
+      "id": "V2-7",
+      "finding": "One dishonour template; FEE used for nothing else; no returned debit",
+      "caught_by": [
+        {
+          "label": "T-dishonour-fee",
+          "family": "twins"
+        },
+        {
+          "check": "V3-dishonour-timing"
+        }
+      ]
+    },
+    {
+      "set": "v2",
+      "id": "V2-8",
+      "finding": "Payer drift: 6 fixed employer pairs",
+      "caught_by": [
+        {
+          "check": "V1-drift-pairs"
+        }
+      ]
+    },
+    {
+      "set": "v2",
+      "id": "V2-9",
+      "finding": "Natural declarations mostly differ only by case, suffix and type",
+      "caught_by": [
+        {
+          "check": "V2-natural-forms"
+        }
+      ]
+    },
+    {
+      "set": "v2",
+      "id": "V2-10",
+      "finding": "Unseen lenders named in src/ (CASHD, HUMM, KLARNA)",
+      "caught_by": [
+        {
+          "check": "V6-unseen-lenders"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C1",
+      "finding": "Every direct debit with cents is a loan repayment",
+      "caught_by": [
+        {
+          "label": "T-repayment",
+          "family": "cents"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C2",
+      "finding": "Every declared card repays exactly $180",
+      "caught_by": [
+        {
+          "label": "L-undisclosed:credit_card",
+          "family": "amount_magnitude"
+        },
+        {
+          "label": "L-undisclosed:credit_card",
+          "family": "amount_reuse"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C3",
+      "finding": "Opaque IDs invert from the seed to the allocation order",
+      "caught_by": [
+        {
+          "label": "A-dishonour",
+          "family": "applicant_ids"
+        },
+        {
+          "label": "L-undisclosed",
+          "family": "applicant_ids"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C4",
+      "finding": "A SAL ddmm reference marks drift",
+      "caught_by": [
+        {
+          "label": "T-drift-line-main",
+          "family": "reference"
+        },
+        {
+          "label": "A-drift-over-time",
+          "family": "pay_reference"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C5",
+      "finding": "The second-bank account holds only pay in the drift group",
+      "caught_by": [
+        {
+          "label": "A-drift-across-banks",
+          "family": "twins"
+        },
+        {
+          "label": "T-drift-line-second",
+          "family": "twins"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C6",
+      "finding": "An 8-digit token marks the reference-noise group (all undisclosed)",
+      "caught_by": [
+        {
+          "label": "L-undisclosed",
+          "family": "narrative_shape"
+        },
+        {
+          "label": "L-undisclosed:personal_loan",
+          "family": "narrative_shape"
+        },
+        {
+          "label": "L-narrative-reference",
+          "family": "declaration"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C7",
+      "finding": "A BPAY outside the 4 bill payees marks an undisclosed card",
+      "caught_by": [
+        {
+          "label": "L-undisclosed:credit_card",
+          "family": "payee_identity"
+        },
+        {
+          "label": "L-no-card-cue",
+          "family": "declaration"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C8",
+      "finding": "A loan account in the grant exists only when the loan is undisclosed",
+      "caught_by": [
+        {
+          "label": "L-undisclosed:personal_loan",
+          "family": "liability_accounts"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C9",
+      "finding": "A loan-account index above the declared count marks an undisclosed loan (caught through the loan account's ID)",
+      "caught_by": [
+        {
+          "label": "L-undisclosed:personal_loan",
+          "family": "record_ids"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C10",
+      "finding": "A declaration suffix marks the natural group",
+      "caught_by": [
+        {
+          "label": "A-natural-group",
+          "family": "declaration"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C11",
+      "finding": "Drift exposed by the pay step",
+      "caught_by": [
+        {
+          "label": "A-drift-over-time",
+          "family": "pay_amount"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C12",
+      "finding": "Drift exposed by split pays",
+      "caught_by": [
+        {
+          "label": "A-drift-across-banks",
+          "family": "twins"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C13",
+      "finding": "Any fee of $9 or more is a dishonour",
+      "caught_by": [
+        {
+          "label": "T-dishonour-fee",
+          "family": "twins"
+        },
+        {
+          "label": "T-dishonour-fee",
+          "family": "amount_magnitude"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C14",
+      "finding": "Debit, return and fee on the same day, some on weekends",
+      "caught_by": [
+        {
+          "check": "V3-dishonour-timing"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C15",
+      "finding": "A dishonour fee reads HONOUR FEE",
+      "caught_by": [
+        {
+          "check": "V4-no-honour-fee"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C16",
+      "finding": "Only 22 of 45 natural declarations genuinely differ",
+      "caught_by": [
+        {
+          "check": "V2-natural-forms"
+        }
+      ]
+    },
+    {
+      "set": "v2.1",
+      "id": "C17",
+      "finding": "Account-keeping fees: the same three amounts every month, never waived",
+      "caught_by": [
+        {
+          "check": "V5-account-fees"
+        }
+      ]
+    }
+  ],
+  "channels_rule": "a channel is caught when any one of its caught_by entries is",
+  "false_alarm_control": "test/research/v22/classifiers.test.ts: labels drawn at random (SHA-256) at base rates of 2.5%, 10% and 40% over noise features are within margin, and planted exact, partial and no-twin leaks are caught",
+  "drafting_log": [
+    "Drafted against the negative controls only (sets v2 and v2.1); set v2.2 did not exist. Every change below was made before freezing, to make the test honest or to state the controls' channels; none was made after seeing any set v2.2 output.",
+    "Folds: 5-fold cross-validation with pooled out-of-fold counts was replaced by one held-out half. On 1,000 random labels over noise features the pooled stump rule false-alarmed at 1.1% for a nominal 0.1%, because a chance cluster draws every fold's rule and the pooled counts are correlated. On a single held-out half, 600 random labels gave 0 false alarms for either rule.",
+    "Stump significance: the normal-approximation z was replaced by the exact binomial tail (the z is fat-tailed for the few dozen units a stump flags).",
+    "Cut points: quantiles alone missed a rare value (20 ones in 800 rows gave only the cut 0); a feature with at most 64 distinct values now uses every value.",
+    "Hashes: folds and the row cap use SHA-256, not FNV-1a, whose high bits follow an ID's last characters.",
+    "Natural form: 'genuinely different' was first a different first word; it is now not reducible by case, spacing, punctuation, company suffixes or loan-type words, which reproduces the v2.1 reviewer's 22 of 45.",
+    "Channels C6 and C7: at half power, the personal-loan and card labels alone no longer reach the margin on these channels; each is listed with its mirror label too (every reference-noise and every no-cue liability in set v2.1 is undisclosed, so those labels leak through the declaration)."
+  ]
+}

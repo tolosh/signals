@@ -1,0 +1,802 @@
+{
+  "ticket": "SIG-60",
+  "test": "T7 adversarial leakage test",
+  "role": "set under test",
+  "verdict": "FAILS: T-repayment: leak; T-pay: leak; T-card-repayment: leak; T-drift-line-main: leak",
+  "set": "v2.2",
+  "seed": 602,
+  "set_sha256": "c520f3714948d4d2279766e314aba6c07f7dbda91eca7883595d4ef7acf376e5",
+  "preregistration_sha256": "af17cfc0540b0c461fa4289b16c4823cd0d8c219ec1be436d130c8ecbd4f8968",
+  "labels": [
+    {
+      "id": "A-undisclosed",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 561,
+        "positives": 198,
+        "base": 0.3529,
+        "test_n": 301,
+        "test_positives": 97,
+        "tree_auc": 0.5478,
+        "logistic_auc": 0.5063,
+        "stump": {
+          "rule": "app_id_inverted_counter < 0.2449",
+          "precision": 0.3288,
+          "recall": 0.2474,
+          "flagged": 73
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "A-dishonour",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 765,
+        "positives": 72,
+        "base": 0.0941,
+        "test_n": 397,
+        "test_positives": 40,
+        "tree_auc": 0.4384,
+        "logistic_auc": 0.5371,
+        "stump": {
+          "rule": "app_pay_count >= 50",
+          "precision": 0.1111,
+          "recall": 0.15,
+          "flagged": 54
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "A-drift-over-time",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 593,
+        "positives": 24,
+        "base": 0.0405,
+        "test_n": 304,
+        "test_positives": 11,
+        "tree_auc": 0.5116,
+        "logistic_auc": 0.5774,
+        "stump": {
+          "rule": "app_n_fees >= 7",
+          "precision": 0.08,
+          "recall": 0.1818,
+          "flagged": 25
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "A-drift-across-banks",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 120,
+        "positives": 22,
+        "base": 0.1833,
+        "test_n": 68,
+        "test_positives": 12,
+        "tree_auc": 0.4821,
+        "logistic_auc": 0.4539,
+        "stump": {
+          "rule": "app_pay_count < 5",
+          "precision": 0,
+          "recall": 0,
+          "flagged": 5
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "A-irregular-pay",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 593,
+        "positives": 192,
+        "base": 0.3238,
+        "test_n": 304,
+        "test_positives": 96,
+        "tree_auc": 0.4939,
+        "logistic_auc": 0.4637,
+        "stump": {
+          "rule": "app_second_account_display == Goal Saver",
+          "precision": 0.1176,
+          "recall": 0.0208,
+          "flagged": 17
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "A-natural-group",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 196,
+        "positives": 24,
+        "base": 0.1224,
+        "test_n": 102,
+        "test_positives": 13,
+        "tree_auc": 0.4499,
+        "logistic_auc": 0.478,
+        "stump": {
+          "rule": "app_debits_per_month >= 30.1036",
+          "precision": 0,
+          "recall": 0,
+          "flagged": 4
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "A-repaid-from-unshared",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 780,
+        "positives": 41,
+        "base": 0.0526,
+        "test_n": 406,
+        "test_positives": 19,
+        "tree_auc": 0.551,
+        "logistic_auc": 0.6253,
+        "stump": {
+          "rule": "app_debits_per_month < 16.4038",
+          "precision": 0,
+          "recall": 0,
+          "flagged": 17
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-undisclosed",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 913,
+        "positives": 222,
+        "base": 0.2432,
+        "test_n": 474,
+        "test_positives": 105,
+        "tree_auc": 0.5147,
+        "logistic_auc": 0.4822,
+        "stump": {
+          "rule": "app_credits_per_month < 3.3635",
+          "precision": 0.26,
+          "recall": 0.1238,
+          "flagged": 50
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-undisclosed:credit_card",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 309,
+        "positives": 75,
+        "base": 0.2427,
+        "test_n": 167,
+        "test_positives": 33,
+        "tree_auc": 0.5966,
+        "logistic_auc": 0.5611,
+        "stump": {
+          "rule": "app_dd_amount_mean_log < 1.8648",
+          "precision": 0,
+          "recall": 0,
+          "flagged": 5
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-undisclosed:personal_loan",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 116,
+        "positives": 27,
+        "base": 0.2328,
+        "test_n": 60,
+        "test_positives": 14,
+        "tree_auc": 0.5365,
+        "logistic_auc": 0.4581,
+        "stump": {
+          "rule": "app_id_inverted_counter < 0.1641",
+          "precision": 0.3333,
+          "recall": 0.2143,
+          "flagged": 9
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-undisclosed:car_loan",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 136,
+        "positives": 35,
+        "base": 0.2574,
+        "test_n": 78,
+        "test_positives": 21,
+        "tree_auc": 0.5902,
+        "logistic_auc": 0.5063,
+        "stump": {
+          "rule": "app_n_fees >= 10",
+          "precision": 0.5,
+          "recall": 0.1429,
+          "flagged": 6
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-undisclosed:mortgage",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 45,
+        "positives": 11,
+        "base": 0.2444,
+        "test_n": 28,
+        "test_positives": 8,
+        "tree_auc": 0.5,
+        "logistic_auc": 0.5625,
+        "stump": {
+          "rule": "app_id_rank < 0.1833",
+          "precision": 0,
+          "recall": 0,
+          "flagged": 3
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-undisclosed:bnpl",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 152,
+        "positives": 38,
+        "base": 0.25,
+        "test_n": 73,
+        "test_positives": 20,
+        "tree_auc": 0.359,
+        "logistic_auc": 0.4594,
+        "stump": {
+          "rule": "app_n_fees >= 14",
+          "precision": 0,
+          "recall": 0,
+          "flagged": 0
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-undisclosed:sacc",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 78,
+        "positives": 18,
+        "base": 0.2308,
+        "test_n": 34,
+        "test_positives": 5,
+        "tree_auc": 0.6241,
+        "logistic_auc": 0.4,
+        "stump": {
+          "rule": "app_credits_per_month < 3.149",
+          "precision": 0.5,
+          "recall": 0.2,
+          "flagged": 2
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-undisclosed:wage_advance",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 77,
+        "positives": 18,
+        "base": 0.2338,
+        "test_n": 34,
+        "test_positives": 4,
+        "tree_auc": 0.5167,
+        "logistic_auc": 0.5167,
+        "stump": {
+          "rule": "lia_amount_reuse >= 1.3617",
+          "precision": 0,
+          "recall": 0,
+          "flagged": 6
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-unseen-lender",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 913,
+        "positives": 105,
+        "base": 0.115,
+        "test_n": 474,
+        "test_positives": 55,
+        "tree_auc": 0.5063,
+        "logistic_auc": 0.5242,
+        "stump": {
+          "rule": "app_debits_per_month < 18.4692",
+          "precision": 0.1429,
+          "recall": 0.0909,
+          "flagged": 35
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-narrative-reference",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 913,
+        "positives": 227,
+        "base": 0.2486,
+        "test_n": 474,
+        "test_positives": 109,
+        "tree_auc": 0.4732,
+        "logistic_auc": 0.4726,
+        "stump": {
+          "rule": "app_second_account_pay_share >= 0.9091",
+          "precision": 0.2162,
+          "recall": 0.0734,
+          "flagged": 37
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-no-card-cue",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 309,
+        "positives": 127,
+        "base": 0.411,
+        "test_n": 167,
+        "test_positives": 73,
+        "tree_auc": 0.4638,
+        "logistic_auc": 0.5016,
+        "stump": {
+          "rule": "app_dd_cents_share < 0.3529",
+          "precision": 0.4074,
+          "recall": 0.1507,
+          "flagged": 27
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-account-in-grant",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 606,
+        "positives": 288,
+        "base": 0.4752,
+        "test_n": 333,
+        "test_positives": 158,
+        "tree_auc": 0.4512,
+        "logistic_auc": 0.4982,
+        "stump": {
+          "rule": "app_dd_cents_share < 0.4667",
+          "precision": 0.4366,
+          "recall": 0.1962,
+          "flagged": 71
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "D-natural-form",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 717,
+        "positives": 268,
+        "base": 0.3738,
+        "test_n": 376,
+        "test_positives": 150,
+        "tree_auc": 0.4931,
+        "logistic_auc": 0.4883,
+        "stump": {
+          "rule": "app_pay_ref_shape == 9{4}-9{2}-9{2}",
+          "precision": 0.3571,
+          "recall": 0.1667,
+          "flagged": 70
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "T-repayment",
+      "status": "leak",
+      "flags": [
+        "auc"
+      ],
+      "scores": {
+        "n": 12000,
+        "positives": 2833,
+        "base": 0.2361,
+        "test_n": 6111,
+        "test_positives": 1373,
+        "tree_auc": 0.5845,
+        "logistic_auc": 0.6356,
+        "stump": {
+          "rule": "app_n_shared_accounts >= 5",
+          "precision": 0.2678,
+          "recall": 0.1122,
+          "flagged": 575
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "T-pay",
+      "status": "leak",
+      "flags": [
+        "auc"
+      ],
+      "scores": {
+        "n": 12000,
+        "positives": 7961,
+        "base": 0.6634,
+        "test_n": 6362,
+        "test_positives": 4340,
+        "tree_auc": 0.7089,
+        "logistic_auc": 0.7368,
+        "stump": {
+          "rule": "line_amount_reuse < 0.301",
+          "precision": 0.7733,
+          "recall": 0.9088,
+          "flagged": 5100
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "amount_reuse",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 12000,
+            "positives": 7961,
+            "base": 0.6634,
+            "test_n": 6362,
+            "test_positives": 4340,
+            "tree_auc": 0.6793,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_amount_reuse < 0.301",
+              "precision": 0.7733,
+              "recall": 0.9088,
+              "flagged": 5100
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-card-repayment",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 10664,
+        "positives": 641,
+        "base": 0.0601,
+        "test_n": 5573,
+        "test_positives": 352,
+        "tree_auc": 0.6097,
+        "logistic_auc": 0.6152,
+        "stump": {
+          "rule": "line_amount_reuse < 0.301",
+          "precision": 0.098,
+          "recall": 0.4631,
+          "flagged": 1664
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "amount_reuse",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 10664,
+            "positives": 641,
+            "base": 0.0601,
+            "test_n": 5573,
+            "test_positives": 352,
+            "tree_auc": 0.6222,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_amount_reuse < 0.301",
+              "precision": 0.098,
+              "recall": 0.4631,
+              "flagged": 1664
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-dishonour-fee",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 436,
+        "positives": 94,
+        "base": 0.2156,
+        "test_n": 248,
+        "test_positives": 59,
+        "tree_auc": 0.499,
+        "logistic_auc": 0.577,
+        "stump": {
+          "rule": "app_id_inverted_counter < 0.0885",
+          "precision": 0.2917,
+          "recall": 0.1186,
+          "flagged": 24
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "T-bounced-debit",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 12000,
+        "positives": 102,
+        "base": 0.0085,
+        "test_n": 5981,
+        "test_positives": 55,
+        "tree_auc": 0.5366,
+        "logistic_auc": 0.5963,
+        "stump": {
+          "rule": "line_first_word == ANYTIME",
+          "precision": 0,
+          "recall": 0,
+          "flagged": 98
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "T-drift-line-main",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 9055,
+        "positives": 144,
+        "base": 0.0159,
+        "test_n": 4640,
+        "test_positives": 75,
+        "tree_auc": 0.6969,
+        "logistic_auc": 0.8151,
+        "stump": {
+          "rule": "line_recurrence < 6",
+          "precision": 0.1037,
+          "recall": 0.1867,
+          "flagged": 135
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "amount_magnitude",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 9055,
+            "positives": 144,
+            "base": 0.0159,
+            "test_n": 4640,
+            "test_positives": 75,
+            "tree_auc": 0.6258,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_amount_log >= 3.9771",
+              "precision": 0,
+              "recall": 0,
+              "flagged": 90
+            }
+          }
+        },
+        {
+          "family": "cadence",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 9055,
+            "positives": 144,
+            "base": 0.0159,
+            "test_n": 4640,
+            "test_positives": 75,
+            "tree_auc": 0.841,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_recurrence < 6",
+              "precision": 0.1037,
+              "recall": 0.1867,
+              "flagged": 135
+            }
+          }
+        },
+        {
+          "family": "cents",
+          "flags": [
+            "stump"
+          ],
+          "scores": {
+            "n": 9055,
+            "positives": 144,
+            "base": 0.0159,
+            "test_n": 4640,
+            "test_positives": 75,
+            "tree_auc": 0.5089,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_cents < 4",
+              "precision": 0.0601,
+              "recall": 0.2533,
+              "flagged": 316
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-drift-line-second",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 1693,
+        "positives": 359,
+        "base": 0.212,
+        "test_n": 1055,
+        "test_positives": 246,
+        "tree_auc": 0.3974,
+        "logistic_auc": 0.4773,
+        "stump": {
+          "rule": "line_ref_shape == A 9{8}",
+          "precision": 0,
+          "recall": 0,
+          "flagged": 42
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "flows",
+          "flags": [
+            "stump"
+          ],
+          "scores": {
+            "n": 1693,
+            "positives": 359,
+            "base": 0.212,
+            "test_n": 1055,
+            "test_positives": 246,
+            "tree_auc": 0.4999,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_request_lookback >= 12",
+              "precision": 0.3672,
+              "recall": 0.1911,
+              "flagged": 128
+            }
+          }
+        },
+        {
+          "family": "timing",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 1693,
+            "positives": 359,
+            "base": 0.212,
+            "test_n": 1055,
+            "test_positives": 246,
+            "tree_auc": 0.6402,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_weekday >= 4",
+              "precision": 0.2282,
+              "recall": 0.3089,
+              "flagged": 333
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "validity": [
+    {
+      "id": "V1-drift-pairs",
+      "pass": true,
+      "detail": {
+        "distinct_pairs": 47
+      }
+    },
+    {
+      "id": "V2-natural-forms",
+      "pass": true,
+      "detail": {
+        "declarations": 56,
+        "genuinely_different": 53,
+        "share": 0.9464285714285714,
+        "in_other_narratives": 22
+      }
+    },
+    {
+      "id": "V3-dishonour-timing",
+      "pass": true,
+      "detail": {
+        "events": 169,
+        "failing": 0
+      }
+    },
+    {
+      "id": "V4-no-honour-fee",
+      "pass": true,
+      "detail": {
+        "honour_fee_lines": 0
+      }
+    },
+    {
+      "id": "V5-account-fees",
+      "pass": true,
+      "detail": {
+        "distinct_amounts": 3,
+        "share_without": 0.7846153846153846,
+        "share_charged_with_waived_month": 0.5476190476190477
+      }
+    },
+    {
+      "id": "V6-unseen-lenders",
+      "pass": true,
+      "detail": {
+        "names": 17,
+        "named_in_code": ""
+      }
+    }
+  ],
+  "channels": [],
+  "generated_by": {
+    "command": "npx tsx scripts/leakage.ts --set v2.2",
+    "arguments": {
+      "set": "v2.2"
+    },
+    "engine_commit": "76eb798c79bd8e23c02e813bfbbf8bb3e7e9d14c",
+    "tree": "clean"
+  }
+}

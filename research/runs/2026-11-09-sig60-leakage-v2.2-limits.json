@@ -1,0 +1,45 @@
+{
+  "ticket": "SIG-60",
+  "analysis": "the stratified evidence for set v2.2's four T7 limits (post hoc; not part of T7)",
+  "role": "diagnostic",
+  "set": "v2.2",
+  "set_sha256": "c520f3714948d4d2279766e314aba6c07f7dbda91eca7883595d4ef7acf376e5",
+  "t7_record": "research/runs/2026-11-09-sig60-leakage-v2.2.json",
+  "limits": {
+    "T-pay": {
+      "feature": "line_amount_reuse",
+      "stratified_by": "line_amount_log",
+      "bands": 20,
+      "overall_auc": 0.693,
+      "within_bands_auc": 0.5276
+    },
+    "T-card-repayment": {
+      "feature": "line_amount_reuse",
+      "stratified_by": "line_amount_log",
+      "bands": 20,
+      "overall_auc": 0.6385,
+      "within_bands_auc": 0.5526
+    },
+    "T-repayment": {
+      "feature": "line_amount_reuse",
+      "stratified_by": "line_amount_log",
+      "bands": 20,
+      "overall_auc": 0.523,
+      "within_bands_auc": 0.5562,
+      "stump_rule": "app_n_shared_accounts >= 5",
+      "stump_lift": 1.1343
+    },
+    "T-drift-line-main": {
+      "feature": "line_recurrence",
+      "auc": 0.8398,
+      "positives": 144,
+      "applicants_with_positives": 23
+    }
+  },
+  "generated_by": {
+    "command": "npx tsx scripts/leakage-limits.ts",
+    "arguments": {},
+    "engine_commit": "c1a68a46a33dbec4e74da8cc8d1f5c13334959ef",
+    "tree": "clean"
+  }
+}

@@ -1,0 +1,2435 @@
+{
+  "ticket": "SIG-60",
+  "test": "T7 adversarial leakage test",
+  "role": "negative control",
+  "verdict": "caught on every channel its review found",
+  "set": "v2.1",
+  "seed": 541,
+  "set_sha256": "819d9e2197597fe4b5ffe41f3248ef8e47d1389528d6e3761401da875c9d6de0",
+  "preregistration_sha256": "af17cfc0540b0c461fa4289b16c4823cd0d8c219ec1be436d130c8ecbd4f8968",
+  "labels": [
+    {
+      "id": "A-undisclosed",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 570,
+        "positives": 173,
+        "base": 0.3035,
+        "test_n": 288,
+        "test_positives": 82,
+        "tree_auc": 0.9439,
+        "logistic_auc": 0.8765,
+        "stump": {
+          "rule": "app_id_inverted_counter >= 0.6692",
+          "precision": 0.6441,
+          "recall": 0.9268,
+          "flagged": 118
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 570,
+            "positives": 173,
+            "base": 0.3035,
+            "test_n": 288,
+            "test_positives": 82,
+            "tree_auc": 0.9439,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter >= 0.6692",
+              "precision": 0.6441,
+              "recall": 0.9268,
+              "flagged": 118
+            }
+          }
+        },
+        {
+          "family": "pay_amount",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 570,
+            "positives": 173,
+            "base": 0.3035,
+            "test_n": 288,
+            "test_positives": 82,
+            "tree_auc": 0.6768,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_pay_distinct_share < 0.0385",
+              "precision": 0.3103,
+              "recall": 0.1098,
+              "flagged": 29
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "A-dishonour",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 741,
+        "positives": 60,
+        "base": 0.081,
+        "test_n": 385,
+        "test_positives": 35,
+        "tree_auc": 0.994,
+        "logistic_auc": 0.8631,
+        "stump": {
+          "rule": "app_id_inverted_counter < 0.4949",
+          "precision": 0.1842,
+          "recall": 1,
+          "flagged": 190
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 741,
+            "positives": 60,
+            "base": 0.081,
+            "test_n": 385,
+            "test_positives": 35,
+            "tree_auc": 0.994,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter < 0.4949",
+              "precision": 0.1842,
+              "recall": 1,
+              "flagged": 190
+            }
+          }
+        },
+        {
+          "family": "obligations",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 741,
+            "positives": 60,
+            "base": 0.081,
+            "test_n": 385,
+            "test_positives": 35,
+            "tree_auc": 0.6907,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_n_direct_debits >= 26",
+              "precision": 0.0976,
+              "recall": 0.2286,
+              "flagged": 82
+            }
+          }
+        },
+        {
+          "family": "pay_amount",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 741,
+            "positives": 60,
+            "base": 0.081,
+            "test_n": 385,
+            "test_positives": 35,
+            "tree_auc": 0.6948,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_pay_cv < 0",
+              "precision": 0.1351,
+              "recall": 1,
+              "flagged": 259
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "A-drift-over-time",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 624,
+        "positives": 20,
+        "base": 0.0321,
+        "test_n": 324,
+        "test_positives": 13,
+        "tree_auc": 0.9759,
+        "logistic_auc": 0.8637,
+        "stump": {
+          "rule": "app_pay_step_ratio >= 1.012",
+          "precision": 0.4643,
+          "recall": 1,
+          "flagged": 28
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 624,
+            "positives": 20,
+            "base": 0.0321,
+            "test_n": 324,
+            "test_positives": 13,
+            "tree_auc": 0.9952,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter < 0.2397",
+              "precision": 0.1512,
+              "recall": 1,
+              "flagged": 86
+            }
+          }
+        },
+        {
+          "family": "pay_amount",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 624,
+            "positives": 20,
+            "base": 0.0321,
+            "test_n": 324,
+            "test_positives": 13,
+            "tree_auc": 0.9759,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_pay_step_ratio >= 1.012",
+              "precision": 0.4643,
+              "recall": 1,
+              "flagged": 28
+            }
+          }
+        },
+        {
+          "family": "pay_reference",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 624,
+            "positives": 20,
+            "base": 0.0321,
+            "test_n": 324,
+            "test_positives": 13,
+            "tree_auc": 0.8662,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_pay_ref_shape == A 9{4}",
+              "precision": 0.6667,
+              "recall": 0.7692,
+              "flagged": 15
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "A-drift-across-banks",
+      "status": "leak",
+      "flags": [
+        "twins"
+      ],
+      "scores": {
+        "n": 20,
+        "positives": 20,
+        "base": 1,
+        "test_n": 8,
+        "test_positives": 8,
+        "tree_auc": 0.5,
+        "logistic_auc": 0.5,
+        "stump": null
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "A-irregular-pay",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 624,
+        "positives": 84,
+        "base": 0.1346,
+        "test_n": 324,
+        "test_positives": 44,
+        "tree_auc": 0.998,
+        "logistic_auc": 0.9313,
+        "stump": {
+          "rule": "app_id_inverted_counter < 0.209",
+          "precision": 0.6197,
+          "recall": 1,
+          "flagged": 71
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 624,
+            "positives": 84,
+            "base": 0.1346,
+            "test_n": 324,
+            "test_positives": 44,
+            "tree_auc": 0.9989,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter < 0.209",
+              "precision": 0.6197,
+              "recall": 1,
+              "flagged": 71
+            }
+          }
+        },
+        {
+          "family": "flows",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 624,
+            "positives": 84,
+            "base": 0.1346,
+            "test_n": 324,
+            "test_positives": 44,
+            "tree_auc": 0.6773,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_debits_per_month < 18.7001",
+              "precision": 0.205,
+              "recall": 0.75,
+              "flagged": 161
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "A-natural-group",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 157,
+        "positives": 20,
+        "base": 0.1274,
+        "test_n": 76,
+        "test_positives": 11,
+        "tree_auc": 0.9315,
+        "logistic_auc": 1,
+        "stump": {
+          "rule": "app_declared_type_suffix_share >= 0.6667",
+          "precision": 1,
+          "recall": 0.6364,
+          "flagged": 7
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 157,
+            "positives": 20,
+            "base": 0.1274,
+            "test_n": 76,
+            "test_positives": 11,
+            "tree_auc": 0.9315,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter >= 0.9",
+              "precision": 0.7692,
+              "recall": 0.9091,
+              "flagged": 13
+            }
+          }
+        },
+        {
+          "family": "declaration",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 157,
+            "positives": 20,
+            "base": 0.1274,
+            "test_n": 76,
+            "test_positives": 11,
+            "tree_auc": 0.9231,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_declared_type_suffix_share >= 0.6667",
+              "precision": 1,
+              "recall": 0.6364,
+              "flagged": 7
+            }
+          }
+        },
+        {
+          "family": "obligations",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 157,
+            "positives": 20,
+            "base": 0.1274,
+            "test_n": 76,
+            "test_positives": 11,
+            "tree_auc": 0.8133,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_dd_amount_mean_log < 2.1336",
+              "precision": 0.4286,
+              "recall": 0.5455,
+              "flagged": 14
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "A-repaid-from-unshared",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 780,
+        "positives": 20,
+        "base": 0.0256,
+        "test_n": 403,
+        "test_positives": 11,
+        "tree_auc": 0.9923,
+        "logistic_auc": 0.894,
+        "stump": {
+          "rule": "app_id_inverted_counter >= 0.8641",
+          "precision": 0.2075,
+          "recall": 1,
+          "flagged": 53
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 780,
+            "positives": 20,
+            "base": 0.0256,
+            "test_n": 403,
+            "test_positives": 11,
+            "tree_auc": 0.9923,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter >= 0.8641",
+              "precision": 0.2075,
+              "recall": 1,
+              "flagged": 53
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "L-undisclosed",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 834,
+        "positives": 173,
+        "base": 0.2074,
+        "test_n": 416,
+        "test_positives": 82,
+        "tree_auc": 0.884,
+        "logistic_auc": 0.9043,
+        "stump": {
+          "rule": "lia_amount_log < 2.1711",
+          "precision": 0.6389,
+          "recall": 0.2805,
+          "flagged": 36
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "amount_magnitude",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 173,
+            "base": 0.2074,
+            "test_n": 416,
+            "test_positives": 82,
+            "tree_auc": 0.7604,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_amount_log < 2.1711",
+              "precision": 0.6389,
+              "recall": 0.2805,
+              "flagged": 36
+            }
+          }
+        },
+        {
+          "family": "amount_reuse",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 173,
+            "base": 0.2074,
+            "test_n": 416,
+            "test_positives": 82,
+            "tree_auc": 0.7564,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_amount_reuse < 2.5211",
+              "precision": 0.296,
+              "recall": 0.9024,
+              "flagged": 250
+            }
+          }
+        },
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 173,
+            "base": 0.2074,
+            "test_n": 416,
+            "test_positives": 82,
+            "tree_auc": 0.8092,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter >= 0.6692",
+              "precision": 0.3979,
+              "recall": 0.9268,
+              "flagged": 191
+            }
+          }
+        },
+        {
+          "family": "biller_structure",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 173,
+            "base": 0.2074,
+            "test_n": 416,
+            "test_positives": 82,
+            "tree_auc": 0.6193,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_has_biller < 1",
+              "precision": 0.2612,
+              "recall": 0.7805,
+              "flagged": 245
+            }
+          }
+        },
+        {
+          "family": "liability_accounts",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 173,
+            "base": 0.2074,
+            "test_n": 416,
+            "test_positives": 82,
+            "tree_auc": 0.6562,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_account_in_grant < 1",
+              "precision": 0.2746,
+              "recall": 0.8171,
+              "flagged": 244
+            }
+          }
+        },
+        {
+          "family": "liability_type",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 173,
+            "base": 0.2074,
+            "test_n": 416,
+            "test_positives": 82,
+            "tree_auc": 0.6536,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_liability_type == wage_advance",
+              "precision": 0.8182,
+              "recall": 0.1098,
+              "flagged": 11
+            }
+          }
+        },
+        {
+          "family": "narrative_shape",
+          "flags": [
+            "stump"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 173,
+            "base": 0.2074,
+            "test_n": 416,
+            "test_positives": 82,
+            "tree_auc": 0.6046,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_digit_run >= 8",
+              "precision": 1,
+              "recall": 0.1098,
+              "flagged": 9
+            }
+          }
+        },
+        {
+          "family": "pay_amount",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 173,
+            "base": 0.2074,
+            "test_n": 416,
+            "test_positives": 82,
+            "tree_auc": 0.6449,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_pay_distinct_share < 0.0385",
+              "precision": 0.2093,
+              "recall": 0.1098,
+              "flagged": 43
+            }
+          }
+        },
+        {
+          "family": "payee_identity",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 173,
+            "base": 0.2074,
+            "test_n": 416,
+            "test_positives": 82,
+            "tree_auc": 0.6891,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_first_word != BPAY",
+              "precision": 0.2667,
+              "recall": 0.7805,
+              "flagged": 240
+            }
+          }
+        },
+        {
+          "family": "type",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 173,
+            "base": 0.2074,
+            "test_n": 416,
+            "test_positives": 82,
+            "tree_auc": 0.6268,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_line_type == DIRECT_DEBIT",
+              "precision": 0.2667,
+              "recall": 0.7805,
+              "flagged": 240
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "L-undisclosed:credit_card",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 348,
+        "positives": 43,
+        "base": 0.1236,
+        "test_n": 176,
+        "test_positives": 18,
+        "tree_auc": 0.7546,
+        "logistic_auc": 0.8583,
+        "stump": {
+          "rule": "lia_amount_log >= 2.3222",
+          "precision": 1,
+          "recall": 0.5556,
+          "flagged": 10
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "amount_magnitude",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 348,
+            "positives": 43,
+            "base": 0.1236,
+            "test_n": 176,
+            "test_positives": 18,
+            "tree_auc": 0.7778,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_amount_log >= 2.3222",
+              "precision": 1,
+              "recall": 0.5556,
+              "flagged": 10
+            }
+          }
+        },
+        {
+          "family": "amount_reuse",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 348,
+            "positives": 43,
+            "base": 0.1236,
+            "test_n": 176,
+            "test_positives": 18,
+            "tree_auc": 0.7778,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_amount_reuse < 2.5211",
+              "precision": 1,
+              "recall": 0.5556,
+              "flagged": 10
+            }
+          }
+        },
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 348,
+            "positives": 43,
+            "base": 0.1236,
+            "test_n": 176,
+            "test_positives": 18,
+            "tree_auc": 0.9497,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter >= 0.9782",
+              "precision": 1,
+              "recall": 0.3889,
+              "flagged": 7
+            }
+          }
+        },
+        {
+          "family": "liability_accounts",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 348,
+            "positives": 43,
+            "base": 0.1236,
+            "test_n": 176,
+            "test_positives": 18,
+            "tree_auc": 0.7813,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_has_card_account < 1",
+              "precision": 0.2222,
+              "recall": 0.8889,
+              "flagged": 72
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "L-undisclosed:personal_loan",
+      "status": "leak",
+      "flags": [
+        "auc"
+      ],
+      "scores": {
+        "n": 139,
+        "positives": 33,
+        "base": 0.2374,
+        "test_n": 70,
+        "test_positives": 16,
+        "tree_auc": 0.7911,
+        "logistic_auc": 0.816,
+        "stump": {
+          "rule": "app_id_inverted_counter >= 0.8269",
+          "precision": 0.5217,
+          "recall": 0.75,
+          "flagged": 23
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 139,
+            "positives": 33,
+            "base": 0.2374,
+            "test_n": 70,
+            "test_positives": 16,
+            "tree_auc": 0.7569,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter >= 0.8269",
+              "precision": 0.5217,
+              "recall": 0.75,
+              "flagged": 23
+            }
+          }
+        },
+        {
+          "family": "liability_accounts",
+          "flags": [
+            "stump"
+          ],
+          "scores": {
+            "n": 139,
+            "positives": 33,
+            "base": 0.2374,
+            "test_n": 70,
+            "test_positives": 16,
+            "tree_auc": 0.5046,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_account_in_grant >= 1",
+              "precision": 1,
+              "recall": 0.375,
+              "flagged": 6
+            }
+          }
+        },
+        {
+          "family": "record_ids",
+          "flags": [
+            "stump"
+          ],
+          "scores": {
+            "n": 139,
+            "positives": 33,
+            "base": 0.2374,
+            "test_n": 70,
+            "test_positives": 16,
+            "tree_auc": 0.4444,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_loan_account_index >= 1",
+              "precision": 1,
+              "recall": 0.375,
+              "flagged": 6
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "L-undisclosed:car_loan",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 227,
+        "positives": 27,
+        "base": 0.1189,
+        "test_n": 109,
+        "test_positives": 14,
+        "tree_auc": 0.9162,
+        "logistic_auc": 0.8331,
+        "stump": {
+          "rule": "app_id_inverted_counter >= 0.8295",
+          "precision": 0.4375,
+          "recall": 1,
+          "flagged": 32
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 227,
+            "positives": 27,
+            "base": 0.1189,
+            "test_n": 109,
+            "test_positives": 14,
+            "tree_auc": 0.9162,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter >= 0.8295",
+              "precision": 0.4375,
+              "recall": 1,
+              "flagged": 32
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "L-undisclosed:mortgage",
+      "status": "within margin",
+      "flags": [],
+      "scores": {
+        "n": 40,
+        "positives": 10,
+        "base": 0.25,
+        "test_n": 20,
+        "test_positives": 6,
+        "tree_auc": 0.6786,
+        "logistic_auc": 0.7857,
+        "stump": {
+          "rule": "app_id_inverted_counter < 0.6064",
+          "precision": 0.75,
+          "recall": 1,
+          "flagged": 8
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-undisclosed:bnpl",
+      "status": "leak",
+      "flags": [
+        "twins"
+      ],
+      "scores": {
+        "n": 33,
+        "positives": 20,
+        "base": 0.6061,
+        "test_n": 21,
+        "test_positives": 11,
+        "tree_auc": 0.5,
+        "logistic_auc": 0.5182,
+        "stump": {
+          "rule": "app_second_account_lines < 12",
+          "precision": 0.4444,
+          "recall": 0.7273,
+          "flagged": 18
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-undisclosed:sacc",
+      "status": "leak",
+      "flags": [
+        "twins"
+      ],
+      "scores": {
+        "n": 26,
+        "positives": 21,
+        "base": 0.8077,
+        "test_n": 9,
+        "test_positives": 8,
+        "tree_auc": 0.5,
+        "logistic_auc": 1,
+        "stump": {
+          "rule": "app_dd_cents_share >= 0.6842",
+          "precision": 0.75,
+          "recall": 0.375,
+          "flagged": 4
+        }
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-undisclosed:wage_advance",
+      "status": "leak",
+      "flags": [
+        "twins"
+      ],
+      "scores": {
+        "n": 21,
+        "positives": 19,
+        "base": 0.9048,
+        "test_n": 11,
+        "test_positives": 9,
+        "tree_auc": 0.5,
+        "logistic_auc": 0.5556,
+        "stump": null
+      },
+      "leaking_families": []
+    },
+    {
+      "id": "L-unseen-lender",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 834,
+        "positives": 20,
+        "base": 0.024,
+        "test_n": 416,
+        "test_positives": 9,
+        "tree_auc": 0.9984,
+        "logistic_auc": 0.7644,
+        "stump": {
+          "rule": "app_id_inverted_counter >= 0.9244",
+          "precision": 0.2195,
+          "recall": 1,
+          "flagged": 41
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 20,
+            "base": 0.024,
+            "test_n": 416,
+            "test_positives": 9,
+            "tree_auc": 0.9948,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter >= 0.9244",
+              "precision": 0.2195,
+              "recall": 1,
+              "flagged": 41
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "L-narrative-reference",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 834,
+        "positives": 20,
+        "base": 0.024,
+        "test_n": 416,
+        "test_positives": 9,
+        "tree_auc": 0.9877,
+        "logistic_auc": 0.8619,
+        "stump": {
+          "rule": "app_id_inverted_counter >= 0.9462",
+          "precision": 0.3103,
+          "recall": 1,
+          "flagged": 29
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 20,
+            "base": 0.024,
+            "test_n": 416,
+            "test_positives": 9,
+            "tree_auc": 0.9944,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter >= 0.9462",
+              "precision": 0.3103,
+              "recall": 1,
+              "flagged": 29
+            }
+          }
+        },
+        {
+          "family": "declaration",
+          "flags": [
+            "stump"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 20,
+            "base": 0.024,
+            "test_n": 416,
+            "test_positives": 9,
+            "tree_auc": 0.7943,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_declared < 1",
+              "precision": 0.1098,
+              "recall": 1,
+              "flagged": 82
+            }
+          }
+        },
+        {
+          "family": "liability_type",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 834,
+            "positives": 20,
+            "base": 0.024,
+            "test_n": 416,
+            "test_positives": 9,
+            "tree_auc": 0.8582,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_liability_type == bnpl",
+              "precision": 0.1905,
+              "recall": 0.4444,
+              "flagged": 21
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "L-no-card-cue",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 348,
+        "positives": 20,
+        "base": 0.0575,
+        "test_n": 176,
+        "test_positives": 8,
+        "tree_auc": 0.9338,
+        "logistic_auc": 0.9747,
+        "stump": {
+          "rule": "app_id_inverted_counter >= 0.9782",
+          "precision": 1,
+          "recall": 0.875,
+          "flagged": 7
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "amount_magnitude",
+          "flags": [
+            "stump"
+          ],
+          "scores": {
+            "n": 348,
+            "positives": 20,
+            "base": 0.0575,
+            "test_n": 176,
+            "test_positives": 8,
+            "tree_auc": 0.7976,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_amount_log >= 2.3222",
+              "precision": 0.5,
+              "recall": 0.625,
+              "flagged": 10
+            }
+          }
+        },
+        {
+          "family": "amount_reuse",
+          "flags": [
+            "stump"
+          ],
+          "scores": {
+            "n": 348,
+            "positives": 20,
+            "base": 0.0575,
+            "test_n": 176,
+            "test_positives": 8,
+            "tree_auc": 0.7976,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_amount_reuse < 2.5211",
+              "precision": 0.5,
+              "recall": 0.625,
+              "flagged": 10
+            }
+          }
+        },
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 348,
+            "positives": 20,
+            "base": 0.0575,
+            "test_n": 176,
+            "test_positives": 8,
+            "tree_auc": 0.9993,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter >= 0.9782",
+              "precision": 1,
+              "recall": 0.875,
+              "flagged": 7
+            }
+          }
+        },
+        {
+          "family": "declaration",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 348,
+            "positives": 20,
+            "base": 0.0575,
+            "test_n": 176,
+            "test_positives": 8,
+            "tree_auc": 0.9673,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_declared < 1",
+              "precision": 0.4444,
+              "recall": 1,
+              "flagged": 18
+            }
+          }
+        },
+        {
+          "family": "declaration_identity",
+          "flags": [
+            "stump"
+          ],
+          "scores": {
+            "n": 348,
+            "positives": 20,
+            "base": 0.0575,
+            "test_n": 176,
+            "test_positives": 8,
+            "tree_auc": 0.7381,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_declared_different_share < 0",
+              "precision": 0.5,
+              "recall": 0.5,
+              "flagged": 8
+            }
+          }
+        },
+        {
+          "family": "liability_accounts",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 348,
+            "positives": 20,
+            "base": 0.0575,
+            "test_n": 176,
+            "test_positives": 8,
+            "tree_auc": 0.8333,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_has_card_account < 1",
+              "precision": 0.1111,
+              "recall": 1,
+              "flagged": 72
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "L-account-in-grant",
+      "status": "leak",
+      "flags": [
+        "auc"
+      ],
+      "scores": {
+        "n": 754,
+        "positives": 340,
+        "base": 0.4509,
+        "test_n": 375,
+        "test_positives": 172,
+        "tree_auc": 0.7901,
+        "logistic_auc": 0.8359,
+        "stump": {
+          "rule": "lia_amount_reuse >= 2.5211",
+          "precision": 0.6265,
+          "recall": 0.6047,
+          "flagged": 166
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "amount_magnitude",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 754,
+            "positives": 340,
+            "base": 0.4509,
+            "test_n": 375,
+            "test_positives": 172,
+            "tree_auc": 0.6602,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_amount_log < 2.446",
+              "precision": 0.578,
+              "recall": 0.7326,
+              "flagged": 218
+            }
+          }
+        },
+        {
+          "family": "amount_reuse",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 754,
+            "positives": 340,
+            "base": 0.4509,
+            "test_n": 375,
+            "test_positives": 172,
+            "tree_auc": 0.6586,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_amount_reuse >= 2.5211",
+              "precision": 0.6265,
+              "recall": 0.6047,
+              "flagged": 166
+            }
+          }
+        },
+        {
+          "family": "biller_structure",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 754,
+            "positives": 340,
+            "base": 0.4509,
+            "test_n": 375,
+            "test_positives": 172,
+            "tree_auc": 0.6158,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_has_biller >= 1",
+              "precision": 0.5848,
+              "recall": 0.5814,
+              "flagged": 171
+            }
+          }
+        },
+        {
+          "family": "cents",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 754,
+            "positives": 340,
+            "base": 0.4509,
+            "test_n": 375,
+            "test_positives": 172,
+            "tree_auc": 0.6204,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_cents < 4",
+              "precision": 0.5789,
+              "recall": 0.6395,
+              "flagged": 190
+            }
+          }
+        },
+        {
+          "family": "declaration",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 754,
+            "positives": 340,
+            "base": 0.4509,
+            "test_n": 375,
+            "test_positives": 172,
+            "tree_auc": 0.6626,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_declared_types == credit_card",
+              "precision": 0.6792,
+              "recall": 0.4186,
+              "flagged": 106
+            }
+          }
+        },
+        {
+          "family": "liability_type",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 754,
+            "positives": 340,
+            "base": 0.4509,
+            "test_n": 375,
+            "test_positives": 172,
+            "tree_auc": 0.6768,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_liability_type == credit_card",
+              "precision": 0.5909,
+              "recall": 0.6047,
+              "flagged": 176
+            }
+          }
+        },
+        {
+          "family": "narrative_shape",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 754,
+            "positives": 340,
+            "base": 0.4509,
+            "test_n": 375,
+            "test_positives": 172,
+            "tree_auc": 0.6036,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_date_like_share < 0.4422",
+              "precision": 0.6187,
+              "recall": 0.5,
+              "flagged": 139
+            }
+          }
+        },
+        {
+          "family": "pay_reference",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 754,
+            "positives": 340,
+            "base": 0.4509,
+            "test_n": 375,
+            "test_positives": 172,
+            "tree_auc": 0.7033,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_nonpay_credit_payref_share >= 0",
+              "precision": 0.5342,
+              "recall": 1,
+              "flagged": 322
+            }
+          }
+        },
+        {
+          "family": "payee_identity",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 754,
+            "positives": 340,
+            "base": 0.4509,
+            "test_n": 375,
+            "test_positives": 172,
+            "tree_auc": 0.6589,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_template == BPAY WESTPAC CREDIT CARD PAYMENT",
+              "precision": 0.5882,
+              "recall": 0.1163,
+              "flagged": 34
+            }
+          }
+        },
+        {
+          "family": "type",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 754,
+            "positives": 340,
+            "base": 0.4509,
+            "test_n": 375,
+            "test_positives": 172,
+            "tree_auc": 0.625,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "lia_line_type != DIRECT_DEBIT",
+              "precision": 0.5909,
+              "recall": 0.6047,
+              "flagged": 176
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "D-natural-form",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 673,
+        "positives": 22,
+        "base": 0.0327,
+        "test_n": 340,
+        "test_positives": 13,
+        "tree_auc": 0.8416,
+        "logistic_auc": 0.9927,
+        "stump": {
+          "rule": "decl_length >= 29",
+          "precision": 0.75,
+          "recall": 0.6923,
+          "flagged": 12
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 673,
+            "positives": 22,
+            "base": 0.0327,
+            "test_n": 340,
+            "test_positives": 13,
+            "tree_auc": 0.9063,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter >= 0.9",
+              "precision": 0.275,
+              "recall": 0.8462,
+              "flagged": 40
+            }
+          }
+        },
+        {
+          "family": "declaration",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 673,
+            "positives": 22,
+            "base": 0.0327,
+            "test_n": 340,
+            "test_positives": 13,
+            "tree_auc": 0.8416,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "decl_length >= 29",
+              "precision": 0.75,
+              "recall": 0.6923,
+              "flagged": 12
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-repayment",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 12000,
+        "positives": 3735,
+        "base": 0.3113,
+        "test_n": 5783,
+        "test_positives": 1829,
+        "tree_auc": 0.9773,
+        "logistic_auc": 0.9885,
+        "stump": {
+          "rule": "line_amount_reuse < 0.4771",
+          "precision": 0.8424,
+          "recall": 0.532,
+          "flagged": 1155
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "accounts",
+          "flags": [
+            "stump"
+          ],
+          "scores": {
+            "n": 12000,
+            "positives": 3735,
+            "base": 0.3113,
+            "test_n": 5783,
+            "test_positives": 1829,
+            "tree_auc": 0.5723,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_n_shared_accounts >= 4",
+              "precision": 0.4826,
+              "recall": 0.1061,
+              "flagged": 402
+            }
+          }
+        },
+        {
+          "family": "amount_reuse",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 12000,
+            "positives": 3735,
+            "base": 0.3113,
+            "test_n": 5783,
+            "test_positives": 1829,
+            "tree_auc": 0.9582,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_amount_reuse < 0.4771",
+              "precision": 0.8424,
+              "recall": 0.532,
+              "flagged": 1155
+            }
+          }
+        },
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 12000,
+            "positives": 3735,
+            "base": 0.3113,
+            "test_n": 5783,
+            "test_positives": 1829,
+            "tree_auc": 0.6493,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter >= 0.6179",
+              "precision": 0.4523,
+              "recall": 0.5522,
+              "flagged": 2233
+            }
+          }
+        },
+        {
+          "family": "biller_structure",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 12000,
+            "positives": 3735,
+            "base": 0.3113,
+            "test_n": 5783,
+            "test_positives": 1829,
+            "tree_auc": 0.6956,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_names_per_code >= 2",
+              "precision": 1,
+              "recall": 0.2783,
+              "flagged": 509
+            }
+          }
+        },
+        {
+          "family": "cents",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 12000,
+            "positives": 3735,
+            "base": 0.3113,
+            "test_n": 5783,
+            "test_positives": 1829,
+            "tree_auc": 0.7735,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_cents >= 1",
+              "precision": 0.6458,
+              "recall": 0.6818,
+              "flagged": 1931
+            }
+          }
+        },
+        {
+          "family": "narrative_shape",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 12000,
+            "positives": 3735,
+            "base": 0.3113,
+            "test_n": 5783,
+            "test_positives": 1829,
+            "tree_auc": 0.6452,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_digit_run < 2",
+              "precision": 0.3628,
+              "recall": 0.9825,
+              "flagged": 4953
+            }
+          }
+        },
+        {
+          "family": "type",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 12000,
+            "positives": 3735,
+            "base": 0.3113,
+            "test_n": 5783,
+            "test_positives": 1829,
+            "tree_auc": 0.621,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_type == DIRECT_DEBIT",
+              "precision": 0.413,
+              "recall": 0.7069,
+              "flagged": 3131
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-pay",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 12000,
+        "positives": 10097,
+        "base": 0.8414,
+        "test_n": 6138,
+        "test_positives": 5109,
+        "tree_auc": 0.9956,
+        "logistic_auc": 0.9987,
+        "stump": {
+          "rule": "line_amount_reuse < 0.699",
+          "precision": 0.9593,
+          "recall": 0.9791,
+          "flagged": 5214
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "amount_reuse",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 12000,
+            "positives": 10097,
+            "base": 0.8414,
+            "test_n": 6138,
+            "test_positives": 5109,
+            "tree_auc": 0.8955,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_amount_reuse < 0.699",
+              "precision": 0.9593,
+              "recall": 0.9791,
+              "flagged": 5214
+            }
+          }
+        },
+        {
+          "family": "cents",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 12000,
+            "positives": 10097,
+            "base": 0.8414,
+            "test_n": 6138,
+            "test_positives": 5109,
+            "tree_auc": 0.8605,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_cents >= 12",
+              "precision": 0.9582,
+              "recall": 0.8524,
+              "flagged": 4545
+            }
+          }
+        },
+        {
+          "family": "pairing",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 12000,
+            "positives": 10097,
+            "base": 0.8414,
+            "test_n": 6138,
+            "test_positives": 5109,
+            "tree_auc": 0.6008,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_reversal_nearby < 1",
+              "precision": 0.8633,
+              "recall": 1,
+              "flagged": 5918
+            }
+          }
+        },
+        {
+          "family": "reference",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 12000,
+            "positives": 10097,
+            "base": 0.8414,
+            "test_n": 6138,
+            "test_positives": 5109,
+            "tree_auc": 0.7716,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_ref_shape != A 9{4}-9{2}-9{2}",
+              "precision": 0.9209,
+              "recall": 0.6655,
+              "flagged": 3692
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-card-repayment",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 5290,
+        "positives": 2354,
+        "base": 0.445,
+        "test_n": 2687,
+        "test_positives": 1162,
+        "tree_auc": 0.9897,
+        "logistic_auc": 1,
+        "stump": {
+          "rule": "line_names_per_code >= 2",
+          "precision": 1,
+          "recall": 0.9793,
+          "flagged": 1138
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "accounts",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 5290,
+            "positives": 2354,
+            "base": 0.445,
+            "test_n": 2687,
+            "test_positives": 1162,
+            "tree_auc": 0.6348,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_n_shared_accounts >= 3",
+              "precision": 0.5387,
+              "recall": 0.4552,
+              "flagged": 982
+            }
+          }
+        },
+        {
+          "family": "amount_reuse",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 5290,
+            "positives": 2354,
+            "base": 0.445,
+            "test_n": 2687,
+            "test_positives": 1162,
+            "tree_auc": 0.9811,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_amount_reuse >= 2.5211",
+              "precision": 1,
+              "recall": 0.9484,
+              "flagged": 1102
+            }
+          }
+        },
+        {
+          "family": "biller_structure",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 5290,
+            "positives": 2354,
+            "base": 0.445,
+            "test_n": 2687,
+            "test_positives": 1162,
+            "tree_auc": 0.9897,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_names_per_code >= 2",
+              "precision": 1,
+              "recall": 0.9793,
+              "flagged": 1138
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-dishonour-fee",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "twins"
+      ],
+      "scores": {
+        "n": 124,
+        "positives": 114,
+        "base": 0.9194,
+        "test_n": 73,
+        "test_positives": 68,
+        "tree_auc": 0.9118,
+        "logistic_auc": 1,
+        "stump": {
+          "rule": "app_id_inverted_counter < 0.5654",
+          "precision": 1,
+          "recall": 1,
+          "flagged": 68
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "flows",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 124,
+            "positives": 114,
+            "base": 0.9194,
+            "test_n": 73,
+            "test_positives": 68,
+            "tree_auc": 0.9191,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_history_months >= 2.8581",
+              "precision": 1,
+              "recall": 1,
+              "flagged": 68
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-bounced-debit",
+      "status": "absent",
+      "flags": [],
+      "scores": null,
+      "leaking_families": []
+    },
+    {
+      "id": "T-drift-line-main",
+      "status": "leak",
+      "flags": [
+        "auc",
+        "stump"
+      ],
+      "scores": {
+        "n": 10459,
+        "positives": 150,
+        "base": 0.0143,
+        "test_n": 5319,
+        "test_positives": 121,
+        "tree_auc": 1,
+        "logistic_auc": 0.9806,
+        "stump": {
+          "rule": "line_ref_shape == A 9{4}",
+          "precision": 1,
+          "recall": 1,
+          "flagged": 121
+        }
+      },
+      "leaking_families": [
+        {
+          "family": "accounts",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 10459,
+            "positives": 150,
+            "base": 0.0143,
+            "test_n": 5319,
+            "test_positives": 121,
+            "tree_auc": 0.6504,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_n_shared_accounts < 2",
+              "precision": 0.0484,
+              "recall": 0.6446,
+              "flagged": 1610
+            }
+          }
+        },
+        {
+          "family": "amount_reuse",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 10459,
+            "positives": 150,
+            "base": 0.0143,
+            "test_n": 5319,
+            "test_positives": 121,
+            "tree_auc": 0.8275,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_amount_reuse < 0.301",
+              "precision": 0.0632,
+              "recall": 1,
+              "flagged": 1914
+            }
+          }
+        },
+        {
+          "family": "applicant_ids",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 10459,
+            "positives": 150,
+            "base": 0.0143,
+            "test_n": 5319,
+            "test_positives": 121,
+            "tree_auc": 0.9884,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "app_id_inverted_counter < 0.2321",
+              "precision": 0.0846,
+              "recall": 1,
+              "flagged": 1431
+            }
+          }
+        },
+        {
+          "family": "order",
+          "flags": [
+            "auc"
+          ],
+          "scores": {
+            "n": 10459,
+            "positives": 150,
+            "base": 0.0143,
+            "test_n": 5319,
+            "test_positives": 121,
+            "tree_auc": 0.6733,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_day_position < 0.3333",
+              "precision": 0.0437,
+              "recall": 0.1405,
+              "flagged": 389
+            }
+          }
+        },
+        {
+          "family": "reference",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 10459,
+            "positives": 150,
+            "base": 0.0143,
+            "test_n": 5319,
+            "test_positives": 121,
+            "tree_auc": 1,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_ref_shape == A 9{4}",
+              "precision": 1,
+              "recall": 1,
+              "flagged": 121
+            }
+          }
+        },
+        {
+          "family": "timing",
+          "flags": [
+            "auc",
+            "stump"
+          ],
+          "scores": {
+            "n": 10459,
+            "positives": 150,
+            "base": 0.0143,
+            "test_n": 5319,
+            "test_positives": 121,
+            "tree_auc": 0.6301,
+            "logistic_auc": 0.5,
+            "stump": {
+              "rule": "line_days_before_end < 45",
+              "precision": 0.0443,
+              "recall": 0.4298,
+              "flagged": 1174
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-drift-line-second",
+      "status": "leak",
+      "flags": [
+        "twins"
+      ],
+      "scores": {
+        "n": 340,
+        "positives": 340,
+        "base": 1,
+        "test_n": 113,
+        "test_positives": 113,
+        "tree_auc": 0.5,
+        "logistic_auc": 0.5,
+        "stump": null
+      },
+      "leaking_families": []
+    }
+  ],
+  "validity": [
+    {
+      "id": "V1-drift-pairs",
+      "pass": true,
+      "detail": {
+        "distinct_pairs": 27
+      }
+    },
+    {
+      "id": "V2-natural-forms",
+      "pass": false,
+      "detail": {
+        "declarations": 45,
+        "genuinely_different": 22,
+        "share": 0.4888888888888889,
+        "in_other_narratives": 40
+      }
+    },
+    {
+      "id": "V3-dishonour-timing",
+      "pass": false,
+      "detail": {
+        "events": 117,
+        "failing": 117
+      }
+    },
+    {
+      "id": "V4-no-honour-fee",
+      "pass": false,
+      "detail": {
+        "honour_fee_lines": 26
+      }
+    },
+    {
+      "id": "V5-account-fees",
+      "pass": false,
+      "detail": {
+        "distinct_amounts": 3,
+        "share_without": 0.4705128205128205,
+        "share_charged_with_waived_month": 0
+      }
+    },
+    {
+      "id": "V6-unseen-lenders",
+      "pass": true,
+      "detail": {
+        "names": 14,
+        "named_in_code": ""
+      }
+    }
+  ],
+  "channels": [
+    {
+      "id": "C1",
+      "caught": true,
+      "by": [
+        "T-repayment / cents"
+      ]
+    },
+    {
+      "id": "C2",
+      "caught": true,
+      "by": [
+        "L-undisclosed:credit_card / amount_magnitude",
+        "L-undisclosed:credit_card / amount_reuse"
+      ]
+    },
+    {
+      "id": "C3",
+      "caught": true,
+      "by": [
+        "A-dishonour / applicant_ids",
+        "L-undisclosed / applicant_ids"
+      ]
+    },
+    {
+      "id": "C4",
+      "caught": true,
+      "by": [
+        "T-drift-line-main / reference",
+        "A-drift-over-time / pay_reference"
+      ]
+    },
+    {
+      "id": "C5",
+      "caught": true,
+      "by": [
+        "A-drift-across-banks / twins",
+        "T-drift-line-second / twins"
+      ]
+    },
+    {
+      "id": "C6",
+      "caught": true,
+      "by": [
+        "L-undisclosed / narrative_shape",
+        "L-narrative-reference / declaration"
+      ]
+    },
+    {
+      "id": "C7",
+      "caught": true,
+      "by": [
+        "L-no-card-cue / declaration"
+      ]
+    },
+    {
+      "id": "C8",
+      "caught": true,
+      "by": [
+        "L-undisclosed:personal_loan / liability_accounts"
+      ]
+    },
+    {
+      "id": "C9",
+      "caught": true,
+      "by": [
+        "L-undisclosed:personal_loan / record_ids"
+      ]
+    },
+    {
+      "id": "C10",
+      "caught": true,
+      "by": [
+        "A-natural-group / declaration"
+      ]
+    },
+    {
+      "id": "C11",
+      "caught": true,
+      "by": [
+        "A-drift-over-time / pay_amount"
+      ]
+    },
+    {
+      "id": "C12",
+      "caught": true,
+      "by": [
+        "A-drift-across-banks / twins"
+      ]
+    },
+    {
+      "id": "C13",
+      "caught": true,
+      "by": [
+        "T-dishonour-fee / twins"
+      ]
+    },
+    {
+      "id": "C14",
+      "caught": true,
+      "by": [
+        "V3-dishonour-timing"
+      ]
+    },
+    {
+      "id": "C15",
+      "caught": true,
+      "by": [
+        "V4-no-honour-fee"
+      ]
+    },
+    {
+      "id": "C16",
+      "caught": true,
+      "by": [
+        "V2-natural-forms"
+      ]
+    },
+    {
+      "id": "C17",
+      "caught": true,
+      "by": [
+        "V5-account-fees"
+      ]
+    }
+  ],
+  "generated_by": {
+    "command": "npx tsx scripts/leakage.ts --set v2.1",
+    "arguments": {
+      "set": "v2.1"
+    },
+    "engine_commit": "9cbc54b0098b3d68f421aa90d53b17de3b68ea4b",
+    "tree": "clean"
+  }
+}

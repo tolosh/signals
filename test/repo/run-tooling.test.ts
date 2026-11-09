@@ -28,6 +28,10 @@ const RECORD_SCRIPTS = [
   "enrich-sample-v2.ts",
   // Moved onto the helpers by the SIG-42 review ruling (8 November 2026).
   "eq-unverified.ts",
+  // SIG-60: the adversarial leakage test's run record.
+  "leakage.ts",
+  // SIG-60: the evidence for set v2.2's four limits (ruling, 9 November 2026).
+  "leakage-limits.ts",
   "lia-detect.ts",
   "generate-synthetic.ts",
   // On the helpers since the set v2 review (8 November 2026).

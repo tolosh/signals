@@ -19,18 +19,23 @@ npm run typecheck
 npm test
 ```
 
-Synthetic data sets. Applicant files are not committed; each set regenerates from its seed, and
-the test suite checks the result against the committed manifest in `research/datasets/`. Nothing
-is overwritten, so a regeneration goes to a new folder (`--out`):
+Synthetic data sets. Applicant files are not committed; each set regenerates from its seed. To
+check a set against its committed manifest in `research/datasets/` (nothing is written; the exit
+code says whether it matches):
 
 ```bash
-npx tsx scripts/generate-synthetic.ts --out research/datasets/synthetic-v1
-npx tsx scripts/generate-synthetic-v2.ts --variant 2.1 --out research/datasets/synthetic-v2.1
-npx tsx scripts/generate-synthetic-v2.ts --variant 2.0 --out research/datasets/synthetic-v2
+npx tsx scripts/generate-synthetic.ts --check  # synthetic-v1
+npx tsx scripts/generate-synthetic-v2.ts --variant 2.2 --check  # synthetic-v2.2
+npx tsx scripts/generate-synthetic-v2.ts --variant 2.1 --check  # synthetic-v2.1 (withdrawn)
+npx tsx scripts/generate-synthetic-v2.ts --variant 2.0 --check  # synthetic-v2 (withdrawn)
 ```
 
-Set v1 (seed 42) and set v2.1 (seed 541) are for experiments. Set v2 (seed 54) stays published
-but is withdrawn from experiments: its feed leaks the truth (SIG-54 review, 8 November 2026).
+To write a set's files, give a new folder with `--out` (synthetic-v1) or a new name (the others);
+an existing folder or manifest stops the run before anything is written.
+Set v1 (seed 42) is for experiments. Set v2.2 (seed 602, SIG-60, label-blind) awaits its
+independent review before any experiment uses it. Sets v2 (seed 54) and v2.1 (seed 541) stay
+published but are withdrawn from experiments: their feeds leak the truth (SIG-54 reviews,
+8 November 2026), and their manifests say so.
 
 Local mock of the contract, for Lovable (SIG-11). See `src/mock/`; `Prefer: example=seed_benchmark` or `example=zero_credits` on `GET /v1/app/me` selects a workspace variant.
 

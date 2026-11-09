@@ -2,7 +2,9 @@
 // The applicant files are reproducible from the seed and are not committed; the manifest is.
 // The seed comes from the committed manifest (research/datasets/synthetic-v1.manifest.json).
 // Usage: npx tsx scripts/generate-synthetic.ts [--out research/datasets/synthetic-v1]
-//        [--allow-dirty]
+//        [--allow-dirty] [--check]
+// --check (SIG-60): regenerate in memory and compare with the committed manifest; nothing is
+// written, and the exit code says whether it matches.
 // On the shared run-record helpers since the SIG-42 review ruling (8 November 2026). The output
 // folder is cleared first, as before, so each file is new; the manifest records how it was made.
 import { createHash } from "node:crypto";
@@ -24,8 +26,28 @@ import {
   requireCleanTree,
   writeNew,
 } from "./lib/run-record.js";
+import { checkAgainstManifest } from "./lib/synthetic-outputs.js";
 
 const args = parseRunArgs(process.argv.slice(2), "research/datasets/synthetic-v1");
+if (args.values.check === "true") {
+  const { seed: checkSeed } = manifestSeed();
+  const all = createHash("sha256");
+  const files = population(checkSeed).map((spec) => {
+    const text = serialise(generateApplicant(spec, checkSeed));
+    all.update(text).update("\n");
+    return { id: spec.id, sha256: createHash("sha256").update(text).digest("hex") };
+  });
+  const diffs = checkAgainstManifest(
+    "research/datasets/synthetic-v1.manifest.json",
+    checkSeed,
+    all.digest("hex"),
+    files,
+  );
+  console.log(
+    diffs.length === 0 ? "synthetic-v1: matches the committed manifest" : diffs.join("\n"),
+  );
+  process.exit(diffs.length === 0 ? 0 : 1);
+}
 const git = gitState();
 requireCleanTree(git.status, args.allowDirty);
 const { seed } = manifestSeed();
