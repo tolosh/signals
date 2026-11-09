@@ -1,0 +1,111 @@
+{
+  "ticket": "SIG-16",
+  "apparatus_ticket": "SIG-61",
+  "title": "SIG-16 income derivation on team members' own grants (Stage A, the first real-data experiment)",
+  "registered_at": "2026-11-09",
+  "status": "pre-registered before any team data is ingested or scored; not to be edited after the first team grant is ingested. A change after that is a new pre-registration on a new population.",
+  "hypothesis": "H1 Serviceability. Grouping recurring credits by normalised payer name and cadence (weekly, fortnightly, monthly), excluding own-account transfers, refunds, loan disbursements and wage advances, will derive net monthly income within 5% of the verified figure for salaried applicants with at least 3 months of history, because salary credits are regular in both timing and amount.",
+  "metric": "absolute percentage error of derived against ground-truth net monthly income (scoring harness, run record schema 1.0.0)",
+  "tolerance_pct": 0.05,
+  "target_share_within": 0.9,
+  "fails_if_share_within_below": 0.8,
+  "classification": {
+    "supported": "primary run share within 5% >= 0.90, with the negative control passing",
+    "refuted": "primary run share within 5% < 0.80, with the negative control passing",
+    "inconclusive": "0.80 <= share < 0.90, or the negative control fails, or the data cannot test the claim"
+  },
+  "primary_configuration": {
+    "lookback_months": 6,
+    "min_occurrences": 3
+  },
+  "variables": {
+    "lookback_months": [3, 6],
+    "min_occurrences": [2, 3]
+  },
+  "method": {
+    "credits_considered": "positive amounts in transaction and savings accounts (CDR productCategory TRANS_AND_SAVINGS_ACCOUNTS, or no category) inside the lookback window ending on as_of",
+    "exclusions": [
+      "own-account transfers: a narrative carrying a BSB and account number; or a credit matched by a debit of the same amount on the same day in another shared account",
+      "refunds and reversals: narratives containing REFUND, REVERSAL or CASHBACK",
+      "loan disbursements and advances: narratives containing LOAN or ADVANCE",
+      "wage-advance and BNPL providers: BEFOREPAY, MYPAYNOW, CASHD, AFTERPAY, ZIP PAY, ZIP MONEY, HUMM, KLARNA",
+      "interest: narratives containing INTEREST",
+      "card and loan repayments received: PAYMENT RECEIVED, REPAYMENT RECEIVED"
+    ],
+    "payer_normalisation": "upper case; digits and punctuation removed; whitespace collapsed",
+    "cadence_from_median_gap_days": {
+      "weekly": [5, 9],
+      "fortnightly": [12, 16],
+      "monthly": [26, 35]
+    },
+    "stream_rule": "a group is a stream when it has at least min_occurrences credits in the window and its median gap falls in a cadence band; other groups are not income",
+    "monthly_equivalent": "median credit amount x 52/12 (weekly), 26/12 (fortnightly) or 1 (monthly), per AF-I1; streams are summed",
+    "enrich": "not used: the hypothesis groups by payer name, and the engine imports nothing outside src/engines (D3). The ticket's control 'Enrich taxonomy 1.3' therefore does not apply to this run"
+  },
+  "engine": {
+    "module": "src/engines/affordability/income.ts",
+    "income_method_version": "1.0.1",
+    "gr3_gate_version": "1.1.0"
+  },
+  "negative_control": {
+    "run_first": true,
+    "name": "shuffled payer names",
+    "manipulation": "every credit narrative is replaced with a name unique to that credit, spelt in letters only (PAYER followed by the credit's index within the applicant in base 26, A to Z), destroying payer grouping while keeping amounts and dates",
+    "amendment": "2026-11-07, before any run: the first registration used PAYER <transactionId>, which payer normalisation (digits removed) would have collapsed into one group; the names are now letters only",
+    "expected": "share within 5% below 0.20; if it is 0.20 or more, the grouping is not what drives the result and no other result in the set stands",
+    "on_this_data": "run first on the same team grants, before the primary configuration is scored"
+  },
+  "data": {
+    "source": "openfeed-production",
+    "consent_basis": "openfeed-onward-disclosure",
+    "consent_record": "SIG-61 comment 40194: openfeed's flow captures a disclosure consent to the app, under the Privacy Act, and no de-identification consent",
+    "deidentification_consent": false,
+    "retention": "purge_after_comparison",
+    "kept_for_research": "nothing: each person's data is used for their own assessment and this comparison with their declared truths, then purged (Colin, 10:50 on 9 November 2026); at the latest 30 days after connection (RETENTION_DAYS, a candidate)",
+    "purpose_requirement": "the purpose each person agrees to names the comparison with their declared figures (openfeed developer terms cl 4.1); a person whose consent record has another purpose version is excluded",
+    "where": "the secure environment only (ADR 0008); nothing real enters the repository, CI or run records"
+  },
+  "truth": {
+    "schema_version": "2.0.0",
+    "field": "payslip.net_per_pay",
+    "monthly_equivalent": {
+      "weekly": "52/12",
+      "fortnightly": "26/12",
+      "four_weekly": "13/12",
+      "monthly": "1"
+    },
+    "cadence_from": "pay_cadence in the truth record",
+    "requires_payslip_verified": true,
+    "note": "net monthly truth = payslip.net_per_pay x the factor for pay_cadence, per AF-I1, the same conversion the engine uses"
+  },
+  "population": {
+    "who": "team members who connect through openfeed production and complete truth capture 2.0.0 with payslip_verified true",
+    "inclusion": "salaried (a pay_cadence other than irregular), at least 3 months of history in the grant, the account the pay goes into in the grant",
+    "exclusion": "anyone who revokes before scoring (purged, not scored); anyone whose consent record has another purpose version",
+    "minimum_people": 10,
+    "below_minimum": "inconclusive: the data cannot test the claim; the counts are reported and nothing else",
+    "as_of": "the day before each person's connection, as ingestion reads it"
+  },
+  "reporting": {
+    "outputs": "counts and rates only, through the T2 guard, written under realdata/ in the secure environment: people scored, people within 5%, the share within, the negative control's share, and the classification",
+    "per_person_rows": false,
+    "small_cell_minimum": 5,
+    "small_cell_rule": "no count or rate is reported for a group of fewer than 5 people; such a group is reported as fewer than 5",
+    "no_amounts": "no income figure, error amount or per-person error is reported, only whether each person was within 5%, counted",
+    "where_results_go": "the SIG-16 ticket and the hypothesis page Results log, as counts and rates"
+  },
+  "no_tuning": "no parameter, exclusion word, cadence band or threshold may change after any team data is seen. Any change is a new pre-registration on a new population, and this one is reported as run.",
+  "order": [
+    "1. this pre-registration is committed and pinned by its SHA-256 before the first team grant is ingested",
+    "2. the negative control is run on the team grants and recorded",
+    "3. the primary configuration is run and recorded",
+    "4. the variables grid is run and recorded",
+    "5. each person's data is purged; the deletion receipts are recorded"
+  ],
+  "known_limits": [
+    "a team of 10 to 20 people is small: a share within 5% has a wide interval (for 15 people, 13 of 15 within has a 95% Clopper-Pearson interval of about 0.60 to 0.98), so the result is reported with its interval",
+    "team members are not a sample of applicants: likely salaried, single-employer and paid into one bank",
+    "the payslip is one pay; a person whose pay varies (overtime, a bonus) may differ from the payslip in a month without the method being wrong",
+    "the truth is self-declared from a payslip the person has; nobody else checks it"
+  ]
+}

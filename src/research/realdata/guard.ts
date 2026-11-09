@@ -17,8 +17,17 @@ export const SYNTHETIC_SOURCES = [
   "synthetic-v2.1",
   "synthetic-v2.2",
 ] as const;
-/** The consent bases a real-data run may name. The route is pending Colin's decision (ADR 0008). */
-export const CONSENT_BASES = ["cdr-service", "cdr-service-and-deidentification"] as const;
+/**
+ * The consent bases a real-data run may name. openfeed-onward-disclosure is the one openfeed's flow
+ * gives (SIG-61 comment 40194): a disclosure consent to the app, under the Privacy Act, with no
+ * de-identification consent. The two CDR bases are kept for a sponsored arrangement, if Biza
+ * confirms one.
+ */
+export const CONSENT_BASES = [
+  "cdr-service",
+  "cdr-service-and-deidentification",
+  "openfeed-onward-disclosure",
+] as const;
 
 export type RealSource = (typeof REAL_SOURCES)[number];
 
@@ -56,6 +65,13 @@ export const VOCABULARY: ReadonlySet<string> = new Set([
   "derived_features",
   "truth_capture",
   "run_inputs",
+  "openfeed_grants",
+  // ingestion, revocation and retention (SIG-61, 10:50)
+  "ingest_summary",
+  "revocation_poll",
+  "revoked",
+  "purge_after_comparison",
+  "privacy-act",
   // truth-capture labels (T4)
   "credit_card",
   "personal_loan",
@@ -248,7 +264,9 @@ const KEY = /^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$/;
 export function isIdentifierKey(key: string): boolean {
   const lower = key.toLowerCase();
   const segments = lower.split(/[_-]/);
-  return IDENTIFIER_KEYS.test(lower) || IDENTIFIER_SEGMENTS.has(segments[segments.length - 1] ?? "");
+  return (
+    IDENTIFIER_KEYS.test(lower) || IDENTIFIER_SEGMENTS.has(segments[segments.length - 1] ?? "")
+  );
 }
 
 const allowedKey = (key: string): boolean =>
@@ -310,7 +328,8 @@ function stringViolation(
 export function guardRunRecord(record: unknown, options: GuardOptions = {}): GuardResult {
   const extra = options.vocabulary ?? [];
   const bad = extra.filter((t) => !EXTRA_TERM.test(t) || classify(t) !== null);
-  if (bad.length) throw new Error(`Vocabulary terms must be lower-case identifiers (${bad.length})`);
+  if (bad.length)
+    throw new Error(`Vocabulary terms must be lower-case identifiers (${bad.length})`);
   const vocabulary = extra.length ? new Set([...VOCABULARY, ...extra]) : VOCABULARY;
   const violations: Violation[] = [];
 
