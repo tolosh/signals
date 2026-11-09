@@ -37,7 +37,6 @@ const LENDERS = [
   "HARMONEY",
   "FIRSTMAC",
   "CITI",
-  "LATITUDE",
   "PLENTI",
   "SOCIETYONE",
   "NIMBLE",

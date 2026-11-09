@@ -180,7 +180,7 @@ describe("ruling 3 (D29): liability reasons name only the lender", () => {
       /IVF/,
     ],
     ["a BNPL", bnpl("HUMM SMILE DENTAL", 45), "HUMM", /SMILE|DENTAL/],
-    ["a card", card("LATITUDE GP CLINIC", 120), "LATITUDE", /CLINIC/],
+    ["a card", card("WESTPAC GP CLINIC", 120), "WESTPAC", /CLINIC/],
   ])("%s: the lender is named, the rest of the narrative never", (_n, lines, lender, rest) => {
     const r = run({ lines: lines as Line[] });
     expect(all(r)).toContain(lender);
