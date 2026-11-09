@@ -61,14 +61,14 @@ describe("ruling 1: a loan the data doesn't type is green when nothing conflicts
   it("a mortgage never matches a loan declaration, and an untyped loan never a mortgage", () => {
     for (const type of ["personal_loan", "car_loan", "loan"])
       expect(
-        lia01(loan("CBA HOME LOAN", 2100), [
-          { type, provider: "CBA", repayment_monthly: 2100 },
-        ]).state,
+        lia01(loan("CBA HOME LOAN", 2100), [{ type, provider: "CBA", repayment_monthly: 2100 }])
+          .state,
         type,
       ).toBe("amber");
     expect(
-      lia01(loan("CBA LOAN", 2100), [{ type: "mortgage", provider: "CBA", repayment_monthly: 2100 }])
-        .state,
+      lia01(loan("CBA LOAN", 2100), [
+        { type: "mortgage", provider: "CBA", repayment_monthly: 2100 },
+      ]).state,
     ).toBe("amber");
   });
   it("a card never matches a loan or a mortgage declaration, nor a loan a card", () => {
