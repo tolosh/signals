@@ -54,6 +54,17 @@ const PROVENANCE: Record<string, string> = {
   "research/reviews/sig41-2026-11-08/random-mismatches.json": "SIG-41 review of synthetic set v1",
 };
 
+/**
+ * Pre-registrations of real-data experiments. SIG-61 requires each to state its source and consent
+ * basis, so each may name a real source. Each is listed here with its ticket. It is still held to
+ * the HARD rule, and it may hold no results: it is registered before any team data is ingested.
+ */
+const REAL_SOURCE_PREREGISTRATIONS: Record<string, string> = {
+  "research/preregistrations/SIG-16-team-grants.json":
+    "SIG-16 on team grants, registered before any team data (SIG-61, 10:50 on 9 November 2026)",
+};
+const RESULT_KEYS = /^(results?|observed|scored|share_observed|per_person|outcome)$/;
+
 const walk = (dir: string): string[] =>
   existsSync(dir)
     ? readdirSync(dir).flatMap((n) => {
@@ -112,6 +123,23 @@ const namesSyntheticSet = (value: unknown): boolean =>
 function scanFile(file: string, rel = file): string[] {
   const text = readFileSync(file, "utf8");
   const problems: string[] = [];
+  const registration = rel in REAL_SOURCE_PREREGISTRATIONS;
+  if (registration) {
+    const json = JSON.parse(text) as unknown;
+    const keys = (v: unknown): string[] =>
+      Array.isArray(v)
+        ? v.flatMap(keys)
+        : v !== null && typeof v === "object"
+          ? Object.entries(v).flatMap(([k, x]) => [k, ...keys(x)])
+          : [];
+    if (keys(json).some((k) => RESULT_KEYS.test(k)))
+      problems.push(`${rel}: a pre-registration holds results`);
+    for (const line of text.split("\n")) {
+      const r = classify(line.replace(/^\s*"[a-z_]+":\s*/, ""));
+      if (r && HARD.includes(r)) problems.push(`${rel}: ${r}`);
+    }
+    return problems;
+  }
   if (mentionsRealSource(text)) problems.push(`${rel}: declares a real source`);
   if (!file.endsWith(".json")) {
     text.split("\n").forEach((line, i) => {
@@ -201,6 +229,27 @@ describe("SIG-61 T2: repo scan of research outputs and fixtures", () => {
         "research/runs/r5.md:1: tfn",
       ]);
     });
+    it("an unlisted pre-registration that names a real source", () => {
+      mkdirSync(join(root, "research/preregistrations"), { recursive: true });
+      expect(
+        plant("research/preregistrations/SIG-99.json", { data: { source: "openfeed-production" } }),
+      ).toEqual(
+        expect.arrayContaining(["research/preregistrations/SIG-99.json: declares a real source"]),
+      );
+    });
+    it("a listed real-data pre-registration that holds results or an email", () => {
+      mkdirSync(join(root, "research/preregistrations"), { recursive: true });
+      const rel = "research/preregistrations/SIG-16-team-grants.json";
+      expect(plant(rel, { data: { source: "openfeed-production" }, results: { n: 12 } })).toEqual([
+        `${rel}: a pre-registration holds results`,
+      ]);
+      expect(
+        plant(rel, {
+          data: { source: "openfeed-production" },
+          contact: "jane.citizen@example.com",
+        }),
+      ).toEqual([`${rel}: email`]);
+    });
     it("an unaccounted file of counts and rates passes", () => {
       expect(plant("research/runs/r6.json", { ticket: "SIG-61", n: 4, rate: 0.5 })).toEqual([]);
     });
@@ -208,10 +257,24 @@ describe("SIG-61 T2: repo scan of research outputs and fixtures", () => {
 });
 
 describe("SIG-61 T2: the local realdata folder is git-ignored", () => {
-  it(".gitignore lists realdata/ and git ignores a file there", () => {
-    expect(readFileSync(".gitignore", "utf8").split(/\r?\n/)).toContain("realdata/");
+  it(".gitignore lists /realdata/ and git ignores a file there", () => {
+    expect(readFileSync(".gitignore", "utf8").split(/\r?\n/)).toContain("/realdata/");
     const out = execFileSync("git", ["check-ignore", "realdata/runs/x.json"], { encoding: "utf8" });
     expect(out.trim()).toBe("realdata/runs/x.json");
+  });
+
+  // SIG-61's second change: the pattern was realdata/, which also ignored the source and test
+  // folders of that name, so new files there were silently left out of commits.
+  it("ignores only the root folder, not the source and test folders named realdata", () => {
+    for (const f of ["src/research/realdata/new.ts", "test/research/realdata/new.test.ts"]) {
+      let ignored = true;
+      try {
+        execFileSync("git", ["check-ignore", "-q", f]);
+      } catch {
+        ignored = false;
+      }
+      expect(ignored, f).toBe(false);
+    }
   });
 });
 

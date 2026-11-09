@@ -166,10 +166,14 @@ describe("the table is for the mock only", () => {
       return statSync(p).isDirectory() ? files(p) : [p];
     });
 
+  // SIG-61 narrowed the match from any @aws-sdk import to the DynamoDB clients, which is what this
+  // rule names: the real-data store uses S3 and KMS (ADR 0008), never DynamoDB.
   it("nothing outside src/mock imports the DynamoDB client or the mock's persistence", () => {
     const offenders = files("src")
       .filter((f) => !f.replaceAll("\\", "/").startsWith("src/mock/"))
-      .filter((f) => /@aws-sdk|mock\/persist|mock\/state/.test(readFileSync(f, "utf8")));
+      .filter((f) =>
+        /@aws-sdk\/(client|lib)-dynamodb|mock\/persist|mock\/state/.test(readFileSync(f, "utf8")),
+      );
     expect(offenders).toEqual([]);
   });
 });

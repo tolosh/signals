@@ -28,7 +28,12 @@ const valid = () => ({
   captured_on: "2026-11-09",
   gross_annual_pay: 95000,
   pay_cadence: "fortnightly",
-  payslip: { pay_date: "2026-10-30", gross_per_pay: 3653.85, net_per_pay: 2780.5, tax_withheld: 873.35 },
+  payslip: {
+    pay_date: "2026-10-30",
+    gross_per_pay: 3653.85,
+    net_per_pay: 2780.5,
+    tax_withheld: 873.35,
+  },
   payslip_verified: true,
   employer: { normalised_name: "EXAMPLE CO PTY LTD" },
   liabilities: [
@@ -62,7 +67,7 @@ type Rec = ReturnType<typeof valid> & Record<string, unknown>;
 const INVALID: [string, (r: Rec) => void][] = [
   ["missing consumer_ref", (r) => delete (r as Partial<Rec>).consumer_ref],
   ["consumer_ref not opaque", (r) => (r.consumer_ref = "jane.citizen")],
-  ["wrong schema_version", (r) => (r.schema_version = "2.0.0")],
+  ["wrong schema_version", (r) => (r.schema_version = "1.0.0")],
   ["captured_on with a time", (r) => (r.captured_on = "2026-11-09T10:00:00Z")],
   ["negative gross pay", (r) => (r.gross_annual_pay = -1)],
   ["gross pay as a string", (r) => ((r as Record<string, unknown>).gross_annual_pay = "95000")],
@@ -72,8 +77,14 @@ const INVALID: [string, (r: Rec) => void][] = [
   ["payslip date with a time", (r) => (r.payslip.pay_date = "2026-10-30T00:00:00Z")],
   ["payslip with an extra key", (r) => ((r.payslip as Record<string, unknown>).employer_abn = 1)],
   ["liabilities_complete missing", (r) => delete (r as Partial<Rec>).liabilities_complete],
-  ["liabilities_complete not boolean", (r) => ((r as Record<string, unknown>).liabilities_complete = "yes")],
-  ["account_in_grant not boolean", (r) => ((r.liabilities[1] as Record<string, unknown>).account_in_grant = 1)],
+  [
+    "liabilities_complete not boolean",
+    (r) => ((r as Record<string, unknown>).liabilities_complete = "yes"),
+  ],
+  [
+    "account_in_grant not boolean",
+    (r) => ((r.liabilities[1] as Record<string, unknown>).account_in_grant = 1),
+  ],
   ["unknown pay cadence", (r) => (r.pay_cadence = "daily")],
   ["payslip_verified not boolean", (r) => ((r as Record<string, unknown>).payslip_verified = 1)],
   ["employer as a bare string", (r) => ((r as Record<string, unknown>).employer = "ACME")],
@@ -144,9 +155,10 @@ describe("SIG-61 T4: the truth-capture record", () => {
 
   it("rejects payslip figures where net pay exceeds gross, or gross minus tax isn't above net", () => {
     expect(validateTruthCapture(build((r) => (r.payslip.net_per_pay = 4000))).ok).toBe(false);
-    expect(
-      validateTruthCapture(build((r) => (r.payslip.tax_withheld = 1000))),
-    ).toMatchObject({ ok: false, errors: [{ path: "$.payslip", rule: "payslip_inconsistent" }] });
+    expect(validateTruthCapture(build((r) => (r.payslip.tax_withheld = 1000)))).toMatchObject({
+      ok: false,
+      errors: [{ path: "$.payslip", rule: "payslip_inconsistent" }],
+    });
   });
 
   it("errors never echo a value", () => {

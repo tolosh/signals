@@ -147,7 +147,10 @@ export class FakeOpenfeed {
     if (!h) return { error: "invalid_dpop_proof" };
     const header = json(h) as { typ?: string; jwk?: JsonWebKey };
     if (header.typ !== "dpop+jwt" || !header.jwk) return { error: "invalid_dpop_proof" };
-    const key = createPublicKey({ key: header.jwk, format: "jwk" });
+    const key = createPublicKey({
+      key: header.jwk as import("node:crypto").JsonWebKey,
+      format: "jwk",
+    });
     const claims = verifyJwt(proof, key);
     if (!claims) return { error: "invalid_dpop_proof" };
     const htu = url.split("?")[0];
