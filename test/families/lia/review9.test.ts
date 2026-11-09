@@ -92,6 +92,52 @@ describe("ruling 1: green needs the exact name and the exact type", () => {
   });
 });
 
+describe("ruling 1: a liability in the grant, repaid from the everyday account", () => {
+  // Found on the set v1 re-run: the name comes from the card or loan account and the repayment
+  // narratives, never from the transaction account the repayments leave.
+  const accounts = [
+    {
+      accountId: "acc-card",
+      productCategory: "CRED_AND_CHRG_CARDS",
+      productName: "ANZ Credit Card",
+    },
+    {
+      accountId: "acc-loan",
+      productCategory: "PERS_LOANS",
+      productName: "MACQUARIE LEASING car loan",
+    },
+  ];
+  const lines = [
+    ...repeat(6, 30, {
+      description: "BPAY ANZ CREDIT CARD PAYMENT",
+      amount: -180,
+      category: "transfer",
+      billerName: "ANZ CREDIT CARD",
+    }),
+    ...repeat(6, 30, {
+      description: "MACQUARIE LEASING LOAN REPAYMENT",
+      amount: -563.33,
+      category: "loan_repayment",
+    }),
+  ];
+  it("is green when declared under its name and type", () => {
+    const s = signal(
+      run(
+        { lines, accounts, payProductName: "Everyday Account" },
+        {
+          declared_liabilities: [
+            { type: "credit_card", provider: "ANZ", repayment_monthly: 180 },
+            { type: "car_loan", provider: "MACQUARIE LEASING", repayment_monthly: 563.33 },
+          ],
+        },
+      ),
+      "LIA-01",
+    );
+    expect(s.state).toBe("green");
+    expect(s.value).toBe("2 found, all declared");
+  });
+});
+
 describe("ruling 2: names compare after NFC, case folding, legal suffixes and digits", () => {
   it.each([
     ["MACQUARIE 37 PERSONAL LOAN", "Macquarie"],

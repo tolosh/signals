@@ -30,6 +30,8 @@ export type Line = {
 export type Script = {
   months?: number;
   lines?: Line[];
+  /** The everyday account's product name, as a bank gives it (set v1: "Everyday Account"). */
+  payProductName?: string;
   /** Extra accounts in the grant, such as a card or a loan. */
   accounts?: { accountId: string; productCategory: string; productName: string }[];
 };
@@ -73,7 +75,11 @@ export function build(s: Script): { feed: LiaFeed; categories: Record<string, st
     feed: {
       accounts: [
         {
-          account: { accountId: "acc-pay", productCategory: "TRANS_AND_SAVINGS_ACCOUNTS" },
+          account: {
+            accountId: "acc-pay",
+            productCategory: "TRANS_AND_SAVINGS_ACCOUNTS",
+            ...(s.payProductName ? { productName: s.payProductName } : {}),
+          },
           detail: { data: { bsb: "062000", accountNumber: "11112222" } },
           transactions: byAccount("acc-pay"),
         },
