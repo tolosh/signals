@@ -45,8 +45,11 @@
   "engine": {
     "module": "src/engines/affordability/income.ts",
     "income_method_version": "1.0.1",
-    "gr3_gate_version": "1.1.0"
+    "gr3_gate_version": "1.2.0"
   },
+  "engine_amendments": [
+    "2026-11-10, before any team grant is ingested or scored: the GR-3 gate moved from 1.1.0 to 1.2.0 (SIG-42 review 9, C3: a liability-category credit carrying a sensitive MCC is now removed). Observed income 1.0.1's output over synthetic set v1 is byte-identical at both gates (test/engines/affordability/gate-replay.test.ts). Nothing else in this registration changes"
+  ],
   "negative_control": {
     "run_first": true,
     "name": "shuffled payer names",
