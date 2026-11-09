@@ -165,6 +165,7 @@ describe("S3Store", () => {
       consumer_ref: A,
       code_verifier: "v",
       started_at: "2026-11-10T00:00:00Z",
+      notice_version: "0.1",
     });
     for (const k of s3.bucket("control").keys()) expect(k).not.toContain("state-1");
     expect(await p.take("state-1")).toMatchObject({ consumer_ref: A, code_verifier: "v" });

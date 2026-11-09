@@ -20,14 +20,10 @@ export const SYNTHETIC_SOURCES = [
 /**
  * The consent bases a real-data run may name. openfeed-onward-disclosure is the one openfeed's flow
  * gives (SIG-61 comment 40194): a disclosure consent to the app, under the Privacy Act, with no
- * de-identification consent. The two CDR bases are kept for a sponsored arrangement, if Biza
- * confirms one.
+ * de-identification consent. It is the only one: ruling N-1 (9 November 2026) found Moroku is not
+ * a sponsored affiliate, so the two CDR bases recorded earlier are removed.
  */
-export const CONSENT_BASES = [
-  "cdr-service",
-  "cdr-service-and-deidentification",
-  "openfeed-onward-disclosure",
-] as const;
+export const CONSENT_BASES = ["openfeed-onward-disclosure"] as const;
 
 export type RealSource = (typeof REAL_SOURCES)[number];
 

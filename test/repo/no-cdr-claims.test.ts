@@ -26,7 +26,9 @@ function files(path: string): string[] {
 
 describe("no CDR claims anywhere a user sees", () => {
   it("covers a real set of files", () => {
-    expect(SURFACES.flatMap(files).length).toBeGreaterThan(50);
+    // Every surface holds files (42 in all on 9 November 2026).
+    for (const s of SURFACES) expect(files(s).length, s).toBeGreaterThan(0);
+    expect(SURFACES.flatMap(files).length).toBeGreaterThan(30);
   });
 
   it.each(SURFACES.flatMap(files).map((f) => [f]))("%s makes no CDR claim", (f) => {

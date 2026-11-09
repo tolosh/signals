@@ -1,7 +1,9 @@
 // SIG-61: a team member's connection to openfeed, from start to the secure store.
 // - startConnect makes a fresh state and PKCE verifier (32 random bytes each), pushes the
 //   authorisation request and remembers {state -> consumer, verifier} for CONNECT_TTL_MINUTES.
-//   The person goes to openfeed's authorize URL and gives the disclosure consent there.
+//   The person goes to openfeed's authorize URL and gives the disclosure consent there. Before
+//   that, connectStartStep shows Moroku's APP 5 collection notice (notice.ts; ruling N-1), and
+//   startConnect refuses unless the current notice version was acknowledged.
 // - completeConnect takes openfeed's callback (code, state) once. It exchanges the code for the
 //   person's DPoP-bound tokens, records the consent and ingests into the secure store (ingest.ts).
 //   An unknown, expired or replayed state stores nothing.
@@ -14,6 +16,7 @@ import { createHash } from "node:crypto";
 import type { OpenfeedClient } from "../../connectors/openfeed/client.js";
 import { consentRecord } from "./consent.js";
 import { ingestGrant, type IngestSummary } from "./ingest.js";
+import { COLLECTION_NOTICE, noticePage } from "./notice.js";
 import type { Sealer } from "./sealer.js";
 import { assertConsumerRef, type ConsumerStore } from "./stores.js";
 
@@ -27,7 +30,13 @@ export function consumerRefFromInvite(invite: string): string {
   return `cr_${h.slice(0, 32)}`;
 }
 
-export type PendingConnect = { consumer_ref: string; code_verifier: string; started_at: string };
+export type PendingConnect = {
+  consumer_ref: string;
+  code_verifier: string;
+  started_at: string;
+  /** The collection notice version the person was shown before going to openfeed. */
+  notice_version: string;
+};
 export interface PendingConnects {
   put(state: string, p: PendingConnect): Promise<void>;
   /** Returns and removes the entry: a state is taken once. */
@@ -63,6 +72,8 @@ export async function startConnect(
   o: { consumerRef: string; at: string; noticeVersion: string },
 ): Promise<{ authorizeUrl: string; state: string }> {
   assertConsumerRef(o.consumerRef);
+  if (o.noticeVersion !== COLLECTION_NOTICE.version)
+    throw new Error("The current collection notice must be shown and acknowledged first");
   const state = b64(deps.random(32));
   const codeVerifier = b64(deps.random(32));
   const { authorizeUrl } = await deps.client.pushAuthorization({ state, codeVerifier });
@@ -70,6 +81,7 @@ export async function startConnect(
     consumer_ref: o.consumerRef,
     code_verifier: codeVerifier,
     started_at: o.at,
+    notice_version: o.noticeVersion,
   });
   return { authorizeUrl, state };
 }
@@ -88,7 +100,7 @@ export async function completeConnect(
     consumerRef: p.consumer_ref,
     recordedOn: today,
     purposeVersion: o.purposeVersion,
-    noticeVersion: "",
+    noticeVersion: p.notice_version,
   });
   // The data runs to the day before connection: today's transactions may not be posted yet.
   const asOf = new Date(Date.parse(`${today}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
@@ -98,12 +110,33 @@ export async function completeConnect(
   );
 }
 
-/** Stub, tests first. */
 export type StartStep =
   { kind: "notice"; html: string } | { kind: "redirect"; location: string } | { kind: "refused" };
+
+/**
+ * GET /connect/start (ruling N-1, 9 November 2026): the APP 5 collection notice comes first. A
+ * request without an acknowledgement of the current notice version gets the notice, with a link
+ * that carries the acknowledgement; only that pushes the authorisation request and redirects to
+ * openfeed. A malformed invite is refused before anything is shown.
+ */
 export async function connectStartStep(
-  _deps: ConnectDeps,
-  _o: { invite: string; notice?: string; at: string },
+  deps: ConnectDeps,
+  o: { invite: string; notice?: string; at: string },
 ): Promise<StartStep> {
-  return { kind: "refused" };
+  let consumerRef: string;
+  try {
+    consumerRef = consumerRefFromInvite(o.invite);
+  } catch {
+    return { kind: "refused" };
+  }
+  if (o.notice !== COLLECTION_NOTICE.version) {
+    const q = new URLSearchParams({ invite: o.invite, notice: COLLECTION_NOTICE.version });
+    return { kind: "notice", html: noticePage(`/connect/start?${q.toString()}`) };
+  }
+  const { authorizeUrl } = await startConnect(deps, {
+    consumerRef,
+    at: o.at,
+    noticeVersion: o.notice,
+  });
+  return { kind: "redirect", location: authorizeUrl };
 }

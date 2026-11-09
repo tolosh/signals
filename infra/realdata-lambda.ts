@@ -5,19 +5,17 @@
 // - poll: every 5 minutes (EventBridge Scheduler), the revocation poller. Its guarded log line
 //   carries `overdue` and `at_risk`, which the stack's metric filters turn into the PurgeOverdue
 //   and DetectionAtRisk alarms.
-// - start: GET /connect/start?invite=<token>. Derives the person's opaque reference from the
-//   invite, pushes the authorisation request and redirects to openfeed.
+// - start: GET /connect/start?invite=<token>. Shows Moroku's APP 5 collection notice first; with
+//   &notice=<current version> it derives the person's opaque reference from the invite, pushes
+//   the authorisation request and redirects to openfeed.
 // - callback: GET /v1/openfeed/callback?code&state. Exchanges the code and ingests.
 // Every line of output goes through realdataLog (the T2 guard). Responses carry no data.
 import { KMSClient } from "@aws-sdk/client-kms";
 import { S3Client } from "@aws-sdk/client-s3";
 import { OpenfeedClient } from "../src/connectors/openfeed/client.js";
 import { kmsSigner } from "../src/connectors/openfeed/kms-signer.js";
-import {
-  completeConnect,
-  consumerRefFromInvite,
-  startConnect,
-} from "../src/research/realdata/connect.js";
+import { completeConnect, connectStartStep } from "../src/research/realdata/connect.js";
+import { DISCLOSURE_PURPOSE } from "../src/research/realdata/notice.js";
 import {
   S3PendingConnects,
   S3RevocationState,
@@ -29,8 +27,8 @@ import { kmsSealer } from "../src/research/realdata/sealer.js";
 import { STORES } from "../src/research/realdata/stores.js";
 import { randomBytes, randomUUID } from "node:crypto";
 
-/** The version of the purpose text shown with the invite; it names the truth comparison. */
-const PURPOSE_VERSION = "1";
+/** The disclosure purpose registered with openfeed (N-2); it names the truth comparison. */
+const PURPOSE_VERSION = DISCLOSURE_PURPOSE.version;
 
 function env(name: string): string {
   const v = process.env[name];
@@ -90,10 +88,10 @@ export async function poll(): Promise<void> {
 }
 
 export async function start(event: HttpEvent): Promise<HttpResult> {
+  const q = event.queryStringParameters ?? {};
   try {
-    const consumerRef = consumerRefFromInvite(event.queryStringParameters?.invite ?? "");
     const w = wiring();
-    const { authorizeUrl } = await startConnect(
+    const step = await connectStartStep(
       {
         client: w.client,
         pending: w.pending,
@@ -101,12 +99,28 @@ export async function start(event: HttpEvent): Promise<HttpResult> {
         sealer: w.sealer,
         random: randomBytes,
       },
-      { consumerRef, at: new Date().toISOString() },
+      {
+        invite: q.invite ?? "",
+        ...(q.notice ? { notice: q.notice } : {}),
+        at: new Date().toISOString(),
+      },
     );
+    if (step.kind === "refused") {
+      realdataLog("connect_started", { status: "failed" });
+      return page(400, "This invite link can't be used. Ask for a new one.");
+    }
+    if (step.kind === "notice") {
+      realdataLog("connect_notice_shown", { status: "complete" });
+      return {
+        statusCode: 200,
+        headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
+        body: step.html,
+      };
+    }
     realdataLog("connect_started", { status: "complete" });
     return {
       statusCode: 302,
-      headers: { location: authorizeUrl, "cache-control": "no-store" },
+      headers: { location: step.location, "cache-control": "no-store" },
       body: "",
     };
   } catch {

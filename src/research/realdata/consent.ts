@@ -41,6 +41,8 @@ export type ConsentRecord = {
   deidentification_consent: false;
   /** The version of the purpose text the person agreed to (it names the truth comparison). */
   purpose_version: string;
+  /** The version of Moroku's APP 5 collection notice shown before openfeed (notice.ts). */
+  notice_version: string;
   recorded_on: string;
 };
 
@@ -59,6 +61,7 @@ export function consentRecord(o: {
   if (!ISO_DATE.test(o.recordedOn)) throw new Error("recordedOn is an ISO date");
   if (!PURPOSE_VERSION.test(o.purposeVersion))
     throw new Error("purposeVersion is a version number");
+  if (!PURPOSE_VERSION.test(o.noticeVersion)) throw new Error("noticeVersion is a version number");
   return {
     consumer_ref: o.consumerRef,
     data_source: OPENFEED_CONSENT_MODEL.source,
@@ -66,6 +69,7 @@ export function consentRecord(o: {
     disclosure_consent: true,
     deidentification_consent: false,
     purpose_version: o.purposeVersion,
+    notice_version: o.noticeVersion,
     recorded_on: o.recordedOn,
   };
 }
