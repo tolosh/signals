@@ -8,8 +8,11 @@
 /**
  * 1.1.0 (SIG-42 re-review direction 5, 8 November 2026): a liability repayment is never removed
  * as sensitive spending, whatever its merchant code. Each engine records this version.
+ * 1.2.0 (SIG-42 review 9, C3, 9 November 2026): the exemption covers repayments, which are
+ * debits, only. A credit in a liability category that carries a sensitive MCC (a BNPL refund
+ * from a dentist) reveals as much as the purchase, so it is removed.
  */
-export const SENSITIVE_METHOD_VERSION = "1.1.0";
+export const SENSITIVE_METHOD_VERSION = "1.2.0";
 
 /**
  * Enrich categories for repayments of a loan, card, BNPL, SACC, mortgage or wage advance. They
@@ -67,7 +70,7 @@ export const SENSITIVE_MCCS: Readonly<Record<string, string>> = Object.freeze({
   "8699": "unions (membership organisations, not elsewhere classified)",
 });
 
-type Tx = { transactionId: string; merchantCategoryCode?: string };
+type Tx = { transactionId: string; merchantCategoryCode?: string; amount?: string };
 
 /** Medical and pharmacy: the codes and MCCs D29 lets into the living-expense total, unitemised. */
 const HEALTH_CATEGORIES: ReadonlySet<string> = new Set(["healthcare", "medical", "pharmacy"]);
@@ -78,9 +81,13 @@ const isHealthMcc = (mcc: string | undefined) =>
  * D29: a sensitive line that is health spending (medical or pharmacy). It counts towards the
  * living-expense total as an aggregate only; it never feeds a signal or a decisioning input.
  */
+/** A liability repayment: a line in a liability category that isn't a credit. */
+const isRepayment = (t: Tx, category: string | undefined) =>
+  category !== undefined && LIABILITY_CATEGORIES.has(category) && !(Number(t.amount) > 0);
+
 export function isHealth(t: Tx, categories?: Readonly<Record<string, string>>): boolean {
   const category = categories?.[t.transactionId];
-  if (category !== undefined && LIABILITY_CATEGORIES.has(category)) return false;
+  if (isRepayment(t, category)) return false;
   if (category !== undefined && SENSITIVE_CATEGORIES.has(category))
     return HEALTH_CATEGORIES.has(category);
   return isHealthMcc(t.merchantCategoryCode);
@@ -88,11 +95,11 @@ export function isHealth(t: Tx, categories?: Readonly<Record<string, string>>): 
 
 /**
  * True when GR-3 excludes the transaction: by its Enrich category, or by its MCC. A liability
- * repayment is never excluded (1.1.0).
+ * repayment is never excluded (1.1.0); a liability credit with a sensitive MCC is (1.2.0).
  */
 export function isSensitive(t: Tx, categories?: Readonly<Record<string, string>>): boolean {
   const category = categories?.[t.transactionId];
-  if (category !== undefined && LIABILITY_CATEGORIES.has(category)) return false;
+  if (isRepayment(t, category)) return false;
   if (category !== undefined && SENSITIVE_CATEGORIES.has(category)) return true;
   return t.merchantCategoryCode !== undefined && t.merchantCategoryCode in SENSITIVE_MCCS;
 }

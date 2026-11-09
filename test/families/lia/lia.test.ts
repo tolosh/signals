@@ -64,7 +64,8 @@ describe("T1: each LIA signal at each state it defines", () => {
       [
         "LIA-01",
         "green",
-        { lines: loan("SOCIETYONE") },
+        // Review 9 ruling 1: green needs the exact type, so the data names it a personal loan.
+        { lines: loan("SOCIETYONE PERSONAL") },
         { declared_liabilities: [{ type: "personal_loan", provider: "SOCIETYONE" }] },
       ],
       ["LIA-01", "amber", { lines: loan("SOCIETYONE") }],
@@ -132,11 +133,13 @@ describe("T1: each LIA signal at each state it defines", () => {
 describe("T2: a disclosed car loan whose repayments are observed", () => {
   it("is not flagged by LIA-01", () => {
     const r = run(
-      { lines: loan("MACQUARIE LEASING", 560) },
+      // Review 9 ruling 1: green needs the exact type, so the data names it a car loan; and
+      // ruling 3: the liability is named by its lender's first word.
+      { lines: loan("MACQUARIE LEASING CAR", 560) },
       { declared_liabilities: [{ type: "car_loan", provider: "MACQUARIE LEASING" }] },
     );
     expect(stateOf(r, "LIA-01")).toBe("green");
-    expect(r.liabilities.find((l) => l.provider === "MACQUARIE LEASING")?.declared).toBe(true);
+    expect(r.liabilities.find((l) => l.provider === "MACQUARIE")?.declared).toBe(true);
   });
 });
 
@@ -184,7 +187,8 @@ describe("T6: deterministic", () => {
 describe("T7 (negative control): the only credit is disclosed and on time", () => {
   it("yields no amber or red", () => {
     const r = run(
-      { lines: loan("SOCIETYONE") },
+      // Review 9 ruling 1: the data names the loan's type, as the declaration does.
+      { lines: loan("SOCIETYONE PERSONAL") },
       {
         declared_liabilities: [{ type: "personal_loan", provider: "SOCIETYONE" }],
         assessed_surplus_monthly: 2000,
@@ -229,5 +233,5 @@ describe("LIA-01 is built on SIG-18's detector, and says how far to trust it", (
 });
 
 describe("version", () => {
-  it("is 1.3.0 (SIG-42 re-review ruling)", () => expect(LIA_VERSION).toBe("1.3.0"));
+  it("is 1.3.1 (SIG-42 review 9 rulings)", () => expect(LIA_VERSION).toBe("1.3.1"));
 });

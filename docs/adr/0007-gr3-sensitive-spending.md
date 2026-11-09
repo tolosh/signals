@@ -19,6 +19,29 @@ G-2 and G-3 are accepted. The interpretations below are kept as they were record
   ENR-30.
 - **G-3 accepted** as a candidate, versioned with the definitions (`SENSITIVE_METHOD_VERSION`).
 
+## Review 9, 9 November 2026 (gate 1.2.0)
+
+- **C2, the scan.** The regex scan is replaced by a taint check over the TypeScript syntax tree
+  (`test/repo/gr3-taint.ts`). It follows every read of `transactions` back to a value the gate
+  returned, through variables, property and element access (literal or constant keys), array
+  methods and their callbacks, for-of, destructuring at any depth, spreads, object-literal
+  properties (one level), and local functions' parameters (by their call sites, or by their
+  declared type's literals). Anything it can't show gated fails. Review 9's three gaps are
+  cases: nested destructuring, computed keys, and a token `withoutSensitive()` call beside an
+  ungated read. Also flagged: an object that carries both a gated feed and the raw one. With
+  INC's gate call removed, the scan fails.
+- **C3.** A credit in a liability category that carries a sensitive MCC (a BNPL refund from a
+  dentist) is removed. The exemption covers repayments, which are debits, only. Gate 1.2.0;
+  with the change reverted, 1 test fails. INC (1.2.2), observed income (1.0.1) and observed
+  expenses (1.1.1) keep their versions: their output changes only on such a credit, and each
+  records the gate version it ran (for the reviewer).
+- **Ruling 3 (D29).** A new test feeds every engine liability narratives with a sensitive word
+  after the lender (review 9's C4 probes among them), uncategorised and with no sensitive MCC,
+  and fails on any sensitive keyword anywhere in any output. Income payers stay outside it
+  (G-2, unchanged).
+- **Correction (C6).** "Only their version and that field changed" below was wrong for observed
+  income: one exclusion counter also moves on some inputs. The income figures don't change.
+
 ## Short re-review direction, 8 November 2026, 19:40 (gate 1.1.0)
 
 The re-review at `11e2ef4` found the GR-3 test couldn't catch an LIA regression, scan gaps, over-
