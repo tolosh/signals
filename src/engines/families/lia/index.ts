@@ -223,6 +223,8 @@ export function exactName(text: string): string | null {
 }
 /** The detector's credit categories: a line in one is named by its narrative, else its biller. */
 const CREDIT_LINE_CATEGORIES = new Set(["loan_repayment", "bnpl", "sacc_loan", "wage_advance"]);
+/** The account categories the detector reads as a liability in the grant. */
+const LIABILITY_ACCOUNTS = new Set(["CRED_AND_CHRG_CARDS", "PERS_LOANS"]);
 const sum = (xs: number[]) => xs.reduce((s, x) => s + x, 0);
 const round2 = (x: number) => Math.round(x * 100) / 100;
 const median = (xs: number[]) => {
@@ -334,6 +336,9 @@ export function assessLia(input: LiaInput): LiaResult {
   const productNames = new Map(
     feed.accounts.map((a) => [a.account.accountId, a.account.productName ?? ""]),
   );
+  const productCategories = new Map(
+    feed.accounts.map((a) => [a.account.accountId, a.account.productCategory ?? ""]),
+  );
   const typeOf = (d: DetectedLiability): string => {
     if (d.family !== "loan") return d.family;
     const text = upper(
@@ -351,8 +356,9 @@ export function assessLia(input: LiaInput): LiaResult {
   // narrative (its biller's name for a card repaid by BPAY). Sources that disagree give no name.
   const nameOfFound = (d: DetectedLiability): string | null => {
     const names = [
+      // Only a card or loan account names the liability, never the account repayments leave.
       ...d.account_ids
-        .filter((id) => d.sources.includes("account") && productNames.has(id))
+        .filter((id) => LIABILITY_ACCOUNTS.has(productCategories.get(id) ?? ""))
         .map((id) => productNames.get(id) ?? ""),
       ...d.evidence.map((id) => {
         const l = byId.get(id);
