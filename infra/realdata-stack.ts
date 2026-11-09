@@ -42,6 +42,9 @@ export type RealDataProps = StackProps & {
 
 const NAMESPACE = "MorokuSignals/RealData";
 
+/** Stub, tests first. */
+export const REAL_DATA_ROLES: string[] = [];
+
 export class SignalsRealDataStack extends Stack {
   constructor(scope: Construct, id: string, props: RealDataProps) {
     super(scope, id, props);
