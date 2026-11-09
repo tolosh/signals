@@ -558,8 +558,10 @@ describe("D29: no output echoes a raw narrative", () => {
   it("the check isn't vacuous: LIA names the lenders", () => {
     const text = JSON.stringify(outputs.find(([n]) => n === "LIA")?.[1]);
     // Ruling 3 (9 November 2026): a lender is named by the first word of its narrative, for every
-    // family now (the interim rule ruled for BNPL), so Cash Converters is "CASH".
-    for (const lender of ["HUMM", "AFTERPAY", "SOCIETYONE", "CASH"]) expect(text).toContain(lender);
+    // family now (the interim rule ruled for BNPL). The 10 November ruling: a known multi-word
+    // lender is matched first, so Cash Converters is "CASH CONVERTERS", not "CASH".
+    for (const lender of ["HUMM", "AFTERPAY", "SOCIETYONE", "CASH CONVERTERS"])
+      expect(text).toContain(lender);
     expect(narratives.length).toBeGreaterThan(8);
   });
 });
@@ -605,12 +607,12 @@ describe("GR-3 gate version", () => {
     ).toMatchObject(v);
     expect(expensesOf(base)).toMatchObject(v);
   });
-  it("LIA is 1.3.1 (review 9 rulings); INC 1.2.2, observed income 1.0.1, observed expenses 1.1.1", () => {
+  it("LIA is 1.3.2 (the 10 November rulings); INC 1.2.2, observed income 1.0.1, observed expenses 1.1.1", () => {
     // Gate 1.2.0 changes their output only on a liability credit carrying a sensitive MCC; each
     // records the gate version it ran, so their own versions stand (for the reviewer).
     expect(INC_VERSION).toBe("1.2.2");
     expect(INCOME_METHOD_VERSION).toBe("1.0.1");
-    expect(LIA_VERSION).toBe("1.3.1");
+    expect(LIA_VERSION).toBe("1.3.2");
     expect(OBSERVED_EXPENSES_METHOD_VERSION).toBe("1.1.1");
   });
 });

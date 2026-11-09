@@ -4,8 +4,11 @@
 // against Zíp; an empty name against "-"). This sweep is my own re-implementation, not the
 // reviewer's harness: random cases from a fixed seed, and an oracle written from the ruling's text
 // alone, independent of the engine's code. LIA-01 must be green exactly when the oracle finds a
-// declaration of the exact type whose name is the same after ruling 2's normalisation and has at
+// declaration of a matching type whose name is the same after ruling 2's normalisation and has at
 // least 3 letters; otherwise amber. Never red.
+// The 10 November 2026 ruling (06:39) refines "matching type": the exact type, or, for a loan the
+// data doesn't type (this sweep's "loan", a "<NAME> LOAN" narrative), a declared personal_loan,
+// car_loan or loan. Mortgages and cards never match a loan declaration, or each other.
 import { describe, expect, it } from "vitest";
 import { repeat, run, signal, type Line } from "./script.js";
 
@@ -77,6 +80,11 @@ function linesFor(type: Type, name: string, monthly: number): Line[] {
   }
 }
 
+/** The 10 November ruling, read independently: missing type data isn't a conflict. */
+const UNTYPED_MATCHES: readonly string[] = ["personal_loan", "car_loan", "loan"];
+const typeMatches = (found: Type, declared: Type) =>
+  found === declared || (found === "loan" && UNTYPED_MATCHES.includes(declared));
+
 /** Ruling 2, read independently: NFC, case fold, digits and legal suffixes out, spacing tidied. */
 function oracleName(name: string): string | null {
   const s = name
@@ -136,7 +144,7 @@ function cases(n: number, seed: number): Case[] {
 }
 
 const N = 7500;
-describe(`the ${N}-case sweep (seed 9): green exactly when the name and the exact type match`, () => {
+describe(`the ${N}-case sweep (seed 9): green exactly when the name and a matching type match`, () => {
   const all = cases(N, 9);
   const results = all.map((c) => {
     const s = signal(
@@ -145,13 +153,14 @@ describe(`the ${N}-case sweep (seed 9): green exactly when the name and the exac
     );
     const want = oracleName(c.lender);
     const exact =
-      want !== null && c.declared.some((d) => d.type === c.type && oracleName(d.provider) === want);
+      want !== null &&
+      c.declared.some((d) => typeMatches(c.type, d.type) && oracleName(d.provider) === want);
     return { c, state: s.state, exact };
   });
   const show = (x: (typeof results)[number]) =>
     `${x.c.type} ${x.c.lender} $${x.c.monthly} vs ${JSON.stringify(x.c.declared)}: ${x.state}`;
 
-  it("no green leak: never green unless the name and the exact type match", () => {
+  it("no green leak: never green unless the name and a matching type match", () => {
     const leaks = results.filter((x) => x.state === "green" && !x.exact).map(show);
     expect(
       leaks.length,
@@ -176,14 +185,26 @@ describe(`the ${N}-case sweep (seed 9): green exactly when the name and the exac
   });
   it("isn't vacuous: it covers each kind of review 9 leak", () => {
     const has = (f: (c: Case) => boolean) => all.filter(f).length;
-    // exact name, wrong exact type
+    // exact name, a conflicting type
     expect(
       has((c) =>
         c.declared.some(
-          (d) => d.type !== c.type && oracleName(d.provider) === oracleName(c.lender),
+          (d) => !typeMatches(c.type, d.type) && oracleName(d.provider) === oracleName(c.lender),
         ),
       ),
     ).toBeGreaterThan(500);
+    // exact name, an untyped loan declared as a personal or car loan (the 10 November ruling)
+    expect(
+      has((c) =>
+        c.declared.some(
+          (d) =>
+            c.type === "loan" &&
+            d.type !== "loan" &&
+            typeMatches(c.type, d.type) &&
+            oracleName(d.provider) === oracleName(c.lender),
+        ),
+      ),
+    ).toBeGreaterThan(30);
     // names differing by digits or a legal suffix
     expect(
       has((c) => c.declared.some((d) => /\d|Pty Ltd|LIMITED/.test(d.provider))),

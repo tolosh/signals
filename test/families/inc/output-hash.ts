@@ -26,12 +26,16 @@ const as121 = (r: ReturnType<typeof assessInc>) => {
   return { ...rest, version: "1.2.1" };
 };
 
-/** One sha256 over the INC result of every set v1 applicant, one JSON line each. */
-export function setV1Hash(lookback: "history" | 6): string {
+/**
+ * One sha256 over the INC result of every set v1 applicant, one JSON line each. SIG-42 ruling 3
+ * (10 November 2026): the versions each result carried are returned too, for the test to pin.
+ */
+export function setV1Hash(lookback: "history" | 6): { hash: string; versions: string[] } {
   const { seed } = JSON.parse(
     readFileSync("research/datasets/synthetic-v1.manifest.json", "utf8"),
   ) as { seed: number };
   const hash = createHash("sha256");
+  const versions = new Set<string>();
   for (const spec of population(seed)) {
     const a = generateApplicant(spec, seed);
     const r = assessInc({
