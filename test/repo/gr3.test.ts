@@ -27,6 +27,7 @@ import {
   isSensitive,
   withoutSensitive,
 } from "../../src/engines/sensitive.js";
+import { scanTransactionsReads } from "./gr3-taint.js";
 
 const AS_OF = "2026-10-31";
 const END = dayOf(AS_OF);
@@ -556,8 +557,9 @@ describe("D29: no output echoes a raw narrative", () => {
   });
   it("the check isn't vacuous: LIA names the lenders", () => {
     const text = JSON.stringify(outputs.find(([n]) => n === "LIA")?.[1]);
-    for (const lender of ["HUMM", "AFTERPAY", "SOCIETYONE", "CASH CONVERTERS"])
-      expect(text).toContain(lender);
+    // Ruling 3 (9 November 2026): a lender is named by the first word of its narrative, for every
+    // family now (the interim rule ruled for BNPL), so Cash Converters is "CASH".
+    for (const lender of ["HUMM", "AFTERPAY", "SOCIETYONE", "CASH"]) expect(text).toContain(lender);
     expect(narratives.length).toBeGreaterThan(8);
   });
 });
@@ -565,8 +567,8 @@ describe("D29: no output echoes a raw narrative", () => {
 // SIG-42 re-review direction 8: the gate's version is part of each engine's recorded inputs, and
 // the engines whose output it changed are bumped.
 describe("GR-3 gate version", () => {
-  it("is 1.1.0: liability repayments are no longer removed", () => {
-    expect(gate.SENSITIVE_METHOD_VERSION).toBe("1.1.0");
+  it("is 1.2.0: liability repayments are kept, and a liability credit with a sensitive MCC removed", () => {
+    expect(gate.SENSITIVE_METHOD_VERSION).toBe("1.2.0");
   });
   it("is recorded by every engine that reads the gate", () => {
     const v = { gr3_gate_version: gate.SENSITIVE_METHOD_VERSION };
@@ -603,15 +605,20 @@ describe("GR-3 gate version", () => {
     ).toMatchObject(v);
     expect(expensesOf(base)).toMatchObject(v);
   });
-  it("bumps INC to 1.2.2, observed income to 1.0.1, LIA to 1.3.0 and observed expenses to 1.1.1", () => {
+  it("LIA is 1.3.1 (review 9 rulings); INC 1.2.2, observed income 1.0.1, observed expenses 1.1.1", () => {
+    // Gate 1.2.0 changes their output only on a liability credit carrying a sensitive MCC; each
+    // records the gate version it ran, so their own versions stand (for the reviewer).
     expect(INC_VERSION).toBe("1.2.2");
     expect(INCOME_METHOD_VERSION).toBe("1.0.1");
-    expect(LIA_VERSION).toBe("1.3.0");
+    expect(LIA_VERSION).toBe("1.3.1");
     expect(OBSERVED_EXPENSES_METHOD_VERSION).toBe("1.1.1");
   });
 });
 
-describe("GR-3 static scan: modules under src/engines/ that read transactions", () => {
+describe("GR-3 static scan: every read of transactions under src/engines/ is gated", () => {
+  // Review 9 (C2): the scan is a taint check over the syntax tree (test/repo/gr3-taint.ts), which
+  // follows each read back to the gate. The regex scan it replaces missed nested destructuring,
+  // computed keys, and a token withoutSensitive() call placed beside an ungated read.
   /** Reads transactions without the gate, on purpose. Adding to this list needs a reason. */
   const UNGATED: Record<string, string> = {
     "engines/sensitive.ts": "the gate itself",
@@ -626,42 +633,61 @@ describe("GR-3 static scan: modules under src/engines/ that read transactions", 
       const p = join(dir, f);
       return statSync(p).isDirectory() ? files(p) : p.endsWith(".ts") ? [p] : [];
     });
-  // `.transactions`; `["transactions"]` or `?.["transactions"]`; or destructured anywhere: in a
-  // for-of, a declaration or a parameter, `{ transactions }` or `{ transactions: tx }`.
-  const READS =
-    /\.transactions\b|\[\s*["'`]transactions["'`]\s*\]|\{[^{}]*\btransactions\b[^{}]*\}\s*(?:of\b|=(?!>)|:|\)|,)/;
-  const readers = files("src/engines")
-    .map((p) => p.replace(/\\/g, "/").replace(/^src\//, ""))
-    .filter((p) => READS.test(readFileSync(`src/${p}`, "utf8")));
+  const ungatedIn = (src: string) => scanTransactionsReads(src).filter((r) => !r.gated);
+  const GATE = 'import { withoutSensitive } from "../sensitive.js";\n';
 
   it.each([
-    "for (const a of feed.accounts) use(a.transactions);",
-    'const tx = account["transactions"];',
-    "const tx = account?.['transactions'];",
-    "for (const { transactions } of feed.accounts) use(transactions);",
-    "const { account, transactions } = a;",
-    "const { transactions: tx } = a;",
-    "feed.accounts.map(({ account, transactions }) => transactions.length);",
-    "function f({ transactions }: Acc) { return transactions; }",
-  ])("the scan finds a reader written as: %s", (snippet) => {
-    expect(READS.test(snippet)).toBe(true);
+    // the forms the regex scan found
+    "export function f(feed: F) { for (const a of feed.accounts) use(a.transactions); }",
+    'export function f(account: A) { return account["transactions"]; }',
+    "export function f(account: A) { return account?.['transactions']; }",
+    "export function f(feed: F) { for (const { transactions } of feed.accounts) use(transactions); }",
+    "export function f(a: A) { const { account, transactions } = a; return transactions; }",
+    "export function f(feed: F) { return feed.accounts.map(({ transactions }) => transactions.length); }",
+    "export function f({ transactions }: Acc) { return transactions; }",
+    // review 9's three gaps
+    "export function f(input: I) { const { feed: { accounts: [{ transactions }] } } = input; return transactions; }",
+    'const K = "transactions";\nexport function f(a: A) { return a[K]; }',
+    'const K = "transactions";\nexport function f(a: A) { const { [K]: tx } = a; return tx; }',
+    "export function f(input: I) { const feed = withoutSensitive(input.feed); for (const a of input.feed.accounts) use(a.transactions); return feed; }",
+    // and its neighbours
+    "export function f(input: I) { const g = withoutSensitive(input.feed); const ctx = { feed: input.feed, g }; return ctx.feed.accounts.map((a) => a.transactions); }",
+    "export function f(input: I) { const g = withoutSensitive(input.feed); return { ...g, accounts: input.feed.accounts }.accounts.map((a) => a.transactions); }",
+  ])("flags an ungated read written as: %s", (snippet) => {
+    expect(ungatedIn(GATE + snippet).length).toBeGreaterThan(0);
   });
-  it.each(['const label = "transactions";', "type T = { transactions: Tx[] };", "// transactions"])(
-    "and doesn't flag: %s",
-    (snippet) => {
-      expect(READS.test(snippet)).toBe(false);
-    },
-  );
 
-  it("every reader not on the list imports and applies withoutSensitive", () => {
-    const ungated = readers.filter((p) => {
-      const text = readFileSync(`src/${p}`, "utf8");
-      return (
-        !/import[^;]*\bwithoutSensitive\b[^;]*sensitive\.js/.test(text) ||
-        !/withoutSensitive\(/.test(text)
-      );
-    });
+  it.each([
+    "export function f(input: I) { const feed = withoutSensitive(input.feed); return feed.accounts.flatMap((acc) => acc.transactions.map((t) => t.amount)); }",
+    "export function f(input: I) { const feed = withoutSensitive(input.feed); for (const { transactions } of feed.accounts) use(transactions); }",
+    "export function f(input: I) { const feed = withoutSensitive(input.feed); const w = { ...feed, accounts: feed.accounts.map((a) => ({ ...a, transactions: a.transactions.filter(ok) })) }; return w.accounts.map((a) => a.transactions); }",
+    "type Ctx = { feed: F; end: number };\nfunction g(c: Ctx) { return c.feed.accounts.map((a) => a.transactions); }\nexport function f(input: I) { const feed = withoutSensitive(input.feed); const ctx: Ctx = { feed, end: 1 }; return g(ctx); }",
+    "function g(feed: F) { return feed.accounts.map((a) => a.transactions); }\nexport function f(input: I) { return g(withoutSensitive(input.feed)); }",
+    'const label = "transactions";\nexport type T = { transactions: Tx[] };\n// transactions',
+  ])("passes a gated read, or no read: %s", (snippet) => {
+    expect(ungatedIn(GATE + snippet)).toEqual([]);
+  });
+
+  it("every module not on the list reads transactions only through the gate", () => {
+    const ungated = files("src/engines")
+      .map((p) => p.replace(/\\/g, "/").replace(/^src\//, ""))
+      .filter((p) => ungatedIn(readFileSync(`src/${p}`, "utf8")).length > 0);
     expect(ungated.sort()).toEqual(Object.keys(UNGATED).sort());
+  });
+  it("the gated engines do read transactions (the scan isn't vacuous)", () => {
+    for (const p of [
+      "engines/evidence/checks.ts",
+      "engines/families/inc/index.ts",
+      "engines/families/lia/index.ts",
+      "engines/affordability/income.ts",
+    ]) {
+      const reads = scanTransactionsReads(readFileSync(`src/${p}`, "utf8"));
+      expect(reads.length, p).toBeGreaterThan(0);
+      expect(
+        reads.every((r) => r.gated),
+        p,
+      ).toBe(true);
+    }
   });
   it("streamsOf is called from assessInc only", () => {
     const callers = files("src")
@@ -670,5 +696,128 @@ describe("GR-3 static scan: modules under src/engines/ that read transactions", 
     expect(callers.sort()).toEqual(
       ["src/engines/families/inc/index.ts", "src/engines/families/inc/streams.ts"].sort(),
     );
+  });
+});
+
+// Review 9 (C3): a credit categorised as a liability that carries a medical MCC, such as a BNPL
+// refund from a dentist, is sensitive. Only liability repayments, which are debits, are exempt.
+describe("GR-3: the liability exemption covers repayments (debits) only", () => {
+  const cats = { r: "bnpl", c: "bnpl" };
+  it("a BNPL repayment carrying a dental MCC is kept", () => {
+    expect(
+      isSensitive({ transactionId: "r", merchantCategoryCode: "8021", amount: "-45.00" }, cats),
+    ).toBe(false);
+  });
+  it("a BNPL refund carrying a dental MCC is removed, in every liability category", () => {
+    for (const category of [
+      "loan_repayment",
+      "credit_card",
+      "bnpl",
+      "sacc_loan",
+      "mortgage",
+      "wage_advance",
+    ])
+      expect(
+        isSensitive(
+          { transactionId: "c", merchantCategoryCode: "8021", amount: "45.00" },
+          { c: category },
+        ),
+        category,
+      ).toBe(true);
+  });
+  it("a liability credit with no sensitive MCC is kept (a loan disbursement)", () => {
+    expect(isSensitive({ transactionId: "c", amount: "5000.00" }, { c: "loan_repayment" })).toBe(
+      false,
+    );
+  });
+  it("the gate is 1.2.0", () => {
+    expect(gate.SENSITIVE_METHOD_VERSION).toBe("1.2.0");
+  });
+});
+
+// Ruling 3 (9 November 2026, 20:29): no engine's output text carries a sensitive keyword, wherever
+// it sits in a narrative, not only as a whole narrative. Every liability family is fed narratives
+// with the lender followed by a sensitive word (review 9's C4 probes among them), uncategorised
+// as sensitive and with no sensitive MCC, so the gate can't remove them: only naming the lender
+// alone keeps the words out. Income payers stay outside this check (G-2, ruled unchanged).
+describe("D29: no engine's output text carries a sensitive keyword", () => {
+  const KEYWORDS =
+    /\b(IVF|CLINIC|ONCOLOGY|PSYCH\w*|APPT|DENTAL|SMILE|HOSPITAL|MEDICAL|PHARMACY|CHEMIST|PHYSIO|GP|CHURCH|PARISH|UNION|PARTY)\b/i;
+  const lines: Line[] = [
+    ...monthly(12, 4, { description: "SALARY BETA LOGISTICS", amount: 900 }),
+    ...monthly(6, 9, {
+      description: "MACQUARIE IVF CLINIC REF 4411",
+      amount: -300,
+      category: "loan_repayment",
+    }),
+    ...Array.from({ length: 6 }, (_, i) => ({
+      ago: 10 + i * 14,
+      description: "NIMBLE REPAY ONCOLOGY BILL",
+      amount: -95,
+      category: "sacc_loan",
+    })),
+    ...Array.from({ length: 6 }, (_, i) => ({
+      ago: 12 + i * 14,
+      description: "BEFOREPAY PSYCH APPT",
+      amount: 200,
+    })),
+    ...Array.from({ length: 6 }, (_, i) => ({
+      ago: 11 + i * 14,
+      description: "BEFOREPAY PSYCH APPT",
+      amount: -210,
+      category: "wage_advance",
+    })),
+    { ago: 30, description: "HARMONEY IVF LOAN 55121", amount: 5000 },
+    ...Array.from({ length: 13 }, (_, i) => ({
+      ago: 5 + i * 14,
+      description: "HUMM SMILE DENTAL",
+      amount: -45,
+      category: "bnpl",
+    })),
+    ...monthly(6, 8, {
+      description: "SOCIETYONE HOSPITAL PARKING",
+      amount: -450,
+      category: "loan_repayment",
+    }),
+  ];
+  const x = applicant(lines);
+  const input = {
+    feed: x.feed,
+    feed_type: "cdr" as const,
+    as_of: AS_OF,
+    lookback_months: 6,
+    categories: x.categories,
+  };
+  const outputs: [string, unknown][] = [
+    ["observed living expenses", expensesOf(x)],
+    ["evidence", assessEvidence(input)],
+    ["INC", assessInc(input as Parameters<typeof assessInc>[0])],
+    ["LIA", assessLia({ ...input, application: { declared_liabilities: [] } })],
+    [
+      "LIA, with declarations",
+      assessLia({
+        ...input,
+        application: {
+          declared_liabilities: [
+            { type: "loan", provider: "Macquarie", repayment_monthly: 300 },
+            { type: "bnpl", provider: "Humm", repayment_monthly: 97 },
+          ],
+        },
+      }),
+    ],
+    [
+      "observed income",
+      deriveIncome({ ...input, min_occurrences: 3 } as Parameters<typeof deriveIncome>[0]),
+    ],
+  ];
+  it.each(outputs)("%s: no sensitive keyword anywhere in its text", (_name, out) => {
+    const text = JSON.stringify(out);
+    expect(text.match(KEYWORDS)?.[0] ?? null).toBeNull();
+  });
+  it("the check isn't vacuous: LIA finds every lender and names it", () => {
+    const text = JSON.stringify(outputs.find(([n]) => n === "LIA")?.[1]);
+    for (const lender of ["MACQUARIE", "NIMBLE", "BEFOREPAY", "HARMONEY", "HUMM", "SOCIETYONE"])
+      expect(text, lender).toContain(lender);
+    expect(JSON.stringify(x)).toMatch(KEYWORDS);
   });
 });

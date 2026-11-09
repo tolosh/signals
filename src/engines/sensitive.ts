@@ -67,7 +67,7 @@ export const SENSITIVE_MCCS: Readonly<Record<string, string>> = Object.freeze({
   "8699": "unions (membership organisations, not elsewhere classified)",
 });
 
-type Tx = { transactionId: string; merchantCategoryCode?: string };
+type Tx = { transactionId: string; merchantCategoryCode?: string; amount?: string };
 
 /** Medical and pharmacy: the codes and MCCs D29 lets into the living-expense total, unitemised. */
 const HEALTH_CATEGORIES: ReadonlySet<string> = new Set(["healthcare", "medical", "pharmacy"]);
