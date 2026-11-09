@@ -47,23 +47,23 @@ because the test helper was unfinished; with it finished they pass, since INC's 
 
 **The 7,500-case sweep (seed 9),** with the oracle updated to this ruling's text:
 
-| Engine | Green leaks | Over-flags (matching, not green) | Red |
-| --- | --- | --- | --- |
-| 1.3.1 (before) | 0 | 49 | 0 |
-| 1.3.2 | **0** | **0** | 0 |
+| Engine         | Green leaks | Over-flags (matching, not green) | Red |
+| -------------- | ----------- | -------------------------------- | --- |
+| 1.3.1 (before) | 0           | 49                               | 0   |
+| 1.3.2          | **0**       | **0**                            | 0   |
 
 All 49 over-flags were untyped loans with the exact name, declared as a personal or car loan.
 
 **Mutation checks** (LIA, GR-3 and lender-name tests, 289):
 
-| Mutant | Tests that fail |
-| --- | --- |
-| Untyped rule removed | 5 |
-| Untyped loans also match a mortgage | 3 |
-| Any typed loan matches loan declarations | 7 |
-| List emptied | 11 |
-| List matched on part words | 1 |
-| List echoes the rest of the description | 4 |
+| Mutant                                   | Tests that fail |
+| ---------------------------------------- | --------------- |
+| Untyped rule removed                     | 5               |
+| Untyped loans also match a mortgage      | 3               |
+| Any typed loan matches loan declarations | 7               |
+| List emptied                             | 11              |
+| List matched on part words               | 1               |
+| List echoes the rest of the description  | 4               |
 
 **Set v1 at 1.3.2** (records `2026-11-09-synthetic-v1-lia-family-v1.3.2*.json`): every signal's
 counts, by tag, at both requests, are identical to 1.3.0's. On the salaried base at a 6-month
