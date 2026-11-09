@@ -56,6 +56,7 @@ async function setup(months = 14, perMonth = 30) {
     consumerRef: REF,
     recordedOn: "2026-11-10",
     purposeVersion: "1",
+    noticeVersion: "0.1",
   });
   const deps = { api: client, stores, sealer };
   const input = { consumerRef: REF, tokens, asOf: AS_OF, consent, revision: 1 };

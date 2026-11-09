@@ -51,6 +51,7 @@ export function consentRecord(o: {
   consumerRef: string;
   recordedOn: string;
   purposeVersion: string;
+  noticeVersion: string;
 }): ConsentRecord {
   assertConsumerRef(o.consumerRef);
   if ("deidentification" in o)

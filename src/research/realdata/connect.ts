@@ -60,7 +60,7 @@ const b64 = (b: Uint8Array) => Buffer.from(b).toString("base64url");
 
 export async function startConnect(
   deps: ConnectDeps,
-  o: { consumerRef: string; at: string },
+  o: { consumerRef: string; at: string; noticeVersion: string },
 ): Promise<{ authorizeUrl: string; state: string }> {
   assertConsumerRef(o.consumerRef);
   const state = b64(deps.random(32));
@@ -88,6 +88,7 @@ export async function completeConnect(
     consumerRef: p.consumer_ref,
     recordedOn: today,
     purposeVersion: o.purposeVersion,
+    noticeVersion: "",
   });
   // The data runs to the day before connection: today's transactions may not be posted yet.
   const asOf = new Date(Date.parse(`${today}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
@@ -95,4 +96,14 @@ export async function completeConnect(
     { api: deps.client, stores: deps.stores, sealer: deps.sealer },
     { consumerRef: p.consumer_ref, tokens, asOf, consent, revision: 1 },
   );
+}
+
+/** Stub, tests first. */
+export type StartStep =
+  { kind: "notice"; html: string } | { kind: "redirect"; location: string } | { kind: "refused" };
+export async function connectStartStep(
+  _deps: ConnectDeps,
+  _o: { invite: string; notice?: string; at: string },
+): Promise<StartStep> {
+  return { kind: "refused" };
 }

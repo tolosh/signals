@@ -76,6 +76,7 @@ async function setup(people = ["a", "b"]) {
       consumerRef: ref,
       recordedOn: "2026-11-10",
       purposeVersion: "1",
+      noticeVersion: "0.1",
     });
     await ingestGrant(
       { api: client, stores, sealer },

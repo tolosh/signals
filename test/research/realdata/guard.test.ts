@@ -4,6 +4,7 @@
 import { describe, expect, it } from "vitest";
 import {
   assertGuarded,
+  CONSENT_BASES,
   classify,
   declaresRealSource,
   detect,
@@ -57,7 +58,7 @@ const ALLOW: string[] = [
   "amber",
   "credit_card",
   "openfeed-production",
-  "cdr-service",
+  "openfeed-onward-disclosure",
   "synthetic-v2.1",
   "6", // a small numeric string, not an account number
   "1234",
@@ -141,7 +142,10 @@ describe("SIG-61 T2: the guard is an allow-list", () => {
 
   it("source and consent-basis keys hold only known identifiers", () => {
     expect(guardRunRecord({ data_source: "openfeed-production" }).ok).toBe(true);
-    expect(guardRunRecord({ consent_basis: "cdr-service" }).ok).toBe(true);
+    expect(guardRunRecord({ consent_basis: "openfeed-onward-disclosure" }).ok).toBe(true);
+    // N-1 ruled (9 November 2026): Moroku is not a sponsored affiliate, so the CDR bases are gone.
+    expect(CONSENT_BASES).toEqual(["openfeed-onward-disclosure"]);
+    expect(guardRunRecord({ consent_basis: "cdr-service" }).ok).toBe(false);
     expect(guardRunRecord({ data_source: "openfeed-sandbox-x" }).violations[0]?.reason).toBe(
       "unknown_source",
     );

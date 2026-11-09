@@ -6,11 +6,13 @@ import { describe, expect, it } from "vitest";
 import { OpenfeedClient } from "../../../src/connectors/openfeed/client.js";
 import {
   completeConnect,
+  connectStartStep,
   CONNECT_TTL_MINUTES,
   MemoryPendingConnects,
   startConnect,
 } from "../../../src/research/realdata/connect.js";
 import { guardRunRecord } from "../../../src/research/realdata/guard.js";
+import { COLLECTION_NOTICE } from "../../../src/research/realdata/notice.js";
 import { aesSealer } from "../../../src/research/realdata/sealer.js";
 import { MemoryStore, STORES } from "../../../src/research/realdata/stores.js";
 import {
@@ -61,6 +63,7 @@ describe("connecting a team member", () => {
     const { authorizeUrl } = await startConnect(deps, {
       consumerRef: REF,
       at: "2026-11-10T00:00:00Z",
+      noticeVersion: COLLECTION_NOTICE.version,
     });
     const { code, state } = callbackFor(fake, authorizeUrl);
     const summary = await completeConnect(deps, {
@@ -79,6 +82,7 @@ describe("connecting a team member", () => {
     const { authorizeUrl } = await startConnect(deps, {
       consumerRef: REF,
       at: "2026-11-10T00:00:00Z",
+      noticeVersion: COLLECTION_NOTICE.version,
     });
     const { code, state } = callbackFor(fake, authorizeUrl);
     await completeConnect(deps, { code, state, at: "2026-11-10T00:01:00Z", purposeVersion: "1" });
@@ -93,6 +97,7 @@ describe("connecting a team member", () => {
     const { authorizeUrl } = await startConnect(deps, {
       consumerRef: REF,
       at: "2026-11-10T00:00:00Z",
+      noticeVersion: COLLECTION_NOTICE.version,
     });
     const { code, state } = callbackFor(fake, authorizeUrl);
     await expect(
@@ -115,8 +120,16 @@ describe("connecting a team member", () => {
 
   it("uses a fresh 32-byte state and verifier each time", async () => {
     const { deps } = setup();
-    const a = await startConnect(deps, { consumerRef: REF, at: "2026-11-10T00:00:00Z" });
-    const b = await startConnect(deps, { consumerRef: REF, at: "2026-11-10T00:00:00Z" });
+    const a = await startConnect(deps, {
+      consumerRef: REF,
+      at: "2026-11-10T00:00:00Z",
+      noticeVersion: COLLECTION_NOTICE.version,
+    });
+    const b = await startConnect(deps, {
+      consumerRef: REF,
+      at: "2026-11-10T00:00:00Z",
+      noticeVersion: COLLECTION_NOTICE.version,
+    });
     expect(a.state).not.toBe(b.state);
     expect(Buffer.from(a.state, "base64url")).toHaveLength(32);
   });
@@ -137,5 +150,78 @@ describe("invites and the stored connection state", () => {
     const { consumerRefFromInvite } = await import("../../../src/research/realdata/connect.js");
     expect(() => consumerRefFromInvite("short")).toThrow(/invite/);
     expect(() => consumerRefFromInvite("x".repeat(43) + "!")).toThrow(/invite/);
+  });
+});
+
+// SIG-61 ruling N-1 (9 November 2026): the APP 5 collection notice is shown at the point of
+// connection, before the person goes to openfeed. The start step shows it first; only a request
+// that acknowledges the current notice version pushes the authorisation request.
+describe("the collection notice comes before openfeed", () => {
+  const invite = Buffer.alloc(32, 5).toString("base64url");
+  const pars = (fake: FakeOpenfeed) =>
+    fake.calls.filter((c) => new URL(c.url).pathname === "/oauth/par").length;
+
+  it("shows the notice, and pushes nothing, when the notice isn't acknowledged", async () => {
+    const { fake, deps } = setup();
+    const step = await connectStartStep(deps, { invite, at: "2026-11-10T00:00:00Z" });
+    expect(step.kind).toBe("notice");
+    if (step.kind !== "notice") return;
+    expect(step.html).toContain(COLLECTION_NOTICE.sections.purposes.slice(0, 40));
+    expect(step.html).toContain(`notice=${COLLECTION_NOTICE.version}`);
+    expect(pars(fake)).toBe(0);
+  });
+
+  it("goes on to openfeed once the current notice is acknowledged", async () => {
+    const { fake, deps } = setup();
+    const step = await connectStartStep(deps, {
+      invite,
+      notice: COLLECTION_NOTICE.version,
+      at: "2026-11-10T00:00:00Z",
+    });
+    expect(step.kind).toBe("redirect");
+    expect(pars(fake)).toBe(1);
+  });
+
+  it("shows the notice again for an out-of-date acknowledgement", async () => {
+    const { fake, deps } = setup();
+    const step = await connectStartStep(deps, {
+      invite,
+      notice: "0.0",
+      at: "2026-11-10T00:00:00Z",
+    });
+    expect(step.kind).toBe("notice");
+    expect(pars(fake)).toBe(0);
+  });
+
+  it("refuses a malformed invite before showing anything", async () => {
+    const { deps } = setup();
+    const step = await connectStartStep(deps, { invite: "x", at: "2026-11-10T00:00:00Z" });
+    expect(step.kind).toBe("refused");
+  });
+
+  it("startConnect itself refuses a request that didn't acknowledge the current notice", async () => {
+    const { fake, deps } = setup();
+    await expect(
+      startConnect(deps, { consumerRef: REF, at: "2026-11-10T00:00:00Z", noticeVersion: "0.0" }),
+    ).rejects.toThrow(/notice/);
+    expect(pars(fake)).toBe(0);
+  });
+
+  it("records the notice version shown with the consent", async () => {
+    const { fake, deps, stores } = setup();
+    const { authorizeUrl } = await startConnect(deps, {
+      consumerRef: REF,
+      at: "2026-11-10T00:00:00Z",
+      noticeVersion: COLLECTION_NOTICE.version,
+    });
+    const { code, state } = callbackFor(fake, authorizeUrl);
+    await completeConnect(deps, { code, state, at: "2026-11-10T00:01:00Z", purposeVersion: "1" });
+    const [link] = (await stores.find((s) => s.name === "openfeed_grants")!.get(REF)) as {
+      consent: Record<string, unknown>;
+    }[];
+    expect(link!.consent).toMatchObject({
+      notice_version: COLLECTION_NOTICE.version,
+      purpose_version: "1",
+    });
   });
 });

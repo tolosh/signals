@@ -26,13 +26,23 @@ describe("the consents openfeed's flow captures", () => {
   });
 
   it("gives every openfeed consent record the purge-after-comparison rule", () => {
-    const c = consentRecord({ consumerRef: REF, recordedOn: "2026-11-10", purposeVersion: "1" });
+    const c = consentRecord({
+      consumerRef: REF,
+      recordedOn: "2026-11-10",
+      purposeVersion: "1",
+      noticeVersion: "0.1",
+    });
     expect(c.deidentification_consent).toBe(false);
     expect(retentionRule(c)).toBe("purge_after_comparison");
   });
 
   it("refuses research retention without a de-identification consent", () => {
-    const c = consentRecord({ consumerRef: REF, recordedOn: "2026-11-10", purposeVersion: "1" });
+    const c = consentRecord({
+      consumerRef: REF,
+      recordedOn: "2026-11-10",
+      purposeVersion: "1",
+      noticeVersion: "0.1",
+    });
     expect(() => assertMayKeepForResearch(c)).toThrow(/de-identification consent/);
   });
 
@@ -42,6 +52,7 @@ describe("the consents openfeed's flow captures", () => {
         consumerRef: REF,
         recordedOn: "2026-11-10",
         purposeVersion: "1",
+        noticeVersion: "0.1",
         deidentification: true,
       } as never),
     ).toThrow(/openfeed's flow captures no de-identification consent/);
@@ -54,7 +65,12 @@ describe("the consents openfeed's flow captures", () => {
 
   it("is a record the T2 guard accepts once the reference is left out", () => {
     const rest: Record<string, unknown> = {
-      ...consentRecord({ consumerRef: REF, recordedOn: "2026-11-10", purposeVersion: "1" }),
+      ...consentRecord({
+        consumerRef: REF,
+        recordedOn: "2026-11-10",
+        purposeVersion: "1",
+        noticeVersion: "0.1",
+      }),
     };
     delete rest.consumer_ref;
     expect(guardRunRecord(rest).violations).toEqual([]);
