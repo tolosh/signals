@@ -1,5 +1,7 @@
-// SIG-61 T4: the truth-capture record (research/schemas/truth-capture-v1.schema.json and
-// src/research/realdata/truth-capture.ts). Structured fields only; unknown fields and free text are
+// SIG-61 T4: the truth-capture record (research/schemas/truth-capture-v2.schema.json and
+// src/research/realdata/truth-capture.ts). Schema 2.0.0 (10:50 on 9 November 2026) adds the payslip
+// figures (gross, net and tax withheld for one pay), BNPL among the declared liabilities, whether
+// each liability's account is in the grant, and the person's statement that the list is complete. Structured fields only; unknown fields and free text are
 // rejected; the JSON Schema and the validator agree; truths live in the truth_capture store only,
 // so deletion removes them. The employer field is blocked by the T2 guard. Invented values only.
 import { readFileSync } from "node:fs";
@@ -14,19 +16,19 @@ import {
 } from "../../../src/research/realdata/truth-capture.js";
 
 const schema = JSON.parse(
-  readFileSync("research/schemas/truth-capture-v1.schema.json", "utf8"),
+  readFileSync("research/schemas/truth-capture-v2.schema.json", "utf8"),
 ) as object;
 const ajv = new Ajv2020({ strict: true, allErrors: true });
 const schemaValid = ajv.compile(schema);
 
 const REF = "cr_0000000000000000aaaa";
 const valid = () => ({
-  schema_version: "1.0.0",
+  schema_version: "2.0.0",
   consumer_ref: REF,
   captured_on: "2026-11-09",
   gross_annual_pay: 95000,
-  net_pay_per_pay: 2780.5,
   pay_cadence: "fortnightly",
+  payslip: { pay_date: "2026-10-30", gross_per_pay: 3653.85, net_per_pay: 2780.5, tax_withheld: 873.35 },
   payslip_verified: true,
   employer: { normalised_name: "EXAMPLE CO PTY LTD" },
   liabilities: [
@@ -43,8 +45,17 @@ const valid = () => ({
       repayment_amount: 420,
       repayment_cadence: "fortnightly",
       balance: 18500,
+      account_in_grant: false,
+    },
+    {
+      type: "bnpl",
+      lender: { normalised_name: "EXAMPLE PAY LATER" },
+      repayment_amount: 45,
+      repayment_cadence: "fortnightly",
+      account_in_grant: false,
     },
   ],
+  liabilities_complete: true,
 });
 
 type Rec = ReturnType<typeof valid> & Record<string, unknown>;
@@ -55,7 +66,14 @@ const INVALID: [string, (r: Rec) => void][] = [
   ["captured_on with a time", (r) => (r.captured_on = "2026-11-09T10:00:00Z")],
   ["negative gross pay", (r) => (r.gross_annual_pay = -1)],
   ["gross pay as a string", (r) => ((r as Record<string, unknown>).gross_annual_pay = "95000")],
-  ["net pay out of range", (r) => (r.net_pay_per_pay = 2_000_000)],
+  ["payslip net pay out of range", (r) => (r.payslip.net_per_pay = 2_000_000)],
+  ["no payslip figures", (r) => delete (r as Partial<Rec>).payslip],
+  ["payslip without net pay", (r) => delete (r.payslip as Partial<Rec["payslip"]>).net_per_pay],
+  ["payslip date with a time", (r) => (r.payslip.pay_date = "2026-10-30T00:00:00Z")],
+  ["payslip with an extra key", (r) => ((r.payslip as Record<string, unknown>).employer_abn = 1)],
+  ["liabilities_complete missing", (r) => delete (r as Partial<Rec>).liabilities_complete],
+  ["liabilities_complete not boolean", (r) => ((r as Record<string, unknown>).liabilities_complete = "yes")],
+  ["account_in_grant not boolean", (r) => ((r.liabilities[1] as Record<string, unknown>).account_in_grant = 1)],
   ["unknown pay cadence", (r) => (r.pay_cadence = "daily")],
   ["payslip_verified not boolean", (r) => ((r as Record<string, unknown>).payslip_verified = 1)],
   ["employer as a bare string", (r) => ((r as Record<string, unknown>).employer = "ACME")],
@@ -108,7 +126,7 @@ describe("SIG-61 T4: the truth-capture record", () => {
 
   it("rejects an unknown field, naming its position and not its text", () => {
     const r = validateTruthCapture({ ...valid(), favourite_colour: "blue" });
-    expect(r).toEqual({ ok: false, errors: [{ path: "${key 9}", rule: "unknown_field" }] });
+    expect(r).toEqual({ ok: false, errors: [{ path: "${key 10}", rule: "unknown_field" }] });
     expect(JSON.stringify(r)).not.toContain("favourite");
   });
 
@@ -118,6 +136,18 @@ describe("SIG-61 T4: the truth-capture record", () => {
       expect(validateTruthCapture(record).ok).toBe(false);
       expect(schemaValid(record)).toBe(false);
     });
+
+  it("accepts BNPL as a declared liability", () => {
+    expect(validateTruthCapture(valid()).ok).toBe(true);
+    expect(valid().liabilities.some((l) => l.type === "bnpl")).toBe(true);
+  });
+
+  it("rejects payslip figures where net pay exceeds gross, or gross minus tax isn't above net", () => {
+    expect(validateTruthCapture(build((r) => (r.payslip.net_per_pay = 4000))).ok).toBe(false);
+    expect(
+      validateTruthCapture(build((r) => (r.payslip.tax_withheld = 1000))),
+    ).toMatchObject({ ok: false, errors: [{ path: "$.payslip", rule: "payslip_inconsistent" }] });
+  });
 
   it("errors never echo a value", () => {
     const r = validateTruthCapture(build((x) => (x.employer.normalised_name = "Jane's cafe")));
