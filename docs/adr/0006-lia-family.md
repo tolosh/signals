@@ -2,8 +2,75 @@
 
 Status: ruled (Colin, 8 November 2026, on SIG-42). L-1 to L-8 stand as recorded, with the two
 changes below, the independent review's rulings of the same day (1.2.0, below) and the short
-re-review's ruling (1.3.0, below). Where a ruling changes an interpretation, the ruling wins, and
-the interpretation is kept as it was recorded. The engine is at 1.3.0.
+re-review's ruling (1.3.0, below) and review 9's rulings (1.3.1, below). Where a ruling changes
+an interpretation, the ruling wins, and the interpretation is kept as it was recorded. The engine
+is at 1.3.1.
+
+## Review 9 rulings, 9 November 2026, 20:29 (LIA 1.3.1)
+
+Review 9 (the independent re-check at `0e30841`) found the fuzzy path clean but 257 green leaks in
+its 7,500-case sweep, all through the exact-name path: an exact name with the wrong exact type
+(140); names differing only by digits or "Pty Ltd" (117); and collisions (ZÖP against Zíp, both
+reduced to "Z P"; an empty name against "-"). A `mortgage` declaration could never exact-match.
+It also found loan, SACC, wage-advance and disbursement reasons echoing narrative remainders
+("MACQUARIE IVF CLINIC REF", "NIMBLE REPAY ONCOLOGY BILL").
+
+1. **Green needs the exact name and the exact type.** The detector's own match (by family, on its
+   ASCII-only name) is no longer used: LIA matches every liability found. A right name with
+   another type is amber, "Possibly the declared <name> (<amount>): confirm with the applicant",
+   with review; without a declared amount the parenthesis is left out. Pairs by name come before
+   pairs by amount, then closest amount, one-to-one. A `mortgage` declaration matches a loan the
+   data types as a mortgage (a home-loan or mortgage narrative).
+2. **Names compare by `exactName`.** NFC, case folding, every digit removed, the legal suffixes
+   Pty, Ltd and Limited removed, punctuation collapsed to spaces. Letters stay letters, accents
+   included. A name with fewer than 3 letters is never exact. A found liability's name is the one
+   its card or loan account and its repayments' narratives (or a card's biller) agree on; if they
+   disagree there is no name. **Interpretations, for the reviewer:**
+   - The detector's product words (loan, repayment, instalment, payment, credit, card, BPAY) and
+     the loan-type words (personal, car, auto, vehicle, motor, mortgage, home) are removed on
+     both sides, as the detector already did, so "HARMONEY PERSONAL LOAN" names Harmoney.
+   - Punctuation and spacing differences are not "other differences": "SOCIETY-ONE" and
+     "SOCIETY ONE" are one name. "SOCIETYONE" and "Society One" are not (fuzzy path).
+3. **D29: every liability is named by its lender only.** Reasons, resolve text, LIA-02's and
+   LIA-03's lender lists and the `liabilities` list all name the lender. **Candidate (the 9
+   November 07:22 ruling's item 2, extended):** the lender is the first word of the narrative, for
+   every family, until there is an Australian lender register. A liability known only from an
+   account in the grant is named by the account's product. So Cash Converters shows as "CASH",
+   and "MACQUARIE LEASING" as "MACQUARIE". Matching still uses the whole name.
+
+**Tests first** (`bc1deba`, 33 failed): `test/families/lia/review9.test.ts` (rulings 1 to 3),
+`test/families/lia/sweep.test.ts` and the D29 keyword test in `test/repo/gr3.test.ts`.
+
+**The 7,500-case sweep** (`sweep.test.ts`, seed 9) is my re-implementation, not the reviewer's
+harness. It has random types (the eight below), lenders, name variants (digits, Pty Ltd, Limited,
+decomposed accents, other lenders, empty, "-", "Bank"), up to two declarations and amounts. Its
+oracle is written from the ruling's text, independently of the engine: green exactly when a
+declaration has the exact type and the same normalised name of at least 3 letters.
+
+| Engine         | Green leaks | Over-flags (exact, not green) | Red |
+| -------------- | ----------- | ----------------------------- | --- |
+| 1.3.0 (before) | 158         | 947                           | 0   |
+| 1.3.1          | **0**       | **0**                         | 0   |
+
+The sweep's lender pool lost LATITUDE after the first run, because it is a reserved unseen-lender
+name (the set v2.1 check); 147 and 962 were the first run's figures with it in.
+
+**Mutation checks** (LIA and GR-3 tests, 228): exact type not required, 7 fail; no 3-letter
+minimum, 4; accents dropped, 3; legal suffixes kept, 6; the lender named by the whole narrative, 11.
+
+**Found on the set v1 re-run, fixed with a test first (`be09491`):** a liability's name took in
+the product name of the everyday account its repayments leave ("Everyday Account"), so no
+liability in a named card or loan account could exact-match. The two records made before the fix
+were withdrawn (`79a6bdc`) and regenerated.
+
+**Set v1 at 1.3.1** (sanity records `2026-11-09-synthetic-v1-lia-family-v1.3.1*.json`). Only
+LIA-01 changes; every other signal's counts are identical to 1.3.0. On the salaried base at a
+6-month request, LIA-01 is 48 green and **27 amber** (was 75 green). Across the tags without an
+undisclosed liability, all 40 ambers are "possibly declared": a loan declared as personal or car
+whose set v1 narrative ("HARMONEY LOAN REPAYMENT") doesn't name its type. That is ruling 1 as
+written (the review counted an untyped loan declared as `car_loan` as a leak), not a false
+"undisclosed". **For Colin:** say if an untyped loan with the exact name should instead be green
+for a personal or car declaration.
 
 ## Short re-review ruling, 8 November 2026, 19:40 (LIA 1.3.0)
 
