@@ -2,9 +2,74 @@
 
 Status: ruled (Colin, 8 November 2026, on SIG-42). L-1 to L-8 stand as recorded, with the two
 changes below, the independent review's rulings of the same day (1.2.0, below) and the short
-re-review's ruling (1.3.0, below) and review 9's rulings (1.3.1, below). Where a ruling changes
-an interpretation, the ruling wins, and the interpretation is kept as it was recorded. The engine
-is at 1.3.1.
+re-review's ruling (1.3.0, below), review 9's rulings (1.3.1, below) and the 10 November
+rulings (1.3.2, below). Where a ruling changes an interpretation, the ruling wins, and the
+interpretation is kept as it was recorded. The engine is at 1.3.2.
+
+## Rulings, 10 November 2026, 06:39 (LIA 1.3.2)
+
+Colin's rulings on #47's three questions.
+
+1. **A loan the data doesn't type is green when nothing conflicts.** This refines review 9's
+   ruling 1. With an exact name, a loan whose account and narratives carry no type word ("HARMONEY
+   LOAN REPAYMENT") matches a declared `personal_loan`, `car_loan` or `loan` as green: missing type
+   data isn't a conflict. Amber "possibly declared" stays for a real conflict, where the data shows
+   one type and the declaration another. Mortgages and cards never match a loan declaration, or
+   each other. **Interpretations, for the reviewer:**
+   - A loan whose data carries two type words (say CAR and PERSONAL) is a conflict, not missing
+     data: it matches only a declared `loan`, as before.
+   - The rule is for the exact-name path only. On the amount-only path an untyped loan under
+     another name still matches no typed declaration (the re-review's ruling, 8 November).
+   - A loan the data types (say a personal loan) against a declared `loan` stays amber, as the
+     ruling's text gives only the untyped case. **For Colin:** say if a declared `loan` should
+     also accept any typed loan.
+2. **Lender names.** `lenders.ts` holds a short, versioned list (`LENDER_NAMES` 1.0.0) of known
+   multi-word Australian lender names, matched on whole words before the first-word rule: American
+   Express, Bank of Melbourne, Bank of Queensland, Bendigo Bank, Cash Converters, Commonwealth Bank,
+   Great Southern Bank, Macquarie Bank, St George, Wallet Wizard. A match returns the list's name,
+   which is the start of the bank's description, so the list never extends the echoed text; the
+   D29 keyword test still runs over every reason. LIA results record `lender_names_version`.
+   **Interim rule (until SIG-57's lender aliases replace it):** a name not on the list is shown by
+   its first word. Matching still uses the whole name. Limits:
+   - One-word lenders (Nimble, Plenti, Latitude) need no entry.
+   - The detector's provider form drops digits, so Money3 shows as "MONEY".
+   - **Reserved names.** No reserved unseen-lender name of synthetic sets v1, v2.1 or v2.2 is on
+     the list, and none is shown differently because of it (`test/research/lender-names.test.ts`).
+     So NOW Finance, from the ruling's examples, is left off and shows as "NOW". Most reserved
+     names are real lenders; this is raised on SIG-60.
+3. **Versions** (ADR 0007): INC 1.2.2, observed income 1.0.1 and observed expenses 1.1.1 keep their
+   versions under gate 1.2.0. Each result and run record carries the gate version, and the set v1
+   replay tests pin both versions.
+
+**Tests first:** `rulings-1110.test.ts`, the sweep's oracle and `lender-names.test.ts`. 24 tests
+failed on assertions before the change. Two of the 24 were the INC replay pins, which failed only
+because the test helper was unfinished; with it finished they pass, since INC's output is unchanged.
+
+**The 7,500-case sweep (seed 9),** with the oracle updated to this ruling's text:
+
+| Engine         | Green leaks | Over-flags (matching, not green) | Red |
+| -------------- | ----------- | -------------------------------- | --- |
+| 1.3.1 (before) | 0           | 49                               | 0   |
+| 1.3.2          | **0**       | **0**                            | 0   |
+
+All 49 over-flags were untyped loans with the exact name, declared as a personal or car loan.
+
+**Mutation checks** (LIA, GR-3 and lender-name tests, 289):
+
+| Mutant                                   | Tests that fail |
+| ---------------------------------------- | --------------- |
+| Untyped rule removed                     | 5               |
+| Untyped loans also match a mortgage      | 3               |
+| Any typed loan matches loan declarations | 7               |
+| List emptied                             | 11              |
+| List matched on part words               | 1               |
+| List echoes the rest of the description  | 4               |
+
+**Set v1 at 1.3.2** (records `2026-11-09-synthetic-v1-lia-family-v1.3.2*.json`): every signal's
+counts, by tag, at both requests, are identical to 1.3.0's. On the salaried base at a 6-month
+request, LIA-01 is 75 green and 0 amber (27 amber at 1.3.1). The ambers that remain, 41 at a 6-month
+request, are all "undisclosed", and all are in the four tags built with an undisclosed liability:
+undisclosed-card 12, bnpl 8, sacc 11, wage-advance 10.
 
 ## Review 9 rulings, 9 November 2026, 20:29 (LIA 1.3.1)
 

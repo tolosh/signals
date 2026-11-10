@@ -19,6 +19,23 @@ G-2 and G-3 are accepted. The interpretations below are kept as they were record
   ENR-30.
 - **G-3 accepted** as a candidate, versioned with the definitions (`SENSITIVE_METHOD_VERSION`).
 
+## Versions ruling, 10 November 2026, 06:39
+
+- **Accepted:** INC 1.2.2, observed income 1.0.1 and observed expenses 1.1.1 keep their versions
+  under gate 1.2.0. The conditions are met as follows:
+  - **The gate version is carried.** Each result carries `gr3_gate_version`, and so do the INC and
+    LIA run records.
+  - **Replay tests pin both versions.** INC's set v1 replay (`n13-identity.test.ts`) pins INC 1.2.2
+    and gate 1.2.0 on every result. A new set v1 replay (`gate-replay.test.ts`) pins observed
+    income's and observed expenses' method versions and gate 1.2.0. Their output hashes, taken at
+    `0e30841` (gate 1.1.0) without the gate field, are unchanged at gate 1.2.0.
+- **Set v1 INC counts are unchanged at gate 1.2.0.** The new records
+  `2026-11-09-synthetic-v1-inc-family-v1.2.2{,-request-6}.json` have the same counts by tag, and the
+  same salaried flags, as the gate 1.1.0 records of 8 November.
+- **The SIG-16 team pre-registration** pinned gate 1.1.0, so main failed after #46 and #47 merged.
+  No team grant has been ingested, so it is amended to 1.2.0, with the reason recorded in
+  `engine_amendments`.
+
 ## Review 9, 9 November 2026 (gate 1.2.0)
 
 - **C2, the scan.** The regex scan is replaced by a taint check over the TypeScript syntax tree

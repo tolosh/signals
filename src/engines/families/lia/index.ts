@@ -13,6 +13,7 @@ import { applyEvidence, assessEvidence, EQ_THRESHOLDS } from "../../evidence/ind
 import { dayOf, isoOf } from "../../evidence/dates.js";
 import type { FeedTransaction, RawSignal, Signal } from "../../evidence/index.js";
 import { SENSITIVE_METHOD_VERSION, withoutSensitive } from "../../sensitive.js";
+import { LENDER_NAMES_VERSION, lenderOf } from "./lenders.js";
 import type { FeedType } from "../../signals/definitions.js";
 import {
   detectLiabilities,
@@ -22,7 +23,7 @@ import {
   type DetectedLiability,
 } from "../../liabilities/index.js";
 
-export const LIA_VERSION = "1.3.1";
+export const LIA_VERSION = "1.3.2";
 
 /** A shared-account feed with the fields both the evidence layer and the detector read. */
 export type LiaFeed = {
@@ -125,6 +126,8 @@ export type LiaResult = {
   version: string;
   /** The GR-3 gate applied to the feed (SENSITIVE_METHOD_VERSION). */
   gr3_gate_version: string;
+  /** The known lender names used to name lenders in text (lenders.ts, LENDER_NAMES_VERSION). */
+  lender_names_version: string;
   detector: { method_version: string; min_occurrences: number; amount_tolerance: number };
   signals: Signal[];
   liabilities: DetectedLiability[];
@@ -175,14 +178,10 @@ const providerOf = (text: string) =>
     .split(" ")
     .filter((w) => w && !EXTRA_WORDS.has(w))
     .join(" ");
-/**
- * D29 (review 9 ruling 3, 9 November 2026): text names only the lender, never the rest of the
- * bank's description ("MACQUARIE IVF CLINIC REF", "HUMM SMILE DENTAL"). Until there is a lender
- * register, the lender is the first word of the narrative, for every family (the interim rule
- * ruled for BNPL, ADR 0006). A liability known only from an account in the grant is named by the
- * account's product, which carries no merchant.
- */
-const lenderOf = (provider: string) => provider.split(" ")[0] ?? provider;
+// D29 (review 9 ruling 3, 9 November 2026): text names only the lender, never the rest of the
+// bank's description ("MACQUARIE IVF CLINIC REF", "HUMM SMILE DENTAL"), by lenderOf (lenders.ts:
+// a known multi-word name first, ruling 2 of 10 November, else the first word). A liability known
+// only from an account in the grant is named by the account's product, which carries no merchant.
 
 /** Words that describe the product, not the lender: the detector's, plus the loan types. */
 const GENERIC_WORDS = new Set([
@@ -350,7 +349,27 @@ export function assessLia(input: LiaInput): LiaResult {
     const types = LOAN_TYPES.filter(([, re]) => re.test(text)).map(([type]) => type);
     return types.length === 1 ? (types[0] as string) : "loan";
   };
-  // Review 9 ruling 1: green needs the exact name AND the exact type. The detector's own match is
+  /** A loan the data doesn't type: no type word at all (two or more is a conflict, not missing). */
+  const untyped = (d: DetectedLiability): boolean =>
+    d.family === "loan" &&
+    !LOAN_TYPES.some(([, re]) =>
+      re.test(
+        upper(
+          [
+            ...d.account_ids.map((id) => productNames.get(id) ?? ""),
+            ...d.evidence.map((id) => byId.get(id)?.t.description ?? ""),
+          ].join(" "),
+        ),
+      ),
+    );
+  // The 10 November 2026 ruling (06:39) refines review 9's ruling 1: missing type data isn't a
+  // conflict, so a loan the data doesn't type matches a declared personal_loan, car_loan or loan.
+  // Otherwise the type must be exact; mortgages and cards never match a loan declaration, or each
+  // other.
+  const UNTYPED_MATCHES = new Set(["personal_loan", "car_loan", "loan"]);
+  const typeMatches = (d: DetectedLiability, declared: string) =>
+    declared === typeOf(d) || (untyped(d) && UNTYPED_MATCHES.has(declared));
+  // Review 9 ruling 1: green needs the exact name AND a matching type (above). The detector's match is
   // by family and its ASCII-only name, so it isn't used: every liability found is matched here.
   // A liability's name is the one its sources agree on: the account product, or each repayment's
   // narrative (its biller's name for a card repaid by BPAY). Sources that disagree give no name.
@@ -388,7 +407,7 @@ export function assessLia(input: LiaInput): LiaResult {
     const x =
       name === null
         ? undefined
-        : declaredList.find((y) => !used.has(y.i) && y.exact === name && y.d.type === typeOf(l));
+        : declaredList.find((y) => !used.has(y.i) && y.exact === name && typeMatches(l, y.d.type));
     if (x) {
       used.add(x.i);
       exactly.add(l);
@@ -396,8 +415,10 @@ export function assessLia(input: LiaInput): LiaResult {
   }
   const keyOf = (d: DetectedLiability) => `${d.family}|${d.provider}`;
   const rest = detected.liabilities.filter((l) => !exactly.has(l));
-  // "Possibly declared" (amber, review): the exact name with another type (ruling 1), first; then
-  // a declaration of exactly its type whose repayment is within tolerance. Closest amount first,
+  // "Possibly declared" (amber, review): the exact name with a conflicting type (ruling 1), first;
+  // then a declaration of exactly its type whose repayment is within tolerance (the untyped-loan
+  // rule of 10 November is for the exact name only: an untyped loan under another name matches no
+  // typed declaration, as the re-review ruled). Closest amount first,
   // one-to-one, duplicates removed.
   const amountDiff = (l: DetectedLiability, d: DeclaredLiability) =>
     l.monthly !== null && d.repayment_monthly !== undefined
@@ -691,6 +712,7 @@ export function assessLia(input: LiaInput): LiaResult {
   return {
     version: LIA_VERSION,
     gr3_gate_version: SENSITIVE_METHOD_VERSION,
+    lender_names_version: LENDER_NAMES_VERSION,
     detector: {
       method_version: LIABILITY_METHOD_VERSION,
       min_occurrences: cfg.min_occurrences,

@@ -52,12 +52,13 @@ describe("ruling 1: green needs the exact name and the exact type", () => {
     expect(s.state).toBe("green");
     expect(s.value).toBe("1 found, all declared");
   });
-  it("an untyped loan declared as a car loan is amber (the review's 140 leaks)", () => {
+  it("an untyped loan declared as a car loan is green (refined by the 10 November ruling)", () => {
+    // Review 9 counted this as a leak; the 10 November 2026 ruling (06:39) makes it green: missing
+    // type data isn't a conflict (rulings-1110.test.ts).
     const s = lia01(loan("FIRSTMAC LOAN", 520), [
       { type: "car_loan", provider: "Firstmac", repayment_monthly: 520 },
     ]);
-    expect(s.state).toBe("amber");
-    expect(s.reason).toContain(POSSIBLY("Firstmac", 520));
+    expect(s.state).toBe("green");
   });
   it("a mortgage declared as a personal loan is amber", () => {
     const s = lia01(loan("CBA HOME LOAN", 2100), [
@@ -242,8 +243,8 @@ describe("ruling 3 (D29): liability reasons name only the lender", () => {
   });
 });
 
-describe("LIA 1.3.1", () => {
+describe("LIA version", () => {
   it("is the version", () => {
-    expect(LIA_VERSION).toBe("1.3.1");
+    expect(LIA_VERSION).toBe("1.3.2");
   });
 });
