@@ -75,6 +75,8 @@ describe("ruling 3: the lender list is matched before digits are stripped", () =
   });
   it("a reference number is not part of a name", () => {
     expect(lenderOf("CASH CONVERTERS", "CASH CONVERTERS 7781 LOAN")).toBe("CASH CONVERTERS");
+    // added after the mutation check: a reference before the name is skipped too
+    expect(lenderOf("MONEY", "4417 MONEY3 LOAN")).toBe("MONEY3");
   });
   it("names Money3 in LIA-03 and in the liabilities list", () => {
     const r = lia(sacc("MONEY3 LOAN 7781", 60));
