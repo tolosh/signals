@@ -395,7 +395,7 @@ describe("Ruling 5: one BNPL monthly figure", () => {
     expect(signal(r, "LIA-05").value).toBe("2 providers, $227.5 a month");
   });
   it("is version 1.3.0", () => {
-    expect(run({}).version).toBe("1.3.2");
+    expect(run({}).version).toBe("1.3.3");
   });
 });
 

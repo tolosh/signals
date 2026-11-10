@@ -3,8 +3,50 @@
 Status: ruled (Colin, 8 November 2026, on SIG-42). L-1 to L-8 stand as recorded, with the two
 changes below, the independent review's rulings of the same day (1.2.0, below) and the short
 re-review's ruling (1.3.0, below), review 9's rulings (1.3.1, below) and the 10 November
-rulings (1.3.2, below). Where a ruling changes an interpretation, the ruling wins, and the
-interpretation is kept as it was recorded. The engine is at 1.3.2.
+rulings (1.3.2 and 1.3.3, below). Where a ruling changes an interpretation, the ruling wins, and
+the interpretation is kept as it was recorded. The engine is at 1.3.3.
+
+## Rulings, 10 November 2026, 13:00 (LIA 1.3.3)
+
+Colin's rulings on #48 (comment 40215).
+
+1. **A declared plain `loan` is green against a typed personal or car loan.** This answers the
+   third interpretation under 1.3.2 below. With an exact name, a plain `loan` declaration matches
+   a loan the data types as personal or car: a plain declaration doesn't conflict with a typed
+   loan. Mortgages and cards still never match a loan declaration.
+2. **Money3 shows as "MONEY3".** `LENDER_NAMES` 1.1.0 adds MONEY3, and the list is now matched on
+   the bank's description with digits kept, before the provider form strips them. Words of digits
+   only (reference numbers) and the detector's product words are skipped, as in the provider form.
+   The fallback is unchanged: the provider's first word.
+3. **Reserved names** (SIG-60, comment 40216): from the next synthetic set, reserved unseen-lender
+   names are invented lenders, checked against the ASIC credit registers. Set v2.2 stays as run,
+   and its reserved names stay off the list while it is used (the README records the limit).
+
+**Tests first** (`a75a50e`, 18 failed on assertions): `rulings-1110-1300.test.ts`, the sweep's
+oracle and the version pins. A leading-reference case was added after the mutation check below
+(`2e40682`): without it, keeping reference numbers survived.
+
+**The 7,500-case sweep (seed 9),** oracle updated to this ruling's text:
+
+| Engine         | Green leaks | Over-flags (matching, not green) | Red |
+| -------------- | ----------- | -------------------------------- | --- |
+| 1.3.2 (before) | 0           | 43                               | 0   |
+| 1.3.3          | **0**       | **0**                            | 0   |
+
+All 43 were typed personal or car loans with the exact name, declared as a plain loan.
+
+**Mutation checks** (LIA, GR-3 and lender-name tests, 303): plain rule removed, 5 fail; plain
+loans also match a mortgage, 4; the description ignored (Money3 back to "MONEY"), 3; reference
+numbers kept, 1 (with the added case).
+
+**Set v1 at 1.3.3** (records `2026-11-10-synthetic-v1-lia-family-v1.3.3*.json`): every signal's
+counts, by tag, at both requests, are identical to 1.3.2's (and so to 1.3.0's). The set v1
+generator declares no plain `loan`, so ruling 1 moves nothing there. MONEY3 is one of set v1's
+car-loan lenders: its reasons now say "MONEY3" rather than "MONEY", which the records (counts
+only) don't show.
+
+**Pre-registrations:** none records an LIA or lender-list version, and this change moves no gate
+or income version.
 
 ## Rulings, 10 November 2026, 06:39 (LIA 1.3.2)
 
@@ -32,7 +74,7 @@ Colin's rulings on #47's three questions.
    **Interim rule (until SIG-57's lender aliases replace it):** a name not on the list is shown by
    its first word. Matching still uses the whole name. Limits:
    - One-word lenders (Nimble, Plenti, Latitude) need no entry.
-   - The detector's provider form drops digits, so Money3 shows as "MONEY".
+   - The detector's provider form drops digits, so Money3 shows as "MONEY" (fixed in 1.3.3).
    - **Reserved names.** No reserved unseen-lender name of synthetic sets v1, v2.1 or v2.2 is on
      the list, and none is shown differently because of it (`test/research/lender-names.test.ts`).
      So NOW Finance, from the ruling's examples, is left off and shows as "NOW". Most reserved

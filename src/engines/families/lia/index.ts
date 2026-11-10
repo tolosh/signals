@@ -23,7 +23,7 @@ import {
   type DetectedLiability,
 } from "../../liabilities/index.js";
 
-export const LIA_VERSION = "1.3.2";
+export const LIA_VERSION = "1.3.3";
 
 /** A shared-account feed with the fields both the evidence layer and the detector read. */
 export type LiaFeed = {
@@ -367,8 +367,13 @@ export function assessLia(input: LiaInput): LiaResult {
   // Otherwise the type must be exact; mortgages and cards never match a loan declaration, or each
   // other.
   const UNTYPED_MATCHES = new Set(["personal_loan", "car_loan", "loan"]);
+  // The 13:00 ruling of the same day adds the converse: a declared plain loan doesn't conflict
+  // with a loan the data types as a personal or car loan.
+  const PLAIN_MATCHES = new Set(["personal_loan", "car_loan"]);
   const typeMatches = (d: DetectedLiability, declared: string) =>
-    declared === typeOf(d) || (untyped(d) && UNTYPED_MATCHES.has(declared));
+    declared === typeOf(d) ||
+    (untyped(d) && UNTYPED_MATCHES.has(declared)) ||
+    (declared === "loan" && d.family === "loan" && PLAIN_MATCHES.has(typeOf(d)));
   // Review 9 ruling 1: green needs the exact name AND a matching type (above). The detector's match is
   // by family and its ASCII-only name, so it isn't used: every liability found is matched here.
   // A liability's name is the one its sources agree on: the account product, or each repayment's
@@ -460,7 +465,9 @@ export function assessLia(input: LiaInput): LiaResult {
     ls.flatMap((d) => d.evidence.map((e) => byId.get(e)).filter((x): x is Line => x !== undefined));
   const kind = (d: DetectedLiability) => typeOf(d).replace("_", " ");
   const nameOf = (d: DetectedLiability) =>
-    d.sources.includes("outflow") ? lenderOf(d.provider) : d.provider;
+    d.sources.includes("outflow")
+      ? lenderOf(d.provider, byId.get(d.evidence[0] ?? "")?.t.description)
+      : d.provider;
   const describe = (d: DetectedLiability) =>
     `${nameOf(d)} (${kind(d)}${d.monthly ? `, $${d.monthly} a month` : ""})`;
   const possiblyText = possibly.map(
@@ -522,9 +529,9 @@ export function assessLia(input: LiaInput): LiaResult {
             },
           );
 
-  /** D29: a set of providers, shown by their lenders only. */
-  const lenders = (providers: Iterable<string>) =>
-    [...new Set([...providers].map(lenderOf))].join(", ");
+  /** D29: providers (with a description of each), shown by their lenders only. */
+  const lenders = (providers: Iterable<[string, string]>) =>
+    [...new Set([...providers].map(([p, text]) => lenderOf(p, text)))].join(", ");
 
   // LIA-02 Loan stacking (L-2): disbursement credits from lenders.
   const lenderProviders = new Set(
@@ -539,7 +546,7 @@ export function assessLia(input: LiaInput): LiaResult {
         lenderProviders.has(providerOf(l.t.description))),
   );
   const recent = disbursements.filter((l) => l.day > end - cfg.stacking_window_days);
-  const recentLenders = new Set(recent.map((l) => providerOf(l.t.description)));
+  const recentLenders = new Map(recent.map((l) => [providerOf(l.t.description), l.t.description]));
   const lia02 =
     disbursements.length === 0
       ? nothing("LIA-02", "No disbursement from a lender was found")
@@ -579,10 +586,10 @@ export function assessLia(input: LiaInput): LiaResult {
           saccRecent || concurrent ? "red" : "amber",
           `${saccBy.size} provider${saccBy.size === 1 ? "" : "s"}`,
           saccRecent
-            ? `SACC repayments to ${lenders(saccBy.keys())} in the last ${cfg.sacc_recent_days} days`
+            ? `SACC repayments to ${lenders([...saccBy].map(([p, ls]) => [p, ls[0]?.t.description ?? p] as [string, string]))} in the last ${cfg.sacc_recent_days} days`
             : concurrent
-              ? `Repayments to ${saccBy.size} SACC lenders at the same time: ${lenders(saccBy.keys())}`
-              : `SACC repayments to ${lenders(saccBy.keys())} in the last 12 months`,
+              ? `Repayments to ${saccBy.size} SACC lenders at the same time: ${lenders([...saccBy].map(([p, ls]) => [p, ls[0]?.t.description ?? p] as [string, string]))}`
+              : `SACC repayments to ${lenders([...saccBy].map(([p, ls]) => [p, ls[0]?.t.description ?? p] as [string, string]))} in the last 12 months`,
           sacc,
         );
 
@@ -619,7 +626,7 @@ export function assessLia(input: LiaInput): LiaResult {
 
   // LIA-05 BNPL (L-5): distinct lenders and monthly outflow, within the requested lookback.
   const bnpl = lines.filter((l) => l.amount < 0 && cat(l) === "bnpl");
-  const bnplLender = (l: Line) => lenderOf(providerOf(l.t.description));
+  const bnplLender = (l: Line) => lenderOf(providerOf(l.t.description), l.t.description);
   const bnplProviders = new Set(bnpl.map(bnplLender));
   const outflow = (from: number, to: number) =>
     -sum(bnpl.filter((l) => l.day > from && l.day <= to).map((l) => l.amount));

@@ -245,6 +245,6 @@ describe("ruling 3 (D29): liability reasons name only the lender", () => {
 
 describe("LIA version", () => {
   it("is the version", () => {
-    expect(LIA_VERSION).toBe("1.3.2");
+    expect(LIA_VERSION).toBe("1.3.3");
   });
 });
