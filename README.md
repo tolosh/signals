@@ -33,7 +33,12 @@ npx tsx scripts/generate-synthetic-v2.ts --variant 2.0 --check  # synthetic-v2 (
 To write a set's files, give a new folder with `--out` (synthetic-v1) or a new name (the others);
 an existing folder or manifest stops the run before anything is written.
 Set v1 (seed 42) is for experiments. Set v2.2 (seed 602, SIG-60, label-blind) awaits its
-independent review before any experiment uses it. Sets v2 (seed 54) and v2.1 (seed 541) stay
+independent review before any experiment uses it. **Set v2.2 limit (SIG-60 ruling, 10 November
+2026):** most of its reserved unseen-lender names, like those of v1 and v2.1, are real lenders, so
+for as long as v2.2 is used they stay off LIA's lender-name list (`lenders.ts`) and out of
+SIG-57's aliases. On real data such a lender is shown by its first word ("NOW" for NOW Finance).
+From the next synthetic set, reserved names are invented lenders, checked against the ASIC credit
+registers. Set v2.2 stays as run. Sets v2 (seed 54) and v2.1 (seed 541) stay
 published but are withdrawn from experiments: their feeds leak the truth (SIG-54 reviews,
 8 November 2026), and their manifests say so.
 
