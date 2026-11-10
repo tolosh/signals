@@ -9,6 +9,8 @@
 // The 10 November 2026 ruling (06:39) refines "matching type": the exact type, or, for a loan the
 // data doesn't type (this sweep's "loan", a "<NAME> LOAN" narrative), a declared personal_loan,
 // car_loan or loan. Mortgages and cards never match a loan declaration, or each other.
+// The 10 November ruling of 13:00 adds: a declared plain loan matches a loan the data types as a
+// personal or car loan (a plain declaration doesn't conflict with a typed loan).
 import { describe, expect, it } from "vitest";
 import { repeat, run, signal, type Line } from "./script.js";
 
@@ -82,8 +84,11 @@ function linesFor(type: Type, name: string, monthly: number): Line[] {
 
 /** The 10 November ruling, read independently: missing type data isn't a conflict. */
 const UNTYPED_MATCHES: readonly string[] = ["personal_loan", "car_loan", "loan"];
+const PLAIN_MATCHES: readonly string[] = ["personal_loan", "car_loan"];
 const typeMatches = (found: Type, declared: Type) =>
-  found === declared || (found === "loan" && UNTYPED_MATCHES.includes(declared));
+  found === declared ||
+  (found === "loan" && UNTYPED_MATCHES.includes(declared)) ||
+  (declared === "loan" && PLAIN_MATCHES.includes(found));
 
 /** Ruling 2, read independently: NFC, case fold, digits and legal suffixes out, spacing tidied. */
 function oracleName(name: string): string | null {
@@ -201,6 +206,17 @@ describe(`the ${N}-case sweep (seed 9): green exactly when the name and a matchi
             c.type === "loan" &&
             d.type !== "loan" &&
             typeMatches(c.type, d.type) &&
+            oracleName(d.provider) === oracleName(c.lender),
+        ),
+      ),
+    ).toBeGreaterThan(30);
+    // exact name, a typed personal or car loan declared as a plain loan (the 13:00 ruling)
+    expect(
+      has((c) =>
+        c.declared.some(
+          (d) =>
+            d.type === "loan" &&
+            PLAIN_MATCHES.includes(c.type) &&
             oracleName(d.provider) === oracleName(c.lender),
         ),
       ),

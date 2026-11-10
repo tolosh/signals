@@ -93,11 +93,12 @@ describe("ruling 1: a loan the data doesn't type is green when nothing conflicts
 
 describe("ruling 2: known multi-word lender names before the first-word rule", () => {
   it("is a short, versioned list", () => {
-    expect(LENDER_NAMES_VERSION).toBe("1.0.0");
+    expect(LENDER_NAMES_VERSION).toBe("1.1.0"); // 1.1.0: Money3 (the 13:00 ruling)
     expect(LENDER_NAMES.length).toBeGreaterThan(5);
     expect(LENDER_NAMES.length).toBeLessThan(40);
     // names only, in the detector's provider form (upper case letters, single spaces)
-    for (const n of LENDER_NAMES) expect(n).toMatch(/^[A-Z]+( [A-Z]+)+$/);
+    // multi-word, or (from 1.1.0, the 13:00 ruling) a name the digit-stripped form would lose
+    for (const n of LENDER_NAMES) expect(n).toMatch(/^[A-Z0-9]+( [A-Z0-9]+)+$|\d/);
   });
   it.each([
     ["CASH CONVERTERS", "CASH CONVERTERS"],
@@ -136,6 +137,6 @@ describe("ruling 2: known multi-word lender names before the first-word rule", (
   it("LIA records the list's version, and is 1.3.2", () => {
     const r = lia([]);
     expect(r.lender_names_version).toBe(LENDER_NAMES_VERSION);
-    expect(LIA_VERSION).toBe("1.3.2");
+    expect(LIA_VERSION).toBe("1.3.3");
   });
 });

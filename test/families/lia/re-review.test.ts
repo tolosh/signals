@@ -258,5 +258,5 @@ describe("7. NFC before keyword matching", () => {
 });
 
 describe("Version", () => {
-  it("is LIA 1.3.2", () => expect(LIA_VERSION).toBe("1.3.2"));
+  it("is LIA 1.3.3", () => expect(LIA_VERSION).toBe("1.3.3"));
 });
