@@ -235,3 +235,180 @@ describe(`the ${N}-case sweep (seed 9): green exactly when the name and a matchi
     expect(results.filter((x) => x.exact).length).toBeGreaterThan(1000);
   });
 });
+
+// The 16 November 2026 rulings (comment 40327, on review 10): exact-name pairing is the best
+// overall fit. Mixed cases put two or three liabilities of one lender against one to three
+// declarations, so declarations compete. The oracle is a brute force over every one-to-one
+// pairing, written from the ruling's text: the most exact (name plus matching type) pairs; then
+// the smallest total amount difference; then the documented tie-break (ADR 0006): liabilities in
+// the detector's key order (family, then provider) each take the earliest declaration, in
+// declaration order (type, name, amount, then the text as written), that keeps the pairing best.
+const MIXED_TYPES = ["personal_loan", "car_loan", "loan", "mortgage", "credit_card"] as const;
+type Mixed = {
+  lender: string;
+  found: { type: Type; monthly: number }[];
+  declared: { type: Type; provider: string; repayment_monthly?: number }[];
+};
+function mixedCases(n: number, seed: number): Mixed[] {
+  const r = rng(seed);
+  return Array.from({ length: n }, () => {
+    const lender = LENDERS[Math.floor(r() * (LENDERS.length - 1))] as string; // not "AB"
+    const pool: Type[] = [...MIXED_TYPES];
+    const types: Type[] = [];
+    const k = 2 + Math.floor(r() * 2);
+    while (types.length < k) types.push(pool.splice(Math.floor(r() * pool.length), 1)[0] as Type);
+    const found = types.map((type, i) => ({
+      type,
+      monthly: 100 + i * 7 + Math.round(r() * 60) * 10,
+    }));
+    const declared = Array.from({ length: 1 + Math.floor(r() * 3) }, () => {
+      const near = found[Math.floor(r() * found.length)] as { monthly: number };
+      const t = r() < 0.8 ? (MIXED_TYPES[Math.floor(r() * MIXED_TYPES.length)] as Type) : "loan";
+      return {
+        type: t,
+        provider: r() < 0.75 ? lender : declaredName(r, lender),
+        ...(r() < 0.9 ? { repayment_monthly: Math.round(near.monthly * (0.8 + r() * 0.4)) } : {}),
+      };
+    });
+    return { lender, found, declared };
+  });
+}
+/** The detector's grouping key, read from its documented provider form (A to Z, spaced). */
+function keyOfFound(lender: string, type: Type): string {
+  const provider = lender
+    .toUpperCase()
+    .replace(/[^A-Z ]/g, " ")
+    .replace(/ +/g, " ")
+    .trim();
+  const suffix: Partial<Record<Type, string>> = {
+    personal_loan: " PERSONAL",
+    car_loan: " CAR",
+    mortgage: " HOME",
+  };
+  return type === "credit_card"
+    ? `credit_card|${provider}`
+    : `loan|${provider}${suffix[type] ?? ""}`;
+}
+const cents = (x: number) => Math.round(x * 100);
+const MISSING = 1e9; // a missing amount: farther than any real one
+const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+function oraclePairing(c: Mixed): boolean[] {
+  const want = oracleName(c.lender);
+  const nameKey = (p: string) => oracleName(p) ?? "￿";
+  // Declaration order; duplicates (same type, name and amount) are one declaration.
+  const seen = new Set<string>();
+  const decl = [...c.declared]
+    .sort(
+      (a, b) =>
+        cmp(a.type, b.type) ||
+        cmp(nameKey(a.provider), nameKey(b.provider)) ||
+        (a.repayment_monthly ?? Infinity) - (b.repayment_monthly ?? Infinity) ||
+        cmp(a.provider, b.provider),
+    )
+    .filter((d) => {
+      const k = `${d.type}|${oracleName(d.provider) ?? `#${d.provider}`}|${d.repayment_monthly ?? ""}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  const order = c.found
+    .map((f, i) => ({ f, i, k: keyOfFound(c.lender, f.type) }))
+    .sort((a, b) => cmp(a.k, b.k));
+  const ok = (f: { type: Type }, d: (typeof decl)[number]) =>
+    want !== null && oracleName(d.provider) === want && typeMatches(f.type, d.type);
+  const diff = (f: { monthly: number }, d: (typeof decl)[number]) =>
+    d.repayment_monthly === undefined
+      ? MISSING
+      : Math.abs(cents(f.monthly) - cents(d.repayment_monthly));
+  // Every one-to-one pairing, as one choice per liability: a declaration's index, or none (last).
+  const NONE = decl.length;
+  let best: { n: number; cost: number; pick: number[] } | null = null;
+  const pick: number[] = [];
+  const beats = (n: number, cost: number, b: { n: number; cost: number; pick: number[] }) => {
+    if (n !== b.n) return n > b.n;
+    if (cost !== b.cost) return cost < b.cost;
+    const j = pick.findIndex((p, i) => p !== b.pick[i]);
+    return j >= 0 && (pick[j] as number) < (b.pick[j] as number);
+  };
+  const go = (j: number, used: Set<number>, n: number, cost: number) => {
+    if (j === order.length) {
+      if (best === null || beats(n, cost, best)) best = { n, cost, pick: [...pick] };
+      return;
+    }
+    const f = (order[j] as (typeof order)[number]).f;
+    decl.forEach((d, x) => {
+      if (used.has(x) || !ok(f, d)) return;
+      used.add(x);
+      pick.push(x);
+      go(j + 1, used, n + 1, cost + diff(f, d));
+      pick.pop();
+      used.delete(x);
+    });
+    pick.push(NONE);
+    go(j + 1, used, n, cost);
+    pick.pop();
+  };
+  go(0, new Set(), 0, 0);
+  const chosen = (best as { pick: number[] } | null)?.pick ?? [];
+  const declared = c.found.map(() => false);
+  order.forEach(({ i }, j) => {
+    declared[i] = chosen[j] !== NONE;
+  });
+  return declared;
+}
+
+const M = 3000;
+describe(`the ${M}-case mixed sweep (seed 16): pairing is a maximum matching`, () => {
+  const all = mixedCases(M, 16);
+  const results = all.map((c) => {
+    const lines = c.found.flatMap((f) => linesFor(f.type, c.lender, f.monthly));
+    const r = run({ lines }, { declared_liabilities: c.declared });
+    const byMonthly = new Map(r.liabilities.map((l) => [l.monthly, l.declared]));
+    return {
+      c,
+      state: signal(r, "LIA-01").state,
+      got: c.found.map((f) => byMonthly.get(f.monthly) ?? null),
+      want: oraclePairing(c),
+      found: r.liabilities.length,
+    };
+  });
+  const show = (x: (typeof results)[number]) =>
+    `${x.c.lender} ${JSON.stringify(x.c.found)} vs ${JSON.stringify(x.c.declared)}: got ${JSON.stringify(x.got)}, want ${JSON.stringify(x.want)}`;
+
+  it("every liability is found, one per type", () => {
+    expect(
+      results
+        .filter((x) => x.found !== x.c.found.length)
+        .map(show)
+        .slice(0, 5),
+    ).toEqual([]);
+  });
+  it("each liability is declared exactly when the oracle's best pairing pairs it", () => {
+    const wrong = results.filter((x) => JSON.stringify(x.got) !== JSON.stringify(x.want));
+    expect(
+      wrong.length,
+      `${wrong.length} cases differ; first: ${wrong.slice(0, 3).map(show).join(" | ")}`,
+    ).toBe(0);
+  }, 600_000);
+  it("LIA-01 is green exactly when every liability is paired, and never red", () => {
+    const wrong = results.filter((x) => (x.state === "green") !== x.want.every(Boolean));
+    expect(wrong.map(show).slice(0, 3)).toEqual([]);
+    expect(results.filter((x) => x.state === "red").length).toBe(0);
+  });
+  it("isn't vacuous: declarations compete, and pairings are partial as well as full", () => {
+    // a declaration the oracle could give to two or more of the liabilities
+    const contested = all.filter((c) =>
+      c.declared.some(
+        (d) =>
+          oracleName(d.provider) !== null &&
+          oracleName(d.provider) === oracleName(c.lender) &&
+          c.found.filter((f) => typeMatches(f.type, d.type)).length >= 2,
+      ),
+    );
+    expect(contested.length).toBeGreaterThan(300);
+    expect(results.filter((x) => x.want.every(Boolean)).length).toBeGreaterThan(100);
+    expect(
+      results.filter((x) => x.want.some((w) => !w) && x.want.some(Boolean)).length,
+    ).toBeGreaterThan(300);
+  });
+});

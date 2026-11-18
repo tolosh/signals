@@ -607,12 +607,12 @@ describe("GR-3 gate version", () => {
     ).toMatchObject(v);
     expect(expensesOf(base)).toMatchObject(v);
   });
-  it("LIA is 1.3.3 (the 10 November rulings); INC 1.2.2, observed income 1.0.1, observed expenses 1.1.1", () => {
+  it("LIA is 1.3.4 (the 16 November rulings); INC 1.2.2, observed income 1.0.1, observed expenses 1.1.1", () => {
     // Gate 1.2.0 changes their output only on a liability credit carrying a sensitive MCC; each
     // records the gate version it ran, so their own versions stand (for the reviewer).
     expect(INC_VERSION).toBe("1.2.2");
     expect(INCOME_METHOD_VERSION).toBe("1.0.1");
-    expect(LIA_VERSION).toBe("1.3.3");
+    expect(LIA_VERSION).toBe("1.3.4");
     expect(OBSERVED_EXPENSES_METHOD_VERSION).toBe("1.1.1");
   });
 });
@@ -655,6 +655,15 @@ describe("GR-3 static scan: every read of transactions under src/engines/ is gat
     // and its neighbours
     "export function f(input: I) { const g = withoutSensitive(input.feed); const ctx = { feed: input.feed, g }; return ctx.feed.accounts.map((a) => a.transactions); }",
     "export function f(input: I) { const g = withoutSensitive(input.feed); return { ...g, accounts: input.feed.accounts }.accounts.map((a) => a.transactions); }",
+    // review 10's two realistic evasions (ruling of 16 November 2026): a `let` reassigned to the
+    // raw feed, and a local function named withoutSensitive
+    "export function f(input: I) { let feed = withoutSensitive(input.feed); feed = input.feed; return feed.accounts.map((a) => a.transactions); }",
+    "export function f(input: I) { let feed = withoutSensitive(input.feed); if (input.raw) feed = input.feed; for (const a of feed.accounts) use(a.transactions); }",
+    "export function f(input: I) { let feed; feed = input.feed; return feed.accounts.map((a) => a.transactions); }",
+    "export function f(input: I) { let feed = withoutSensitive(input.feed); ({ feed } = input); return feed.accounts.map((a) => a.transactions); }",
+    "const withoutSensitive = (f: F) => f;\nexport function f(input: I) { const feed = withoutSensitive(input.feed); return feed.accounts.map((a) => a.transactions); }",
+    "function withoutSensitive(f: F) { return f; }\nexport function f(input: I) { const feed = withoutSensitive(input.feed); return feed.accounts.map((a) => a.transactions); }",
+    "export function f(input: I, withoutSensitive: (f: F) => F) { const feed = withoutSensitive(input.feed); return feed.accounts.map((a) => a.transactions); }",
   ])("flags an ungated read written as: %s", (snippet) => {
     expect(ungatedIn(GATE + snippet).length).toBeGreaterThan(0);
   });
@@ -666,8 +675,27 @@ describe("GR-3 static scan: every read of transactions under src/engines/ is gat
     "type Ctx = { feed: F; end: number };\nfunction g(c: Ctx) { return c.feed.accounts.map((a) => a.transactions); }\nexport function f(input: I) { const feed = withoutSensitive(input.feed); const ctx: Ctx = { feed, end: 1 }; return g(ctx); }",
     "function g(feed: F) { return feed.accounts.map((a) => a.transactions); }\nexport function f(input: I) { return g(withoutSensitive(input.feed)); }",
     'const label = "transactions";\nexport type T = { transactions: Tx[] };\n// transactions',
+    // a `let` that is only ever given gated values stays gated
+    "export function f(input: I) { let feed = withoutSensitive(input.feed); feed = withoutSensitive(input.other); return feed.accounts.map((a) => a.transactions); }",
   ])("passes a gated read, or no read: %s", (snippet) => {
     expect(ungatedIn(GATE + snippet)).toEqual([]);
+  });
+  it("counts withoutSensitive as the gate only when it is imported from the gate module", () => {
+    const read =
+      "export function f(input: I) { const feed = withoutSensitive(input.feed); return feed.accounts.map((a) => a.transactions); }";
+    expect(ungatedIn(read).length).toBeGreaterThan(0);
+    expect(
+      ungatedIn('import { withoutSensitive } from "./not-the-gate.js";\n' + read).length,
+    ).toBeGreaterThan(0);
+    expect(ungatedIn('import { withoutSensitive } from "../../sensitive.js";\n' + read)).toEqual(
+      [],
+    );
+    expect(
+      ungatedIn(
+        'import { withoutSensitive as gate } from "../sensitive.js";\n' +
+          read.replace("withoutSensitive(", "gate("),
+      ),
+    ).toEqual([]);
   });
 
   it("every module not on the list reads transactions only through the gate", () => {
@@ -781,6 +809,18 @@ describe("D29: no engine's output text carries a sensitive keyword", () => {
       amount: -450,
       category: "loan_repayment",
     }),
+    // review 10 (ruling 2 of 16 November 2026): a sensitive word before the lender's name
+    ...Array.from({ length: 6 }, (_, i) => ({
+      ago: 9 + i * 14,
+      description: "IVF CASH CONVERTERS",
+      amount: -55,
+      category: "sacc_loan",
+    })),
+    ...monthly(6, 7, {
+      description: "ONCOLOGY PLENTI LOAN",
+      amount: -275,
+      category: "loan_repayment",
+    }),
   ];
   const x = applicant(lines);
   const input = {
@@ -803,6 +843,8 @@ describe("D29: no engine's output text carries a sensitive keyword", () => {
           declared_liabilities: [
             { type: "loan", provider: "Macquarie", repayment_monthly: 300 },
             { type: "bnpl", provider: "Humm", repayment_monthly: 97 },
+            // the applicant's own text, shown in "possibly declared" (ruling 2, [withheld])
+            { type: "loan", provider: "IVF clinic loan", repayment_monthly: 450 },
           ],
         },
       }),
@@ -818,8 +860,21 @@ describe("D29: no engine's output text carries a sensitive keyword", () => {
   });
   it("the check isn't vacuous: LIA finds every lender and names it", () => {
     const text = JSON.stringify(outputs.find(([n]) => n === "LIA")?.[1]);
-    for (const lender of ["MACQUARIE", "NIMBLE", "BEFOREPAY", "HARMONEY", "HUMM", "SOCIETYONE"])
+    for (const lender of [
+      "MACQUARIE",
+      "NIMBLE",
+      "BEFOREPAY",
+      "HARMONEY",
+      "HUMM",
+      "SOCIETYONE",
+      "CASH CONVERTERS",
+      "PLENTI",
+    ])
       expect(text, lender).toContain(lender);
     expect(JSON.stringify(x)).toMatch(KEYWORDS);
+  });
+  it("the check isn't vacuous: the declared text is shown, its sensitive words withheld", () => {
+    const text = JSON.stringify(outputs.find(([n]) => n === "LIA, with declarations")?.[1]);
+    expect(text).toContain("Possibly the declared [withheld] [withheld] loan");
   });
 });

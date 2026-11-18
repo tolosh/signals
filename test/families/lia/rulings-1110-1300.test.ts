@@ -1,4 +1,4 @@
-// SIG-42: Colin's rulings of 10 November 2026, 13:00 (comment 40215), LIA 1.3.3. Written before
+// SIG-42: Colin's rulings of 10 November 2026, 13:00 (comment 40215), LIA 1.3.3 (pins moved to 1.3.4 on 16 November). Written before
 // the change it tests:
 //   2. With an exact name, a declared plain `loan` is green against a loan the data types as a
 //      personal or car loan: a plain declaration doesn't conflict with a typed loan. Mortgages and
@@ -86,9 +86,9 @@ describe("ruling 3: the lender list is matched before digits are stripped", () =
   it("names Money3 in LIA-01's reason", () => {
     expect(lia01(loan("MONEY3 PERSONAL LOAN", 300), []).reason).toContain("MONEY3 (personal loan");
   });
-  it("the list is 1.1.0 and LIA is 1.3.3", () => {
+  it("the list is 1.1.0 and LIA is 1.3.4 (from the 16 November rulings)", () => {
     expect(LENDER_NAMES_VERSION).toBe("1.1.0");
     expect(lia([]).lender_names_version).toBe("1.1.0");
-    expect(LIA_VERSION).toBe("1.3.3");
+    expect(LIA_VERSION).toBe("1.3.4");
   });
 });

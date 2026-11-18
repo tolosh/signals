@@ -233,5 +233,5 @@ describe("LIA-01 is built on SIG-18's detector, and says how far to trust it", (
 });
 
 describe("version", () => {
-  it("is 1.3.3 (SIG-42 rulings of 10 November, 13:00)", () => expect(LIA_VERSION).toBe("1.3.3"));
+  it("is 1.3.4 (SIG-42 rulings of 16 November)", () => expect(LIA_VERSION).toBe("1.3.4"));
 });
