@@ -1,7 +1,8 @@
 # ADR 0009: synthetic set v2.2 and its four leakage limits
 
-Status: ruled (Colin, 9 November 2026, SIG-60 comment 40197). Fitness for each experiment is
-decided by the set v2.2 independent review, which follows the merge of PR #44.
+Status: ruled (Colin, 9 November 2026, SIG-60 comment 40197). Independent review 11 (comment
+40328, 16 November 2026) and Colin's rulings on it (comment 40386, 16 November 2026) are recorded
+below: set v2.2 may be used for experiments, under the caveats in the fitness table.
 
 ## Context
 
@@ -55,5 +56,62 @@ and flows. That is the same clustered-line effect.
   - **Fit with a stated caveat:** any experiment that must first identify pay lines (the SIG-16
     re-run, SIG-46) or drift lines.
   - **SIG-46's tax arithmetic** is unaffected (the X-3 caveat as before).
-- **Nothing uses set v2.2 before that review is posted.**
 - A future set that removes these limits needs its own pre-registration; this one stays frozen.
+  That set is v2.3 (SIG-63).
+
+## Review 11 and the rulings of 16 November 2026
+
+Independent review 11 (comment 40328, pinned at `5114112`) reproduced T7 exactly, negative controls
+first, and found none of the v2 or v2.1 channels. It recorded three discrepancies:
+
+- **T3:** 3 drift-tagged applicants have no drift line, because the generator's label pool doesn't
+  exclude applicants with an unshared salary account or a history too short for the split.
+- **L4, D-L4-1:** BPAY biller codes encode the answer. Lender codes have 4 digits and bill codes 5
+  or 6; the leading digit gives the type; codes step by 91 within a type; reserved unseen lenders
+  take the top codes; and a no-cue card's code carries "CREDIT CARD" on other applicants' lines.
+  T7 couldn't see this, because the biller code is intended evidence for those labels and is
+  excluded from their classifiers. It affects 26% of repayment lines, 22 of 105 visible
+  unseen-lender liabilities and 42 of 127 no-cue cards. Statement feeds carry no codes.
+- **L5:** T-drift-line-main is arbitrary by construction: which side of a rename counts as
+  "drifted" is a coin flip in the generator (`driftBefore`).
+
+It also recorded D-L4-2 (descriptor words only on "same" names, within margin), D-L4-3 (268
+natural declarations use only 83 alias pairs, repeated up to 12 times) and 14 realism flags.
+
+**Rulings (comment 40386):**
+
+1. **Biller codes: use v2.2 now, fix the codes in v2.3.** Experiments may start on v2.2. Each one
+   pre-registers that no rule or feature uses biller-code length, prefix, digit arithmetic or code
+   rank, or learns code-to-name links across applicants, with a static check where practical.
+   Unseen-lender and no-card-cue results are reported with BPAY code features off, and again with
+   BPAY lines excluded. Set v2.3 is SIG-63. v2.2 stays as run, and its T7 result is unchanged.
+2. **Drift: per applicant only; the 3 unobservable applicants are excluded.** On v2.2 drift is
+   never scored per line, and T-drift-line-main is not a target. The pre-registered exclusion list
+   is `research/datasets/synthetic-v2.2.drift-exclusions.json` (`syn-v22-7620cc69c71d8ce9`,
+   `syn-v22-ceb6a90aecba2b61`, `syn-v22-e5410aea343dffbb`), reported in every run. The full IDs are
+   derived from the regenerated truths and match the review's prefixes, which
+   `test/research/v22/drift-exclusions.test.ts` checks. Observable counts are 23 over time and 22
+   across banks; both minimums of 20 hold.
+3. **The fitness table below is accepted as the record.** Every experiment on v2.2 copies its row's
+   caveats into its own pre-registration, and its results carry them. SIG-57's references to set
+   v2 now read set v2.2 (comment 40387, before any run).
+
+## Fitness per experiment (review 11, accepted 16 November 2026)
+
+| Use                                          | Fitness         | Caveat                                                                                                                                                   |
+| -------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LIA detection; SIG-18 re-run                 | Fit with caveat | No rule keys on biller-code length, prefix or arithmetic; audit before the run. Report the unseen-lender stratum separately.                             |
+| SIG-57 (alias matching, H2)                  | Fit with caveat | Pre-register the alias table without reading `catalog.ts` or this set. Report name-only matching.                                                        |
+| SIG-16 re-run (income, drift, irregular pay) | Fit with caveat | Score drift per applicant, not per line. Exclude and report the 3 unobservable applicants. Pay stability is an upper bound.                              |
+| SIG-17 re-run (expenses)                     | Fit with caveat | Don't separate bills from repayments by code length. No sensitive merchants are present, so GR-3 isn't exercised. Categorisation results are optimistic. |
+| SIG-46 (gross from net)                      | Fit with caveat | Under X-3 the gross-up is an exact inversion, so error will be near zero.                                                                                |
+| Dishonour scoring                            | Fit with caveat | Fit for detection, counting and recency. **Not fit** for anything that predicts dishonours from balances or flows.                                       |
+| H2: natural declarations                     | Fit with caveat | The alias pairs repeat (D-L4-3). Compare within the pool of applicants with 2 or more declared liabilities.                                              |
+| H2: unseen lenders                           | Fit with caveat | Disable BPAY code features, or exclude BPAY lines.                                                                                                       |
+| H2: reference noise                          | Fit             | None.                                                                                                                                                    |
+| H2: no card cue                              | Fit with caveat | Disable code-prefix rules and learning code-to-name links across applicants.                                                                             |
+| H2: repaid from unshared                     | Fit with caveat | Declared amounts equal the truth to the cent, which makes it easier; report name-based results.                                                          |
+| H2: account in or out of grant               | Fit             | None.                                                                                                                                                    |
+
+The architect's expectation of 9 November (above) is superseded by this table. In particular,
+H2 / SIG-57 and dishonour scoring are fit only with the caveats it states.
