@@ -11,7 +11,12 @@
 //   Also: lender names keep Unicode letters (ZÖP, ÉCO).
 import { describe, expect, it } from "vitest";
 import { assessLia, LIA_VERSION, type LiaResult } from "../../../src/engines/families/lia/index.js";
-import { LENDER_NAMES_VERSION, lenderOf } from "../../../src/engines/families/lia/lenders.js";
+import {
+  LENDER_NAMES,
+  LENDER_NAMES_VERSION,
+  isSensitiveWord,
+  lenderOf,
+} from "../../../src/engines/families/lia/lenders.js";
 import { AS_OF, build, repeat, run, signal, type Line, type Script } from "./script.js";
 
 type Declared = { type: string; provider: string; repayment_monthly?: number };
@@ -126,6 +131,27 @@ describe("ruling 1: the input order of feeds and declarations never changes the 
       ...sacc("CASH CONVERTERS LOAN", 45),
       { ago: 40, description: "SOCIETYONE LOAN DISBURSEMENT", amount: 4000 },
       { ago: 20, description: "HARMONEY LOAN DISBURSEMENT", amount: 1500 },
+      // added after the mutation check: a second account in the grant, with a lender repaid from
+      // both, so the order of accounts matters too
+      ...repeat(
+        13,
+        14,
+        {
+          description: "ZIP PAY",
+          amount: -25,
+          category: "bnpl",
+          account: "acc-joint",
+        },
+        9,
+      ),
+      ...loan("WESTPAC CAR LOAN", 610).map((l) => ({ ...l, account: "acc-joint" })),
+    ],
+    accounts: [
+      {
+        accountId: "acc-joint",
+        productCategory: "TRANS_AND_SAVINGS_ACCOUNTS",
+        productName: "Joint Everyday",
+      },
     ],
   };
   const declared: Declared[] = [
@@ -197,6 +223,10 @@ describe("ruling 2: sensitive words in displayed names are masked", () => {
     ["IVF CLINIC", "a lender"],
   ])("a lender written %s is named %s", (narrative, name) => {
     expect(lenderOf(narrative, narrative)).toBe(name);
+  });
+  it("no listed lender name has a sensitive word (so the list never shows one)", () => {
+    for (const n of LENDER_NAMES)
+      for (const w of n.split(" ")) expect(isSensitiveWord(w), n).toBe(false);
   });
   it("without a description too", () => {
     expect(lenderOf("IVF NIMBLE REPAY")).toBe("NIMBLE");

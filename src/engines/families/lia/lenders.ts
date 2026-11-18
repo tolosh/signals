@@ -139,11 +139,13 @@ export const NO_NAME = "a lender";
 
 /**
  * The description's words, upper case, Unicode letters kept (ZÖP, ÉCO, from 1.3.4): words of
- * digits only (references), the product words and sensitive words are dropped.
+ * digits only (references) and the product words are dropped. They are read only to match the
+ * list (no listed name has a sensitive word) and to spell the provider's own first word, which
+ * is never sensitive, so sensitive words need no filter here.
  */
 const wordsOf = (text: string) =>
   (text.normalize("NFC").toUpperCase().match(WORD) ?? []).filter(
-    (w) => !/^\p{N}+$/u.test(w) && !SKIP.has(w) && !isSensitiveWord(w),
+    (w) => !/^\p{N}+$/u.test(w) && !SKIP.has(w),
   );
 /** A word in the detector's provider form: A to Z only, anything else a space (ZÖP is "Z P"). */
 const asciiOf = (word: string) =>
