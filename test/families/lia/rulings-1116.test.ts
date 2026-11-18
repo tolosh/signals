@@ -125,7 +125,7 @@ describe("ruling 1: the input order of feeds and declarations never changes the 
       ...sacc("NIMBLE REPAY", 60),
       ...sacc("CASH CONVERTERS LOAN", 45),
       { ago: 40, description: "SOCIETYONE LOAN DISBURSEMENT", amount: 4000 },
-      { ago: 20, description: "MONEYME LOAN DISBURSEMENT", amount: 1500 },
+      { ago: 20, description: "HARMONEY LOAN DISBURSEMENT", amount: 1500 },
     ],
   };
   const declared: Declared[] = [
