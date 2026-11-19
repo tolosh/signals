@@ -2,9 +2,128 @@
 
 Status: ruled (Colin, 8 November 2026, on SIG-42). L-1 to L-8 stand as recorded, with the two
 changes below, the independent review's rulings of the same day (1.2.0, below) and the short
-re-review's ruling (1.3.0, below), review 9's rulings (1.3.1, below) and the 10 November
-rulings (1.3.2 and 1.3.3, below). Where a ruling changes an interpretation, the ruling wins, and
-the interpretation is kept as it was recorded. The engine is at 1.3.3.
+re-review's ruling (1.3.0, below), review 9's rulings (1.3.1, below), the 10 November
+rulings (1.3.2 and 1.3.3, below) and review 10's rulings (1.3.4, below). Where a ruling changes an
+interpretation, the ruling wins, and the interpretation is kept as it was recorded. The engine is
+at 1.3.4.
+
+## Rulings, 16 November 2026, on review 10 (LIA 1.3.4)
+
+Independent review 10 (comment 40326, at `5114112`) checked LIA 1.3.1 to 1.3.3 and gate 1.2.0.
+It found that exact-name pairing depended on order, and that sensitive words could still show.
+Colin's rulings (comment 40327):
+
+1. **Exact-name pairing is the best overall fit** (`src/engines/families/lia/pairing.ts`). Of
+   every one-to-one pairing of found liabilities with declarations, where each pair has the exact
+   name and a matching type, LIA takes:
+   1. the most pairs;
+   2. then the smallest total amount difference, in cents (a missing amount counts as farther than
+      any real one);
+   3. then the **tie-break**: liabilities, in the detector's key order (family, then provider),
+      each take the earliest declaration, in declaration order, that still allows a pairing as
+      good on 1 and 2.
+
+   **Declaration order** is by type, then exact name (none last), then repayment (none last), then
+   the text as written. Duplicates (the same type, name and repayment) are removed after sorting,
+   so the one kept, and the text shown for it, doesn't depend on order. Steps 1 and 2 are a
+   minimum-cost maximum matching, by successive shortest paths; step 3 re-solves with each choice
+   fixed. It is exact for any number of liabilities and declarations.
+
+   **Input order never changes the result.** LIA reads the gated feed in account-ID order, and
+   each account's lines by date, then transaction ID. Every step sees that one order, including
+   SIG-18's detector (unchanged at 1.0.0), the evidence layer and the other five signals. The
+   liabilities list and the reasons follow the detector's key order.
+
+   **The fuzzy path is unchanged.** It is the same rule, still amber "possibly declared", closest
+   amount first. Its ties now break on the liability's key and the fixed declaration order, not
+   on input position.
+
+   Review 10's cases:
+   - **XAVO:** an untyped $500 loan and a $300 car loan, against declared personal $310 and car
+     $480. Both are now green, in either declaration order.
+   - **BEVO:** an untyped $900 loan and a $300 personal loan, against one declared personal $300.
+     The declaration now goes to the $300 loan, and the $900 loan is reported.
+
+2. **Sensitive words never show in a displayed name.**
+   - **Lender names:** `lenderOf` skips sensitive words, then applies the list and the first-word
+     rule to what is left. So "IVF NIMBLE REPAY" shows "NIMBLE", "IVF CASH CONVERTERS" shows "CASH
+     CONVERTERS" (the list still wins, as the 06:39 ruling requires), and a name with nothing else
+     left shows "a lender".
+   - **Account names:** a liability known only from its account shows its product name whole,
+     unless that name has a sensitive word; then it is named the same way.
+   - **The applicant's declared text** shows each sensitive word as "[withheld]". Every keyword is
+     withheld, so "IVF clinic loan" shows "[withheld] [withheld] loan": CLINIC is on the list too.
+     The ruling's example withheld only IVF.
+   - **Masking is for display only.** Matching reads the unmasked name, so an exact name with a
+     sensitive word still matches.
+   - **The words** are `SENSITIVE_WORDS` in `lenders.ts`, GR-3's five groups as words a narrative
+     or an applicant writes. The list is covered by LIA's version, and the lender-name list stays
+     at 1.1.0. The D29 keyword test in `test/repo/gr3.test.ts` now covers both paths; its keyword
+     list is independent of the engine's.
+
+3. **A merchant in a narrative stays amber.** "HUMM SMILE DENTAL" against a declared "Humm" is
+   amber "possibly declared", and shows only HUMM.
+
+**Also fixed (no ruling needed):**
+
+- **Lender names keep Unicode letters.** The provider's first word is shown as the bank's
+  description writes it: ZÖP shows "ZÖP" (it was "Z"), ÉCO BANK shows "ÉCO" (it was "CO"), and
+  ŁUKA shows "ŁUKA".
+- **The GR-3 scan's two realistic evasions are closed.** The other known limits are listed in
+  ADR 0007.
+- **Correction:** the "description ignored" mutant under 1.3.3 (below) fails 4 tests, not 3. It
+  was 3 at `9437c0b`; `2e40682` added the leading-reference case, and I didn't update the count.
+- **Mortgages and cards under a loan declaration's name (recorded as intended).** A mortgage or
+  card with the exact name of a loan declaration is amber "possibly declared" (the exact name with
+  a conflicting type), never green. A literal reading of the rule would give "not matched"; both
+  are amber, and this is the intended reading.
+
+**Tests first** (`6d536f4`; every new test failed on assertions):
+
+- `rulings-1116.test.ts`, the D29 keyword and scan cases in `gr3.test.ts`, the mixed sweep, and
+  the version pins.
+- One test was added after the mutation check (`d37e6be`): a second account in the order test.
+  Without it, keeping the accounts' input order survived.
+- That commit also removed a sensitive-word filter on the description's words. It did nothing:
+  removing it failed no test, because those words only match the list (no listed name has a
+  sensitive word, now tested) and spell the provider's first word, which is already masked.
+
+**Sweeps:**
+
+| Engine | 7,500-case sweep (seed 9): green leaks / over-flags | 3,000-case mixed sweep (seed 16): cases paired differently from the oracle |
+| ------ | --------------------------------------------------- | -------------------------------------------------------------------------- |
+| 1.3.3  | 0 / 0                                               | 315                                                                        |
+| 1.3.4  | **0 / 0**                                           | **0**                                                                      |
+
+The mixed sweep puts two or three liabilities of one lender (personal, car, untyped loan,
+mortgage, card) against one to three declarations, so declarations compete. Its oracle is a brute
+force over every one-to-one pairing, written from the ruling's text and the tie-break above. It
+checks every liability's "declared" flag, and that LIA-01 is green exactly when every liability
+is paired. It is never red.
+
+**Mutation checks** at `d37e6be` (LIA, GR-3 and lender-name tests, 352):
+
+| Mutant                                    | Tests failing |
+| ----------------------------------------- | ------------- |
+| 1.3.3's first-match pairing               | 4             |
+| amount ignored in pairing                 | 2             |
+| tie-break reversed                        | 1             |
+| feed lines in input order                 | 6             |
+| accounts in input order (after `d37e6be`) | 3             |
+| declarations in input order               | 1             |
+| lender names unmasked                     | 13            |
+| declared text not withheld                | 3             |
+| account names unmasked                    | 1             |
+| Unicode name dropped                      | 3             |
+| scan: reassignment ignored                | 3             |
+| scan: any `withoutSensitive` is the gate  | 4             |
+
+**Set v1 at 1.3.4** (records `2026-11-18-synthetic-v1-lia-family-v1.3.4*.json`): every signal's
+counts, by tag, at both requests, are identical to 1.3.3's (and so to 1.3.0's). They were recorded
+at `429be07`. Regenerated at `d37e6be`, after the no-op filter was removed, the counts are
+identical again.
+
+**Pre-registrations:** none records an LIA version, and the gate stays at 1.2.0.
 
 ## Rulings, 10 November 2026, 13:00 (LIA 1.3.3)
 

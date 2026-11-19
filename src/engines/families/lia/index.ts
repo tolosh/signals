@@ -8,12 +8,17 @@
 // declaration is amber "possibly declared", never green; strict matching (exact types, closest
 // amount, one-to-one, duplicates removed); reasons name the lender, not the narrative (D29); LIA
 // reads within the requested lookback (LIA-03 keeps 12 months); text is NFC before keywords.
+// 1.3.4 follows review 10 (Colin's rulings of 16 November 2026, SIG-42 comment 40327): exact-name
+// pairing is a maximum matching with a fixed tie-break, the input order of feeds and declarations
+// never changes the result, sensitive words never show in a displayed name, and lender names keep
+// Unicode letters. See ADR 0006.
 // Pure: categories and the application are inputs; no clock, no randomness, relative imports (D3).
 import { applyEvidence, assessEvidence, EQ_THRESHOLDS } from "../../evidence/index.js";
 import { dayOf, isoOf } from "../../evidence/dates.js";
 import type { FeedTransaction, RawSignal, Signal } from "../../evidence/index.js";
 import { SENSITIVE_METHOD_VERSION, withoutSensitive } from "../../sensitive.js";
-import { LENDER_NAMES_VERSION, lenderOf } from "./lenders.js";
+import { LENDER_NAMES_VERSION, isSensitiveWord, lenderOf, withheld } from "./lenders.js";
+import { bestPairing } from "./pairing.js";
 import type { FeedType } from "../../signals/definitions.js";
 import {
   detectLiabilities,
@@ -23,7 +28,7 @@ import {
   type DetectedLiability,
 } from "../../liabilities/index.js";
 
-export const LIA_VERSION = "1.3.3";
+export const LIA_VERSION = "1.3.4";
 
 /** A shared-account feed with the fields both the evidence layer and the detector read. */
 export type LiaFeed = {
@@ -275,7 +280,22 @@ export function assessLia(input: LiaInput): LiaResult {
   const cfg: LiaConfig = { ...LIA_DEFAULTS, ...input.config };
   const lookback = input.lookback_months ?? 6;
   // GR-3: sensitive spending is removed before anything is read, the detector included.
-  const feed = withoutSensitive(input.feed, input.categories);
+  const gated = withoutSensitive(input.feed, input.categories);
+  // 1.3.4 (ruling 1 of 16 November 2026): the feed's order never changes the result. Accounts are
+  // read in account-ID order and each account's lines by date, then transaction ID, so every step
+  // below, the detector included, sees one order whatever order the bank sent.
+  const at = (t: { postingDateTime?: string; valueDateTime?: string; transactionId: string }) =>
+    `${t.postingDateTime ?? t.valueDateTime ?? ""}|${t.transactionId}`;
+  const byText = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+  const feed = {
+    ...gated,
+    accounts: [...gated.accounts]
+      .sort((a, b) => byText(a.account.accountId, b.account.accountId))
+      .map((a) => ({
+        ...a,
+        transactions: [...a.transactions].sort((x, y) => byText(at(x), at(y))),
+      })),
+  };
   const ctx = assessEvidence({
     feed,
     feed_type: input.feed_type,
@@ -397,29 +417,54 @@ export function assessLia(input: LiaInput): LiaResult {
     const first = names[0];
     return first !== undefined && first !== null && names.every((n) => n === first) ? first : null;
   };
-  const seen = new Set<string>();
-  const declaredList = input.application.declared_liabilities.flatMap((d, i) => {
-    const exact = exactName(d.provider);
-    const key = `${d.type}|${exact ?? `#${normaliseProvider(d.provider)}`}|${d.repayment_monthly ?? ""}`;
-    if (seen.has(key)) return [];
-    seen.add(key);
-    return [{ i, d, exact }];
-  });
-  const used = new Set<number>();
-  const exactly = new Set<DetectedLiability>();
-  for (const l of detected.liabilities) {
-    const name = nameOfFound(l);
-    const x =
-      name === null
-        ? undefined
-        : declaredList.find((y) => !used.has(y.i) && y.exact === name && typeMatches(l, y.d.type));
-    if (x) {
-      used.add(x.i);
-      exactly.add(l);
-    }
-  }
+  // 1.3.4 (ruling 1 of 16 November 2026): a fixed order for both sides, so the order the
+  // application lists declarations in never changes the result. Liabilities in the detector's
+  // key order (family, then provider; one liability per key). Declarations by type, then exact
+  // name (none last), then repayment (none last), then the text as written; duplicates (the same
+  // type, name and repayment) are removed after sorting, so the one kept doesn't depend on order.
   const keyOf = (d: DetectedLiability) => `${d.family}|${d.provider}`;
-  const rest = detected.liabilities.filter((l) => !exactly.has(l));
+  const found = [...detected.liabilities].sort((a, b) => byText(keyOf(a), keyOf(b)));
+  const seen = new Set<string>();
+  const declaredList = input.application.declared_liabilities
+    .map((d) => ({ d, exact: exactName(d.provider) }))
+    .sort(
+      (a, b) =>
+        byText(a.d.type, b.d.type) ||
+        (a.exact === null ? 1 : 0) - (b.exact === null ? 1 : 0) ||
+        byText(a.exact ?? "", b.exact ?? "") ||
+        (a.d.repayment_monthly ?? Infinity) - (b.d.repayment_monthly ?? Infinity) ||
+        byText(a.d.provider, b.d.provider),
+    )
+    .filter(({ d, exact }) => {
+      const key = `${d.type}|${exact ?? `#${normaliseProvider(d.provider)}`}|${d.repayment_monthly ?? ""}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((x, i) => ({ ...x, i }));
+  // Cents between a liability's monthly repayment and a declaration's; a missing amount is
+  // farther than any real one.
+  const centsApart = (l: DetectedLiability, d: DeclaredLiability) =>
+    l.monthly !== null && d.repayment_monthly !== undefined
+      ? Math.abs(Math.round(l.monthly * 100) - Math.round(d.repayment_monthly * 100))
+      : 1e9;
+  // Ruling 1: the exact pass is the best overall fit (pairing.ts): the most exact pairs (name and
+  // a matching type), then the smallest total amount difference, then the tie-break: liabilities
+  // in the order above each take the earliest declaration, in the order above, that keeps the
+  // pairing best.
+  const names = found.map(nameOfFound);
+  const best = bestPairing(
+    found.length,
+    declaredList.length,
+    found.flatMap((l, li) =>
+      declaredList
+        .filter((x) => names[li] !== null && x.exact === names[li] && typeMatches(l, x.d.type))
+        .map((x) => ({ left: li, right: x.i, cost: centsApart(l, x.d) })),
+    ),
+  );
+  const used = new Set<number>(best.map((p) => p.right));
+  const exactly = new Set<DetectedLiability>(best.map((p) => found[p.left] as DetectedLiability));
+  const rest = found.filter((l) => !exactly.has(l));
   // "Possibly declared" (amber, review): the exact name with a conflicting type (ruling 1), first;
   // then a declaration of exactly its type whose repayment is within tolerance (the untyped-loan
   // rule of 10 November is for the exact name only: an untyped loan under another name matches no
@@ -444,12 +489,10 @@ export function assessLia(input: LiaInput): LiaResult {
       return fuzzy ? [{ l, x, rank: 1, diff: amountDiff(l, x.d) }] : [];
     });
   });
+  // Ties go to the liability's key, then the declaration's place in the fixed order above, so
+  // the input order never decides (1.3.4); the fuzzy rule itself is unchanged.
   pairs.sort(
-    (a, b) =>
-      a.rank - b.rank ||
-      a.diff - b.diff ||
-      (keyOf(a.l) < keyOf(b.l) ? -1 : keyOf(a.l) > keyOf(b.l) ? 1 : 0) ||
-      a.x.i - b.x.i,
+    (a, b) => a.rank - b.rank || a.diff - b.diff || byText(keyOf(a.l), keyOf(b.l)) || a.x.i - b.x.i,
   );
   const matched = new Map<DetectedLiability, DeclaredLiability>();
   for (const { l, x } of pairs)
@@ -464,15 +507,21 @@ export function assessLia(input: LiaInput): LiaResult {
   const linesOf = (ls: DetectedLiability[]) =>
     ls.flatMap((d) => d.evidence.map((e) => byId.get(e)).filter((x): x is Line => x !== undefined));
   const kind = (d: DetectedLiability) => typeOf(d).replace("_", " ");
+  // Ruling 2 of 16 November 2026: no displayed name shows a sensitive word. A lender's name skips
+  // them (lenderOf); an account's product name is shown whole unless it has one.
   const nameOf = (d: DetectedLiability) =>
     d.sources.includes("outflow")
       ? lenderOf(d.provider, byId.get(d.evidence[0] ?? "")?.t.description)
-      : d.provider;
+      : d.provider.split(" ").some(isSensitiveWord)
+        ? lenderOf(d.provider)
+        : d.provider;
+  /** The applicant's declared text, with each sensitive word shown as "[withheld]". */
+  const declaredText = (d: DeclaredLiability) => withheld(d.provider.trim());
   const describe = (d: DetectedLiability) =>
     `${nameOf(d)} (${kind(d)}${d.monthly ? `, $${d.monthly} a month` : ""})`;
   const possiblyText = possibly.map(
     (p) =>
-      `${describe(p.liability)}. Possibly the declared ${p.declared.provider.trim()}${p.declared.repayment_monthly === undefined ? "" : ` ($${p.declared.repayment_monthly} a month)`}: confirm with the applicant`,
+      `${describe(p.liability)}. Possibly the declared ${declaredText(p.declared)}${p.declared.repayment_monthly === undefined ? "" : ` ($${p.declared.repayment_monthly} a month)`}: confirm with the applicant`,
   );
   const counts = [
     ...(undisclosed.length > 0 ? [`${undisclosed.length} undisclosed`] : []),
@@ -523,7 +572,7 @@ export function assessLia(input: LiaInput): LiaResult {
                 ),
                 ...possibly.map(
                   (p) =>
-                    `The applicant's confirmation that ${nameOf(p.liability)} is the declared ${p.declared.provider.trim()}`,
+                    `The applicant's confirmation that ${nameOf(p.liability)} is the declared ${declaredText(p.declared)}`,
                 ),
               ],
             },
@@ -728,7 +777,7 @@ export function assessLia(input: LiaInput): LiaResult {
     signals: applyEvidence([lia01, lia02, lia03, lia04, lia05, lia06], ctx),
     // D29: every liability is named by its lender here too, never by the rest of its narrative;
     // "declared" is the exact match of ruling 1 (name and type).
-    liabilities: detected.liabilities.map((d) => ({
+    liabilities: found.map((d) => ({
       ...d,
       provider: nameOf(d),
       declared: exactly.has(d),

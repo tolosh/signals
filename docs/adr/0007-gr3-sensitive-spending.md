@@ -19,6 +19,37 @@ G-2 and G-3 are accepted. The interpretations below are kept as they were record
   ENR-30.
 - **G-3 accepted** as a candidate, versioned with the definitions (`SENSITIVE_METHOD_VERSION`).
 
+## Review 10, 16 November 2026 (the scan; gate unchanged at 1.2.0)
+
+Review 10 (SIG-42 comment 40326) found six more ways past the static scan. Colin's ruling (comment
+40327): close the two realistic ones, and list the rest as known limits.
+
+- **Closed** (`test/repo/gr3-taint.ts`; `test/repo/gr3.test.ts` has each form):
+  - **A variable reassigned to the raw feed.** A variable is gated only if every value it is ever
+    given is gated: its initialiser and each later assignment. A destructuring or compound
+    assignment to it, or `++`, counts as unknown, so it fails.
+  - **A local function named `withoutSensitive`.** The call counts as the gate only when the file
+    imports `withoutSensitive` from the gate module (`sensitive.js`; a rename is allowed) and no
+    local function, variable or parameter of that name shadows it.
+- **Known limits.** Review 10's comment names only the two closed above, so this list is mine,
+  each probed against the scan: every one passes the scan when it shouldn't. If the review's
+  other four differ, they belong here too.
+  1. **Mutating a gated value:** `gated.accounts = raw.accounts`, `gated.accounts.push(...)` or
+     `Object.assign(gated, ...)`. The scan follows values, not later writes to their properties.
+  2. **An array method's arguments:** `gated.accounts.concat(raw.accounts)`, or a callback that
+     returns a raw value (`gated.accounts.map((a, i) => raw.accounts[i])`). An array method on a
+     gated array counts as gated whatever its arguments or callback return.
+  3. **A typed parameter given a cast object:** when every object written with a type's
+     annotation is gated, a parameter of that type is gated, even at a call that passes
+     `{ feed: raw } as Ctx`.
+  4. **Across modules:** each file is scanned on its own, so an exported function whose callers in
+     its own file pass gated values counts as gated, even if another module calls it with the raw
+     feed.
+
+  The detector and the other modules on the scan's exception list (`UNGATED`) still read only
+  what their callers pass, and every engine entry is also checked by behaviour: the GR-3 tests
+  feed each one sensitive lines and require identical output without them.
+
 ## Versions ruling, 10 November 2026, 06:39
 
 - **Accepted:** INC 1.2.2, observed income 1.0.1 and observed expenses 1.1.1 keep their versions

@@ -10,6 +10,12 @@
 // parameters of a local function, gated when every direct call passes a gated argument, or when
 // every object written with the parameter's declared type gates that property. A read whose
 // source can't be shown gated counts as ungated: an unknown fails, never passes.
+//
+// Review 10 (ruling of 16 November 2026) closed two evasions: a variable is gated only if every
+// value it is ever given is (its initialiser and each later assignment; a destructuring or
+// compound assignment to it is unknown), and `withoutSensitive` is the gate only when the file
+// imports it from the gate module (`sensitive.js`) and no local name shadows it. The scan's
+// other known limits are listed in docs/adr/0007-gr3-sensitive-spending.md.
 import ts from "typescript";
 
 export type Read = { line: number; text: string; gated: boolean };
@@ -76,6 +82,7 @@ export function scanTransactionsReads(source: string, file = "x.ts"): Read[] {
       ts.isIdentifier(n.name)
     )
       add(n.name);
+    if (ts.isFunctionDeclaration(n) && n.name) add(n.name);
     if (
       ts.isVariableDeclaration(n) &&
       ts.isIdentifier(n.name) &&
@@ -84,6 +91,18 @@ export function scanTransactionsReads(source: string, file = "x.ts"): Read[] {
     )
       constStrings.set(n.name.text, n.initializer.text);
   });
+  // The gate's local names: `withoutSensitive`, imported from the gate module (renames allowed).
+  const gateNames = new Set<string>();
+  for (const st of sf.statements)
+    if (
+      ts.isImportDeclaration(st) &&
+      ts.isStringLiteral(st.moduleSpecifier) &&
+      /(^|\/)sensitive(\.js)?$/.test(st.moduleSpecifier.text) &&
+      st.importClause?.namedBindings &&
+      ts.isNamedImports(st.importClause.namedBindings)
+    )
+      for (const el of st.importClause.namedBindings.elements)
+        if ((el.propertyName ?? el.name).text === "withoutSensitive") gateNames.add(el.name.text);
   const taint = new Map<ts.Node, Taint>(); // a declaration, parameter, binding element or pattern
 
   const constKey = (e: ts.Expression): string | null => {
@@ -118,14 +137,64 @@ export function scanTransactionsReads(source: string, file = "x.ts"): Read[] {
     return sf;
   };
   /** The innermost declaration of an identifier's name whose scope contains it. */
-  const byName = (id: ts.Identifier): Taint => {
-    const candidates = (decls.get(id.text) ?? [])
+  const declOf = (id: ts.Identifier): ts.Node | undefined =>
+    (decls.get(id.text) ?? [])
       .map((d) => ({ d, s: scopeOf(d) }))
       .filter(({ s }) => s.pos <= id.pos && id.end <= s.end)
-      .sort((a, b) => a.s.end - a.s.pos - (b.s.end - b.s.pos));
-    const d = candidates[0]?.d;
+      .sort((a, b) => a.s.end - a.s.pos - (b.s.end - b.s.pos))[0]?.d;
+  const byName = (id: ts.Identifier): Taint => {
+    const d = declOf(id);
     return d ? (taint.get(d) ?? null) : null;
   };
+  /** A call of the imported gate, not of a local function or parameter of the same name. */
+  const isGate = (c: ts.Expression) =>
+    ts.isIdentifier(c) && gateNames.has(c.text) && declOf(c) === undefined;
+  // Every later value a variable is given: an assignment's right side, or null (unknown) for a
+  // destructuring or compound assignment to it.
+  const assigned = new Map<ts.Node, (ts.Expression | null)[]>();
+  const assign = (id: ts.Identifier, e: ts.Expression | null) => {
+    const d = declOf(id);
+    if (d) assigned.set(d, [...(assigned.get(d) ?? []), e]);
+  };
+  /** The names a destructuring assignment's left side writes. */
+  const targets = (e: ts.Expression, out: ts.Identifier[] = []): ts.Identifier[] => {
+    if (ts.isIdentifier(e)) {
+      out.push(e);
+    } else if (ts.isParenthesizedExpression(e)) {
+      targets(e.expression, out);
+    } else if (ts.isArrayLiteralExpression(e)) {
+      for (const x of e.elements) targets(ts.isSpreadElement(x) ? x.expression : x, out);
+    } else if (ts.isObjectLiteralExpression(e)) {
+      for (const p of e.properties) {
+        if (ts.isShorthandPropertyAssignment(p)) out.push(p.name);
+        else if (ts.isPropertyAssignment(p)) targets(p.initializer, out);
+        else if (ts.isSpreadAssignment(p)) targets(p.expression, out);
+      }
+    } else if (ts.isBinaryExpression(e) && e.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+      targets(e.left, out); // a default value: `{ feed = x } = input`
+    }
+    return out;
+  };
+  visit(sf, (n) => {
+    if (
+      ts.isBinaryExpression(n) &&
+      n.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+      n.operatorToken.kind <= ts.SyntaxKind.LastAssignment
+    ) {
+      const plain =
+        n.operatorToken.kind === ts.SyntaxKind.EqualsToken ||
+        n.operatorToken.kind === ts.SyntaxKind.QuestionQuestionEqualsToken ||
+        n.operatorToken.kind === ts.SyntaxKind.BarBarEqualsToken ||
+        n.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandEqualsToken;
+      if (ts.isIdentifier(n.left)) assign(n.left, plain ? n.right : null);
+      else for (const id of targets(n.left)) assign(id, null);
+    }
+    if (
+      (ts.isPrefixUnaryExpression(n) || ts.isPostfixUnaryExpression(n)) &&
+      ts.isIdentifier(n.operand)
+    )
+      assign(n.operand, null);
+  });
 
   function T(e: ts.Expression | undefined): Taint {
     if (!e) return null;
@@ -146,7 +215,7 @@ export function scanTransactionsReads(source: string, file = "x.ts"): Read[] {
     }
     if (ts.isCallExpression(e)) {
       const c = e.expression;
-      if (ts.isIdentifier(c) && c.text === "withoutSensitive") return FULL;
+      if (isGate(c)) return FULL;
       if (ts.isPropertyAccessExpression(c) && ARRAY_METHODS.has(c.name.text))
         return isFull(T(c.expression)) ? FULL : null;
       return null;
@@ -208,6 +277,9 @@ export function scanTransactionsReads(source: string, file = "x.ts"): Read[] {
         : { kind: "except", props: new Set([...(t.kind === "except" ? t.props : []), k]) };
 
   /** Taint a binding pattern, every name it binds and every pattern nested in it. */
+  /** A declaration's taint, met with every value it is later assigned. */
+  const later = (d: ts.Node, t: Taint): Taint =>
+    (assigned.get(d) ?? []).reduce<Taint>((acc, e) => meet(acc, e ? T(e) : null), t);
   function bind(name: ts.BindingName, t: Taint) {
     taint.set(name, t);
     if (ts.isIdentifier(name)) return;
@@ -227,13 +299,13 @@ export function scanTransactionsReads(source: string, file = "x.ts"): Read[] {
         : isFull(t)
           ? FULL
           : null;
-      taint.set(el, sub);
-      bind(el.name, sub);
+      taint.set(el, later(el, sub));
+      bind(el.name, later(el, sub));
     }
   }
   const setParam = (p: ts.ParameterDeclaration, t: Taint) => {
-    taint.set(p, t);
-    bind(p.name, t);
+    taint.set(p, later(p, t));
+    bind(p.name, later(p, t));
   };
 
   for (let pass = 0; pass < 10; pass++) {
@@ -260,8 +332,8 @@ export function scanTransactionsReads(source: string, file = "x.ts"): Read[] {
             ? FULL
             : null
           : T(n.initializer);
-        taint.set(n, t);
-        bind(n.name, t);
+        taint.set(n, later(n, t));
+        bind(n.name, later(n, t));
       }
       if (
         ts.isCallExpression(n) &&
