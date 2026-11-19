@@ -1,0 +1,14 @@
+{
+  "set": "synthetic-v2.2",
+  "set_sha256": "c520f3714948d4d2279766e314aba6c07f7dbda91eca7883595d4ef7acf376e5",
+  "ruling": "SIG-60 comment 40386, ruling 2 (Colin, 16 November 2026), on independent review 11 (comment 40328), T3",
+  "rule": "On set v2.2, drift is scored per applicant only, never per line, and these applicants are excluded from every drift result. Every run reports this list. T-drift-line-main is not used as a target.",
+  "why": "Each is tagged for drift, but its truth lists no drift line: the generator's label pool doesn't exclude applicants with an unshared salary account or a history too short for the split (fixed in set v2.3, SIG-63). Derived from the regenerated truths (truth.v2.drift.transaction_ids empty) and checked against the review's three prefixes.",
+  "excluded": [
+    { "applicant_id": "syn-v22-7620cc69c71d8ce9", "mode": "drift-across-banks" },
+    { "applicant_id": "syn-v22-ceb6a90aecba2b61", "mode": "drift-over-time" },
+    { "applicant_id": "syn-v22-e5410aea343dffbb", "mode": "drift-across-banks" }
+  ],
+  "observable": { "drift-over-time": 23, "drift-across-banks": 22 },
+  "minimum_per_mode": 20
+}
