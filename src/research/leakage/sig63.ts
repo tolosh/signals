@@ -22,6 +22,9 @@ import { validityChecksV23 } from "./validity-v23.js";
 import { unseenLendersInCode, validityChecks, type Check } from "./validity.js";
 
 export type Sig63Set = SetName | "v2.3";
+/** r1: SIG-63.json as registered; r2: SIG-63-r2.json, which replaces two v2.2 channels. */
+export type Registration = "r1" | "r2";
+export const SIG63_R2 = "research/preregistrations/SIG-63-r2.json";
 const MANIFEST_V23 = "research/datasets/synthetic-v2.3.manifest.json";
 const ASIC_RECORD = "research/datasets/synthetic-v2.3.reserved-names-asic.json";
 
@@ -83,6 +86,25 @@ function load(set: Sig63Set) {
   return { ...g, seed: manifest.seed, setSha };
 }
 
+/** The channels a set must be caught on: SIG-60's, then SIG-63's, with r2's replacements. */
+export function channelsFor(set: string, registration: Registration): Channel[] {
+  const s60 = loadPreregistration(PREREGISTRATION) as unknown as { channels: Channel[] };
+  let added = sig63File().channels_added;
+  if (registration === "r2") {
+    const r2 = JSON.parse(readFileSync(SIG63_R2, "utf8")) as {
+      carries: { file: string; sha256: string };
+      channels_replaced: (Channel & { rule?: string; finding?: string })[];
+    };
+    if (sha(r2.carries.file) !== r2.carries.sha256)
+      throw new Error(`${r2.carries.file} has changed: r2 doesn't carry it unchanged`);
+    added = added.map((c) => {
+      const r = r2.channels_replaced.find((x) => x.set === c.set && x.id === c.id);
+      return r ? { ...c, caught_by: r.caught_by } : c;
+    });
+  }
+  return [...s60.channels, ...added].filter((c) => c.set === set);
+}
+
 /** V8: the committed ASIC check record lists every reserved name on both registers, no match. */
 function reservedNames(names: string[]): Check {
   if (!existsSync(ASIC_RECORD))
@@ -121,7 +143,7 @@ const compact = (s: Scores | null) =>
     },
   };
 
-export function runSig63(set: Sig63Set) {
+export function runSig63(set: Sig63Set, registration: Registration = "r1") {
   const { applicants, unseen, seed, setSha } = load(set);
   const pre = preregistrationFor(set);
   const units = addStructureFeatures(extractUnits({ name: set, seed, applicants }), applicants);
@@ -145,26 +167,24 @@ export function runSig63(set: Sig63Set) {
     unseenLendersInCode(unseen),
     ...(set === "v2.3" ? [reservedNames(unseen), ...validityChecksV23(applicants)] : []),
   ];
-  const s60 = pre as unknown as { channels: Channel[] };
-  const channels = [...s60.channels, ...sig63File().channels_added]
-    .filter((c) => c.set === set)
-    .map((c) => {
-      const by = c.caught_by.flatMap((e) =>
-        "check" in e
-          ? validity.some((v) => v.id === e.check && !v.pass)
-            ? [e.check]
-            : []
-          : caught(results, e.label, e.family)
-            ? [`${e.label} / ${e.family}`]
-            : [],
-      );
-      return { id: c.id, caught: by.length > 0, by };
-    });
+  const channels = channelsFor(set, registration).map((c) => {
+    const by = c.caught_by.flatMap((e) =>
+      "check" in e
+        ? validity.some((v) => v.id === e.check && !v.pass)
+          ? [e.check]
+          : []
+        : caught(results, e.label, e.family)
+          ? [`${e.label} / ${e.family}`]
+          : [],
+    );
+    return { id: c.id, caught: by.length > 0, by };
+  });
   return {
     set,
     seed,
     set_sha256: setSha,
     preregistration_sha256: sha(SIG63_PREREGISTRATION),
+    ...(registration === "r2" ? { registration, r2_sha256: sha(SIG63_R2) } : {}),
     t7_carried_sha256: sha(PREREGISTRATION),
     labels: results.map((r) => ({
       id: r.id,
