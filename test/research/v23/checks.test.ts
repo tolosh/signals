@@ -232,7 +232,8 @@ describe("v2.3 realism (ticket section 5)", () => {
     for (const a of set())
       for (const acc of a.feed.accounts) {
         const cat = accOf(acc).productCategory;
-        const closing = Number((acc.balance.data as { currentBalance: string }).currentBalance);
+        const bal = acc.balance as { data: { currentBalance: string } };
+        const closing = Number(bal.data.currentBalance);
         const flows = acc.transactions.reduce((x, t) => x + Number(t.amount), 0);
         const opening = Math.round((closing - flows) * 100) / 100;
         if (cat === "PERS_LOANS" || cat === "RESIDENTIAL_MORTGAGES") {

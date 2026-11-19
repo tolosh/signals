@@ -25,6 +25,7 @@ code says whether it matches):
 
 ```bash
 npx tsx scripts/generate-synthetic.ts --check  # synthetic-v1
+npx tsx scripts/generate-synthetic-v2.ts --variant 2.3 --check  # synthetic-v2.3 (SIG-63; independent review required before use)
 npx tsx scripts/generate-synthetic-v2.ts --variant 2.2 --check  # synthetic-v2.2
 npx tsx scripts/generate-synthetic-v2.ts --variant 2.1 --check  # synthetic-v2.1 (withdrawn)
 npx tsx scripts/generate-synthetic-v2.ts --variant 2.0 --check  # synthetic-v2 (withdrawn)

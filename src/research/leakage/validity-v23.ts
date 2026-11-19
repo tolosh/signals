@@ -81,12 +81,23 @@ export function driftLines(set: GeneratedApplicant[]): Check {
   };
 }
 
-/** The alias part of a (lender, alias) pair: case, punctuation and spacing don't make a new one. */
+/** Company-suffix and loan-type words: SIG-60's rule ignores them, so they don't make a new alias. */
+const SUFFIX_WORDS = new Set(
+  "PTY LTD LIMITED GROUP CORPORATION CORP CO INC CREDIT CARD CARDS PERSONAL CAR HOME LOAN LOANS MORTGAGE".split(
+    " ",
+  ),
+);
+/**
+ * The alias part of a (lender, alias) pair: case, punctuation, spacing, company suffixes and
+ * loan-type words don't make a new one ("Comm Bank Pty Ltd credit card" is "COMM BANK").
+ */
 export const aliasKey = (s: string) =>
   s
     .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, " ")
-    .trim();
+    .replace(/[^A-Z0-9 ]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w && !SUFFIX_WORDS.has(w))
+    .join(" ");
 
 /**
  * V9: no (lender, alias) pair is used by more than 4 natural-form declarations (declared names
