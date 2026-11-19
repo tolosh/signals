@@ -202,5 +202,14 @@
     "the code-length and declared-amount distributions are stated assumptions, not measured",
     "the structure family covers the channels review 11 found and their obvious relatives; a channel of a new kind could still pass it, which is why an independent review is required before use",
     "the ASIC check is by name search on the day recorded; a lender licensed later under one of the names would not be caught"
-  ]
+  ],
+  "pre_run_amendments": {
+    "rule": "recorded before set v2.3 was generated and before any run on it (T7 or experiment). Each fills a gap in this file or records a build-time choice, with its reason. Nothing above is edited",
+    "A1-rounding-floor": "declared amounts: a rounding that would give $0 (a small repayment rounded to $50 or $100) falls back to the next finer unit; the result is never below $1. Reason: the rule as registered could declare $0, which no applicant does",
+    "A2-card-cue-quota": "a card issuer's registered BPAY name carries a card word (a cue) or is its legal name. 35% of issuers (rounded: 3 of 9) have no cue, the lowest by HMAC rank, as populations are set by quota. Reason: independent draws per issuer gave 1 of 9, and the no-card-biller-cue tag missed its minimum (18 < 20)",
+    "A3-v9-pair": "ruling, Colin, 20 November 2026 (SIG-63 comment after 40449): V9 counts a (lender, alias) pair the strict way. The alias is the declared name upper-cased, with punctuation removed and company-suffix and loan-type words dropped (PTY LTD LIMITED GROUP CORPORATION CORP CO INC CREDIT CARD CARDS PERSONAL CAR HOME LOAN LOANS MORTGAGE: SIG-60's rule's own list), so 'Comm Bank Pty Ltd credit card' is 'COMM BANK'. The lender is its ID",
+    "A4-stated-choices": "not measured: repayment channel shares (direct debit / BPAY; the rest a transfer): bill 0.50/0.40, credit card 0.15/0.55, personal and car loan 0.80/0.10, mortgage 0.70/0.05, BNPL 0.92/0, SACC 0.88/0.02, wage advance 0.95/0. Loan interest a year, on the closing balance, jittered ±10%: mortgage 6.2%, car 8.5%, personal 11.5%. Wage advances drawn in a pay cycle with chance 0.55 (at least two cycles). Card purchases post 0, 1 or 2 banking days after their value day (0.35, 0.45, 0.20)",
+    "A5-alias-generator": "made while building, to meet V9 under A3 (strict counts in order: 183, 187, 194, 203): the pool adds natural forms of each lender's legal name (its first word or two; abbreviations written out or contracted); a product word on 40% of names (30% before), a second one on 30% of those; and the generator itself draws a pair at most 3 times (strict count), inside V9's cap of 4. Every modifier is drawn independently of the same/different class (V10)",
+    "not_fixed": "ticket section 5 flags not fixed: overdrawn fees are not tied to a negative running balance (transaction accounts keep a positive cushion throughout, so an overdrawn fee can follow a debit that left the balance positive); cards carry no interest. Each recorded here before the first run, as realism requires"
+  }
 }

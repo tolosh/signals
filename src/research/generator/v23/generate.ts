@@ -360,6 +360,12 @@ const aliasKey = (s2: string) =>
     .join(" ");
 /** V9's cap: no (lender, alias) pair is used by more than this many natural-form declarations. */
 export const ALIAS_CAP = 4;
+/**
+ * The generator's own cap, inside V9's (amendment A5): a pair is drawn at most this many times,
+ * counted the strict way (suffix and type words don't make a new alias), so natural forms spread
+ * over the pool instead of repeating its plainest names.
+ */
+export const GENERATOR_ALIAS_CAP = 3;
 const DESCRIPTORS = ["Australia", "Finance", "Financial", "Services", "Group"];
 /**
  * Natural forms of a legal name: its first word or two, and its abbreviations written out or
@@ -474,7 +480,7 @@ function declaredName(
     fallback ??= { name, descriptor };
     if (!different) return { name, descriptor };
     const key = `${type}:${lenderKey}|${aliasKey(name)}`;
-    if ((pairs.get(key) ?? 0) >= ALIAS_CAP) continue;
+    if ((pairs.get(key) ?? 0) >= GENERATOR_ALIAS_CAP) continue;
     pairs.set(key, (pairs.get(key) ?? 0) + 1);
     return { name, descriptor };
   }
