@@ -42,7 +42,7 @@
     "committed_unchanged": "SOURCES.md and the agent's original table are committed as the agent wrote them. The committed table is the original with the 10 lenders removed and the removal recorded; nothing else is changed. Aliases the agent flagged as generic (COLES, CASH CONVERTERS, IMB, EARNED WAGE ACCESS, EWA, BANK AUSTRALIA) are kept, as written",
     "agent_original": {
       "file": "research/aliases/lender-aliases-1.0.0.agent-original.json",
-      "sha256": "0496255566ee5f78de3b0cc8058230afde46f0527d97c59120c8ebb3291a8289",
+      "sha256": "667bfbbcd3e13e26c5fc20100a51f393e4bd1ee6f075c62fba7a387820cc6c16",
       "sources_sha256": "4c4dd3a3e67bd99ccb13a6c5de2561234ffab5086b24b96d4ee81d111d1210e9",
       "lenders": 59,
       "aliases": 188,
@@ -54,7 +54,8 @@
         "bpay_biller_name": 1
       },
       "bpay_biller_codes_recorded": 12,
-      "left_out_by_agent": "30 entries in its own 'excluded' list (12 aliases without a usable source, among them WBC and ST GEORGE; 5 by policy; 8 BPAY codes; Openpay, defunct)"
+      "left_out_by_agent": "30 entries in its own 'excluded' list (12 aliases without a usable source, among them WBC and ST GEORGE; 5 by policy; 8 BPAY codes; Openpay, defunct)",
+      "line_endings": "the agent wrote the file with CRLF line endings (sha256 0496255566ee5f78de3b0cc8058230afde46f0527d97c59120c8ebb3291a8289); the repository's .gitattributes (eol=lf) stored it with LF, and sha256 above is of the committed LF file. No other byte differs"
     }
   },
   "disclosure": [
