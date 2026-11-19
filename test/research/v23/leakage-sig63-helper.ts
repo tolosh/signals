@@ -19,7 +19,9 @@ export const recordPath = (set: Sig63Set) => {
 export async function checkSet(set: Sig63Set) {
   const path = recordPath(set);
   expect(path, `a SIG-63 T7 record for ${set} is committed`).not.toBeNull();
-  const mod = (await import(/* @vite-ignore */ "../../../src/research/leakage/sig63.js")) as {
+  const mod = (await import(
+    /* @vite-ignore */ "../../../src/research/leakage/sig63.js"
+  )) as unknown as {
     runSig63: (s: Sig63Set) => Record<string, unknown>;
     verdictSig63: (r: Record<string, unknown>) => { pass: boolean; failing: string[] };
   };
