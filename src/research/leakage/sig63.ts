@@ -203,13 +203,22 @@ export type Sig63Result = ReturnType<typeof runSig63>;
 
 /**
  * SIG-63's pass rule. Set v2.3: every label present and within margin on every family (the
- * structure family included), and every validity check passes. A control passes, as a control,
+ * structure family included; a family-level flag fails the label, by ruling), and every validity
+ * check passes. A control passes, as a control,
  * when it is caught on every channel listed for it.
  */
 export function verdictSig63(r: Sig63Result): { pass: boolean; failing: string[] } {
   if (r.set === "v2.3") {
+    // Ruling, Colin, 20 November 2026: "within margin on every family" counts a family-level
+    // flag as a failure, even when the label is within margin overall.
     const failing = [
-      ...r.labels.filter((l) => l.status !== "within margin").map((l) => `${l.id}: ${l.status}`),
+      ...r.labels.flatMap((l) =>
+        l.status !== "within margin"
+          ? [`${l.id}: ${l.status}`]
+          : l.leaking_families.length > 0
+            ? [`${l.id}: family flag (${l.leaking_families.map((f) => f.family).join(", ")})`]
+            : [],
+      ),
       ...r.validity.filter((v) => !v.pass).map((v) => v.id),
     ];
     return { pass: failing.length === 0, failing };
