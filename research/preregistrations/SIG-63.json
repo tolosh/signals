@@ -1,0 +1,206 @@
+{
+  "ticket": "SIG-63",
+  "registered_at": "2026-11-19",
+  "status": "T8: committed before any change to the generator for set v2.3 (order 40430: after SIG-57's pre-registration, 73c7301). Not to be edited after the first run on set v2.3; a change is a new pre-registration, recorded as a deviation",
+  "author_disclosure": "written by Claude Code, which also wrote the v2, v2.1 and v2.2 generators and will write v2.3. An independent review is required before any experiment uses set v2.3 (ticket section 6)",
+  "purpose": "The adversarial leakage test for set v2.3: SIG-60's T7, unchanged, plus a structure family run against every label, including labels whose intended evidence is the biller or payee. Sets v2, v2.1 and v2.2 are negative controls; v2.2 must be caught on D-L4-1",
+  "sets": {
+    "measured": "synthetic-v2.3",
+    "negative_controls": ["synthetic-v2", "synthetic-v2.1", "synthetic-v2.2"],
+    "regenerate_to_published_hashes": [
+      "synthetic-v1",
+      "synthetic-v2",
+      "synthetic-v2.1",
+      "synthetic-v2.2"
+    ]
+  },
+  "t7_carried": {
+    "file": "research/preregistrations/SIG-60.json",
+    "sha256": "af17cfc0540b0c461fa4289b16c4823cd0d8c219ec1be436d130c8ecbd4f8968",
+    "unchanged": "units, classifiers (split, stump, tree, logistic, per_family), margins, margin_rules, row_cap and its rule, every feature family, every label and its intended evidence, validity checks V1 to V6, the v2 and v2.1 channels, channels_rule and the false-alarm control. Nothing in SIG-60.json is edited"
+  },
+  "structure_family": {
+    "rule": "these families are never intended evidence for any label. A leak through one of them fails that label even when the label's intended evidence includes payee_identity or biller_structure",
+    "families": {
+      "code_shape": [
+        "lia_code_length",
+        "lia_code_lead1",
+        "lia_code_lead2",
+        "lia_code_last1",
+        "lia_code_digit_sum_mod9",
+        "line_code_length",
+        "line_code_lead1",
+        "line_code_lead2",
+        "line_code_last1",
+        "line_code_digit_sum_mod9"
+      ],
+      "code_rank": [
+        "lia_code_rank_in_set",
+        "lia_code_rank_in_length",
+        "lia_code_gap_to_nearest",
+        "lia_code_step_share",
+        "line_code_rank_in_set",
+        "line_code_rank_in_length",
+        "line_code_gap_to_nearest",
+        "line_code_step_share"
+      ],
+      "code_name_links": [
+        "lia_code_names_elsewhere",
+        "lia_code_card_name_elsewhere",
+        "lia_code_applicants",
+        "line_code_names_elsewhere",
+        "line_code_card_name_elsewhere",
+        "line_code_applicants"
+      ],
+      "id_arithmetic": [
+        "app_id_digit_sum_mod9",
+        "app_id_hex_lead",
+        "line_id_mod7",
+        "line_id_mod91",
+        "line_id_gap_to_previous",
+        "app_account_id_mod7"
+      ]
+    },
+    "definitions": {
+      "code": "the line's billerCode as digits; a line without one has every code feature missing (the logistic's missing indicator, the stump's own category)",
+      "length, lead1, lead2, last1": "digit count; first digit; first two digits; last digit",
+      "digit_sum_mod9": "the sum of the code's digits, mod 9",
+      "rank_in_set": "the code's rank among the distinct codes of the whole set, as a fraction (0 lowest, 1 highest)",
+      "rank_in_length": "the same rank among the distinct codes of the same length",
+      "gap_to_nearest": "the absolute difference to the nearest other distinct code of the same length, log10(1 + gap)",
+      "step_share": "the share of the set's same-length codes whose difference to their next-lower code equals this code's difference to its next-lower code (a constant step, like v2.2's 91, gives a high share)",
+      "names_elsewhere": "the number of distinct biller names that lines with this code carry on other applicants' lines",
+      "card_name_elsewhere": "1 when a line with this code on another applicant carries a biller name containing CARD",
+      "applicants": "log2(1 + the number of other applicants with a line carrying this code)",
+      "id features": "the numeric or hexadecimal part of the ID: digit sum mod 9 or first hex character; mod 7 and mod 91; the gap to the previous line's ID in the same account, by posting order"
+    },
+    "label_blind": "every feature is computed from the feed alone, never from a label or from truth, and the cross-applicant features read every applicant in both halves of the split, as a real detector could"
+  },
+  "labels_added": [
+    {
+      "id": "T-drift-pair-main",
+      "unit": "line",
+      "pool": "pay credits of salaried single-employer applicants, in the account that receives most of their pay",
+      "label": "the credit is under either descriptor of a drift pair (ticket: 'lines under either descriptor', not a chosen side; review 11 L5)",
+      "intended_evidence": ["payee_identity"],
+      "intended_evidence_in_words": "the descriptor",
+      "twin": true,
+      "applies_to": "v2.3 only. The v2.2 truth labels one side only, so the controls keep SIG-60's T-drift-line-main"
+    },
+    {
+      "id": "T-drift-pair-second",
+      "unit": "line",
+      "pool": "pay credits of salaried single-employer applicants, in any other account",
+      "label": "the credit is under either descriptor of a drift pair",
+      "intended_evidence": ["payee_identity"],
+      "intended_evidence_in_words": "the descriptor",
+      "twin": true,
+      "applies_to": "v2.3 only"
+    }
+  ],
+  "labels_re_registered": {
+    "T-drift-line-main": "on v2.3, replaced by T-drift-pair-main (review 11 L5: the side labelled was a coin flip, so its leakage score was uninformative). Kept unchanged for the controls",
+    "T-drift-line-second": "on v2.3, replaced by T-drift-pair-second, for the same reason"
+  },
+  "validity_checks_added": {
+    "V7-drift-lines": "every drift-tagged applicant has at least one drift line; the drift label pool excludes applicants whose salary is paid to an unshared account or whose history is too short for a split (review 11 T3)",
+    "V8-reserved-names": "every reserved unseen-lender name is invented: none is on the ASIC Professional Registers (credit licensees and credit representatives), checked by name, and the check record (name, register, search date, result) is committed (T9). No reserved name appears in src/ or in a test outside the generator (V6, carried)",
+    "V9-alias-repeats": "no (lender, alias) pair is used by more than 4 declarations; at least 200 distinct pairs across the set's natural-form declarations (review 11 D-L4-3)",
+    "V11-code-distribution": "biller and lender codes come from one distribution: the code-length distributions of bill billers, lender billers and unseen-lender billers do not differ (chi-squared, p > 0.05), and no code is shared by two biller names",
+    "V10-descriptor-words": "the descriptor words added to declared names are drawn independently of the same/different flag: chi-squared on a descriptor-present by flag table, p > 0.05 (review 11 D-L4-2)"
+  },
+  "generation_parameters": {
+    "seed": 623,
+    "biller_codes": {
+      "lengths": {
+        "3": 0.02,
+        "4": 0.28,
+        "5": 0.3,
+        "6": 0.3,
+        "7": 0.05,
+        "8": 0.02,
+        "9": 0.02,
+        "10": 0.01
+      },
+      "rule": "every biller, bill or lender, seen or unseen, draws its length from this one distribution and its digits by HMAC-SHA256 of the seed and the biller's ID, with no leading zero; a collision redraws. No type digit, step, order by group or check digit. Each code has one registered biller name; a bank renders it in full or cut to its first 20 characters, chosen by HMAC of the line, independent of every label",
+      "basis": "assumption: published BPAY biller codes are mostly 4 to 6 digits, with some shorter and longer. The distribution is a stated choice, not measured"
+    },
+    "declared_amounts": {
+      "rule": "declared monthly repayment = truth monthly x (1 + e), then rounded: 35% to the dollar, 35% to $10, 20% to $50, 10% to $100. e is 0 for 50% of declarations, else drawn from a normal with mean 0 and sd 0.08, clipped to [-0.25, 0.25]. All draws by HMAC of the seed and the declaration's ID",
+      "basis": "assumption: applicants round, and some misremember. No measured distribution is available; real-data comparison under SIG-61"
+    },
+    "aliases": "drawn from a generator larger than v2.2's 83 pairs, with V9's cap. Descriptor words drawn independently of the same/different flag (V10)",
+    "realism": "ticket section 5's flags, fixed where cheap: weekend card purchases, posting dates that differ from value dates, balances that reconcile with flows, wage advances not every cycle, a repayment channel mix that depends on type, declining loan balances, varied creationDate, no doubled product names. Each one not fixed is recorded with a reason before the first run"
+  },
+  "channels_added": [
+    {
+      "set": "v2.2",
+      "id": "D-L4-1a",
+      "finding": "lender codes have 4 digits and bill codes 5 or 6: a 4-digit code is a repayment",
+      "caught_by": [
+        {
+          "label": "T-repayment",
+          "family": "code_shape"
+        }
+      ]
+    },
+    {
+      "set": "v2.2",
+      "id": "D-L4-1b",
+      "finding": "the leading digit gives the liability type, and codes step by 91 within a type",
+      "caught_by": [
+        {
+          "label": "T-card-repayment",
+          "family": "code_shape"
+        },
+        {
+          "label": "T-card-repayment",
+          "family": "code_rank"
+        }
+      ]
+    },
+    {
+      "set": "v2.2",
+      "id": "D-L4-1c",
+      "finding": "reserved unseen lenders take the top codes",
+      "caught_by": [
+        {
+          "label": "L-unseen-lender",
+          "family": "code_rank"
+        }
+      ]
+    },
+    {
+      "set": "v2.2",
+      "id": "D-L4-1d",
+      "finding": "no-cue card codes carry CREDIT CARD names on other applicants' lines",
+      "caught_by": [
+        {
+          "label": "L-no-card-cue",
+          "family": "code_name_links"
+        }
+      ]
+    }
+  ],
+  "pass_rule": {
+    "set_v2.3": "every label present (at least one positive) and within margin on every family, the structure family included, apart from limits re-registered here with their reasons; and every validity check (V1 to V11) passes",
+    "negative_controls": "sets v2 and v2.1 are caught on every channel SIG-60 lists for them, and set v2.2 on each of D-L4-1a to D-L4-1d. A control not caught on a listed channel fails T7, and no v2.3 result stands"
+  },
+  "false_alarm_control": "SIG-60's, carried, plus: over noise features with codes drawn from the v2.3 rule, labels drawn at random (SHA-256) at base rates of 2.5%, 10% and 40% are within margin on the structure family; and a planted code-length leak, a planted constant step, and a planted top-rank leak are each caught",
+  "tests": {
+    "T1": "the same seed twice gives byte-identical output; a different seed differs",
+    "T2": "100% CDR-valid",
+    "T3": "truths valid and consistent, every labelled ID exists, and V7",
+    "T4": "the tax recompute matches, and the static scan is clean in both directions",
+    "T5": "population minimums met; request independence holds (chi-squared and permutation p > 0.05)",
+    "T6": "sets v1, v2, v2.1 and v2.2 regenerate to their published hashes",
+    "T7": "the leakage test above: pass_rule",
+    "T8": "this file is committed before any change to the generator (checked from git history: no commit touching src/research/generator/ precedes it on the SIG-63 branch)",
+    "T9": "V8: the ASIC check record is committed and every reserved name returns no match"
+  },
+  "known_limits": [
+    "the code-length and declared-amount distributions are stated assumptions, not measured",
+    "the structure family covers the channels review 11 found and their obvious relatives; a channel of a new kind could still pass it, which is why an independent review is required before use",
+    "the ASIC check is by name search on the day recorded; a lender licensed later under one of the names would not be caught"
+  ]
+}
