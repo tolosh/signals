@@ -1,0 +1,1844 @@
+{
+  "version": "1.0.0",
+  "compiled_at": "2026-11-19",
+  "compiled_by": "separate agent from public sources only",
+  "scope": {
+    "lists": [
+      {
+        "name": "APRA Register of authorised deposit-taking institutions (updated 15 Oct 2026)",
+        "url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions"
+      },
+      {
+        "name": "Savings.com.au: Who are the biggest banks in Australia (APRA data; top 10 by total residents assets; top 10 customer-owned banks by assets)",
+        "url": "https://www.savings.com.au/home-loans/who-are-the-biggest-banks-in-australia"
+      },
+      {
+        "name": "CreditCardCompare: Credit Card Issuers",
+        "url": "https://www.creditcardcompare.com.au/issuers"
+      },
+      {
+        "name": "ASIC 20-280MR (REP 672 BNPL industry update) provider list",
+        "url": "https://asic.gov.au/about-asic/news-centre/find-a-media-release/2020-releases/20-280mr-asic-releases-latest-data-on-buy-now-pay-later-industry/"
+      },
+      {
+        "name": "Senate Economics References Committee report, ch.3 (SACC market dominated by Cash Converters, Money3, Nimble)",
+        "url": "https://aph.gov.au/Parliamentary_Business/Committees/Senate/Economics/Creditfinancialservices/Report/c03"
+      },
+      {
+        "name": "Cash Converters: compare our Cashies loan with other cash loans",
+        "url": "https://www.cashconverters.com.au/loans/resources/compare-our-cashies-loan-with-other-cash-loans"
+      },
+      {
+        "name": "Savings.com.au: Wage advance apps - the good, the bad and the ugly",
+        "url": "https://www.savings.com.au/budgeting-finance-tips/wage-advance-apps-the-good-the-bad-and-the-ugly"
+      },
+      {
+        "name": "Finder: Non-bank personal loans in Australia",
+        "url": "https://finder.com.au/personal-loans/non-bank-lenders"
+      },
+      {
+        "name": "Savings.com.au: Personal loan lenders",
+        "url": "https://www.savings.com.au/personal-loans/lenders/"
+      }
+    ],
+    "rule": "Banks: the 10 banks in the savings.com.au top-10 by total residents assets plus the top-10 customer-owned banks by assets (both APRA data), legal names checked against the APRA register; plus the bank sub-brands St.George, Bank of Melbourne, BankSA, Bankwest and Virgin Money because CreditCardCompare lists them as separate card issuers. Card issuers: non-bank issuers on CreditCardCompare that are major stand-alone brands (American Express, Coles, Latitude Financial Services). BNPL: all six providers in ASIC 20-280MR (Openpay excluded as defunct). SACC: the three named in the Senate report plus every other lender on the Cash Converters comparison page. Wage advance: every provider named in the savings.com.au wage-advance article (CommBank AdvancePay folded into CBA). Personal/car loans: non-bank lenders in the Finder non-bank table and Lenders section (excluding banks, Revolut, broker Driva, EBP Money, Alex, Fox Symes) plus SocietyOne and Firstmac/loans.com.au from savings.com.au. Families are assigned only where a lender page or listing was cited."
+  },
+  "lenders": [
+    {
+      "id": "cba",
+      "canonical": "COMMONWEALTH BANK",
+      "families": ["credit_card", "loan", "mortgage", "wage_advance"],
+      "family_sources": {
+        "credit_card": "https://www.commbank.com.au/credit-cards.html",
+        "loan": "https://www.commbank.com.au/support/loan-payment-options.html",
+        "mortgage": "https://www.commbank.com.au/support/loan-payment-options.html",
+        "wage_advance": "https://www.commbank.com.au/banking/commbank-advancepay.html"
+      },
+      "aliases": [
+        {
+          "text": "COMMONWEALTH BANK OF AUSTRALIA",
+          "kind": "legal_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "COMMONWEALTH BANK OF AUSTRALIA",
+          "kind": "legal_name",
+          "source_url": "https://www.commbank.com.au/support/loan-payment-options.html",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "COMMBANK",
+          "kind": "brand",
+          "source_url": "https://www.commbank.com.au/support/loan-payment-options.html",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "CBA",
+          "kind": "abbreviation",
+          "source_url": "https://www.commbank.com.au/support/loan-payment-options.html",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "COMMBANK ADVANCEPAY",
+          "kind": "trading_name",
+          "source_url": "https://www.commbank.com.au/banking/commbank-advancepay.html",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [
+        {
+          "code": "55566",
+          "product": "home and personal loan payments",
+          "source_url": "https://www.commbank.com.au/support/loan-payment-options.html"
+        }
+      ],
+      "notes": "Footer: Commonwealth Bank of Australia ABN 48 123 123 124, ACL 234945. CommBank AdvancePay is a CBA pay-advance product name (not a separate lender). CBA owns Bankwest (separate entry elsewhere). No personal credit-card BPAY code found on CBA pages checked."
+    },
+    {
+      "id": "westpac",
+      "canonical": "WESTPAC",
+      "families": ["credit_card", "loan", "mortgage"],
+      "family_sources": {
+        "credit_card": "https://www.westpac.com.au/personal-banking/credit-cards/manage/using/repayments/",
+        "loan": "https://www.westpac.com.au/personal-loans/manage-loan",
+        "mortgage": "https://www.westpac.com.au/personal-banking/home-loans/"
+      },
+      "aliases": [
+        {
+          "text": "WESTPAC BANKING CORPORATION",
+          "kind": "legal_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "WESTPAC",
+          "kind": "brand",
+          "source_url": "https://www.westpac.com.au/personal-banking/credit-cards/manage/using/repayments/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "WESTPAC PERSONAL LEN",
+          "kind": "bpay_biller_name",
+          "source_url": "https://www.westpac.com.au/personal-loans/manage-loan",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [
+        {
+          "code": "5181",
+          "product": "credit cards",
+          "source_url": "https://www.westpac.com.au/personal-banking/credit-cards/manage/using/repayments/"
+        },
+        {
+          "code": "85571",
+          "product": "personal loans",
+          "source_url": "https://www.westpac.com.au/personal-loans/manage-loan"
+        }
+      ],
+      "notes": "Group brands St.George, Bank of Melbourne, BankSA are separate entries elsewhere. WESTPAC PERSONAL LEN is the BPAY biller name Westpac says appears for code 85571 (truncated as published)."
+    },
+    {
+      "id": "nab",
+      "canonical": "NAB",
+      "families": ["credit_card", "loan", "mortgage"],
+      "family_sources": {
+        "credit_card": "https://www.nab.com.au/personal/banking/credit-cards/manage-your-credit-card/credit-card-repayments-and-interest",
+        "loan": "https://www.nab.com.au/personal/personal-loans",
+        "mortgage": "https://www.nab.com.au/personal/home-loans"
+      },
+      "aliases": [
+        {
+          "text": "NATIONAL AUSTRALIA BANK LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "NATIONAL AUSTRALIA BANK LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.nab.com.au/personal/banking/credit-cards/manage-your-credit-card/credit-card-repayments-and-interest",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "NAB",
+          "kind": "abbreviation",
+          "source_url": "https://www.nab.com.au/personal/banking/credit-cards/manage-your-credit-card/credit-card-repayments-and-interest",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [
+        {
+          "code": "1008",
+          "product": "credit cards",
+          "source_url": "https://www.nab.com.au/personal/banking/credit-cards/manage-your-credit-card/credit-card-repayments-and-interest"
+        }
+      ],
+      "notes": "Footer: National Australia Bank Limited ABN 12 004 044 937, ACL 230686. Mortgage URL taken from nav of the fetched personal-loans page. NAB is also issuer of some partner-branded cards (third-party reports), a possible issuer ambiguity."
+    },
+    {
+      "id": "anz",
+      "canonical": "ANZ",
+      "families": ["credit_card", "loan", "mortgage"],
+      "family_sources": {
+        "credit_card": "https://www.anz.com.au/support/online-banking/manage-your-card/pay-your-card/",
+        "loan": "https://www.anz.com.au/personal/personal-loans/",
+        "mortgage": "https://www.anz.com.au/personal/home-loans/"
+      },
+      "aliases": [
+        {
+          "text": "AUSTRALIA AND NEW ZEALAND BANKING GROUP LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "AUSTRALIA AND NEW ZEALAND BANKING GROUP LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.anz.com.au/support/online-banking/manage-your-card/pay-your-card/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "ANZ",
+          "kind": "abbreviation",
+          "source_url": "https://www.anz.com.au/support/online-banking/manage-your-card/pay-your-card/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [
+        {
+          "code": "6007",
+          "product": "credit cards",
+          "source_url": "https://www.anz.com.au/support/online-banking/manage-your-card/pay-your-card/"
+        }
+      ],
+      "notes": "Footer: ABN 11 005 357 522, uses '(ANZ)'. ANZ acquired Norfina Limited (Suncorp Bank) on 31 July 2024; Suncorp Bank kept as separate entry."
+    },
+    {
+      "id": "macquarie",
+      "canonical": "MACQUARIE BANK",
+      "families": ["credit_card", "mortgage"],
+      "family_sources": {
+        "credit_card": "https://www.macquarie.com.au/help/personal/credit-cards/manage-credit-card/making-credit-card-payments.html",
+        "mortgage": "https://www.macquarie.com.au/home-loans.html"
+      },
+      "aliases": [
+        {
+          "text": "MACQUARIE BANK LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "MACQUARIE BANK LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.macquarie.com.au/home-loans.html",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "MBL",
+          "kind": "abbreviation",
+          "source_url": "https://www.macquarie.com.au/home-loans.html",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "MACQUARIE",
+          "kind": "brand",
+          "source_url": "https://www.macquarie.com.au/home-loans.html",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [
+        {
+          "code": "423251",
+          "product": "credit cards",
+          "source_url": "https://www.macquarie.com.au/help/personal/credit-cards/manage-credit-card/making-credit-card-payments.html"
+        }
+      ],
+      "notes": "Footer: Macquarie Bank Limited ABN 46 008 583 542, ACL 237502 (MBL). No personal loans; car loans only via a YourLease nav link, so loan family omitted."
+    },
+    {
+      "id": "bendigo",
+      "canonical": "BENDIGO BANK",
+      "families": ["credit_card", "loan", "mortgage"],
+      "family_sources": {
+        "credit_card": "https://www.bendigobank.com.au/personal/credit-cards/",
+        "loan": "https://www.bendigobank.com.au/personal/loans/",
+        "mortgage": "https://www.bendigobank.com.au/personal/home-loans/"
+      },
+      "aliases": [
+        {
+          "text": "BENDIGO AND ADELAIDE BANK LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "BENDIGO AND ADELAIDE BANK LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.bendigobank.com.au/personal/credit-cards/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "BENDIGO BANK",
+          "kind": "brand",
+          "source_url": "https://www.bendigobank.com.au/personal/credit-cards/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Footer: ABN 11 068 049 178, ACL 237879. Card page says BPAY from other institutions is accepted but gives no code. Group brands (Adelaide Bank, Up) not researched."
+    },
+    {
+      "id": "boq",
+      "canonical": "BANK OF QUEENSLAND",
+      "families": ["credit_card", "mortgage"],
+      "family_sources": {
+        "credit_card": "https://www.boq.com.au/personal/credit-cards",
+        "mortgage": "https://www.boq.com.au/personal/home-loans"
+      },
+      "aliases": [
+        {
+          "text": "BANK OF QUEENSLAND LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "BOQ",
+          "kind": "abbreviation",
+          "source_url": "https://www.boq.com.au/personal/help-and-support/credit-cards/payment-options",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [
+        {
+          "code": "91215",
+          "product": "credit cards",
+          "source_url": "https://www.boq.com.au/personal/help-and-support/credit-cards/payment-options"
+        }
+      ],
+      "notes": "Legal name from APRA only (site footer not rendered). BOQ group also owns Virgin Money and ME Bank brands (separate entries if in scope). Personal loan pages returned 404, so loan family omitted."
+    },
+    {
+      "id": "suncorp_bank",
+      "canonical": "SUNCORP BANK",
+      "families": ["credit_card", "mortgage"],
+      "family_sources": {
+        "credit_card": "https://www.suncorpbank.com.au/bank-and-save/credit-cards.html",
+        "mortgage": "https://www.suncorpbank.com.au/home-loans.html"
+      },
+      "aliases": [
+        {
+          "text": "NORFINA LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "NORFINA LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.suncorpbank.com.au/help-support/ways-to-bank/bpay.html",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "SUNCORP BANK",
+          "kind": "trading_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "SUNCORP BANK",
+          "kind": "brand",
+          "source_url": "https://www.suncorpbank.com.au/help-support/ways-to-bank/bpay.html",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "APRA: Norfina Limited (trading as Suncorp Bank). Footer: Norfina Limited ABN 66 010 831 722, ACL 229882. ANZ-owned since 31 July 2024. Home-loans page says no new applications. Credit-card URL from site nav. Code 999532 seen only in a search snippet (page 404), not recorded."
+    },
+    {
+      "id": "people_first_bank",
+      "canonical": "PEOPLE FIRST BANK",
+      "families": ["mortgage", "loan", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://www.peoplefirstbank.com.au/loans/home-loans/owner-occupier-home-loans",
+        "loan": "https://www.peoplefirstbank.com.au/loans/personal-loans",
+        "credit_card": "https://www.peoplefirstbank.com.au/loans/visa-credit-card"
+      },
+      "aliases": [
+        {
+          "text": "PEOPLE FIRST BANK",
+          "kind": "brand",
+          "source_url": "https://www.peoplefirstbank.com.au/loans",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "HERITAGE AND PEOPLE'S CHOICE LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://abr.business.gov.au/ABN/View/11087651125",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "HERITAGE AND PEOPLE'S CHOICE LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.peoplefirstbank.com.au/loans",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "HERITAGE BANK",
+          "kind": "trading_name",
+          "source_url": "https://abr.business.gov.au/ABN/View/11087651125",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "PEOPLE'S CHOICE BANK",
+          "kind": "trading_name",
+          "source_url": "https://abr.business.gov.au/ABN/View/11087651125",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "PEOPLE'S CHOICE CREDIT UNION",
+          "kind": "trading_name",
+          "source_url": "https://abr.business.gov.au/ABN/View/11087651125",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "SAVINGS & LOANS",
+          "kind": "trading_name",
+          "source_url": "https://abr.business.gov.au/ABN/View/11087651125",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "SAVINGS & LOANS CREDIT UNION",
+          "kind": "trading_name",
+          "source_url": "https://abr.business.gov.au/ABN/View/11087651125",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "AUSTRALIAN CENTRAL",
+          "kind": "trading_name",
+          "source_url": "https://abr.business.gov.au/ABN/View/11087651125",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "AUSTRALIAN CENTRAL CREDIT UNION",
+          "kind": "trading_name",
+          "source_url": "https://abr.business.gov.au/ABN/View/11087651125",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "AUSTRALIAN CENTRAL CREDIT UNION LTD",
+          "kind": "trading_name",
+          "source_url": "https://abr.business.gov.au/ABN/View/11087651125",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Formed by 2023 merger of Heritage Bank and People's Choice (Australian Central Credit Union). ABN 11 087 651 125, ACL 244310. Legal name also on APRA register. Legacy brands Heritage Bank / People's Choice still in use on some materials. 'SAVINGS & LOANS' is generic; high false-positive risk."
+    },
+    {
+      "id": "newcastle_permanent",
+      "canonical": "NEWCASTLE PERMANENT",
+      "families": ["mortgage", "loan", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://www.newcastlepermanent.com.au/personal/home-loans",
+        "loan": "https://www.newcastlepermanent.com.au/personal/personal-and-car-loans",
+        "credit_card": "https://www.newcastlepermanent.com.au/personal/credit-card"
+      },
+      "aliases": [
+        {
+          "text": "NEWCASTLE PERMANENT",
+          "kind": "brand",
+          "source_url": "https://www.newcastlepermanent.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "NEWCASTLE GREATER MUTUAL GROUP LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.newcastlepermanent.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "NGM GROUP",
+          "kind": "abbreviation",
+          "source_url": "https://www.newcastlepermanent.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Brand of Newcastle Greater Mutual Group Ltd (ACN 087 651 992, ACL 238273), which also trades as Greater Bank. Modelled as two lenders (one per consumer brand) sharing the legal name."
+    },
+    {
+      "id": "greater_bank",
+      "canonical": "GREATER BANK",
+      "families": ["mortgage", "loan", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://www.greater.com.au/personal/loans/home-loans",
+        "loan": "https://www.greater.com.au/personal/loans/personal-loans",
+        "credit_card": "https://www.greater.com.au/personal/credit-cards/visa-credit-card"
+      },
+      "aliases": [
+        {
+          "text": "GREATER BANK",
+          "kind": "brand",
+          "source_url": "https://www.greater.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "NEWCASTLE GREATER MUTUAL GROUP LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.greater.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Brand of Newcastle Greater Mutual Group Ltd (same entity as Newcastle Permanent). Legal name shared with newcastle_permanent."
+    },
+    {
+      "id": "great_southern_bank",
+      "canonical": "GREAT SOUTHERN BANK",
+      "families": ["mortgage", "loan", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://www.greatsouthernbank.com.au/home-loans",
+        "loan": "https://www.greatsouthernbank.com.au/personal-loans",
+        "credit_card": "https://www.greatsouthernbank.com.au/credit-cards"
+      },
+      "aliases": [
+        {
+          "text": "GREAT SOUTHERN BANK",
+          "kind": "brand",
+          "source_url": "https://www.greatsouthernbank.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "CREDIT UNION AUSTRALIA LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.greatsouthernbank.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Business name of Credit Union Australia Ltd ABN 44 087 650 959, ACL 238317."
+    },
+    {
+      "id": "bank_australia",
+      "canonical": "BANK AUSTRALIA",
+      "families": ["mortgage", "loan", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://www.bankaust.com.au/banking/home-loans",
+        "loan": "https://www.bankaust.com.au/banking/personal-loans",
+        "credit_card": "https://www.bankaust.com.au/banking/credit-cards"
+      },
+      "aliases": [
+        {
+          "text": "BANK AUSTRALIA",
+          "kind": "brand",
+          "source_url": "https://www.bankaust.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "BANK AUSTRALIA LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 21 087 651 607, ACL 238431. 'BANK AUSTRALIA' is a substring of other names (e.g. BEYOND BANK AUSTRALIA LIMITED, HSBC BANK AUSTRALIA LIMITED); match on whole name."
+    },
+    {
+      "id": "teachers_mutual_bank",
+      "canonical": "TEACHERS MUTUAL BANK",
+      "families": ["mortgage", "loan", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://www.tmbank.com.au/home-loans",
+        "loan": "https://www.tmbank.com.au/personal-loans",
+        "credit_card": "https://www.tmbank.com.au/banking/credit-card"
+      },
+      "aliases": [
+        {
+          "text": "TEACHERS MUTUAL BANK",
+          "kind": "brand",
+          "source_url": "https://www.tmbank.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "TEACHERS MUTUAL BANK LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "AUSTRALIAN MUTUAL BANK",
+          "kind": "trading_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "FIREFIGHTERS MUTUAL BANK",
+          "kind": "trading_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "HEALTH PROFESSIONALS BANK",
+          "kind": "trading_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "UNIBANK",
+          "kind": "trading_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "APRA lists trading names Australian Mutual Bank, Firefighters Mutual Bank, Health Professionals Bank, Teachers Mutual Bank and UniBank; creditcardcompare lists several separately. ABN/ACL not captured (site footer fragment not readable)."
+    },
+    {
+      "id": "beyond_bank",
+      "canonical": "BEYOND BANK",
+      "families": ["mortgage", "loan", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://www.beyondbank.com.au/home-loans/",
+        "loan": "https://www.beyondbank.com.au/personal-loans/",
+        "credit_card": "https://www.beyondbank.com.au/bank-and-save/debit-and-credit-cards/low-rate-visa-credit-card/"
+      },
+      "aliases": [
+        {
+          "text": "BEYOND BANK",
+          "kind": "brand",
+          "source_url": "https://www.beyondbank.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "BEYOND BANK AUSTRALIA LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.beyondbank.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "BEYOND BANK AUSTRALIA",
+          "kind": "trading_name",
+          "source_url": "https://www.beyondbank.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 15 087 651 143, ACL 237856."
+    },
+    {
+      "id": "pn_bank",
+      "canonical": "P&N BANK",
+      "families": ["mortgage", "loan", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://www.pnbank.com.au/home-loans/",
+        "loan": "https://www.pnbank.com.au/personal-loans/",
+        "credit_card": "https://www.pnbank.com.au/cards/credit-cards/"
+      },
+      "aliases": [
+        {
+          "text": "P&N BANK",
+          "kind": "brand",
+          "source_url": "https://www.pnbank.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "POLICE & NURSES LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.pnbank.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "BCU BANK",
+          "kind": "trading_name",
+          "source_url": "https://www.apra.gov.au/register-of-authorised-deposit-taking-institutions",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 69 087 651 876, ACL 240701. BCU Bank is a second trading name per APRA (creditcardcompare lists BCU separately); not shown on pnbank.com.au home page."
+    },
+    {
+      "id": "imb_bank",
+      "canonical": "IMB BANK",
+      "families": ["mortgage", "loan"],
+      "family_sources": {
+        "mortgage": "https://www.imb.com.au/home-loans",
+        "loan": "https://www.imb.com.au/banking/personal-loans"
+      },
+      "aliases": [
+        {
+          "text": "IMB BANK",
+          "kind": "brand",
+          "source_url": "https://www.imb.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "IMB LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.imb.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "IMB",
+          "kind": "abbreviation",
+          "source_url": "https://www.imb.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "HUNTER UNITED",
+          "kind": "trading_name",
+          "source_url": "https://abr.business.gov.au/ABN/View/92087651974",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "THE SHIRE ...LOCAL BANKING",
+          "kind": "trading_name",
+          "source_url": "https://abr.business.gov.au/ABN/View/92087651974",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 92 087 651 974, ACL 237391. Credit card family not included: no IMB credit card page found. 'IMB' is short; substring false-positive risk."
+    },
+    {
+      "id": "regional_australia_bank",
+      "canonical": "REGIONAL AUSTRALIA BANK",
+      "families": ["mortgage", "loan", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://www.regionalaustraliabank.com.au/home-loans/regional-australia-bank-home-loan",
+        "loan": "https://www.regionalaustraliabank.com.au/personal-loans/personal-loan",
+        "credit_card": "https://www.regionalaustraliabank.com.au/everyday-banking/credit-cards/your-choice-credit-card"
+      },
+      "aliases": [
+        {
+          "text": "REGIONAL AUSTRALIA BANK",
+          "kind": "brand",
+          "source_url": "https://www.regionalaustraliabank.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "REGIONAL AUSTRALIA BANK LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.regionalaustraliabank.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 21 087 650 360, ACL 241167."
+    },
+    {
+      "id": "defence_bank",
+      "canonical": "DEFENCE BANK",
+      "families": ["mortgage", "loan", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://www.defencebank.com.au/banking/home-loans/",
+        "loan": "https://www.defencebank.com.au/banking/personal-and-car-loans/",
+        "credit_card": "https://www.defencebank.com.au/creditcard"
+      },
+      "aliases": [
+        {
+          "text": "DEFENCE BANK",
+          "kind": "brand",
+          "source_url": "https://www.defencebank.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "DEFENCE BANK LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.defencebank.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 57 087 651 385, ACL 234582."
+    },
+    {
+      "id": "st_george",
+      "canonical": "ST.GEORGE",
+      "families": ["mortgage", "loan", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://www.stgeorge.com.au/personal/home-loans",
+        "loan": "https://www.stgeorge.com.au/personal/personal-loans",
+        "credit_card": "https://www.stgeorge.com.au/personal/credit-cards"
+      },
+      "aliases": [
+        {
+          "text": "ST.GEORGE",
+          "kind": "brand",
+          "source_url": "https://www.stgeorge.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "ST.GEORGE BANK",
+          "kind": "trading_name",
+          "source_url": "https://www.stgeorge.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "WESTPAC BANKING CORPORATION",
+          "kind": "legal_name",
+          "source_url": "https://www.stgeorge.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [
+        {
+          "code": "22863",
+          "product": "credit card repayments",
+          "source_url": "https://www.stgeorge.com.au/personal/credit-cards/tools/faqs/credit-card-repayments"
+        }
+      ],
+      "notes": "Division of Westpac Banking Corporation ABN 33 007 457 141, ACL 233714; legal name shared with Westpac, Bank of Melbourne, BankSA. Site uses 'St.George' (no space). BPAY 22863 also published by Bank of Melbourne."
+    },
+    {
+      "id": "bank_of_melbourne",
+      "canonical": "BANK OF MELBOURNE",
+      "families": ["mortgage", "loan", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://www.bankofmelbourne.com.au/personal/home-loans",
+        "loan": "https://www.bankofmelbourne.com.au/personal/personal-loans",
+        "credit_card": "https://www.bankofmelbourne.com.au/personal/credit-cards"
+      },
+      "aliases": [
+        {
+          "text": "BANK OF MELBOURNE",
+          "kind": "brand",
+          "source_url": "https://www.bankofmelbourne.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "WESTPAC BANKING CORPORATION",
+          "kind": "legal_name",
+          "source_url": "https://www.bankofmelbourne.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [
+        {
+          "code": "22863",
+          "product": "credit card repayments",
+          "source_url": "https://www.bankofmelbourne.com.au/personal/credit-cards/tools/faqs/credit-card-repayments"
+        }
+      ],
+      "notes": "Division of Westpac Banking Corporation (ACL 233714). Same BPAY credit-card biller code (22863) as St.George."
+    },
+    {
+      "id": "banksa",
+      "canonical": "BANKSA",
+      "families": ["mortgage", "loan", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://www.banksa.com.au/personal/home-loans",
+        "loan": "https://www.banksa.com.au/personal/personal-loans",
+        "credit_card": "https://www.banksa.com.au/personal/credit-cards"
+      },
+      "aliases": [
+        {
+          "text": "BANKSA",
+          "kind": "brand",
+          "source_url": "https://www.banksa.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "WESTPAC BANKING CORPORATION",
+          "kind": "legal_name",
+          "source_url": "https://www.banksa.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [
+        {
+          "code": "9787",
+          "product": "credit card repayments",
+          "source_url": "https://www.banksa.com.au/personal/credit-cards/tools/faqs/credit-card-repayments"
+        }
+      ],
+      "notes": "Division of Westpac Banking Corporation (ACL 233714)."
+    },
+    {
+      "id": "virgin_money",
+      "canonical": "VIRGIN MONEY",
+      "families": ["mortgage", "credit_card"],
+      "family_sources": {
+        "mortgage": "https://virginmoney.com.au/home-loans/",
+        "credit_card": "https://www.virginmoney.com.au/credit-cards/"
+      },
+      "aliases": [
+        {
+          "text": "VIRGIN MONEY",
+          "kind": "brand",
+          "source_url": "https://virginmoney.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "VIRGIN MONEY AUSTRALIA",
+          "kind": "trading_name",
+          "source_url": "https://www.virginmoney.com.au/content/dam/virginmoney/vma-downloads/credit-cards/credit-guide-virgin-money-credit-cards.pdf",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "BANK OF QUEENSLAND LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.virginmoney.com.au/content/dam/virginmoney/vma-downloads/credit-cards/credit-guide-virgin-money-credit-cards.pdf",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Virgin Money Australia is a division of Bank of Queensland Limited (ABN 32 009 656 740, ACL 244616), which distributes the cards; per the Virgin Money credit guide NAB (ABN 12 004 044 937, ACL 230686) is credit provider and issuer of the credit cards. Legal names shared with BOQ and NAB. The credit-guide wording was relayed through a search-result summary, not a direct fetch; verify before primary use. Merge step: the NAB legal-name alias was removed because its source wording was seen only via a search summary."
+    },
+    {
+      "id": "amex",
+      "canonical": "AMERICAN EXPRESS",
+      "families": ["credit_card"],
+      "family_sources": {
+        "credit_card": "https://americanexpress.com/content/dam/amex/en-au/company/terms-and-conditions/personal-cards/CreditCardConditions.pdf"
+      },
+      "aliases": [
+        {
+          "text": "AMERICAN EXPRESS",
+          "kind": "brand",
+          "source_url": "https://www.creditcardcompare.com.au/issuers",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "AMERICAN EXPRESS AUSTRALIA LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://americanexpress.com/content/dam/amex/en-au/company/terms-and-conditions/personal-cards/CreditCardConditions.pdf",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "AMEX",
+          "kind": "abbreviation",
+          "source_url": "https://www.asic.gov.au/about-asic/news-centre/find-a-media-release/2022-releases/22-352mr-asic-intervention-improves-small-amount-lenders-target-market-determinations",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [
+        {
+          "code": "5082",
+          "product": "Amex card accounts (reference = 15-digit Card Account number)",
+          "source_url": "https://www.americanexpress.com/en-au/customer-service/payments-and-billings/faq.pay-bill.html"
+        },
+        {
+          "code": "88013",
+          "product": "Card accounts per some Amex AU pages, incl. David Jones cards cancelled before 13 Jul 2024",
+          "source_url": "https://www.americanexpress.com/au/content/pay-bill.htm"
+        }
+      ],
+      "notes": "ABN 92 108 952 085, ACL 291313. Amex AU pages would not load directly (header overflow). The legal name, the AMEX usage and the biller codes come from the search index of Amex's own pages and PDFs, and from ASIC 22-352MR, which writes 'American Express Australia Limited (Amex)'. Amex pages conflict on the biller code (5082 vs 88013). Amex also issues co-brand cards (Qantas American Express, David Jones). ASIC instrument 24-0492 covers a card facility transfer between Latitude Finance Australia and American Express Australia Limited (https://download.asic.gov.au/media/w3xmzc3n/asic-instrument-24-0492-latitude-finance-australia-and-american-express-australia-limited.pdf)."
+    },
+    {
+      "id": "coles_credit_cards",
+      "canonical": "COLES CREDIT CARDS",
+      "families": ["credit_card"],
+      "family_sources": {
+        "credit_card": "https://www.coles.com.au/financial-services/credit-cards/faqs"
+      },
+      "aliases": [
+        {
+          "text": "COLES",
+          "kind": "brand",
+          "source_url": "https://www.creditcardcompare.com.au/issuers",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "COLES CREDIT CARDS",
+          "kind": "trading_name",
+          "source_url": "https://www.coles.com.au/financial-services/credit-cards/faqs",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "COLES MASTERCARD",
+          "kind": "trading_name",
+          "source_url": "https://www.coles.com.au/content/dam/coles/coles-financial-services/credit-cards/documents-and-forms/pdfs/coles-mastercard-terms-and-conditions-info.pdf",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Cards are issued by National Australia Bank Limited (ABN 12 004 044 937, ACL 230686) and distributed by Coles Supermarkets Australia Pty Ltd (ABN 45 004 189 708), per the Coles FAQ. Neither name is listed as an alias: NAB's legal name stays with the NAB lender, and the Coles Supermarkets entity name would match grocery spend. A 2020 key facts sheet names an earlier issuer, Citigroup Pty Limited. The brand alias 'COLES' is also the supermarket brand, so it is ambiguous for transaction matching. Biller code 8862 comes from the search-indexed text of the old financialservices.coles.com.au FAQ; the current FAQ page shows no BPAY code. Coles Personal Loans also exist (coles-personal-loans-tnc.pdf), but the Sept 2025 paydown notice could not be read, so neither the loan family nor its biller code was recorded."
+    },
+    {
+      "id": "afterpay",
+      "canonical": "AFTERPAY",
+      "families": ["bnpl"],
+      "family_sources": {
+        "bnpl": "https://asic.gov.au/about-asic/news-centre/find-a-media-release/2020-releases/20-280mr-asic-releases-latest-data-on-buy-now-pay-later-industry/"
+      },
+      "aliases": [
+        {
+          "text": "AFTERPAY",
+          "kind": "brand",
+          "source_url": "https://asic.gov.au/about-asic/news-centre/find-a-media-release/2020-releases/20-280mr-asic-releases-latest-data-on-buy-now-pay-later-industry/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "AFTERPAY AUSTRALIA PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://afterpay.com/en-au/terms",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ACN 169 342 947 (ABN 15 169 342 947), ACL 527911, per Afterpay's terms and loyalty terms. Owned by Block (Square). No BPAY biller code is published."
+    },
+    {
+      "id": "zip",
+      "canonical": "ZIP",
+      "families": ["bnpl"],
+      "family_sources": {
+        "bnpl": "https://asic.gov.au/about-asic/news-centre/find-a-media-release/2020-releases/20-280mr-asic-releases-latest-data-on-buy-now-pay-later-industry/"
+      },
+      "aliases": [
+        {
+          "text": "ZIP",
+          "kind": "brand",
+          "source_url": "https://zip.co/buy-now-pay-later",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "ZIP PAY",
+          "kind": "brand",
+          "source_url": "https://asic.gov.au/about-asic/news-centre/find-a-media-release/2020-releases/20-280mr-asic-releases-latest-data-on-buy-now-pay-later-industry/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "ZIP MONEY",
+          "kind": "brand",
+          "source_url": "https://zip.co/zip-money",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "ZIPMONEY PAYMENTS PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://zip.co/files/au/zip-money-terms-and-conditions.pdf",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 58 164 440 993, ACL 441878. Zip Money is a line of credit. Zip lets customers pay bills by BPAY from their Zip account, which is the reverse direction; Zip publishes no biller code for repaying Zip. The issuer list also shows 'Zip+', which was not recorded as an alias."
+    },
+    {
+      "id": "brighte",
+      "canonical": "BRIGHTE",
+      "families": ["bnpl", "loan"],
+      "family_sources": {
+        "bnpl": "https://asic.gov.au/about-asic/news-centre/find-a-media-release/2020-releases/20-280mr-asic-releases-latest-data-on-buy-now-pay-later-industry/",
+        "loan": "https://brighte.com.au/"
+      },
+      "aliases": [
+        {
+          "text": "BRIGHTE",
+          "kind": "brand",
+          "source_url": "https://brighte.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "BRIGHTEPAY",
+          "kind": "trading_name",
+          "source_url": "https://asic.gov.au/about-asic/news-centre/find-a-media-release/2020-releases/20-280mr-asic-releases-latest-data-on-buy-now-pay-later-industry/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "BRIGHTE CAPITAL PTY LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://brighte.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 74 609 165 906, ACL 508217. Brighte now markets a 0% Interest Payment Plan plus Green and Personal Loans. Its homepage no longer uses the name 'BrightePay'."
+    },
+    {
+      "id": "cash_converters",
+      "canonical": "CASH CONVERTERS",
+      "families": ["sacc", "loan"],
+      "family_sources": {
+        "sacc": "https://aph.gov.au/Parliamentary_Business/Committees/Senate/Economics/Creditfinancialservices/Report/c03",
+        "loan": "https://www.cashconverters.com.au/loans/small-loans"
+      },
+      "aliases": [
+        {
+          "text": "CASH CONVERTERS",
+          "kind": "brand",
+          "source_url": "https://www.cashconverters.com.au/loans/resources/compare-our-cashies-loan-with-other-cash-loans",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "CASH CONVERTERS PERSONAL FINANCE PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://abr.business.gov.au/Search/ResultsActive?SearchText=cash+converters+personal+finance",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "CASH CONVERTERS PERSONAL FINANCE",
+          "kind": "trading_name",
+          "source_url": "https://abr.business.gov.au/Search/ResultsActive?SearchText=cash+converters+personal+finance",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "CASHIES LOAN",
+          "kind": "trading_name",
+          "source_url": "https://www.cashconverters.com.au/loans/small-loans",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ACL 391436, per Cash Converters' comparison page; the entity holding it was not confirmed. The ABR returns many franchisee entities and trading names containing 'CASH CONVERTERS', and the brand is also used by the pawnbroking and second-hand retail stores, so it is ambiguous for transaction matching. The sacc family relies on a Senate Economics committee report naming Cash Converters, Money3 and Nimble as dominant SACC lenders; that page returned 403, so it was seen in search results only. The current flagship Cashies Loan is continuing credit ($2,050 to $10,000), not a SACC. CASHIES LOAN is a product name, kept because it identifies the provider."
+    },
+    {
+      "id": "money3",
+      "canonical": "MONEY3",
+      "families": ["loan", "sacc"],
+      "family_sources": {
+        "loan": "https://www.money3.com.au/",
+        "sacc": "https://aph.gov.au/Parliamentary_Business/Committees/Senate/Economics/Creditfinancialservices/Report/c03"
+      },
+      "aliases": [
+        {
+          "text": "MONEY3",
+          "kind": "brand",
+          "source_url": "https://www.money3.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "MONEY3 LOANS PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.money3.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 36 108 979 406, ACL 389067. Money3 currently offers car and vehicle loans up to $75k and personal loans from $2,000, repaid by direct debit. The sacc family is historical: it rests only on the Senate report seen in search results, so treat it as weak."
+    },
+    {
+      "id": "nimble",
+      "canonical": "NIMBLE",
+      "families": ["sacc", "loan"],
+      "family_sources": {
+        "sacc": "https://nimble.com.au/",
+        "loan": "https://nimble.com.au/"
+      },
+      "aliases": [
+        {
+          "text": "NIMBLE",
+          "kind": "brand",
+          "source_url": "https://nimble.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "NIMBLE AUSTRALIA PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://abr.business.gov.au/ABN/View/91135501807",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "CASH DOCTORS AUSTRALIA PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://abr.business.gov.au/AbnHistory/View/91135501807",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 91 135 501 807, ACL 386010 (ASIC 16-089MR). Cash Doctors Australia Pty Ltd is a former name of the same ABN, and ASIC calls Nimble 'previously Cash Doctors'. Nimble offers Small Loans of $500 to $2,000 (SACC) and Personal Loans of $2,050 to $5,000. A trade-press report (adviservoice.com.au, not checked against a primary source) says SkyCredit, the parent of Fair Go Finance, acquired Nimble in 2024."
+    },
+    {
+      "id": "wallet_wizard",
+      "canonical": "WALLET WIZARD",
+      "families": ["loan"],
+      "family_sources": {
+        "loan": "https://www.walletwizard.com.au/"
+      },
+      "aliases": [
+        {
+          "text": "WALLET WIZARD",
+          "kind": "trading_name",
+          "source_url": "https://www.walletwizard.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "CREDIT CORP FINANCIAL SERVICES PTY LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.walletwizard.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 39 146 525 706, ACL 400871. The site footer names 'Credit Corp Financial Services Pty Limited trading as Wallet Wizard'. Part of the Credit Corp group, which is also a large debt buyer and collector. Wallet Wizard came into scope from the SACC comparison list, but its Smart Loan is a continuing credit contract (line of credit), so no sacc family was assigned."
+    },
+    {
+      "id": "credit24",
+      "canonical": "CREDIT24",
+      "families": ["sacc", "loan"],
+      "family_sources": {
+        "sacc": "https://www.credit24.com.au/",
+        "loan": "https://www.credit24.com.au/"
+      },
+      "aliases": [
+        {
+          "text": "CREDIT24",
+          "kind": "trading_name",
+          "source_url": "https://www.credit24.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "IPF DIGITAL AUSTRALIA PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.credit24.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ACN 130 894 405, ACL 422839. The site says Credit24 is a registered trademark and business name of IPF Digital Australia Pty Ltd. It offers Small Loans of $2,000 or under (20% establishment fee plus a monthly fee, which are SACC terms) alongside line of credit, medium and personal loans."
+    },
+    {
+      "id": "jacaranda_finance",
+      "canonical": "JACARANDA FINANCE",
+      "families": ["loan"],
+      "family_sources": {
+        "loan": "https://www.jacarandafinance.com.au/"
+      },
+      "aliases": [
+        {
+          "text": "JACARANDA FINANCE",
+          "kind": "brand",
+          "source_url": "https://www.jacarandafinance.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "JACARANDA FINANCE PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.jacarandafinance.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 53 162 078 195, ACL 456404. It came into scope from the SACC comparison list, but its site says it is not a payday lender and offers personal and car loans of $3k to $40k, so no sacc family was assigned. It is also on savings.com.au's personal loan lender list, so another fork may have recorded it too."
+    },
+    {
+      "id": "fair_go_finance",
+      "canonical": "FAIR GO FINANCE",
+      "families": ["sacc", "loan"],
+      "family_sources": {
+        "sacc": "https://www.asic.gov.au/about-asic/news-centre/find-a-media-release/2016-releases/16-027mr-payday-lender-penalised-for-overcharging-consumers",
+        "loan": "https://www.fairgofinance.com.au/product-tmd-infomation/line-of-credit-tmd"
+      },
+      "aliases": [
+        {
+          "text": "FAIR GO FINANCE",
+          "kind": "brand",
+          "source_url": "https://www.cashconverters.com.au/loans/resources/compare-our-cashies-loan-with-other-cash-loans",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "FAIR GO FINANCE PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://abr.business.gov.au/ABN/View/18134369574",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 18 134 369 574, ACL 387995. The reported parent is SkyCredit Pty Ltd, which is also reported to own Nimble. ASIC 16-027MR (2016) calls it a payday lender. The homepage returned 502, so details came from the ABR and from search-indexed fairgofinance.com.au pages."
+    },
+    {
+      "id": "beforepay",
+      "canonical": "BEFOREPAY",
+      "families": ["wage_advance", "loan"],
+      "family_sources": {
+        "wage_advance": "https://www.beforepay.com.au/",
+        "loan": "https://www.beforepay.com.au/"
+      },
+      "aliases": [
+        {
+          "text": "BEFOREPAY",
+          "kind": "brand",
+          "source_url": "https://www.beforepay.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "BEFOREPAY FINANCE PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.beforepay.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "BPG CREDIT PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.beforepay.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "BEFOREPAY GROUP LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.beforepay.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Pay Advance offered by Beforepay Finance Pty Ltd; personal loans by BPG Credit Pty Ltd (ACL 554659); parent Beforepay Group Limited."
+    },
+    {
+      "id": "mypaynow",
+      "canonical": "MYPAYNOW",
+      "families": ["wage_advance"],
+      "family_sources": {
+        "wage_advance": "https://www.mypaynow.com.au/"
+      },
+      "aliases": [
+        {
+          "text": "MYPAYNOW",
+          "kind": "brand",
+          "source_url": "https://www.mypaynow.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "MYPAYNOW PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.mypaynow.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Footer: MyPayNow Pty Ltd ACN 635 410 909; no credit licence shown."
+    },
+    {
+      "id": "mypayfast",
+      "canonical": "MYPAYFAST",
+      "families": ["wage_advance"],
+      "family_sources": {
+        "wage_advance": "https://www.savings.com.au/budgeting-finance-tips/wage-advance-apps-the-good-the-bad-and-the-ugly"
+      },
+      "aliases": [
+        {
+          "text": "MYPAYFAST",
+          "kind": "brand",
+          "source_url": "https://www.savings.com.au/budgeting-finance-tips/wage-advance-apps-the-good-the-bad-and-the-ugly",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Own site (mypayfast.com.au) showed only an under-construction notice on 2026-11-19; no legal entity found; may not be accepting customers."
+    },
+    {
+      "id": "wagepay",
+      "canonical": "WAGEPAY",
+      "families": ["wage_advance"],
+      "family_sources": {
+        "wage_advance": "https://www.wagepay.com.au/"
+      },
+      "aliases": [
+        {
+          "text": "WAGEPAY",
+          "kind": "brand",
+          "source_url": "https://www.wagepay.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "WAGEPAY PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.wagepay.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "WAGEPAY SPV1 PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.wagepay.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Wagepay Pty Ltd ABN 15 645 114 629; SPV1 is a wholly owned subsidiary."
+    },
+    {
+      "id": "wagetap",
+      "canonical": "WAGETAP",
+      "families": ["wage_advance"],
+      "family_sources": {
+        "wage_advance": "https://wagetap.com/"
+      },
+      "aliases": [
+        {
+          "text": "WAGETAP",
+          "kind": "brand",
+          "source_url": "https://wagetap.com/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "WAGETAP LENDING PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://wagetap.com/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "DIGITAL SERVICES AUSTRALIA V PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://wagetap.com/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Both entities are stated as authorised representatives of ACLs 000389620 and 000519253 (licensee names not shown). wagetap.com.au had an expired certificate; wagetap.com used."
+    },
+    {
+      "id": "employment_hero_ewa",
+      "canonical": "EMPLOYMENT HERO",
+      "families": ["wage_advance"],
+      "family_sources": {
+        "wage_advance": "https://employmenthero.com/blog/ewa-employers/"
+      },
+      "aliases": [
+        {
+          "text": "EMPLOYMENT HERO",
+          "kind": "brand",
+          "source_url": "https://employmenthero.com/blog/ewa-employers/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "EMPLOYMENT HERO PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://employmenthero.com/blog/ewa-employers/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "EARNED WAGE ACCESS",
+          "kind": "trading_name",
+          "source_url": "https://employmenthero.com/blog/ewa-employers/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "EWA",
+          "kind": "abbreviation",
+          "source_url": "https://employmenthero.com/blog/ewa-employers/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "INSTAPAY",
+          "kind": "trading_name",
+          "source_url": "https://workhelp.employmenthero.com/hc/en-au/articles/9546310458511-Introduction-to-Earned-Wage-Access-InstaPay",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "SWAG",
+          "kind": "trading_name",
+          "source_url": "https://employmenthero.com/blog/ewa-employers/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Product formerly InstaPay, accessed via the Swag app. 'EARNED WAGE ACCESS' and 'EWA' are generic industry terms also used by other providers: high collision risk. InstaPay source is the help-centre article (page returned 403 to fetch; title seen in search results)."
+    },
+    {
+      "id": "paytime",
+      "canonical": "PAYTIME",
+      "families": ["wage_advance"],
+      "family_sources": {
+        "wage_advance": "https://www.paytime.com.au/"
+      },
+      "aliases": [
+        {
+          "text": "PAYTIME",
+          "kind": "brand",
+          "source_url": "https://www.paytime.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "PAYTIME SERVICES PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.paytime.com.au/terms-and-conditions",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Paytime Services Pty Ltd ABN 78 647 450 137."
+    },
+    {
+      "id": "ourmoneymarket",
+      "canonical": "OURMONEYMARKET",
+      "families": ["loan"],
+      "family_sources": {
+        "loan": "https://www.ourmoneymarket.com/"
+      },
+      "aliases": [
+        {
+          "text": "OURMONEYMARKET",
+          "kind": "brand",
+          "source_url": "https://www.ourmoneymarket.com/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "OMM",
+          "kind": "abbreviation",
+          "source_url": "https://www.ourmoneymarket.com/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "OURMONEYMARKET LENDING PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.ourmoneymarket.com/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ABN 64 605 231 669, ACL 488228. ourmoneymarket.com.au redirects to ourmoneymarket.com."
+    },
+    {
+      "id": "harmoney",
+      "canonical": "HARMONEY",
+      "families": ["loan"],
+      "family_sources": {
+        "loan": "https://www.harmoney.com.au/"
+      },
+      "aliases": [
+        {
+          "text": "HARMONEY",
+          "kind": "brand",
+          "source_url": "https://www.harmoney.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "HARMONEY AUSTRALIA PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.harmoney.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "HARMONEY SERVICES AUSTRALIA PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.harmoney.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "HARMONEY CORP LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.harmoney.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Also operates in New Zealand. BPAY codes seen only in a search snippet of an FAQ that now redirects; not recorded."
+    },
+    {
+      "id": "moneyplace",
+      "canonical": "MONEYPLACE",
+      "families": ["loan"],
+      "family_sources": {
+        "loan": "https://www.savings.com.au/personal-loans/lenders/"
+      },
+      "aliases": [
+        {
+          "text": "MONEYPLACE",
+          "kind": "brand",
+          "source_url": "https://www.savings.com.au/personal-loans/lenders/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Also in Finder non-bank table. Legal entity not confirmed from a page I could read (own site returned title only); left out."
+    },
+    {
+      "id": "plenti",
+      "canonical": "PLENTI",
+      "families": ["loan"],
+      "family_sources": {
+        "loan": "https://www.plenti.com.au/"
+      },
+      "aliases": [
+        {
+          "text": "PLENTI",
+          "kind": "brand",
+          "source_url": "https://www.plenti.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "PLENTI FINANCE PTY LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.plenti.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "PLENTI PTY LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.plenti.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "PLENTI RE LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.plenti.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Plenti accepts BPAY repayments but shows the biller code only inside the logged-in account (https://web.plenti.com.au/help/how-do-i-make-an-extra-repayment). Former name RateSetter not stated on site; omitted. Footer also names Perpetual Corporate Trust Limited as custodian (omitted: trustee, not lender)."
+    },
+    {
+      "id": "societyone",
+      "canonical": "SOCIETYONE",
+      "families": ["loan"],
+      "family_sources": {
+        "loan": "https://societyone.com.au/index.html"
+      },
+      "aliases": [
+        {
+          "text": "SOCIETYONE",
+          "kind": "trading_name",
+          "source_url": "https://societyone.com.au/index.html",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "SOCIETYONE AUSTRALIA PTY LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://societyone.com.au/index.html",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "SOCIETY ONE",
+          "kind": "brand",
+          "source_url": "https://finder.com.au/personal-loans/non-bank-lenders",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "SocietyOne site says app access has moved to the MONEYME app and uses moneyme.com.au contact domains; ownership by MoneyMe not stated there."
+    },
+    {
+      "id": "firstmac",
+      "canonical": "FIRSTMAC",
+      "families": ["mortgage", "loan"],
+      "family_sources": {
+        "mortgage": "https://www.firstmac.com.au/",
+        "loan": "https://www.firstmac.com.au/"
+      },
+      "aliases": [
+        {
+          "text": "FIRSTMAC",
+          "kind": "brand",
+          "source_url": "https://www.firstmac.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "FIRSTMAC LIMITED",
+          "kind": "legal_name",
+          "source_url": "https://www.firstmac.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "Loan family = asset finance (car and caravan loans). Relationship to loans.com.au not stated on either footer, so kept separate."
+    },
+    {
+      "id": "loans_com_au",
+      "canonical": "LOANS.COM.AU",
+      "families": ["mortgage", "loan"],
+      "family_sources": {
+        "mortgage": "https://www.loans.com.au/",
+        "loan": "https://www.loans.com.au/"
+      },
+      "aliases": [
+        {
+          "text": "LOANS.COM.AU",
+          "kind": "brand",
+          "source_url": "https://www.loans.com.au/",
+          "accessed": "2026-11-19"
+        },
+        {
+          "text": "LOANS.COM.AU PTY LTD",
+          "kind": "legal_name",
+          "source_url": "https://www.loans.com.au/",
+          "accessed": "2026-11-19"
+        }
+      ],
+      "bpay_biller_codes": [],
+      "notes": "ACL 395219. Described by third parties as a Firstmac brand; not confirmed on its own footer."
+    }
+  ],
+  "shared_aliases": [
+    {
+      "text": "BANK OF QUEENSLAND LIMITED",
+      "lenders": ["boq", "virgin_money"]
+    },
+    {
+      "text": "COMMONWEALTH BANK OF AUSTRALIA",
+      "lenders": ["bankwest", "cba"]
+    },
+    {
+      "text": "NEWCASTLE GREATER MUTUAL GROUP LTD",
+      "lenders": ["greater_bank", "newcastle_permanent"]
+    },
+    {
+      "text": "WESTPAC BANKING CORPORATION",
+      "lenders": ["bank_of_melbourne", "banksa", "st_george", "westpac"]
+    }
+  ],
+  "excluded": [
+    {
+      "lender_or_alias": "HSBC BPAY code 17095",
+      "reason": "only third-party (Finder) source; not lender-published",
+      "batch": "a_banks"
+    },
+    {
+      "lender_or_alias": "Suncorp Bank BPAY code 999532",
+      "reason": "seen only in a search snippet; source page 404",
+      "batch": "a_banks"
+    },
+    {
+      "lender_or_alias": "CBA BPAY code 1818",
+      "reason": "business/corporate cards only; out of consumer scope",
+      "batch": "a_banks"
+    },
+    {
+      "lender_or_alias": "WBC (Westpac ASX code)",
+      "reason": "ticker seen only on a third-party ranking page; not used by the lender as an alias",
+      "batch": "a_banks"
+    },
+    {
+      "lender_or_alias": "BOQ loan family",
+      "reason": "personal loan pages 404; no citable product page",
+      "batch": "a_banks"
+    },
+    {
+      "lender_or_alias": "Macquarie loan family (YourLease car loans)",
+      "reason": "nav link only; product issuer not cited",
+      "batch": "a_banks"
+    },
+    {
+      "lender_or_alias": "CommBank StepPay (BNPL)",
+      "reason": "current availability not verified; not recorded",
+      "batch": "a_banks"
+    },
+    {
+      "lender_or_alias": "ST GEORGE (no dot)",
+      "reason": "not seen on lender's own site; site uses St.George",
+      "batch": "b_mutuals"
+    },
+    {
+      "lender_or_alias": "Bankwest BPAY biller code 9100",
+      "reason": "third-party source only (bankchart.com.au)",
+      "batch": "b_mutuals"
+    },
+    {
+      "lender_or_alias": "St.George BPAY 9779",
+      "reason": "third-party source only; lender publishes 22863",
+      "batch": "b_mutuals"
+    },
+    {
+      "lender_or_alias": "IMB credit_card family",
+      "reason": "no citable IMB credit card page found",
+      "batch": "b_mutuals"
+    },
+    {
+      "lender_or_alias": "Bankwest / Virgin Money loan family",
+      "reason": "no personal/car loan page found",
+      "batch": "b_mutuals"
+    },
+    {
+      "lender_or_alias": "VIRGIN MONEY (AUSTRALIA) PTY LIMITED",
+      "reason": "seen only in search snippets (legacy home loans/TMD), not on a fetched lender page",
+      "batch": "b_mutuals"
+    },
+    {
+      "lender_or_alias": "Openpay",
+      "reason": "collapsed into receivership in Feb 2023; no live lender-published source for its legal name or aliases",
+      "source_url": "https://savings.com.au/news/openpay-collapse",
+      "batch": "c_cards_bnpl_sacc"
+    },
+    {
+      "lender_or_alias": "COLES FINANCIAL SERVICES (Coles)",
+      "reason": "no citable source uses this text as a provider name (it appears only in URL paths); the current FAQ says 'Coles Credit Cards'",
+      "batch": "c_cards_bnpl_sacc"
+    },
+    {
+      "lender_or_alias": "NATIONAL AUSTRALIA BANK LIMITED (as Coles issuer)",
+      "reason": "issuer legal name; left out to avoid a cross-lender alias with NAB; recorded in the Coles notes",
+      "batch": "c_cards_bnpl_sacc"
+    },
+    {
+      "lender_or_alias": "COLES SUPERMARKETS AUSTRALIA PTY LTD (Coles distributor)",
+      "reason": "distributor, not lender; would match grocery spend; recorded in notes only",
+      "batch": "c_cards_bnpl_sacc"
+    },
+    {
+      "lender_or_alias": "CITIGROUP PTY LIMITED (former Coles issuer)",
+      "reason": "historical issuer only; recorded in notes",
+      "batch": "c_cards_bnpl_sacc"
+    },
+    {
+      "lender_or_alias": "Coles Personal Loans BPAY 266551",
+      "reason": "source PDF could not be read, so the code was not verified",
+      "batch": "c_cards_bnpl_sacc"
+    },
+    {
+      "lender_or_alias": "LATITUDEPAY (Latitude)",
+      "reason": "no live citable source confirms the product",
+      "batch": "c_cards_bnpl_sacc"
+    },
+    {
+      "lender_or_alias": "HUMM90 (humm)",
+      "reason": "seen only in a search snippet, never on a fetched page",
+      "batch": "c_cards_bnpl_sacc"
+    },
+    {
+      "lender_or_alias": "FERRATUM AUSTRALIA PTY LTD",
+      "reason": "named in ASIC 22-352MR in a SACC context, but not on the scope list and no source links it to Credit24",
+      "batch": "c_cards_bnpl_sacc"
+    },
+    {
+      "lender_or_alias": "MYPAYFAST legal entity",
+      "reason": "no citable source (site under construction)",
+      "batch": "d_wage_personal"
+    },
+    {
+      "lender_or_alias": "MONEY PLACE ASSETS PTY LTD / SECURE FUNDING PTY LTD (MoneyPlace)",
+      "reason": "seen only in a search summary; page itself not readable",
+      "batch": "d_wage_personal"
+    },
+    {
+      "lender_or_alias": "Harmoney BPAY codes 112177 / 311423",
+      "reason": "seen only in search snippet; source page redirects, not verifiable",
+      "batch": "d_wage_personal"
+    },
+    {
+      "lender_or_alias": "RATESETTER (Plenti former name)",
+      "reason": "no citable source on Plenti page",
+      "batch": "d_wage_personal"
+    },
+    {
+      "lender_or_alias": "Wagetap licensee names for ACL 000389620 / 000519253",
+      "reason": "not named on site",
+      "batch": "d_wage_personal"
+    },
+    {
+      "lender_or_alias": "FIRSTMAC MONEY / FIRSTMAC ONTRACK",
+      "reason": "service names, not credit products; omitted",
+      "batch": "d_wage_personal"
+    },
+    {
+      "lender_or_alias": "virgin_money: NATIONAL AUSTRALIA BANK LIMITED (legal_name)",
+      "reason": "source text seen only via search-result summary, not a fetched page",
+      "batch": "merge"
+    },
+    {
+      "lender_or_alias": "coles_credit_cards: BPAY biller code 8862",
+      "reason": "only in search-indexed text of a retired page; current lender page shows no code",
+      "batch": "merge"
+    }
+  ],
+  "removed_by_reserved_name_test": {
+    "ids": [
+      "ing",
+      "hsbc",
+      "bankwest",
+      "latitude",
+      "humm",
+      "payright",
+      "now_finance",
+      "wisr",
+      "pepper_money",
+      "moneyme"
+    ],
+    "rule": "SIG-57 pre-registration alias_table.reserved_unseen_lenders: a lender whose canonical name or alias equals or contains a reserved unseen-lender name is removed whole",
+    "aliases_removed": 38
+  }
+}

@@ -1,0 +1,191 @@
+{
+  "ticket": "SIG-57",
+  "registered_at": "2026-11-19",
+  "status": "pre-registered with the alias table, in one commit, before any SIG-57 code, categorisation of set v2.2 or run; not to be edited after the first scored run",
+  "hypothesis": "H2 Hidden liabilities. Adding a lender-alias table (brand, legal name, trading name, published abbreviation and BPAY biller name) to SIG-18's detector, and normalising reference numbers out of narratives, will identify liabilities missing from the application with precision of at least 90% and recall of at least 80%, for applicants with at least 3 months of history, on set v2.2's natural-form declarations, unseen lenders, noisy narratives and no 'CREDIT CARD' biller cue, because a liability is the same lender under its several names, and those names can be listed and matched without reading free text.",
+  "research_question": "RQ-2",
+  "rulings": {
+    "40387": "runs on set v2.2 with review 11's caveats (copied under caveats_40387)",
+    "40431": "40387 was given and posted on 18 November 2026; SIG-57 may start after review 12 (SIG-42 40428)",
+    "40434": "the alias table is compiled by a separate agent from cited public sources (Colin, 19 November 2026, on 40433)"
+  },
+  "alias_table": {
+    "file": "research/aliases/lender-aliases-1.0.0.json",
+    "sources": "research/aliases/SOURCES.md",
+    "version": "1.0.0",
+    "sha256": "39853f2c8fe01555abef192fb5bc29e9e89cdd5d6b36ae609c51084e002bf9a5",
+    "compiled_by": "a separate Claude Code agent (same model family as the author of the v2.2 generator), started fresh with no context from this ticket or SIG-60, working only from public web sources, told not to open any local repository or dataset",
+    "rules_given_to_it": [
+      "every alias cites a URL; an alias that can't be cited is left out",
+      "the lender scope is fixed from a public list, recorded in the table, not from the set",
+      "abbreviations only when a cited source uses them",
+      "BPAY biller codes only when the lender publishes them; they are recorded but not used by any arm"
+    ],
+    "reserved_unseen_lenders": "not given to the agent. test/research/sig57-aliases.test.ts checks every alias against the three sets' reserved names (imported from the catalogues; the test prints only table lender IDs, never a reserved name). An entry that hits one is removed before this commit, and the removal is listed under alias_table.removed",
+    "removed": {
+      "lenders": 10,
+      "aliases": 38,
+      "ids": [
+        "ing",
+        "hsbc",
+        "bankwest",
+        "latitude",
+        "humm",
+        "payright",
+        "now_finance",
+        "wisr",
+        "pepper_money",
+        "moneyme"
+      ],
+      "how": "T6's first run failed on these 10 table lender IDs. A one-off script then showed each lender's canonical name equals a reserved name exactly; every other hit was one of its own legal or trading names containing it. Each lender was removed whole. The committed table keeps 49 lenders and 150 aliases; the removal is recorded inside it ('removed_by_reserved_name_test')"
+    },
+    "committed_unchanged": "SOURCES.md and the agent's original table are committed as the agent wrote them. The committed table is the original with the 10 lenders removed and the removal recorded; nothing else is changed. Aliases the agent flagged as generic (COLES, CASH CONVERTERS, IMB, EARNED WAGE ACCESS, EWA, BANK AUSTRALIA) are kept, as written",
+    "agent_original": {
+      "file": "research/aliases/lender-aliases-1.0.0.agent-original.json",
+      "sha256": "0496255566ee5f78de3b0cc8058230afde46f0527d97c59120c8ebb3291a8289",
+      "sources_sha256": "4c4dd3a3e67bd99ccb13a6c5de2561234ffab5086b24b96d4ee81d111d1210e9",
+      "lenders": 59,
+      "aliases": 188,
+      "by_kind": {
+        "legal_name": 85,
+        "brand": 56,
+        "trading_name": 36,
+        "abbreviation": 10,
+        "bpay_biller_name": 1
+      },
+      "bpay_biller_codes_recorded": 12,
+      "left_out_by_agent": "30 entries in its own 'excluded' list (12 aliases without a usable source, among them WBC and ST GEORGE; 5 by policy; 8 BPAY codes; Openpay, defunct)"
+    }
+  },
+  "disclosure": [
+    "Claude Code wrote set v2.2's generator, including its 83 alias pairs (d60004c, SIG-60; earlier 76eeb14 and 3ca45a4). The compiling agent is the same model family, so shared priors about Australian lender names may make the table closer to the set's aliases than an independent human's would be.",
+    "The agent's restriction from the repository was by instruction, not enforced by the file system. Its own statement on this is in SOURCES.md.",
+    "Neither the agent nor the author of this pre-registration read src/research/generator/**/catalog.ts, src/research/generator/v22/*, or any v2.2 declaration, truth file or record for SIG-57. The v2.2 manifest's top-level keys, applicant count and set hash were read; its unseen_lenders and by_tag entries were not.",
+    "Running T6 showed the author of this pre-registration the names of the 10 removed lenders, so 10 reserved unseen-lender names are now known to the author of the SIG-57 detector. The treatment code holds no lender name: lenders come only from the alias table (test T8)."
+  ],
+  "caveats_40387": {
+    "alias_table": "pre-registered before any run without reading catalog.ts or any v2.2 declarations; v2.2 uses only 83 alias pairs, repeated up to 12 times (D-L4-3)",
+    "name_only_primary": "the primary result uses names only. v2.2's declared amounts equal the truth to the cent, so amount-assisted matching is reported separately, with its tolerance, and never as the primary result",
+    "natural_declarations": "natural-declaration results are compared only within applicants with 2 or more declarations; the report notes that 30% of the other declarations also differ",
+    "bpay": "no feature uses biller-code length, prefix, digit arithmetic or code rank, and nothing learns code-to-name links across applicants (D-L4-1). Results are reported with BPAY code features off (every arm) and with BPAY lines excluded",
+    "unseen_lenders": "kept out of the alias table (10 November ruling)"
+  },
+  "metric": {
+    "unit": "a liability: one (applicant, family, lender). Families: credit_card, loan (car_loan and personal_loan), mortgage where the set has them, bnpl, sacc, wage_advance",
+    "lender_identity_for_scoring": "the same in every arm: a provider string is normalised (normalisation below) and resolved through the alias table to a lender ID; one that resolves to none keeps its normalised string as its identity. Ground-truth providers and detected providers are resolved the same way. Scoring never changes between arms; only detection and disclosure do",
+    "detected_undisclosed": "a detected liability that matches no declared liability (disclosure rule of the arm)",
+    "true_positive": "a detected-undisclosed liability matching an undeclared ground-truth liability by family and lender identity; each ground-truth liability matched at most once",
+    "false_positive": "a detected-undisclosed liability matching no undeclared ground-truth liability",
+    "precision": "true positives / detected-undisclosed",
+    "recall": "true positives / undeclared ground-truth liabilities"
+  },
+  "targets": {
+    "precision_at_least": 0.9,
+    "recall_at_least": 0.8
+  },
+  "fails_if": {
+    "precision_below": 0.8
+  },
+  "classification": {
+    "supported": "the primary run has precision >= 0.90 and recall >= 0.80, the negative control passes, and set v1 stays at 1.00 / 1.00",
+    "refuted": "the primary run has precision < 0.80, with the negative control passing",
+    "inconclusive": "anything else: precision 0.80 to 0.90; recall below 0.80 with precision at least 0.80; the negative control fails; the set v1 regression fails; or the data can't test the claim"
+  },
+  "data": {
+    "set": "synthetic-v2.2",
+    "manifest": "research/datasets/synthetic-v2.2.manifest.json",
+    "set_sha256": "c520f3714948d4d2279766e314aba6c07f7dbda91eca7883595d4ef7acf376e5",
+    "seed": 602,
+    "generator_version": "2.2.0",
+    "applicants": 780,
+    "as_of": "2026-10-31",
+    "population": "the liability variants and every other applicant with at least 3 months of history; counts by family, declared and account-shared are taken from ground truth by the run script and recorded in the run record, not counted before registration",
+    "regression_set": "synthetic-v1 (research/datasets/synthetic-v1.manifest.json, 8f5cf973…), as in SIG-18"
+  },
+  "categorisation": {
+    "source": "Moroku Enrich local engine 1.7.0, taxonomy 1.4, no dictionary, overrides or LLM cache, as in SIG-17 and SIG-18",
+    "cache": "research/enrich/synthetic-v2.2-categories.json, produced and committed after this registration and before the negative control; its sha256 is recorded in every run record",
+    "deviation": "as in SIG-18: taxonomy 1.4 locally, not the deployed Enrich at 1.3 (D27)"
+  },
+  "arms": {
+    "baseline": "SIG-18's detector 1.0.0 (src/engines/liabilities, detectLiabilities) unchanged: no alias table; disclosure by family and normalised provider",
+    "treatment": "a new research detector (src/research/sig57/, version 1.0.0). It leaves detectLiabilities, LIA and LENDER_NAMES unchanged (frozen until SIG-64). Steps (a) and (c) are SIG-18's; step (b) and disclosure differ as in method"
+  },
+  "method": {
+    "normalisation": "NFKC; upper case; first, the alias table's aliases are matched on whole words (longest alias first), so an alias with a digit (MONEY3) is found before digits go; then every word containing a digit (a reference number, 'REF12345', a card tail) is removed; then SIG-18's product words (LOAN, REPAYMENT, REPAYMENTS, INSTALMENT, PAYMENT, CREDIT, CARD, PTY, LTD, BPAY) and the words REF, REFERENCE, LIMITED, AUSTRALIA, AUST and ACN are removed; spaces collapsed",
+    "resolution": "a provider string resolves to the lender ID of the longest alias it contains on whole-word boundaries. An alias text that appears under two or more lenders of the committed table (WESTPAC BANKING CORPORATION, BANK OF QUEENSLAND LIMITED, NEWCASTLE GREATER MUTUAL GROUP LTD) resolves to none when it is the longest match, and the string keeps its normalised form. COMMONWEALTH BANK OF AUSTRALIA was shared with bankwest, which was removed, so it now resolves to cba. The table's shared_aliases list is not read; sharing is computed from the lenders",
+    "a_accounts_in_grant": "as SIG-18: CRED_AND_CHRG_CARDS is a credit_card, PERS_LOANS a loan; provider from the product name",
+    "b_lender_outflows": {
+      "by_category": "as SIG-18 (loan_repayment, bnpl, sacc_loan, wage_advance)",
+      "by_biller_name": "a debit whose biller name resolves to a lender is a lender outflow. Its family: credit_card when the biller name contains CARD; otherwise the lender's family when the table lists exactly one of credit_card, loan, mortgage, bnpl, sacc, wage_advance for it; otherwise not a lender outflow (FN2). No biller code is read",
+      "excluded": "credits, and debits whose narrative carries a BSB and account number (as SIG-18)"
+    },
+    "c_recurrence": "as SIG-18, grouped by (family, lender identity)",
+    "disclosure_name_only": "primary. A detected liability is disclosed when a declaration of the same family resolves to the same lender ID, or, when neither resolves, has the same normalised provider. Amounts are not read",
+    "disclosure_amount_assisted": "reported separately, never primary. As name-only; then a remaining detected liability is disclosed when a remaining declaration of the same family has repayment_monthly within the arm's tolerance of the detection's monthly amount. Each declaration discloses at most one detection; the pairing is the most pairs, then the smallest total amount difference, then earliest declaration order. Tolerances 5% and 15%",
+    "bpay_excluded": "the feed with every BPAY line removed before detection: a transaction with a non-empty billerName, or a description containing the word BPAY"
+  },
+  "primary_configuration": {
+    "arm": "treatment",
+    "disclosure": "name_only",
+    "bpay": "code features off (as every arm), BPAY lines in",
+    "min_occurrences": 3,
+    "amount_tolerance": 0.15
+  },
+  "runs_in_order": [
+    "1. negative control (below), first",
+    "2. primary",
+    "3. treatment, name-only, BPAY lines excluded",
+    "4. treatment, amount-assisted at 5% and at 15%",
+    "5. baseline (SIG-18 1.0.0) on set v2.2, BPAY lines in and excluded",
+    "6. variables grid: min_occurrences 2 and 3 x amount_tolerance 0.05 and 0.15, treatment name-only",
+    "7. set v1 regression: treatment name-only, primary configuration"
+  ],
+  "variables": {
+    "alias_table": ["off (baseline)", "on (treatment)"],
+    "min_occurrences": [2, 3],
+    "amount_tolerance": [0.05, 0.15],
+    "unseen_lender_share": "reported, not varied: precision and recall on liabilities of unseen lenders and on the rest, from ground truth's unseen marker as the set records it"
+  },
+  "reported_breakdowns": [
+    "by family",
+    "unseen lenders vs listed lenders",
+    "natural declarations: within applicants with 2 or more declarations only, with the note that 30% of the other declarations also differ",
+    "liabilities with no card cue",
+    "repaid from unshared accounts"
+  ],
+  "negative_control": {
+    "run_first": true,
+    "name": "rotated declarations",
+    "manipulation": "each applicant is given the declared liabilities of the next applicant in ID order (the last takes the first's); transactions, accounts and categories unchanged",
+    "arm": "treatment, primary configuration",
+    "expected": "precision below 0.50. If 0.50 or more, disclosure isn't what drives the result, and no other SIG-57 result stands"
+  },
+  "miss_causes": {
+    "note": "as SIG-18 (FN1 to FN6, FP1 to FP3), in the same precedence, with the SIG-18 scorer fix (FN1 only when no repayment is visible). Each miss also records whether its lender is unseen and whether its alias resolved",
+    "added": {
+      "FN7 unseen lender unresolved": "a sub-tag of FN2 or FP1 when the lender resolves to no table entry"
+    }
+  },
+  "tests": {
+    "T1": "a declaration 'Commonwealth Bank credit card' and a CBA card in the grant match (disclosed), provided the table lists both forms; if it doesn't, the test records that and T1 fails",
+    "T2": "a lender narrative with a reference number ('AFTERPAY 12345678 INSTALMENT') normalises as without it",
+    "T3": "an unseen lender (a made-up name in the test) with a regular repayment and no alias entry is detected, and its miss or match is tagged; never dropped",
+    "T4": "per D28, CI asserts that the primary run reproduces its recorded result, not that it meets the target",
+    "T5": "set v1: the treatment's precision and recall stay 1.00 / 1.00",
+    "T6": "the alias table carries a source URL for every alias, and no alias resolves to or contains a reserved unseen-lender name (test/research/sig57-aliases.test.ts)",
+    "T7": "no arm reads a biller code: the detector's output is identical with every billerCode field removed or scrambled",
+    "T8": "no string literal in src/research/sig57/ is a lender name or alias from the table, or a reserved unseen-lender name"
+  },
+  "known_limits": [
+    "set v2.2 uses only 83 alias pairs, repeated up to 12 times (D-L4-3); a table that covers them generalises less than the count suggests",
+    "declared amounts equal the truth to the cent in v2.2, so amount-assisted results overstate real performance",
+    "the table's author shares a model family with the set's author (disclosure)",
+    "scoring resolves lender identity through the table, so a table gap can split one lender into two identities on both sides; misses are tagged so this shows",
+    "openfeed supplies no direct debits, scheduled payments or loan schedules (as SIG-18)",
+    "the categoriser is the local engine at taxonomy 1.4",
+    "the table holds 49 lenders after the removal; lenders it lacks (among them the 10 removed, and ST GEORGE and WBC, which the agent couldn't source) are matched only by normalised name, as in the baseline",
+    "some aliases are generic (EARNED WAGE ACCESS, EWA, COLES, CASH CONVERTERS, IMB, BANK AUSTRALIA) and may over-match; they are kept as written",
+    "American Express's legal name, abbreviation and BPAY codes come from search-indexed Amex PDFs (its own pages didn't load), and the Senate SACC source was seen only in search results (SOURCES.md)"
+  ]
+}
