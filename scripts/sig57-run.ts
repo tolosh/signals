@@ -49,7 +49,8 @@ const aliases = loadAliases();
 if (aliases.sha256 !== prereg.alias_table.sha256)
   throw new Error("the alias table differs from the pre-registered one");
 
-const name = (set: string, m: string) => `2026-11-19-${set}-sig57-${m}.json`;
+const date = new Date().toISOString().slice(0, 10);
+const suffix = (set: string, m: string) => `-${set}-sig57-${m}.json`;
 const inOut = (() => {
   try {
     return readdirSync(args.out);
@@ -58,7 +59,7 @@ const inOut = (() => {
   }
 })();
 if (mode !== "control") {
-  const control = inOut.find((f) => f === name("synthetic-v2.2", "control"));
+  const control = inOut.find((f) => f.endsWith(suffix("synthetic-v2.2", "control")));
   if (!control) throw new Error("run the negative control first (--mode control)");
   const rec = JSON.parse(readFileSync(join(args.out, control), "utf8")) as { passed: boolean };
   if (!rec.passed) throw new Error("the negative control failed: no other SIG-57 result stands");
@@ -112,6 +113,7 @@ const passed =
 const record = {
   ticket: "SIG-57",
   mode,
+  date,
   ...provenance("scripts/sig57-run.ts", args, git),
   preregistration: { file: PREREG, sha256: createHash("sha256").update(preregRaw).digest("hex") },
   set: { name: set.set, set_sha256: set.set_sha256, applicants_scored: set.applicants.length },
@@ -135,7 +137,7 @@ const record = {
       : {}),
   results,
 };
-const path = join(args.out, name(set.set, mode));
+const path = join(args.out, `${date}${suffix(set.set, mode)}`);
 writeNew(path, `${JSON.stringify(record, null, 2)}\n`);
 console.log(
   JSON.stringify({
