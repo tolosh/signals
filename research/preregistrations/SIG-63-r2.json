@@ -1,0 +1,59 @@
+{
+  "ticket": "SIG-63",
+  "registration": "r2",
+  "registered_at": "2026-11-20",
+  "status": "a new pre-registration of T7's v2.2 channels, committed before any run under it. Not to be edited after the first run under it",
+  "ruling": "Colin, 20 November 2026, on SIG-63 comment 40468 (the v2.2 control failed on D-L4-1c and D-L4-1d under SIG-63.json): re-register the two channels (option 1). No feature is added: the structure family stays exactly as SIG-63.json registers it",
+  "carries": {
+    "file": "research/preregistrations/SIG-63.json",
+    "sha256": "43be47bfc31de59267b46f18293463852b24e2c0c72eae57b901ffe932dd0b66",
+    "unchanged": "everything in SIG-63.json except channels_added for D-L4-1c and D-L4-1d: t7_carried (SIG-60.json by hash), sets, structure_family, labels_added, labels_re_registered, validity checks V7 to V11, generation_parameters, pre_run_amendments, the other channels, pass_rule, false_alarm_control, tests and known_limits. Nothing in SIG-63.json is edited"
+  },
+  "deviation": {
+    "from": "SIG-63.json channels_added, as run at f097488 (research/runs/2026-11-19-sig63-leakage-v2.2.json, sha256 8dbff6ba5ad7fca845c911d3c082ee6666335da9413deb53f7a15e419590244d). That record stands as run: under SIG-63.json, the v2.2 control failed and T7 failed",
+    "why": {
+      "D-L4-1c": "registered as L-unseen-lender caught by code_rank. In v2.2 unseen lenders take the top codes within each type's leading digit; a rank feature alone doesn't express that, and the per-family tree reads one family at a time. The label leaked through code_shape and code_name_links instead",
+      "D-L4-1d": "registered as L-no-card-cue caught by code_name_links. Cued and uncued cards share the issuer's code in v2.2, so a card-word name elsewhere on the code marks a card, not a card without a cue: the channel acts on T-card-repayment, not L-no-card-cue"
+    }
+  },
+  "channels_replaced": [
+    {
+      "set": "v2.2",
+      "id": "D-L4-1c",
+      "finding": "reserved unseen lenders take the top codes",
+      "caught_by": [
+        {
+          "label": "L-unseen-lender",
+          "family": "code_shape"
+        },
+        {
+          "label": "L-unseen-lender",
+          "family": "code_rank"
+        },
+        {
+          "label": "L-unseen-lender",
+          "family": "code_name_links"
+        },
+        {
+          "label": "L-unseen-lender",
+          "family": "id_arithmetic"
+        }
+      ],
+      "rule": "caught when L-unseen-lender leaks through any structure family"
+    },
+    {
+      "set": "v2.2",
+      "id": "D-L4-1d",
+      "finding": "no-cue card codes carry CREDIT CARD names on other applicants' lines",
+      "caught_by": [
+        {
+          "label": "T-card-repayment",
+          "family": "code_name_links"
+        }
+      ]
+    }
+  ],
+  "disclosure": "chosen after seeing the v2.2 control's results under SIG-63.json: both replacement mappings are ones that record shows caught. For these two channels the control no longer tests in advance that the structure family sees them; it confirms the family carries them. Sets v2 and v2.1, D-L4-1a and D-L4-1b, and every v2.3 result are unaffected: set v2.3 has not been run and nothing about it has been seen. Written by Claude Code, which also wrote the generator, SIG-63.json and the tooling",
+  "run_order": "under this registration the controls run again, in order (v2, v2.1, v2.2), then set v2.3 once. Records are research/runs/<date>-sig63r2-leakage-<set>.json; the SIG-63.json records stay as run",
+  "generator_frozen": "the v2.3 generator is frozen at 491a075 once T7 runs on set v2.3. Any change after seeing T7's result is a new set version and a new pre-registration, never an amendment (Colin, 20 November 2026, condition 4)"
+}
