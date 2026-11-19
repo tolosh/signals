@@ -1,0 +1,76 @@
+{
+  "ticket": "SIG-46",
+  "registered_at": "2026-11-19",
+  "status": "pre-registered before any gross-up code or run; not to be edited after the first scored run",
+  "purpose": "Apparatus for H1 (RQ-1): gross annual income worked back from observed net pay through the Australian resident tax schedule and Medicare levy (D24), so gross LTI and DTI can be computed from the data. The badges still follow net (D24, I-5)",
+  "rulings": {
+    "39981": "hold until a set whose gross is the primary input and whose net is derived forward",
+    "40424": "hold lifted; runs on set v2.2 with the X-3 caveat, the T-pay limit and identical salaried pay copied in; accuracy reported as an upper bound; real-data validation under SIG-61"
+  },
+  "caveats_40424": {
+    "X-3": "set v2.2's net is gross less the schedule's tax less the Medicare levy, an annual figure spread evenly across pays: no PAYG withholding, no offsets (no LITO), no deductions. Inverting the same schedule recovers gross almost exactly, so the method-level error is near zero by construction",
+    "T-pay": "end-to-end results inherit the T-pay limit: pay lines are identified partly through amount reuse, so observed net rests on that identification",
+    "identical_pay": "salaried pay is identical to the cent in set v2.2, which makes observed net easier to recover than real pay",
+    "upper_bound": "every accuracy figure here is an upper bound on real performance. Real-data validation follows under SIG-61"
+  },
+  "independence": "the gross-up's tax tables are written from the ATO pages cited below and research/datasets/tax-tables.md, not from src/research/generator/tax.ts, which is not read. SIG-54 T4's static scan (no import path between the generator and src/engines) still applies and must pass",
+  "method": {
+    "module": "src/engines/affordability/grossup.ts (new); tables in src/engines/affordability/tax-tables.ts as versioned, effective-dated data (AF-5)",
+    "inputs": "net annual income by kind: salary_wage, variable (already shaded, INC-R1) and benefits; the observation window's end date (as_of); optionally a pinned table version",
+    "table_selection": "the financial year (1 July to 30 June) holding as_of; within it, the latest table version whose effective_from is on or before as_of. The result records the table ID and version. Given a pinned version, that version is used (replay)",
+    "inversion": "taxable net = salary_wage + variable. Net as a function of gross, g - tax(g) - levy(g), is continuous, increasing and piecewise linear, with breakpoints at the tax thresholds and the Medicare shade-in thresholds; gross is found exactly on the segment holding the net. levy(g) = 0 up to the lower threshold, then min(10% x (g - lower), 2% x g). Gross is rounded to the cent",
+    "benefits": "treated as untaxed: added to gross unchanged (rule recorded in the trace)",
+    "not_modelled": "recorded in resolve_with as reasons gross may be misstated: HELP and other study-debt repayments, salary sacrifice, non-resident rates, tax offsets (LITO among them; with LITO, real net is higher and this gross-up overstates gross), deductions, and provisional Medicare thresholds when the table marks them so",
+    "unverified": "net income unverified, missing or not positive gives state unverified and no number",
+    "output": "gross_income_annual, basis 'inferred', table ID and version, and a trace of every step. Pure: no clock, no randomness, relative imports (D3). Affordability is unchanged: it already takes gross as an input (I-2), and a caller passes this result"
+  },
+  "tables": {
+    "fy_2026_27": {
+      "source": "https://www.ato.gov.au/tax-rates-and-codes/tax-rates-australian-residents (updated 13 August 2026, transcribed in research/datasets/tax-tables.md on 8 November 2026)",
+      "brackets": "nil to $18,200; 15c to $45,000; $4,020 plus 30c to $135,000; $31,020 plus 37c to $190,000; $51,370 plus 45c above",
+      "medicare": "2%; low-income thresholds for 2026-27 not yet published: 2025-26's single thresholds ($28,011 lower, $35,013 upper) are used, marked provisional (as X-1)"
+    },
+    "fy_2025_26": {
+      "source": "the same ATO page, 2025-26 rates; Medicare thresholds from https://www.ato.gov.au/individuals-and-families/medicare-and-private-health-insurance/medicare-levy/medicare-levy-reduction/medicare-levy-reduction-for-low-income-earners (updated 30 June 2026)",
+      "brackets": "nil to $18,200; 16c to $45,000; $4,288 plus 30c to $135,000; $31,288 plus 37c to $190,000; $51,638 plus 45c above",
+      "medicare": "2%; $28,011 lower and $35,013 upper",
+      "use": "the negative control (T6) and assessments whose window ends in 2025-26"
+    }
+  },
+  "tests": {
+    "file": "test/engines/affordability/grossup.test.ts",
+    "T1": "known answers, to $1 a year. The ATO publishes no 2026-27 worked example of gross from net (X-2), so, as SIG-54 T4 did: the net that the ATO's published tax figures give at each 2026-27 threshold ($45,000: tax $4,020; $135,000: $31,020; $190,000: $51,370; each with the 2% levy) grosses back to that threshold; and the ATO's Medicare example (Angie, taxable income $29,000, levy $98.90, 2025-26) grosses back to $29,000 under the 2025-26 table. Interpretation, for ruling: these stand in for 'published worked examples'",
+    "T3": "net unverified, null or not positive: gross is unverified, never a number",
+    "T4": "a second table version for 2026-27 effective mid-year: an as_of before it pins the first, an as_of after pins the second, and replaying the first with its pinned version gives byte-identical output",
+    "T5": "identical inputs twice give byte-identical output (same hash)",
+    "T6": "negative control: the wrong year's table (2025-26) on a 2026-27 known answer differs by more than $1"
+  },
+  "t2_experiment": {
+    "metric": "absolute percentage error of derived gross annual income against ground-truth gross (truth.income.gross_annual) per applicant",
+    "target": "at least 95% of applicants within 2%",
+    "classification": {
+      "met": "the primary run's share within 2% is at least 0.95, the negative control passing",
+      "not_met": "otherwise, the negative control passing",
+      "invalid": "the negative control fails"
+    },
+    "data": {
+      "set": "synthetic-v2.2 (research/datasets/synthetic-v2.2.manifest.json, c520f3714948d4d2279766e314aba6c07f7dbda91eca7883595d4ef7acf376e5)",
+      "population": "applicants whose truth tags include 'salaried' and whose history is at least 3 months; counted by the run script, not before registration",
+      "as_of": "2026-10-31 (FY 2026-27)"
+    },
+    "primary_end_to_end": "observed net from SIG-16's observed income (deriveIncome 1.0.1, its registered primary configuration: lookback 6 months, min occurrences 3), net_monthly x 12 as salary_wage, grossed up with the table in force at as_of. Categories: none (deriveIncome's optional input left out), as SIG-16's primary",
+    "method_level": "reported separately, never primary: truth.v2.tax.net_annual grossed up. Expected near-exact under X-3",
+    "negative_control": {
+      "run_first": true,
+      "manipulation": "each applicant's derived gross (primary method) is compared with the next applicant's ground-truth gross in ID order (the last with the first)",
+      "expected": "share within 2% below 0.50; otherwise the comparison isn't what drives the result and no T2 result stands"
+    },
+    "breakdowns": "share within 2% and median error by truth tag (salaried-fixed, salaried-irregular, overtime, bonus, pay-rise, salaried-payer-drift, new-employer, coverage-gap, statement-feed, and the rest) and by history months",
+    "known_limits": [
+      "X-3, the T-pay limit and identical salaried pay (caveats above): an upper bound",
+      "X-4: overtime and bonuses are net amounts on top of base pay, while truth gross is base salary only, so a gross-up of all observed net overstates gross for those applicants by design",
+      "the 2026-27 Medicare thresholds are provisional; no set v2.2 salaried gross is below $55,000, where they would matter",
+      "no offsets are modelled, matching X-3; real PAYG with LITO would make this method overstate gross below about $66,667"
+    ]
+  }
+}
