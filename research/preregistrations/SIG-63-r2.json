@@ -2,6 +2,10 @@
   "ticket": "SIG-63",
   "registration": "r2",
   "registered_at": "2026-11-20",
+  "sets": {
+    "measured": "synthetic-v2.3",
+    "negative_controls": ["synthetic-v2", "synthetic-v2.1", "synthetic-v2.2"]
+  },
   "status": "a new pre-registration of T7's v2.2 channels, committed before any run under it. Not to be edited after the first run under it",
   "ruling": "Colin, 20 November 2026, on SIG-63 comment 40468 (the v2.2 control failed on D-L4-1c and D-L4-1d under SIG-63.json): re-register the two channels (option 1). No feature is added: the structure family stays exactly as SIG-63.json registers it",
   "carries": {
