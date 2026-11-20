@@ -36,6 +36,8 @@ const RECORD_SCRIPTS = [
   "generate-synthetic.ts",
   // On the helpers since the set v2 review (8 November 2026).
   "generate-synthetic-v2.ts",
+  // SIG-57: the alias experiment's runs.
+  "sig57-run.ts",
 ];
 /** The .mjs files are build and CI tools, not run scripts. */
 const OWN_EQUIVALENT: string[] = [];

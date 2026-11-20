@@ -1,0 +1,132 @@
+{
+  "ticket": "SIG-57",
+  "mode": "v1",
+  "command": "npx tsx scripts/sig57-run.ts --mode v1",
+  "arguments": {
+    "mode": "v1"
+  },
+  "engine_commit": "8e380acf56be8074215d6a80b537e11eea146252",
+  "tree": "clean",
+  "preregistration": {
+    "file": "research/preregistrations/SIG-57.json",
+    "sha256": "56a479cde7f9a49233a7e0fde5f09982e07031663964300ef73d8212d58bb613"
+  },
+  "set": {
+    "name": "synthetic-v1",
+    "set_sha256": "8f5cf973ec46b33bbeccd97e87dcde10edea22919ed9af9bc9469149b2e17ea9",
+    "applicants_scored": 380
+  },
+  "categories": {
+    "file": "research/enrich/synthetic-v1-categories.json",
+    "sha256": "081dac79191b9438f6144a58c79c190531d9e3e7ac901d926df9d7ae802a47f2",
+    "enrich": {
+      "engine_version": "1.7.0",
+      "taxonomy_version": "1.4"
+    },
+    "biller_code_given": true
+  },
+  "alias_table": {
+    "sha256": "39853f2c8fe01555abef192fb5bc29e9e89cdd5d6b36ae609c51084e002bf9a5"
+  },
+  "versions": {
+    "sig57_detector": "1.0.0",
+    "sig57_alias_method": "1.0.0",
+    "baseline_detector": "1.0.0"
+  },
+  "passed": true,
+  "expected": "precision and recall 1.00 / 1.00 (T5)",
+  "results": [
+    {
+      "spec": {
+        "arm": "treatment",
+        "disclosure": {
+          "disclosure": "name_only"
+        },
+        "min_occurrences": 3,
+        "amount_tolerance": 0.15,
+        "variant": "as-generated",
+        "bpay": "in"
+      },
+      "applicants": 380,
+      "undisclosed_truth": 69,
+      "detected_undisclosed": 69,
+      "true_positives": 69,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1,
+      "recall": 1,
+      "by_family": {
+        "credit_card": {
+          "truth": 20,
+          "tp": 20,
+          "fp": 0
+        },
+        "bnpl": {
+          "truth": 15,
+          "tp": 15,
+          "fp": 0
+        },
+        "sacc": {
+          "truth": 18,
+          "tp": 18,
+          "fp": 0
+        },
+        "wage_advance": {
+          "truth": 16,
+          "tp": 16,
+          "fp": 0
+        }
+      },
+      "breakdowns": {
+        "unseen_lenders": {
+          "truth": 0,
+          "tp": 0,
+          "recall": null
+        },
+        "other_lenders": {
+          "truth": 0,
+          "tp": 0,
+          "recall": null
+        },
+        "no_card_cue": {
+          "truth": 0,
+          "tp": 0,
+          "recall": null
+        },
+        "repaid_from_unshared": {
+          "truth": 0,
+          "tp": 0,
+          "recall": null
+        },
+        "natural_declarations_pool": {
+          "rule": "applicants with 2 or more declarations only; 30% of the other declarations also differ (40387)",
+          "natural": {
+            "applicants": 0,
+            "truth": 0,
+            "tp": 0,
+            "fp": 0,
+            "precision": null,
+            "recall": null
+          },
+          "other": {
+            "applicants": 70,
+            "truth": 10,
+            "tp": 10,
+            "fp": 0,
+            "precision": 1,
+            "recall": 1
+          }
+        },
+        "disclosed_by": {
+          "name": 305,
+          "amount": 0
+        }
+      },
+      "false_positive_causes": {},
+      "false_negative_causes": {},
+      "fn7_sub_tags": 0,
+      "false_positives_list": [],
+      "false_negatives_list": []
+    }
+  ]
+}
