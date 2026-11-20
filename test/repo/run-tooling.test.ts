@@ -30,6 +30,8 @@ const RECORD_SCRIPTS = [
   "eq-unverified.ts",
   // SIG-60: the adversarial leakage test's run record.
   "leakage.ts",
+  // SIG-63: T7 with the structure family.
+  "sig63-leakage.ts",
   // SIG-60: the evidence for set v2.2's four limits (ruling, 9 November 2026).
   "leakage-limits.ts",
   "lia-detect.ts",

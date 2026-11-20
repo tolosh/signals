@@ -1,7 +1,8 @@
-// SIG-54 and SIG-60: writes synthetic set v2, v2.1 or v2.2 and its manifest (seed, versions, tax
+// SIG-54, SIG-60 and SIG-63: writes synthetic set v2, v2.1, v2.2 or v2.3 and its manifest (seed, versions, tax
 // table, minimum and final counts per tag, the request-by-history table, the unseen lenders,
 // per-applicant and set hashes). The applicant files regenerate from the seed and are not
 // committed (research/datasets/*/ is ignored); the manifest is.
+//   npx tsx scripts/generate-synthetic-v2.ts --variant 2.3 --check   set v2.3 (generator 2.3.0)
 //   npx tsx scripts/generate-synthetic-v2.ts --variant 2.2 --check   set v2.2 (generator 2.2.0)
 //   npx tsx scripts/generate-synthetic-v2.ts --variant 2.1 --check   set v2.1 (withdrawn)
 //   npx tsx scripts/generate-synthetic-v2.ts --variant 2.0 --check   set v2 (withdrawn)
@@ -37,6 +38,14 @@ import {
   SET_V22_SEED,
   UNSEEN_PROVIDERS_V22,
 } from "../src/research/generator/v22/index.js";
+import {
+  generateSetV23,
+  GENERATOR_VERSION_V23,
+  GROUND_TRUTH_SCHEMA_VERSION_V23,
+  SET_V23_MINIMUMS,
+  SET_V23_SEED,
+  UNSEEN_PROVIDERS_V23,
+} from "../src/research/generator/v23/index.js";
 import {
   gitState,
   parseRunArgs,
@@ -76,10 +85,19 @@ const VARIANTS = {
     unseen: UNSEEN_PROVIDERS_V22 as Record<string, readonly string[]>,
     generate: (seed: number): GeneratedApplicant[] => generateSetV22(seed),
   },
+  "2.3": {
+    name: "synthetic-v2.3",
+    seed: SET_V23_SEED,
+    generator: GENERATOR_VERSION_V23,
+    schema: GROUND_TRUTH_SCHEMA_VERSION_V23,
+    minimums: SET_V23_MINIMUMS,
+    unseen: UNSEEN_PROVIDERS_V23 as Record<string, readonly string[]>,
+    generate: (seed: number): GeneratedApplicant[] => generateSetV23(seed),
+  },
 } as const;
 
 const variantArg = parseRunArgs().values.variant ?? "2.2";
-if (!(variantArg in VARIANTS)) throw new Error("--variant must be 2.0, 2.1 or 2.2");
+if (!(variantArg in VARIANTS)) throw new Error("--variant must be 2.0, 2.1, 2.2 or 2.3");
 const v = VARIANTS[variantArg as keyof typeof VARIANTS];
 const args = parseRunArgs(process.argv.slice(2), `research/datasets/${v.name}`);
 const seed = Number(args.values.seed ?? v.seed);
