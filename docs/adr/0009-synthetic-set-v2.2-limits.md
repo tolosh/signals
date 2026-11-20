@@ -115,3 +115,8 @@ natural declarations use only 83 alias pairs, repeated up to 12 times) and 14 re
 
 The architect's expectation of 9 November (above) is superseded by this table. In particular,
 H2 / SIG-57 and dishonour scoring are fit only with the caveats it states.
+
+## Superseded for use, 20 November 2026
+
+Set v2.3 replaces v2.2 as the working synthetic set (ruling, SIG-63 comment 40483; ADR 0010). Set
+v2.2 stays as run, and this record is unchanged above.
