@@ -32,3 +32,22 @@ table records the URLs, each page's update date and the date checked.
 
 A ruling that changes any of these changes only the table or this module; set v2 is then
 regenerated, and its hash in the manifest changes with it.
+
+## Both years' rates, as the SIG-46 gross-up uses them (review 15, R2)
+
+The gross-up (`src/engines/affordability/tax-tables.ts`) holds both years as versioned,
+effective-dated tables, chosen by the financial year of `as_of`. Review 15 checked them against
+the ATO pages (MATCH).
+
+| Taxable income        | 2025-26 (`AU-RES-2025-26` v1) | 2026-27 (`AU-RES-2026-27` v1) |
+| --------------------- | ----------------------------- | ----------------------------- |
+| $0 to $18,200         | nil                           | nil                           |
+| $18,201 to $45,000    | 16c per dollar over $18,200   | 15c per dollar over $18,200   |
+| $45,001 to $135,000   | $4,288 plus 30c over $45,000  | $4,020 plus 30c over $45,000  |
+| $135,001 to $190,000  | $31,288 plus 37c over $135,000 | $31,020 plus 37c over $135,000 |
+| Over $190,000         | $51,638 plus 45c over $190,000 | $51,370 plus 45c over $190,000 |
+| Medicare levy         | 2%                            | 2%                            |
+| Levy reduction (single, no SAPTO) | $28,011 lower, $35,013 upper; 10c shade-in | the same, **provisional** (2026-27 thresholds not yet published; X-1) |
+
+The 2025-26 rates are from the same ATO page's 2025-26 table. The 2026-27 rates exclude the
+Medicare levy, as the page says.
