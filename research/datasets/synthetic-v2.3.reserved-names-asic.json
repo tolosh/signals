@@ -1,0 +1,350 @@
+{
+  "set": "synthetic-v2.3",
+  "ticket": "SIG-63",
+  "check": "T9 / V8: every reserved unseen-lender name is invented",
+  "source": "ASIC Professional Registers Search, https://service.asic.gov.au/search (one search covers every professional register; results list each entry's register). Register data stated as current as of 5:00 AM AEDT 19 November 2026",
+  "method": "each full name searched, and its distinctive word searched alone (the search matches substrings, so the word search is the stricter one). A name passes when neither search returns any entry on the credit licensees or credit representatives register. Searched on 2026-11-20 by Claude Code in the app's built-in browser",
+  "checks": [
+    {
+      "name": "BRIGALOW BANK",
+      "type": "credit_card",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Brigalow",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "BRIGALOW BANK",
+      "type": "credit_card",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Brigalow",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "TASMAN REACH BANK",
+      "type": "credit_card",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Tasman Reach",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "TASMAN REACH BANK",
+      "type": "credit_card",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Tasman Reach",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "GANNET MUTUAL",
+      "type": "credit_card",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Gannet",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "GANNET MUTUAL",
+      "type": "credit_card",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Gannet",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "QUANDONG FINANCE",
+      "type": "personal_loan",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Quandong",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "QUANDONG FINANCE",
+      "type": "personal_loan",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Quandong",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "WOLLEMI LENDING",
+      "type": "personal_loan",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Wollemi",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "WOLLEMI LENDING",
+      "type": "personal_loan",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Wollemi",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "GIBBER AUTO LOANS",
+      "type": "car_loan",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Gibber",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "GIBBER AUTO LOANS",
+      "type": "car_loan",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Gibber",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "BETTONG MOTOR FINANCE",
+      "type": "car_loan",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Bettong",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "BETTONG MOTOR FINANCE",
+      "type": "car_loan",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Bettong",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "BOOBOOK HOME LOANS",
+      "type": "mortgage",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Boobook",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "BOOBOOK HOME LOANS",
+      "type": "mortgage",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Boobook",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "CURRAWONG MUTUAL",
+      "type": "mortgage",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Currawong",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "CURRAWONG MUTUAL",
+      "type": "mortgage",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Currawong",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "POTOROO HOME LENDING",
+      "type": "mortgage",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Potoroo",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "POTOROO HOME LENDING",
+      "type": "mortgage",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Potoroo",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "QUOLLPAY",
+      "type": "bnpl",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Quollpay",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "QUOLLPAY",
+      "type": "bnpl",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Quollpay",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "PAYWATTLE",
+      "type": "bnpl",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Paywattle",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "PAYWATTLE",
+      "type": "bnpl",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Paywattle",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "DUNNART PAY",
+      "type": "bnpl",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Dunnart",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "DUNNART PAY",
+      "type": "bnpl",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Dunnart",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "SALTBUSH CASH",
+      "type": "sacc",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Saltbush",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "SALTBUSH CASH",
+      "type": "sacc",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Saltbush",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "PADEMELON LOANS",
+      "type": "sacc",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Pademelon",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "PADEMELON LOANS",
+      "type": "sacc",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Pademelon",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "WAGEFERN",
+      "type": "wage_advance",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Wagefern",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "WAGEFERN",
+      "type": "wage_advance",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Wagefern",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "LYREPAY",
+      "type": "wage_advance",
+      "register": "credit licensees",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Lyrepay",
+      "word_search_result": "no credit licensee or credit representative"
+    },
+    {
+      "name": "LYREPAY",
+      "type": "wage_advance",
+      "register": "credit representatives",
+      "searched": "2026-11-20",
+      "result": "no match",
+      "word_search": "Lyrepay",
+      "word_search_result": "no credit licensee or credit representative"
+    }
+  ],
+  "rejected_before_use": [
+    {
+      "word": "Kookaburra",
+      "why": "credit representatives that are organisations (e.g. KOOKABURRA FINANCE PTY LTD)"
+    },
+    {
+      "word": "Mallee",
+      "why": "a credit representative organisation (MALLEE FINANCE PTY LTD)"
+    },
+    {
+      "word": "Mulga",
+      "why": "a credit licensee (MULGA FINANCE PTY LTD)"
+    },
+    {
+      "word": "Spinifex",
+      "why": "a credit representative organisation"
+    },
+    {
+      "word": "Corella",
+      "why": "credit representatives whose names contain it (individuals); rejected for caution"
+    },
+    {
+      "word": "Jarrah",
+      "why": "a credit representative with this given name; rejected for caution"
+    },
+    {
+      "word": "Tuart",
+      "why": "matches STUART: over 1,000 entries; rejected for caution"
+    },
+    {
+      "word": "Bilby",
+      "why": "a credit representative with this surname; rejected for caution"
+    }
+  ],
+  "limit": "a name search on the day recorded; a lender licensed later under one of these names would not be caught (SIG-63 known_limits)"
+}

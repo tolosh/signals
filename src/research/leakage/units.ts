@@ -91,7 +91,8 @@ function invertId(id: string, seed: number, n: number): number {
         createHash("sha256").update(`${seed}|applicant|${k}`).digest("hex").slice(0, 12) === v21[1]
       )
         return k;
-  const v22 = id.match(/^syn-v22-([0-9a-f]{16})$/);
+  // Set v2.3 (SIG-63) uses set v2.2's scheme under its own prefix.
+  const v22 = id.match(/^syn-v2[23]-([0-9a-f]{16})$/);
   if (v22)
     for (let k = 0; k < n; k++)
       if (
