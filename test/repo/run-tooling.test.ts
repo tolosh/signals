@@ -40,6 +40,8 @@ const RECORD_SCRIPTS = [
   "generate-synthetic-v2.ts",
   // SIG-57: the alias experiment's runs.
   "sig57-run.ts",
+  // SIG-46: the gross-up's T2 runs.
+  "sig46-run.ts",
 ];
 /** The .mjs files are build and CI tools, not run scripts. */
 const OWN_EQUIVALENT: string[] = [];
