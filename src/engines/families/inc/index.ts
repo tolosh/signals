@@ -3,7 +3,9 @@
 // never re-derives income. Every output passes through the evidence-quality layer (SIG-39).
 // Interpretations N-1 to N-14 are in docs/adr/0004-inc-family.md, for ruling.
 // Pure: no clock, no randomness, relative imports only (D3).
+import { KEYWORD_LIST_VERSION } from "../../display-mask.js";
 import { applyEvidence, assessEvidence } from "../../evidence/index.js";
+import { maskSignal } from "../../evidence/masked.js";
 import { dayOf, isoOf, lookbackStart } from "../../evidence/dates.js";
 import type { EvidenceContext, Feed, RawSignal, Signal } from "../../evidence/index.js";
 import { SENSITIVE_METHOD_VERSION, withoutSensitive } from "../../sensitive.js";
@@ -22,7 +24,10 @@ export {
 } from "./config.js";
 // 1.2.2 (SIG-42 re-review direction 8): the GR-3 gate's output change since #40 is versioned, and
 // the gate's version is recorded on the result. Nothing else changed.
-export const INC_VERSION = "1.2.2";
+// 1.2.3 (SIG-64, ruling 40524) changes output text only: a payer is shown masked (D29; observed
+// income 1.0.2's displayPayer), every displayed text goes through the shared masker, and the
+// keyword list's version is recorded. Streams are still found and typed by the unmasked payer.
+export const INC_VERSION = "1.2.3";
 
 export type IncApplication = {
   /** FR-C9; used only by INC-02 (INC-R3). */
@@ -65,6 +70,8 @@ export type IncResult = {
   version: string;
   /** The GR-3 gate applied to the feed (SENSITIVE_METHOD_VERSION). */
   gr3_gate_version: string;
+  /** The keyword list the displayed text is masked with (display-mask.ts; SIG-64). */
+  keyword_list_version: string;
   signals: Signal[];
   income: IncomeRow[];
   net_monthly: number;
@@ -169,7 +176,7 @@ function inc01(c: Ctx): Out {
       "INC-01",
       "red",
       `Last pay ${daysSince} days ago`,
-      `The last ${p.cadence} pay from ${p.payer} was more than 1.5 cycles ago`,
+      `The last ${p.cadence} pay from ${p.shown} was more than 1.5 cycles ago`,
       recent,
     );
   return out(
@@ -177,8 +184,8 @@ function inc01(c: Ctx): Out {
     variation > T.regularity_variation ? "amber" : "green",
     `Varies up to ${pct(variation)}% cycle to cycle`,
     variation > T.regularity_variation
-      ? `Pay from ${p.payer} varies more than 20% from one cycle to the next`
-      : `Pay from ${p.payer} arrives ${p.cadence} and varies by ${pct(variation)}% at most`,
+      ? `Pay from ${p.shown} varies more than 20% from one cycle to the next`
+      : `Pay from ${p.shown} arrives ${p.cadence} and varies by ${pct(variation)}% at most`,
     recent,
   );
 }
@@ -248,7 +255,7 @@ function inc04(c: Ctx): Out {
       "INC-04",
       "green",
       fromStart ? `At least ${months.toFixed(1)} months` : `${months.toFixed(1)} months`,
-      `Paid by ${cur.payer} since ${isoOf(cur.first)}${fromStart ? ", the start of the history" : ""}`,
+      `Paid by ${cur.shown} since ${isoOf(cur.first)}${fromStart ? ", the start of the history" : ""}`,
       cur.credits.slice(0, 1),
     );
   const policy = c.config.policy_loan_amount;
@@ -258,7 +265,7 @@ function inc04(c: Ctx): Out {
     "INC-04",
     red ? "red" : "amber",
     `${months.toFixed(1)} months`,
-    `First pay from ${cur.payer} was on ${isoOf(cur.first)}, under 3 months ago` +
+    `First pay from ${cur.shown} was on ${isoOf(cur.first)}, under 3 months ago` +
       (red ? `, and the loan is over the policy size of $${policy.toFixed(0)}` : ""),
     cur.credits.slice(0, 1),
   );
@@ -499,7 +506,7 @@ function inc11(c: Ctx): Out {
     "INC-11",
     worst.fall > T.falling_red ? "red" : "amber",
     `Down ${pct(worst.fall)}% over ${n} cycles`,
-    `Pay from ${worst.s.payer} has fallen ${pct(worst.fall)}% over the last ${n} cycles`,
+    `Pay from ${worst.s.shown} has fallen ${pct(worst.fall)}% over the last ${n} cycles`,
     worst.last,
   );
 }
@@ -594,7 +601,7 @@ function inc13(c: Ctx): Out {
       const now = bandOf(median(gapsOf(recent)));
       if (was && now && was[0] !== now[0])
         changes.push({
-          what: `${s.payer} moved from ${was[0]} to ${now[0]} pay`,
+          what: `${s.shown} moved from ${was[0]} to ${now[0]} pay`,
           before: median(older.map((x) => x.amount)) * was[3],
           after: median(recent.map((x) => x.amount)) * now[3],
           credits: recent,
@@ -604,7 +611,7 @@ function inc13(c: Ctx): Out {
       const before = monthlyOf(salary.filter((o) => o !== s && o.first < s.first));
       const after = monthlyOf(salary.filter((o) => c.end - o.last <= o.cycle_days * 1.5));
       changes.push({
-        what: `${s.payer} first paid on ${isoOf(s.first)}`,
+        what: `${s.shown} first paid on ${isoOf(s.first)}`,
         before,
         after,
         credits: s.credits,
@@ -691,12 +698,12 @@ export function assessInc(input: IncInput): IncResult {
   // INC-09's final state decides whether INC-12 cross-references it (fix 3, cfa9d4f).
   const inc09State = finalise([inc09(ctx)])[0]?.state;
   ctx.inc09Fires = inc09State === "amber" || inc09State === "red";
-  const signals = finalise(EVALUATORS.map((evaluate) => evaluate(ctx)));
+  const signals = finalise(EVALUATORS.map((evaluate) => evaluate(ctx))).map(maskSignal);
 
   const income = found.streams.map((s) => {
     const shading = config.shading[s.type];
     return {
-      payer: s.payer,
+      payer: s.shown,
       cadence: s.cadence,
       observed_amount: s.monthly,
       type: s.type,
@@ -708,6 +715,7 @@ export function assessInc(input: IncInput): IncResult {
   return {
     version: INC_VERSION,
     gr3_gate_version: SENSITIVE_METHOD_VERSION,
+    keyword_list_version: KEYWORD_LIST_VERSION,
     signals,
     income,
     net_monthly: found.net_monthly,

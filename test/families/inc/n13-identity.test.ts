@@ -6,7 +6,10 @@ import { asmIncomeHash, setV1Hash } from "./output-hash.js";
 
 // SIG-42 ruling 3 (10 November 2026): INC keeps 1.2.2 under GR-3 gate 1.2.0, so the replay pins
 // both versions on every result, beside the hash of everything else.
-const PINNED = ["1.2.2|1.2.0"];
+// SIG-64 (ruling 40524): INC 1.2.3 changes output text only and records the keyword list's
+// version; output-hash.ts sets both back to 1.2.1's form, so the hashes still prove every other
+// byte of the output is unchanged.
+const PINNED = ["1.2.3|1.2.0"];
 
 describe("N-13 in the layer: INC's output is byte-identical to d2e59a0", () => {
   it("over set v1, lookback max(3, history months)", () => {

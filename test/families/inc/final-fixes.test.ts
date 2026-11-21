@@ -88,6 +88,7 @@ describe("Fix 5: INC-09 says it judges regular income only (N-1)", () => {
 });
 
 describe("Fix 7: the engine version", () => {
-  it("is 1.2.2 (1.2.1, with the GR-3 gate versioned: SIG-42 re-review)", () =>
-    expect(INC_VERSION).toBe("1.2.2"));
+  // SIG-64 (ruling 40524): LIA 1.3.5, INC 1.2.3, observed income 1.0.2 and LENDER_NAMES 1.2.0 change output text only.
+  it("is 1.2.3 (SIG-64; 1.2.2, with the GR-3 gate versioned: SIG-42 re-review)", () =>
+    expect(INC_VERSION).toBe("1.2.3"));
 });

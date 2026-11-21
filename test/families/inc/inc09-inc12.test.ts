@@ -192,7 +192,8 @@ describe("8 November ruling: every real trough is amber or red, whatever pays we
 });
 
 describe("8 November ruling: the engine version", () => {
-  it("is 1.2.2 (1.2.1's fixes, with the GR-3 gate versioned: SIG-42 re-review)", () => {
-    expect(INC_VERSION).toBe("1.2.2");
+  // SIG-64 (ruling 40524): LIA 1.3.5, INC 1.2.3, observed income 1.0.2 and LENDER_NAMES 1.2.0 change output text only.
+  it("is 1.2.3 (SIG-64; 1.2.1's fixes, with the GR-3 gate versioned: SIG-42 re-review)", () => {
+    expect(INC_VERSION).toBe("1.2.3");
   });
 });

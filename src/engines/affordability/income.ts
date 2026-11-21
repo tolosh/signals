@@ -3,6 +3,7 @@
 // refunds, loan disbursements, advances, interest and repayments received are never income.
 // The method and its parameters are pre-registered in research/preregistrations/SIG-16.json.
 // Pure: no clock, no randomness, relative imports only (D3).
+import { KEYWORD_LIST_VERSION, cleanText, maskText } from "../display-mask.js";
 import { SENSITIVE_METHOD_VERSION, withoutSensitive } from "../sensitive.js";
 
 export type IncomeTransaction = {
@@ -49,6 +50,8 @@ export type Exclusion =
 export type IncomeResult = {
   /** The GR-3 gate applied to the feed (SENSITIVE_METHOD_VERSION). */
   gr3_gate_version: string;
+  /** The keyword list each payer shown is masked with (display-mask.ts; SIG-64). */
+  keyword_list_version: string;
   net_monthly: number;
   streams: IncomeStream[];
   excluded: Record<Exclusion, number>;
@@ -58,7 +61,11 @@ export type IncomeResult = {
 
 // 1.0.1 (SIG-42 re-review direction 8): the GR-3 gate's output change since #40 is versioned, and
 // the gate's version is recorded on the result. Nothing else changed.
-export const INCOME_METHOD_VERSION = "1.0.1";
+// 1.0.2 (SIG-64, ruling 40524; SIG-16-team-grants.json amended 21 November 2026, before any team
+// grant is taken in): the payer shown is masked (D29) and the keyword list's version is recorded.
+// Streams are still grouped by the unmasked payer (deriveIncomeByPayerKey), so every figure,
+// cadence and count is as at 1.0.1; only the payer text changes.
+export const INCOME_METHOD_VERSION = "1.0.2";
 
 const CADENCE_BANDS: [Cadence, number, number, number][] = [
   ["weekly", 5, 9, 52 / 12],
@@ -110,7 +117,37 @@ type Line = {
   t: IncomeTransaction;
 };
 
+/** A stream with the unmasked payer it is grouped by, and the narrative of its first credit. */
+export type KeyedStream = IncomeStream & { narrative: string };
+export type KeyedIncome = Omit<IncomeResult, "streams" | "keyword_list_version"> & {
+  streams: KeyedStream[];
+};
+
+/**
+ * The payer a lender sees (D29): the narrative as a person reads it (NFKC, with invisible format
+ * characters removed), normalised as the payer key is, with each sensitive word "[withheld]".
+ */
+export const displayPayer = (narrative: string): string =>
+  maskText(normalisePayer(cleanText(narrative).normalize("NFKC")));
+
+/** Observed income as shown: each stream's payer masked (1.0.2); everything else as keyed. */
 export function deriveIncome(input: IncomeInput): IncomeResult {
+  const keyed = deriveIncomeByPayerKey(input);
+  return {
+    gr3_gate_version: keyed.gr3_gate_version,
+    keyword_list_version: KEYWORD_LIST_VERSION,
+    net_monthly: keyed.net_monthly,
+    streams: keyed.streams.map(({ narrative, ...s }) => ({ ...s, payer: displayPayer(narrative) })),
+    excluded: keyed.excluded,
+    unmatched_credits: keyed.unmatched_credits,
+  };
+}
+
+/**
+ * Observed income by the unmasked payer key, as at 1.0.1: for the engines that group or match by
+ * payer (INC's streams), never for display.
+ */
+export function deriveIncomeByPayerKey(input: IncomeInput): KeyedIncome {
   const end = dayOf(input.as_of);
   const start = lookbackStart(input.as_of, input.lookback_months);
   // GR-3: sensitive spending is removed before anything is read.
@@ -165,7 +202,7 @@ export function deriveIncome(input: IncomeInput): IncomeResult {
     groups.set(payer, [...(groups.get(payer) ?? []), l]);
   }
 
-  const streams: IncomeStream[] = [];
+  const streams: KeyedStream[] = [];
   let unmatched = 0;
   for (const [payer, group] of [...groups].sort(([a], [b]) => (a < b ? -1 : 1))) {
     const days = group.map((l) => l.day).sort((a, b) => a - b);
@@ -176,8 +213,10 @@ export function deriveIncome(input: IncomeInput): IncomeResult {
       continue;
     }
     const amount = median(group.map((l) => l.cents)) / 100;
+    const firstCredit = [...group].sort((a, b) => a.day - b.day)[0];
     streams.push({
       payer,
+      narrative: firstCredit?.t.description ?? payer,
       cadence: band[0],
       occurrences: group.length,
       median_amount: amount,
