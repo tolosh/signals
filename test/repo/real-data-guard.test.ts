@@ -185,9 +185,13 @@ describe("SIG-61 T2: repo scan of research outputs and fixtures", () => {
     expect(files).toContain("test/fixtures/af-t1.json");
   });
 
+  // 30s, not vitest's default 5s (SIG-64, ruling 40524, 3): the scan reads every committed run
+  // record, manifest and fixture, about 3s on its own, and took 5.8s under full-suite load once
+  // the SIG-46, SIG-57 and SIG-63 records were merged (20 November 2026). It failed on time, not
+  // on a finding; the scan and what it checks are unchanged.
   it("no committed file declares a real source or holds a value the guard rejects", () => {
     expect(files.flatMap((f) => scanFile(f))).toEqual([]);
-  });
+  }, 30_000);
 
   it("every listed provenance is still a file the scan sees", () => {
     expect(Object.keys(PROVENANCE).filter((p) => !files.includes(p))).toEqual([]);

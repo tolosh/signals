@@ -19,6 +19,40 @@ G-2 and G-3 are accepted. The interpretations below are kept as they were record
   ENR-30.
 - **G-3 accepted** as a candidate, versioned with the definitions (`SENSITIVE_METHOD_VERSION`).
 
+## SIG-64, 21 November 2026 (display masking; gate unchanged at 1.2.0)
+
+D29 is two things: the gate keeps sensitive lines out of every signal input (above), and no
+displayed text shows a sensitive word. Review 12 (SIG-42 comment 40428) found the second leaking.
+Colin's rulings of 19 November and 21 November (SIG-64 comment 40524):
+
+- **One shared, versioned keyword list for display** (`src/engines/display-mask.ts`, 1.0.0),
+  separate from the gate. The gate stays at 1.2.0, and **G-2 stays the limit for detection**:
+  masking changes what a lender reads, never what an engine counts.
+- **Matching:** NFKC, then format characters (Unicode Cf) removed, then upper case. Stems are kept
+  (the safer side). A run of letters inside a word is checked (IVF4417).
+- **Exempt:** `LENDER_NAMES` (1.2.0) and the phrase CREDIT UNION.
+- **Every engine's displayed text:** LIA (1.3.5), INC (1.2.3) and observed income (1.0.2) mask
+  every reason, review reason, resolve-with text and lender or payer name, and record
+  `keyword_list_version`. Observed income groups streams by the unmasked payer
+  (`deriveIncomeByPayerKey`) and shows the payer masked, so its figures are unchanged
+  (`SIG-16-team-grants.json` amended, 21 November 2026). Observed expenses shows no narrative
+  text, so it is unchanged at 1.1.1.
+
+**Known limits of display masking:**
+
+1. **Harmless words are masked.** A stem masks every word it starts (OSTEON, PSYCHE); a short
+   union or insurer name masks the same letters elsewhere (ASU, SDA, NIB, AHM); HEALTH masks an
+   employer's name ("SALARY NORTHSIDE HEALTH" shows "SALARY NORTHSIDE [withheld]" in set v1).
+   Over-masking was ruled the safer side.
+2. **Look-alike letters** (a Cyrillic "і" in IVF) aren't folded: NFKC doesn't map them.
+3. **A keyword glued to other letters** ("IVFNIMBLE") or split by visible punctuation ("I.V.F")
+   isn't a whole word, so it isn't masked.
+4. **A split keyword in a lender's provider form shows a fragment.** The detector's provider form
+   keeps A to Z only, so "IVF NIMBLE" written with a zero-width space after the I is the provider
+   "I VF NIMBLE", and LIA names the lender "I". No keyword shows.
+5. **The list is a list.** A sensitive word not on it shows (a new denomination, a clinic's own
+   name).
+
 ## Review 10, 16 November 2026 (the scan; gate unchanged at 1.2.0)
 
 Review 10 (SIG-42 comment 40326) found six more ways past the static scan. Colin's ruling (comment
@@ -31,9 +65,10 @@ Review 10 (SIG-42 comment 40326) found six more ways past the static scan. Colin
   - **A local function named `withoutSensitive`.** The call counts as the gate only when the file
     imports `withoutSensitive` from the gate module (`sensitive.js`; a rename is allowed) and no
     local function, variable or parameter of that name shadows it.
-- **Known limits.** Review 10's comment names only the two closed above, so this list is mine,
-  each probed against the scan: every one passes the scan when it shouldn't. If the review's
-  other four differ, they belong here too.
+- **Known limits.** Review 10's comment names only the two closed above, so items 1 to 4 are mine,
+  each probed against the scan: every one passes the scan when it shouldn't. Review 12 (SIG-42
+  comment 40428, E4) found that review 10's other four are different evasions, and that each
+  passes the scan; SIG-64 lists them as items 5 to 8 (ruling 40524).
   1. **Mutating a gated value:** `gated.accounts = raw.accounts`, `gated.accounts.push(...)` or
      `Object.assign(gated, ...)`. The scan follows values, not later writes to their properties.
   2. **An array method's arguments:** `gated.accounts.concat(raw.accounts)`, or a callback that
@@ -45,6 +80,12 @@ Review 10 (SIG-42 comment 40326) found six more ways past the static scan. Colin
   4. **Across modules:** each file is scanned on its own, so an exported function whose callers in
      its own file pass gated values counts as gated, even if another module calls it with the raw
      feed.
+  5. **A computed property, `a[k]`:** reading the raw feed's accounts or transactions through a
+     key held in a variable (`feed[key]`) isn't seen as a read of them.
+  6. **`Object.values`:** `Object.values(feed)` reaches the accounts without naming them.
+  7. **`Reflect.get`:** `Reflect.get(feed, "accounts")` is a call, not a property read.
+  8. **`for…in`:** `for (const k in feed)` walks the feed's keys, and the reads that follow go
+     through `feed[k]`.
 
   The detector and the other modules on the scan's exception list (`UNGATED`) still read only
   what their callers pass, and every engine entry is also checked by behaviour: the GR-3 tests

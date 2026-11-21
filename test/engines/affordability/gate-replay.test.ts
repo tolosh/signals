@@ -14,8 +14,10 @@ beforeAll(() => {
 }, 300_000);
 
 describe("set v1 replay at GR-3 gate 1.2.0 (both versions pinned)", () => {
-  it("observed income 1.0.1: every result carries gate 1.2.0, output as at gate 1.1.0", () => {
-    expect(INCOME_METHOD_VERSION).toBe("1.0.1");
+  // SIG-64 (ruling 40524): observed income 1.0.2 changes only the payer text, and records the
+  // keyword list's version, which the replay takes out as it takes out the gate's.
+  it("observed income 1.0.2: every result carries gate 1.2.0, output as at gate 1.1.0", () => {
+    expect(INCOME_METHOD_VERSION).toBe("1.0.2");
     expect(SENSITIVE_METHOD_VERSION).toBe("1.2.0");
     expect(replay.income.versions).toEqual(["1.2.0"]);
     expect(replay.income.hash).toBe(

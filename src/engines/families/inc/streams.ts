@@ -3,10 +3,11 @@
 // income. It types each stream (AF-I2) and links the credits that formed it, so each signal
 // can cite its evidence. Interpretations N-1 to N-3 in docs/adr/0004-inc-family.md.
 import {
-  deriveIncome,
+  deriveIncomeByPayerKey,
+  displayPayer,
   normalisePayer,
   type Exclusion,
-  type IncomeStream,
+  type KeyedStream,
 } from "../../affordability/income.js";
 import { dayOf, lookbackStart } from "../../evidence/dates.js";
 import type { Feed } from "../../evidence/types.js";
@@ -19,7 +20,9 @@ const CYCLE_DAYS = { weekly: 7, fortnightly: 14, monthly: 30.4375 } as const;
 const BSB_NUMBER = /\b\d{3}-?\d{3}\s+\d{6,10}\b/;
 
 export type Credit = { day: number; amount: number; transactionId: string; account: string };
-export type TypedStream = IncomeStream & {
+export type TypedStream = KeyedStream & {
+  /** The payer as shown (D29, SIG-64): masked; payer is the unmasked key streams are found by. */
+  shown: string;
   type: StreamType;
   cycle_days: number;
   /** Oldest first. */
@@ -54,7 +57,8 @@ export const SALARY_LIKE: ReadonlySet<StreamType> = new Set([
 ]);
 
 export function streamsOf(feed: Feed, asOf: string, config: IncConfig): Streams {
-  const income = deriveIncome({
+  // SIG-64: by the unmasked payer key, which credits are matched and streams typed by.
+  const income = deriveIncomeByPayerKey({
     feed,
     as_of: asOf,
     lookback_months: STREAM_LOOKBACK_MONTHS,
@@ -93,6 +97,7 @@ export function streamsOf(feed: Feed, asOf: string, config: IncConfig): Streams 
       .sort((a, b) => a.day - b.day || (a.transactionId < b.transactionId ? -1 : 1));
     return {
       ...s,
+      shown: displayPayer(s.narrative),
       type: typeOf(s.payer, config),
       cycle_days: CYCLE_DAYS[s.cadence],
       credits,

@@ -12,12 +12,18 @@
 // pairing is a maximum matching with a fixed tie-break, the input order of feeds and declarations
 // never changes the result, sensitive words never show in a displayed name, and lender names keep
 // Unicode letters. See ADR 0006.
+// 1.3.5 (SIG-64, ruling 40524) changes output text only: every displayed text goes through the
+// shared masker (display-mask.ts, keyword list 1.0.0, recorded in each result), listed lender
+// names (LENDER_NAMES 1.2.0) and CREDIT UNION are never masked, and a lender's name shows no
+// reference digits. LIA-05 still counts lenders by LIA 1.3.4's identity (lenderKeyOf).
 // Pure: categories and the application are inputs; no clock, no randomness, relative imports (D3).
 import { applyEvidence, assessEvidence, EQ_THRESHOLDS } from "../../evidence/index.js";
 import { dayOf, isoOf } from "../../evidence/dates.js";
 import type { FeedTransaction, RawSignal, Signal } from "../../evidence/index.js";
 import { SENSITIVE_METHOD_VERSION, withoutSensitive } from "../../sensitive.js";
-import { LENDER_NAMES_VERSION, isSensitiveWord, lenderOf, withheld } from "./lenders.js";
+import { KEYWORD_LIST_VERSION, maskText } from "../../display-mask.js";
+import { maskSignal } from "../../evidence/masked.js";
+import { LENDER_NAMES_VERSION, lenderKeyOf, lenderOf, withheld } from "./lenders.js";
 import { bestPairing } from "./pairing.js";
 import type { FeedType } from "../../signals/definitions.js";
 import {
@@ -28,7 +34,7 @@ import {
   type DetectedLiability,
 } from "../../liabilities/index.js";
 
-export const LIA_VERSION = "1.3.4";
+export const LIA_VERSION = "1.3.5";
 
 /** A shared-account feed with the fields both the evidence layer and the detector read. */
 export type LiaFeed = {
@@ -131,8 +137,10 @@ export type LiaResult = {
   version: string;
   /** The GR-3 gate applied to the feed (SENSITIVE_METHOD_VERSION). */
   gr3_gate_version: string;
-  /** The known lender names used to name lenders in text (lenders.ts, LENDER_NAMES_VERSION). */
+  /** The known lender names used to name lenders in text (lender-names.ts). */
   lender_names_version: string;
+  /** The keyword list the displayed text is masked with (display-mask.ts). */
+  keyword_list_version: string;
   detector: { method_version: string; min_occurrences: number; amount_tolerance: number };
   signals: Signal[];
   liabilities: DetectedLiability[];
@@ -512,7 +520,7 @@ export function assessLia(input: LiaInput): LiaResult {
   const nameOf = (d: DetectedLiability) =>
     d.sources.includes("outflow")
       ? lenderOf(d.provider, byId.get(d.evidence[0] ?? "")?.t.description)
-      : d.provider.split(" ").some(isSensitiveWord)
+      : maskText(d.provider) !== d.provider
         ? lenderOf(d.provider)
         : d.provider;
   /** The applicant's declared text, with each sensitive word shown as "[withheld]". */
@@ -675,8 +683,18 @@ export function assessLia(input: LiaInput): LiaResult {
 
   // LIA-05 BNPL (L-5): distinct lenders and monthly outflow, within the requested lookback.
   const bnpl = lines.filter((l) => l.amount < 0 && cat(l) === "bnpl");
-  const bnplLender = (l: Line) => lenderOf(providerOf(l.t.description), l.t.description);
+  // Counted by LIA 1.3.4's identity (lenderKeyOf), so SIG-64's display changes move no count;
+  // each is shown by its display name.
+  const bnplLender = (l: Line) => lenderKeyOf(providerOf(l.t.description), l.t.description);
   const bnplProviders = new Set(bnpl.map(bnplLender));
+  const bnplShown = [
+    ...new Set(
+      [...bnplProviders].map((p) => {
+        const l = bnpl.find((x) => bnplLender(x) === p);
+        return l ? lenderOf(providerOf(l.t.description), l.t.description) : p;
+      }),
+    ),
+  ];
   const outflow = (from: number, to: number) =>
     -sum(bnpl.filter((l) => l.day > from && l.day <= to).map((l) => l.amount));
   const nowOut = outflow(end - 90, end);
@@ -713,7 +731,7 @@ export function assessLia(input: LiaInput): LiaResult {
               ? "amber"
               : "green",
           `${bnplProviders.size} provider${bnplProviders.size === 1 ? "" : "s"}, $${bnplMonthly} a month`,
-          `${[...bnplProviders].join(", ")}; $${round2(nowOut)} in the last 90 days` +
+          `${bnplShown.join(", ")}; $${round2(nowOut)} in the last 90 days` +
             (rising ? `, up from $${round2(priorOut)} in the 90 days before` : ""),
           bnpl,
         );
@@ -769,17 +787,18 @@ export function assessLia(input: LiaInput): LiaResult {
     version: LIA_VERSION,
     gr3_gate_version: SENSITIVE_METHOD_VERSION,
     lender_names_version: LENDER_NAMES_VERSION,
+    keyword_list_version: KEYWORD_LIST_VERSION,
     detector: {
       method_version: LIABILITY_METHOD_VERSION,
       min_occurrences: cfg.min_occurrences,
       amount_tolerance: cfg.amount_tolerance,
     },
-    signals: applyEvidence([lia01, lia02, lia03, lia04, lia05, lia06], ctx),
+    signals: applyEvidence([lia01, lia02, lia03, lia04, lia05, lia06], ctx).map(maskSignal),
     // D29: every liability is named by its lender here too, never by the rest of its narrative;
     // "declared" is the exact match of ruling 1 (name and type).
     liabilities: found.map((d) => ({
       ...d,
-      provider: nameOf(d),
+      provider: maskText(nameOf(d)),
       declared: exactly.has(d),
     })),
   };

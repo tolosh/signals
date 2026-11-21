@@ -86,9 +86,10 @@ describe("ruling 3: the lender list is matched before digits are stripped", () =
   it("names Money3 in LIA-01's reason", () => {
     expect(lia01(loan("MONEY3 PERSONAL LOAN", 300), []).reason).toContain("MONEY3 (personal loan");
   });
-  it("the list is 1.1.0 and LIA is 1.3.4 (from the 16 November rulings)", () => {
-    expect(LENDER_NAMES_VERSION).toBe("1.1.0");
-    expect(lia([]).lender_names_version).toBe("1.1.0");
-    expect(LIA_VERSION).toBe("1.3.4");
+  // SIG-64 (ruling 40524): LIA 1.3.5, INC 1.2.3, observed income 1.0.2 and LENDER_NAMES 1.2.0 change output text only.
+  it("the list is 1.2.0 and LIA is 1.3.5 (SIG-64)", () => {
+    expect(LENDER_NAMES_VERSION).toBe("1.2.0");
+    expect(lia([]).lender_names_version).toBe("1.2.0");
+    expect(LIA_VERSION).toBe("1.3.5");
   });
 });

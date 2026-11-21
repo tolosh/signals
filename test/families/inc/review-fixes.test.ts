@@ -56,7 +56,8 @@ describe("Fix 2: missed pays for the add-back are found over INC-09's 12 months"
 
 describe("Fix 3: the engine version", () => {
   it("is 1.2.0 since the 8 November ruling (1.1.0 carried the superseded add-back)", () => {
-    expect(INC_VERSION).toBe("1.2.2");
+    // SIG-64 (ruling 40524): LIA 1.3.5, INC 1.2.3, observed income 1.0.2 and LENDER_NAMES 1.2.0 change output text only.
+    expect(INC_VERSION).toBe("1.2.3");
   });
 });
 

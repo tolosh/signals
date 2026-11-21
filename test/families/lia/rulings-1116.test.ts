@@ -224,9 +224,13 @@ describe("ruling 2: sensitive words in displayed names are masked", () => {
   ])("a lender written %s is named %s", (narrative, name) => {
     expect(lenderOf(narrative, narrative)).toBe(name);
   });
-  it("no listed lender name has a sensitive word (so the list never shows one)", () => {
-    for (const n of LENDER_NAMES)
-      for (const w of n.split(" ")) expect(isSensitiveWord(w), n).toBe(false);
+  // SIG-64 (ruling of 19 November 2026 on review 12, and ruling 40524): a listed lender name is
+  // never masked, though it may hold a sensitive word (HEALTH PROFESSIONALS BANK, POLICE CREDIT
+  // UNION); the names that do are exactly these, and each shows in full (SIG-64 T2).
+  it("a listed lender name with a sensitive word is exempt, and shows in full", () => {
+    const withWord = LENDER_NAMES.filter((n) => n.split(" ").some(isSensitiveWord));
+    expect(withWord.length).toBeGreaterThan(0);
+    for (const n of withWord) expect(lenderOf(n, `${n} LOAN`), n).toBe(n);
   });
   it("without a description too", () => {
     expect(lenderOf("IVF NIMBLE REPAY")).toBe("NIMBLE");
@@ -313,9 +317,10 @@ describe("lender names keep Unicode letters", () => {
 });
 
 describe("versions", () => {
-  it("LIA is 1.3.4; the lender-name list is unchanged at 1.1.0", () => {
-    expect(LIA_VERSION).toBe("1.3.4");
-    expect(LENDER_NAMES_VERSION).toBe("1.1.0");
-    expect(lia([]).version).toBe("1.3.4");
+  // SIG-64 (ruling 40524): LIA 1.3.5, INC 1.2.3, observed income 1.0.2 and LENDER_NAMES 1.2.0 change output text only.
+  it("LIA is 1.3.5; the lender-name list is 1.2.0 (SIG-64)", () => {
+    expect(LIA_VERSION).toBe("1.3.5");
+    expect(LENDER_NAMES_VERSION).toBe("1.2.0");
+    expect(lia([]).version).toBe("1.3.5");
   });
 });
