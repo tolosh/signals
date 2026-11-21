@@ -3,9 +3,35 @@
 Status: ruled (Colin, 8 November 2026, on SIG-42). L-1 to L-8 stand as recorded, with the two
 changes below, the independent review's rulings of the same day (1.2.0, below) and the short
 re-review's ruling (1.3.0, below), review 9's rulings (1.3.1, below), the 10 November
-rulings (1.3.2 and 1.3.3, below) and review 10's rulings (1.3.4, below). Where a ruling changes an
-interpretation, the ruling wins, and the interpretation is kept as it was recorded. The engine is
-at 1.3.4.
+rulings (1.3.2 and 1.3.3, below), review 10's rulings (1.3.4, below) and SIG-64's display
+hardening (1.3.5, below). Where a ruling changes an interpretation, the ruling wins, and the
+interpretation is kept as it was recorded. The engine is at 1.3.5.
+
+## SIG-64, 21 November 2026 (LIA 1.3.5: displayed text only)
+
+Review 12 (SIG-42 comment 40428) verified LIA 1.3.4's matching and found gaps in what a lender
+sees. Colin's rulings of 19 November (SIG-42 closes on the matching; SIG-64 carries the display)
+and 21 November (SIG-64 comment 40524):
+
+- **One shared keyword list** (`src/engines/display-mask.ts`, keyword list 1.0.0, recorded in
+  every result as `keyword_list_version`). It holds 1.3.4's words, stems kept, and review 12's
+  gaps with sources (union names, denominations, medical specialties, health insurers). A word
+  matches after NFKC, with format characters (Unicode Cf) removed, in upper case, so fullwidth
+  "ＩＶＦ" and a zero-width-split "IVF" are masked; a run of letters inside a word is checked too,
+  so "IVF4417" is masked. Every displayed text (reasons, review reasons, resolve-with, lender
+  names, the applicant's declared text) goes through it. ADR 0007 has its known limits.
+- **Exemptions.** A name on `LENDER_NAMES` (1.2.0) and the phrase CREDIT UNION are never masked:
+  "POLICE CREDIT UNION" and "HEALTH PROFESSIONALS BANK" show in full. 1.2.0 adds APRA's
+  customer-owned ADIs and their trading names (two that contain a reserved set v2.2 name are left
+  out), and OSTEON FINANCE, review 12's probe name, which is not an APRA-listed lender (Colin, 21
+  November).
+- **Lender names shown.** NFC; a reference glued to the name is taken out ("NIMBLE4417",
+  "4417NIMBLE" and "HARMONEY88123" show the name alone: the 1.3.4 regression, review 12 E3); a
+  listed name keeps its own digits (MONEY3); an NFD-written name is found ("ZÖP", not "ZO").
+- **Matching and counting are unchanged.** LIA-05 counts BNPL lenders by 1.3.4's identity
+  (`lender-key.ts`, frozen with LENDER_NAMES 1.1.0 and 1.3.4's words), and shows each by its 1.3.5
+  name. Over sets v1 and v2.2 and the probe corpus, LIA 1.3.5's output with every text and version
+  field taken out is byte-identical to 1.3.4's (SIG-64 T5; baseline taken at `a763b95`).
 
 ## Rulings, 16 November 2026, on review 10 (LIA 1.3.4)
 
@@ -155,7 +181,8 @@ oracle and the version pins. A leading-reference case was added after the mutati
 All 43 were typed personal or car loans with the exact name, declared as a plain loan.
 
 **Mutation checks** (LIA, GR-3 and lender-name tests, 303): plain rule removed, 5 fail; plain
-loans also match a mortgage, 4; the description ignored (Money3 back to "MONEY"), 3; reference
+loans also match a mortgage, 4; the description ignored (Money3 back to "MONEY"), 3 (corrected
+to 4: see the correction under review 10's rulings, 1.3.4, above); reference
 numbers kept, 1 (with the added case).
 
 **Set v1 at 1.3.3** (records `2026-11-10-synthetic-v1-lia-family-v1.3.3*.json`): every signal's
