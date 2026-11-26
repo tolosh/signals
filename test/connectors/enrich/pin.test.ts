@@ -78,7 +78,7 @@ describe("LocalEnrich runs the pinned build", () => {
     expect(m.PINNED_BUILD).toEqual({
       commit: pin.moroku_enrich_commit,
       version: pin.engine_version,
-      dist_sha256: pin.dist_index_sha256,
+      dist_sha256: pin.dist_tree_sha256_published,
     });
   });
   it("pinned.ts loads under tsx (esbuild), as the demo stage's bundle and the record scripts load it", () => {
@@ -100,7 +100,7 @@ describe("LocalEnrich runs the pinned build", () => {
     expect(local?.build).toEqual({
       commit: PUBLISHED.commit,
       version: PUBLISHED.engine_version,
-      dist_sha256: PUBLISHED.dist_index_sha256,
+      dist_sha256: PUBLISHED.dist_tree_sha256,
     });
     const r = await local?.categorise([
       {

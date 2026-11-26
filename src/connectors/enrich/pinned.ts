@@ -11,11 +11,16 @@ import * as engine from "../../../vendor/moroku-enrich/engine-1.8.0-8cdb0d9.mjs"
 import { makeLocalEnrich, type EngineModule } from "./local.js";
 import type { Categoriser, EngineBuild } from "./types.js";
 
-/** The pinned build, as each assessment's Enrich record names it (pin.json). */
+/**
+ * The pinned build, as each assessment's Enrich record names it (pin.json). Its hash is the dist
+ * tree's (all 12 files, by the Enrich side's method): dist/index.js only re-exports the others, so
+ * its hash is the same for 1.7.0 and 1.8.0 (the Enrich side, 27 November 2026) and can't tell
+ * builds apart.
+ */
 export const PINNED_BUILD: EngineBuild = {
   commit: "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
   version: "1.8.0",
-  dist_sha256: "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421",
+  dist_sha256: "151430cb2c42aa316c6c2dce3bbf20f1fa7aed83737536fa9c3e09c7ae735284",
 };
 
 /** LocalEnrich on the pinned build. */

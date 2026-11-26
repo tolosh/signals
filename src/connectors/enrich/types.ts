@@ -37,7 +37,10 @@ export type EnrichResponse = {
  */
 export type Taxonomy = { taxonomy_version: string; [field: string]: unknown };
 
-/** A pinned engine build: the moroku-enrich commit, the version and the dist's SHA-256. */
+/**
+ * A pinned engine build: the moroku-enrich commit, the version, and the SHA-256 of its dist tree
+ * (every built file; dist/index.js alone doesn't change between builds).
+ */
 export type EngineBuild = { commit: string; version: string; dist_sha256: string };
 
 export interface Categoriser {
