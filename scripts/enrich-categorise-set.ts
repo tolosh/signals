@@ -9,8 +9,13 @@
 // cache is written as <set>-categories-no-biller-code.json.
 // SIG-56: the cache stores its command and commit, the tree must be clean, and the committed
 // cache is never overwritten (a re-run goes to another folder with --out).
+// SIG-70: --pin vendor/moroku-enrich/pin.json runs the packaged build that pin names, checks the
+// bundle's hash against it, records the moroku-enrich build in the cache (enrich_build; earlier
+// caches record only the engine and taxonomy versions, and engine_commit is Signals' own commit),
+// and writes <set>-categories[-no-biller-code]-engine-<version>.json: a new build, a new fixture.
 import { createHash } from "node:crypto";
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { generateApplicant, population, serialise } from "../src/research/generator/index.js";
 import { generateSetV22 } from "../src/research/generator/v22/index.js";
@@ -26,8 +31,23 @@ import {
 const args = parseRunArgs(process.argv.slice(2), "research/enrich");
 const git = gitState();
 requireCleanTree(git.status, args.allowDirty);
-const enginePath = args.values.engine;
-if (!enginePath) throw new Error("--engine is required");
+type Pin = {
+  moroku_enrich_commit: string;
+  engine_version: string;
+  taxonomy_version: string;
+  dist_index_sha256: string;
+  bundle: string;
+  bundle_sha256: string;
+};
+const pinPath = args.values.pin;
+const pin = pinPath ? (JSON.parse(readFileSync(pinPath, "utf8")) as Pin) : undefined;
+const enginePath = pin && pinPath ? join(dirname(pinPath), pin.bundle) : args.values.engine;
+if (!enginePath) throw new Error("--engine or --pin is required");
+if (
+  pin &&
+  createHash("sha256").update(readFileSync(enginePath)).digest("hex") !== pin.bundle_sha256
+)
+  throw new Error(`${enginePath} doesn't match the pin's bundle_sha256`);
 const manifest = manifestSeed(args.values.manifest);
 const withoutCode = args.values["without-biller-code"] === "true";
 const applicants =
@@ -83,12 +103,24 @@ const out = {
   ...provenance("scripts/enrich-categorise-set.ts", args, git),
   set_sha256: setSha,
   enrich: { engine_version: engine.ENGINE_VERSION, taxonomy_version: engine.TAXONOMY_VERSION },
+  ...(pin
+    ? {
+        enrich_build: {
+          moroku_enrich_commit: pin.moroku_enrich_commit,
+          engine_version: pin.engine_version,
+          taxonomy_version: pin.taxonomy_version,
+          dist_index_sha256: pin.dist_index_sha256,
+          bundle: pin.bundle,
+          bundle_sha256: pin.bundle_sha256,
+        },
+      }
+    : {}),
   lookups_loaded: "none (no dictionary, overrides or LLM cache)",
   biller_code_given: !withoutCode,
   debits: Object.keys(categories).length,
   by_source: bySource,
   categories,
 };
-const name = `${manifest.set}-categories${withoutCode ? "-no-biller-code" : ""}.json`;
+const name = `${manifest.set}-categories${withoutCode ? "-no-biller-code" : ""}${pin ? `-engine-${engine.ENGINE_VERSION}` : ""}.json`;
 writeNew(join(args.out, name), `${JSON.stringify(out)}\n`);
 console.log(JSON.stringify({ debits: out.debits, enrich: out.enrich, by_source: bySource }));
