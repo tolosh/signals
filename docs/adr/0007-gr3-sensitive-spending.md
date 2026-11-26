@@ -19,6 +19,39 @@ G-2 and G-3 are accepted. The interpretations below are kept as they were record
   ENR-30.
 - **G-3 accepted** as a candidate, versioned with the definitions (`SENSITIVE_METHOD_VERSION`).
 
+## SIG-74, 26 November 2026 (split keywords; gate unchanged at 1.2.0)
+
+Review 16 (SIG-64 comment 40700, E6) found SIG-64's known limit 4 understated. A keyword split by
+an invisible character showed fragments of 2 or more letters ("IV", "CARDIO", "HOSP"): as the
+lender's name in LIA, and as both halves of a loan or card account's product name ("I VF
+LENDING"). A default-ignorable character that isn't Cf (U+034F, U+FE0F, U+2800) also split a word
+without being masked, in LIA and in observed income's payer, which the review didn't test. Colin's
+ruling of 26 November (comment 40705, and his answers of the same day):
+
+- **One normalisation** (keyword list 1.1.0, the same words): NFKC, then every Unicode
+  default-ignorable code point and U+2800 removed, then upper case. `cleanText`, which every
+  displayed name is read through, does the same.
+- **Read joined.** LIA puts back together the provider words that an invisible character split
+  ("IV F" is IVF), and reads a product name with its invisible characters removed, so a split
+  keyword is masked whole. A name that is still a piece of a sensitive word shows as "a lender".
+  Text without invisible characters is named exactly as before: over sets v1 and v2.2, LIA 1.3.6's,
+  INC 1.2.4's and observed income 1.0.3's text is byte-identical to SIG-64's.
+- **A fully withheld name stays "a lender"** (the 16 November rule), as do names that are only
+  pieces.
+
+**Known limit 4, as SIG-64 recorded it, is superseded** (kept below as written): split keywords
+are now masked whole in LIA's names, product names and observed income's payers. **New known
+limits:**
+
+6. **A split can change how LIA reads a loan's type.** In "CAR<ZWSP>DIOLOGY XAVOCA PERSONAL LOAN",
+   LIA's type rule sees the word CAR, so the loan is typed a car loan and "(car loan)" is shown.
+   The type is matching, which SIG-74 leaves unchanged; reading types on joined text is its own
+   ticket. SIG-74's T1 fails on this, as run, for CARDIOLOG and CARDIAC only.
+7. **A lender's name is the narrative's first word that isn't sensitive** (unchanged since 1.3.0),
+   so a narrative starting "TO MYPAYNOW" names the lender "TO" (14 applicants in set v2.2). Found
+   while building SIG-74, and left unchanged: SIG-74 changes no text that has no invisible
+   character.
+
 ## SIG-64, 21 November 2026 (display masking; gate unchanged at 1.2.0)
 
 D29 is two things: the gate keeps sensitive lines out of every signal input (above), and no
@@ -47,7 +80,8 @@ Colin's rulings of 19 November and 21 November (SIG-64 comment 40524):
 2. **Look-alike letters** (a Cyrillic "і" in IVF) aren't folded: NFKC doesn't map them.
 3. **A keyword glued to other letters** ("IVFNIMBLE") or split by visible punctuation ("I.V.F")
    isn't a whole word, so it isn't masked.
-4. **A split keyword in a lender's provider form shows a fragment.** The detector's provider form
+4. **Superseded by SIG-74 (26 November 2026); kept as written.** **A split keyword in a lender's
+   provider form shows a fragment.** The detector's provider form
    keeps A to Z only, so "IVF NIMBLE" written with a zero-width space after the I is the provider
    "I VF NIMBLE", and LIA names the lender "I". No keyword shows.
 5. **The list is a list.** A sensitive word not on it shows (a new denomination, a clinic's own
