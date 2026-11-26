@@ -48,7 +48,7 @@ export function makeLocalEnrich(engine: EngineModule, build: EngineBuild | null)
       };
     },
     async taxonomy(): Promise<Taxonomy> {
-      return engine.taxonomyDocument?.() ?? { version: engine.TAXONOMY_VERSION };
+      return engine.taxonomyDocument?.() ?? { taxonomy_version: engine.TAXONOMY_VERSION };
     },
   };
 }

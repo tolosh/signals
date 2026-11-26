@@ -58,7 +58,7 @@ function standInEngine() {
     },
     taxonomyDocument() {
       return {
-        version: "9.9-standin",
+        taxonomy_version: "9.9-standin",
         categories: [
           { id: "groceries", classification: "essential" },
           { id: "income", classification: "essential" },
@@ -271,7 +271,7 @@ describe("T4: consumer rules at the adapter (engine-facing rules are their own t
       synthetic: false,
     });
     expect(record.taxonomy_version).toBe("9.9-standin");
-    expect(record.taxonomy?.version).toBe("9.9-standin");
+    expect(record.taxonomy?.taxonomy_version).toBe("9.9-standin");
   });
   it("no category id or taxonomy version is hard-coded in the adapter", () => {
     const dir = "src/connectors/enrich";
