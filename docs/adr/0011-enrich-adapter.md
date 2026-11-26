@@ -46,7 +46,31 @@ live API.
    for the named tenant. A lender's own key is refused, and so is any credential for another tenant.
 6. **The demo runs on `local` only** (D58).
 
-## The pinned build: not yet pinned
+## The pinned build
+
+**Pinned, 27 November 2026** (Colin: the ENR-28 build, published on ENR-28 comment 40724):
+moroku-enrich `8cdb0d926f7a9473051655fdeed5d69c1ceffaeb`, engine 1.8.0, taxonomy 1.4.
+
+- `scripts/enrich-package.ts` refuses unless the checkout is at that commit, with `packages/engine`
+  and `packages/taxonomy` clean, and `dist/index.js` at the published SHA-256 (`134909da…`).
+- It bundles the engine and taxonomy dists into `vendor/moroku-enrich/engine-1.8.0-8cdb0d9.mjs`
+  (SHA-256 `f843b882…`). An independent rebuild reproduces that hash.
+- It writes `vendor/moroku-enrich/pin.json`, with every dist file's hash.
+- `pinnedLocalEnrich()` (`src/connectors/enrich/pinned.ts`) runs it, and names it as the build on
+  each record.
+- The published dist **tree** SHA-256 (`151430cb…`) is recorded as published. Its method is asked
+  of the Enrich side, since no obvious computation over the 12 files reproduces it.
+- New fixtures, made on the pinned build with `--pin`, sit beside the 1.7.0 ones. Each records its
+  moroku-enrich build (`enrich_build`):
+  - `research/enrich/synthetic-v1-categories-engine-1.8.0.json`;
+  - `research/enrich/synthetic-v2.2-categories-no-biller-code-engine-1.8.0.json`.
+- Runtime categories on the pinned build equal both exactly (`test/connectors/enrich/pin.test.ts`).
+- The ENR-28 fix shows in them. On set v2.2, 10,927 debits move from `transfer` to an expense
+  category (4,423 to `other_expenses`, 2,833 to utilities, 1,597 to insurance, and others). On set
+  v1, 1,101 move.
+- The experiments that ran on the 1.7.0 fixtures (SIG-17, SIG-57 and others) keep them.
+
+### As first recorded (26 November), before the pin
 
 Ruling 40719, 2: the engine is packaged into the Signals build by moroku-enrich commit and hash,
 never imported from a sibling checkout at run time. The committed `research/enrich` categories stay
@@ -67,7 +91,8 @@ _Corrected 27 November 2026:_ the first version of this ADR read `b85fd2b` as a 
 commit missing from its history. It is a Signals commit. The conclusion stands: no fixture
 identifies the Enrich build behind it.
 
-Until the pin, LocalEnrich takes the engine module as an argument, and the tests use a stand-in.
+Until the pin, LocalEnrich took the engine module as an argument, and the tests used a stand-in.
+It still takes one, so the adapter's tests keep their stand-in.
 
 ## Known limits
 
