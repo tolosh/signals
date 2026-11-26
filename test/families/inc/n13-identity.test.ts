@@ -9,7 +9,8 @@ import { asmIncomeHash, setV1Hash } from "./output-hash.js";
 // SIG-64 (ruling 40524): INC 1.2.3 changes output text only and records the keyword list's
 // version; output-hash.ts sets both back to 1.2.1's form, so the hashes still prove every other
 // byte of the output is unchanged.
-const PINNED = ["1.2.3|1.2.0"];
+// SIG-74 (26 November 2026): LIA 1.3.6, INC 1.2.4, observed income 1.0.3 and keyword list 1.1.0 change output text only.
+const PINNED = ["1.2.4|1.2.0"];
 
 describe("N-13 in the layer: INC's output is byte-identical to d2e59a0", () => {
   it("over set v1, lookback max(3, history months)", () => {

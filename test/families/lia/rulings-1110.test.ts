@@ -137,9 +137,9 @@ describe("ruling 2: known multi-word lender names before the first-word rule", (
     expect(s.reason).not.toContain("IVF");
   });
   // SIG-64 (ruling 40524): LIA 1.3.5, INC 1.2.3, observed income 1.0.2 and LENDER_NAMES 1.2.0 change output text only.
-  it("LIA records the list's version, and is 1.3.5 (SIG-64)", () => {
+  it("LIA records the list's version, and is 1.3.6 (SIG-74)", () => {
     const r = lia([]);
     expect(r.lender_names_version).toBe(LENDER_NAMES_VERSION);
-    expect(LIA_VERSION).toBe("1.3.5");
+    expect(LIA_VERSION).toBe("1.3.6");
   });
 });

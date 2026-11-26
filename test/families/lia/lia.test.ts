@@ -234,6 +234,6 @@ describe("LIA-01 is built on SIG-18's detector, and says how far to trust it", (
 
 describe("version", () => {
   // SIG-64 (ruling 40524): LIA 1.3.5, INC 1.2.3, observed income 1.0.2 and LENDER_NAMES 1.2.0 change output text only.
-  it("is 1.3.5 (SIG-64; 1.3.4 from the SIG-42 rulings of 16 November)", () =>
-    expect(LIA_VERSION).toBe("1.3.5"));
+  it("is 1.3.6 (SIG-74, SIG-64; 1.3.4 from the SIG-42 rulings of 16 November)", () =>
+    expect(LIA_VERSION).toBe("1.3.6"));
 });

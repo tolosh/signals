@@ -5,8 +5,9 @@
 // detects, matches or counts never reads it. The GR-3 gate (sensitive.ts, 1.2.0) is separate and
 // unchanged, and G-2 stays the limit for detection (ADR 0007).
 //
-// A word matches after NFKC (fullwidth ＩＶＦ is IVF), with invisible format characters (Unicode
-// Cf: zero-width space and joiner, soft hyphen) removed, in upper case. A word is a run of
+// A word matches after NFKC (fullwidth ＩＶＦ is IVF), with every invisible character removed
+// (from 1.1.0, SIG-74: every Unicode default-ignorable code point, which covers Cf, U+034F and the
+// variation selectors, plus U+2800; 1.0.0 removed Cf only), in upper case. A word is a run of
 // letters, marks and digits; a run of letters inside it is checked too, so IVF4417 is masked. A
 // stem (a keyword ending in *) covers its endings: the safer side, kept by ruling. A word inside
 // a known lender name (lender-names.ts) or the phrase CREDIT UNION is never masked.
@@ -14,8 +15,12 @@
 // Pure: no clock, no randomness, relative imports (D3).
 import { LENDER_NAMES } from "./lender-names.js";
 
-/** 1.0.0 (SIG-64): LIA 1.3.4's list, moved here and shared, with review 12's gaps added. */
-export const KEYWORD_LIST_VERSION = "1.0.0";
+/**
+ * 1.0.0 (SIG-64): LIA 1.3.4's list, moved here and shared, with review 12's gaps added.
+ * 1.1.0 (SIG-74; review 16, E6): the same words; the normalisation removes every default-ignorable
+ * code point and U+2800 before matching, not only Cf, so "I\u034fVF" is IVF.
+ */
+export const KEYWORD_LIST_VERSION = "1.1.0";
 
 /** Where each group's words come from. */
 export const KEYWORD_SOURCES: Readonly<Record<string, string>> = Object.freeze({
@@ -192,6 +197,8 @@ export const WITHHELD = "[withheld]";
 export const EXEMPT_PHRASES: readonly string[] = [...LENDER_NAMES, "CREDIT UNION"];
 
 const FORMAT = /\p{Cf}/gu;
+/** Every invisible character (SIG-74): the default-ignorable code points, and U+2800. */
+const INVISIBLE = /[\p{Default_Ignorable_Code_Point}\u2800]/gu;
 const TOKEN = /[\p{L}\p{M}\p{N}]+/gu;
 const LETTERS = /\p{L}+/gu;
 const STEMS = SENSITIVE_KEYWORDS.filter((w) => w.endsWith("*")).map((w) => w.slice(0, -1));
@@ -199,17 +206,21 @@ const WORDS = new Set(SENSITIVE_KEYWORDS.filter((w) => !w.endsWith("*")));
 const PHRASES = EXEMPT_PHRASES.map((p) => p.split(" "));
 const hit = (form: string) => WORDS.has(form) || STEMS.some((s) => form.startsWith(s));
 
-/** Text as it is shown: invisible format characters removed, NFC. */
-export const cleanText = (text: string): string => text.replace(FORMAT, "").normalize("NFC");
-
-/** The masker's three parts, each of which T7 switches off in turn. */
-export type MaskOptions = { nfkc: boolean; stripFormat: boolean; exemptions: boolean };
+/**
+ * The masker's parts, each of which a mutation test switches off in turn (SIG-64 T7, SIG-74 T5).
+ * `ignorable: false` removes Cf only, as 1.0.0 did; it is on unless set to false.
+ */
+export type MaskOptions = {
+  nfkc: boolean;
+  stripFormat: boolean;
+  exemptions: boolean;
+  ignorable?: boolean;
+};
 
 export function makeMasker(o: MaskOptions) {
-  const formOf = (word: string) => {
-    const n = word.normalize(o.nfkc ? "NFKC" : "NFC");
-    return (o.stripFormat ? n.replace(FORMAT, "") : n).toUpperCase();
-  };
+  const strip = (text: string) =>
+    o.stripFormat ? text.replace(o.ignorable === false ? FORMAT : INVISIBLE, "") : text;
+  const formOf = (word: string) => strip(word.normalize(o.nfkc ? "NFKC" : "NFC")).toUpperCase();
   /** True when a word, in any case or width, is sensitive, or has a run of letters that is. */
   const isSensitiveWord = (word: string): boolean => {
     const form = formOf(word);
@@ -217,7 +228,7 @@ export function makeMasker(o: MaskOptions) {
   };
   /** The text with each sensitive word shown as [withheld], outside a lender name. */
   const mask = (text: string): string => {
-    const t = (o.stripFormat ? text.replace(FORMAT, "") : text).normalize("NFC");
+    const t = strip(text).normalize("NFC");
     const tokens = [...t.matchAll(TOKEN)];
     const forms = tokens.map((m) => formOf(m[0]));
     const exempt = new Set<number>();
@@ -235,10 +246,14 @@ export function makeMasker(o: MaskOptions) {
     });
     return out + t.slice(at);
   };
-  return { mask, isSensitiveWord };
+  /** Text as it is shown: invisible characters removed, NFC. */
+  const clean = (text: string): string => strip(text).normalize("NFC");
+  return { mask, isSensitiveWord, clean };
 }
 
 const masker = makeMasker({ nfkc: true, stripFormat: true, exemptions: true });
 /** Every displayed text goes through this (T7 replaces it to prove each engine does). */
 export const maskText = (text: string): string => masker.mask(text);
 export const isSensitiveWord = (word: string): boolean => masker.isSensitiveWord(word);
+/** Text as it is shown: every invisible character removed (SIG-74), NFC. */
+export const cleanText = (text: string): string => masker.clean(text);

@@ -111,7 +111,8 @@ export function normaliseProvider(text: string): string {
 }
 
 const familyOfType = (type: string): Family | undefined => TYPE_FAMILY[type];
-const accountProvider = (productName: string) =>
+/** A card or loan account's provider, from its product name (exported for LIA's display). */
+export const accountProvider = (productName: string) =>
   normaliseProvider(productName.replace(/\s*(credit card|car loan|personal loan)\s*$/i, ""));
 
 type Outflow = { id: string; accountId: string; day: number; amount: number };

@@ -27,7 +27,9 @@ export {
 // 1.2.3 (SIG-64, ruling 40524) changes output text only: a payer is shown masked (D29; observed
 // income 1.0.2's displayPayer), every displayed text goes through the shared masker, and the
 // keyword list's version is recorded. Streams are still found and typed by the unmasked payer.
-export const INC_VERSION = "1.2.3";
+// 1.2.4 (SIG-74, ruling of 26 November 2026) changes output text only: payers are shown as
+// observed income 1.0.3 shows them, and keyword list 1.1.0 is recorded.
+export const INC_VERSION = "1.2.4";
 
 export type IncApplication = {
   /** FR-C9; used only by INC-02 (INC-R3). */
