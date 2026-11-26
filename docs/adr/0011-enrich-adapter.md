@@ -56,10 +56,16 @@ build is a new fixture, recorded, not an overwrite.
 **Colin's answer (26 November): no packaging or pin until the Enrich side publishes the ENR-28
 build** (BPAY bill payments returned as transfers). Two facts make an interim pin unsafe:
 
-- The set v2.2 fixture names engine commit `b85fd2b`, which is not in the local moroku-enrich
-  history.
+- No `research/enrich` fixture records which moroku-enrich build made it. They record only the
+  engine and taxonomy versions. The set v2.2 fixture's `engine_commit`, `b85fd2b`, is the
+  **Signals** commit the script ran at (`scripts/lib/run-record.ts`, `provenance`), not a
+  moroku-enrich commit.
 - moroku-enrich's HEAD still reports engine 1.7.0, taxonomy 1.4, though its code has changed since.
   A version string doesn't identify a build; only the commit and the dist hash do.
+
+_Corrected 27 November 2026:_ the first version of this ADR read `b85fd2b` as a moroku-enrich
+commit missing from its history. It is a Signals commit. The conclusion stands: no fixture
+identifies the Enrich build behind it.
 
 Until the pin, LocalEnrich takes the engine module as an argument, and the tests use a stand-in.
 
