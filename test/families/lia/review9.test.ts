@@ -246,6 +246,6 @@ describe("ruling 3 (D29): liability reasons name only the lender", () => {
 describe("LIA version", () => {
   it("is the version", () => {
     // SIG-64 (ruling 40524): LIA 1.3.5, INC 1.2.3, observed income 1.0.2 and LENDER_NAMES 1.2.0 change output text only.
-    expect(LIA_VERSION).toBe("1.3.5");
+    expect(LIA_VERSION).toBe("1.3.6");
   });
 });

@@ -608,12 +608,12 @@ describe("GR-3 gate version", () => {
     expect(expensesOf(base)).toMatchObject(v);
   });
   // SIG-64 (ruling 40524): LIA 1.3.5, INC 1.2.3, observed income 1.0.2 and LENDER_NAMES 1.2.0 change output text only; observed expenses shows no narrative text and is unchanged.
-  it("LIA is 1.3.5, INC 1.2.3, observed income 1.0.2 (SIG-64); observed expenses 1.1.1", () => {
+  it("LIA is 1.3.6, INC 1.2.4, observed income 1.0.3 (SIG-74); observed expenses 1.1.1", () => {
     // Gate 1.2.0 changes their output only on a liability credit carrying a sensitive MCC; each
     // records the gate version it ran, so their own versions stand (for the reviewer).
-    expect(INC_VERSION).toBe("1.2.3");
-    expect(INCOME_METHOD_VERSION).toBe("1.0.2");
-    expect(LIA_VERSION).toBe("1.3.5");
+    expect(INC_VERSION).toBe("1.2.4");
+    expect(INCOME_METHOD_VERSION).toBe("1.0.3");
+    expect(LIA_VERSION).toBe("1.3.6");
     expect(OBSERVED_EXPENSES_METHOD_VERSION).toBe("1.1.1");
   });
 });

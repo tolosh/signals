@@ -62,7 +62,7 @@ beforeAll(async () => {
 
 describe("SIG-64: one shared, versioned keyword list", () => {
   it("the keyword list has its own version, 1.0.0", () => {
-    expect(m.KEYWORD_LIST_VERSION).toBe("1.0.0");
+    expect(m.KEYWORD_LIST_VERSION).toBe("1.1.0"); // SIG-74 (26 November 2026): LIA 1.3.6, INC 1.2.4, observed income 1.0.3 and keyword list 1.1.0 change output text only.
   });
   it("it keeps every 1.3.4 keyword, stems included, and adds review 12's gaps", () => {
     const list = new Set(m.SENSITIVE_KEYWORDS ?? []);
@@ -344,14 +344,14 @@ describe("T5 and the observed-income replay: states, values and figures are byte
     it("every result records its versions, the keyword list's included", () => {
       expect(now.versions).toEqual([
         "inc.gr3_gate_version=1.2.0",
-        "inc.keyword_list_version=1.0.0",
-        "inc.version=1.2.3",
+        "inc.keyword_list_version=1.1.0",
+        "inc.version=1.2.4",
         "income.gr3_gate_version=1.2.0",
-        "income.keyword_list_version=1.0.0",
+        "income.keyword_list_version=1.1.0",
         "lia.gr3_gate_version=1.2.0",
-        "lia.keyword_list_version=1.0.0",
+        "lia.keyword_list_version=1.1.0",
         "lia.lender_names_version=1.2.0",
-        "lia.version=1.3.5",
+        "lia.version=1.3.6",
       ]);
     });
   });
@@ -386,9 +386,9 @@ describe("T5 and the observed-income replay: states, values and figures are byte
 
 describe("versions (SIG-64 method, Versions; ruling 40524, 1)", () => {
   it("observed income is 1.0.2, and SIG-16-team-grants.json records it, amended before any grant", () => {
-    expect(income.INCOME_METHOD_VERSION).toBe("1.0.2");
+    expect(income.INCOME_METHOD_VERSION).toBe("1.0.3"); // SIG-74 (26 November 2026): LIA 1.3.6, INC 1.2.4, observed income 1.0.3 and keyword list 1.1.0 change output text only.
     const prereg = readFileSync("research/preregistrations/SIG-16-team-grants.json", "utf8");
-    expect(prereg).toContain('"income_method_version": "1.0.2"');
+    expect(prereg).toContain('"income_method_version": "1.0.3"');
     expect(prereg).toMatch(/2026-11-21[^"]*1\.0\.1[^"]*1\.0\.2/);
   });
   it("AS_OF is the scripts' date", () => {

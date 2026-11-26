@@ -1,0 +1,30 @@
+{
+  "ticket": "SIG-74",
+  "purpose": "T3: skeleton hashes (text and version fields out) and text hashes (version fields out) before any SIG-74 change",
+  "commit": "ff66973333b436e898979c5ac88b8b304f577cd2",
+  "sets": {
+    "synthetic-v1": {
+      "lia": "8c79c4a6c7bdd9f5b5fb4f9a9512b65967844caa67394f0db5d2c80a5f512426",
+      "inc": "f6242c29792adcaadf672d50b4c304dc0f8f6d0d40e8fdff155f24ce43a04f75",
+      "income": "766b01a54a45486c336e745659b811605eb0a57f726d4398f32ac5b9ecc0fdf9",
+      "lia_text": "f388ab1ee20bdbcc4f3d86673759d872a9e9e9503607847f70d3d2d6ee860275",
+      "inc_text": "808c64fa6a7a42d8298956a17dd56e4bb31d1191970a89b176564161fa8e3386",
+      "income_text": "397042f77fe37de5a34a7544e05a0b8f49944c07720b4a0b51c0e4819361878a"
+    },
+    "synthetic-v2.2": {
+      "lia": "d4ca57ff5a145b9b5557ee00c597aee0a03741f8dacfc9c8160f73cc994a0662",
+      "inc": "ffaf644a69bc94def6b20d8d594bfc4681052ffa7a614dcb72ee78711c25bdda",
+      "income": "dc410a4147042c14ba618ac54e7c03cff0d63c7415f0951e48e7f6e68b954836",
+      "lia_text": "7352782cac95a1b2b6d7940b3c5afa14d619fcaa988d1db2f89ecb836d35c32f",
+      "inc_text": "9d7e673cf95fd4fbc1360bf6bc70c7317618b462cc7cc9616c6ba3984eecbf82",
+      "income_text": "057bd01cd90381770c8f48881ce7b86238625375d4dd3c49add80635f8f125be"
+    }
+  },
+  "corpus": {
+    "count": 1314,
+    "lia": "ce474821585509a99abce28a8d3b095e1665454fb7cd440d9e767f2bb7b5f29d",
+    "inc": "9e0dbf549e1a1eb1929d1b8fa66e36ef36d06acc56a59e5044329043adfb570b",
+    "income": "13e183de9274bf1b4aced28705051c50a09774370691e9422815f3be7ece0f47",
+    "expenses": "775f4f1aa7fe606c901577033a71459160a5b8213bf91d12aa2cf79e2f9c6f93"
+  }
+}

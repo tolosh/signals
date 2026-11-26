@@ -396,7 +396,7 @@ describe("Ruling 5: one BNPL monthly figure", () => {
   });
   it("is version 1.3.0", () => {
     // SIG-64 (ruling 40524): LIA 1.3.5, INC 1.2.3, observed income 1.0.2 and LENDER_NAMES 1.2.0 change output text only.
-    expect(run({}).version).toBe("1.3.5");
+    expect(run({}).version).toBe("1.3.6");
   });
 });
 

@@ -16,6 +16,9 @@
 // shared masker (display-mask.ts, keyword list 1.0.0, recorded in each result), listed lender
 // names (LENDER_NAMES 1.2.0) and CREDIT UNION are never masked, and a lender's name shows no
 // reference digits. LIA-05 still counts lenders by LIA 1.3.4's identity (lenderKeyOf).
+// 1.3.6 (SIG-74; review 16, E6) changes output text only: a lender's narrative and an account's
+// product name are read with every invisible character removed, so a split keyword is masked
+// whole, never shown as a fragment (keyword list 1.1.0). Matching and counting are unchanged.
 // Pure: categories and the application are inputs; no clock, no randomness, relative imports (D3).
 import { applyEvidence, assessEvidence, EQ_THRESHOLDS } from "../../evidence/index.js";
 import { dayOf, isoOf } from "../../evidence/dates.js";
@@ -23,7 +26,7 @@ import type { FeedTransaction, RawSignal, Signal } from "../../evidence/index.js
 import { SENSITIVE_METHOD_VERSION, withoutSensitive } from "../../sensitive.js";
 import { KEYWORD_LIST_VERSION, maskText } from "../../display-mask.js";
 import { maskSignal } from "../../evidence/masked.js";
-import { LENDER_NAMES_VERSION, lenderKeyOf, lenderOf, withheld } from "./lenders.js";
+import { LENDER_NAMES_VERSION, accountNameOf, lenderKeyOf, lenderOf, withheld } from "./lenders.js";
 import { bestPairing } from "./pairing.js";
 import type { FeedType } from "../../signals/definitions.js";
 import {
@@ -34,7 +37,7 @@ import {
   type DetectedLiability,
 } from "../../liabilities/index.js";
 
-export const LIA_VERSION = "1.3.5";
+export const LIA_VERSION = "1.3.6";
 
 /** A shared-account feed with the fields both the evidence layer and the detector read. */
 export type LiaFeed = {
@@ -516,13 +519,15 @@ export function assessLia(input: LiaInput): LiaResult {
     ls.flatMap((d) => d.evidence.map((e) => byId.get(e)).filter((x): x is Line => x !== undefined));
   const kind = (d: DetectedLiability) => typeOf(d).replace("_", " ");
   // Ruling 2 of 16 November 2026: no displayed name shows a sensitive word. A lender's name skips
-  // them (lenderOf); an account's product name is shown whole unless it has one.
+  // them (lenderOf); an account's product name is shown whole unless it has one (accountNameOf,
+  // which reads the product name joined from 1.3.6, SIG-74).
+  const productOf = new Map(
+    input.feed.accounts.map((a) => [a.account.accountId, a.account.productName ?? ""]),
+  );
   const nameOf = (d: DetectedLiability) =>
     d.sources.includes("outflow")
       ? lenderOf(d.provider, byId.get(d.evidence[0] ?? "")?.t.description)
-      : maskText(d.provider) !== d.provider
-        ? lenderOf(d.provider)
-        : d.provider;
+      : accountNameOf(productOf.get(d.account_ids[0] ?? "") ?? d.provider, d.provider);
   /** The applicant's declared text, with each sensitive word shown as "[withheld]". */
   const declaredText = (d: DeclaredLiability) => withheld(d.provider.trim());
   const describe = (d: DetectedLiability) =>

@@ -5,7 +5,19 @@ changes below, the independent review's rulings of the same day (1.2.0, below) a
 re-review's ruling (1.3.0, below), review 9's rulings (1.3.1, below), the 10 November
 rulings (1.3.2 and 1.3.3, below), review 10's rulings (1.3.4, below) and SIG-64's display
 hardening (1.3.5, below). Where a ruling changes an interpretation, the ruling wins, and the
-interpretation is kept as it was recorded. The engine is at 1.3.5.
+interpretation is kept as it was recorded. The engine is at 1.3.6 (SIG-74, below).
+
+## SIG-74, 26 November 2026 (LIA 1.3.6: displayed text only)
+
+Review 16 (SIG-64 comment 40700, E6): a keyword split by an invisible character showed as a
+fragment in a lender's name ("IV") or a product name ("I VF LENDING"). LIA 1.3.6 reads both joined
+(keyword list 1.1.0, ADR 0007): the provider words an invisible character split are put back
+together before the first-word rule, and a product name is read with its invisible characters
+removed, so the keyword is masked whole. LIA's matching, counting and LIA-05's 1.3.4 identity are
+unchanged, and so is all text without invisible characters: over sets v1 and v2.2, 1.3.6's output
+with its version fields taken out is byte-identical to 1.3.5's. Two limits found are recorded in
+ADR 0007 (known limits 6 and 7): a split can change the loan type LIA reads ("CAR<ZWSP>DIOLOGY" is a
+car loan), and a narrative starting "TO" names the lender "TO".
 
 ## SIG-64, 21 November 2026 (LIA 1.3.5: displayed text only)
 

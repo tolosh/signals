@@ -65,7 +65,11 @@ export type IncomeResult = {
 // grant is taken in): the payer shown is masked (D29) and the keyword list's version is recorded.
 // Streams are still grouped by the unmasked payer (deriveIncomeByPayerKey), so every figure,
 // cadence and count is as at 1.0.1; only the payer text changes.
-export const INCOME_METHOD_VERSION = "1.0.2";
+// 1.0.3 (SIG-74, Colin's ruling of 26 November 2026; SIG-16-team-grants.json amended the same day,
+// before any team grant): the payer shown is read with every invisible character removed (keyword
+// list 1.1.0), so a keyword split by U+034F, U+FE0F or U+2800 is masked whole. Only the payer
+// text changes.
+export const INCOME_METHOD_VERSION = "1.0.3";
 
 const CADENCE_BANDS: [Cadence, number, number, number][] = [
   ["weekly", 5, 9, 52 / 12],
