@@ -3,6 +3,7 @@
 // the packaging. The engine is packaged into the Signals build by commit and hash, never imported
 // from a sibling checkout at run time; research/enrich stays the CI fixture, a new build is a new
 // fixture (recorded, never an overwrite), and runtime categories equal it for the same build.
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -72,6 +73,27 @@ describe("the pin records the published ENR-28 build", () => {
 });
 
 describe("LocalEnrich runs the pinned build", () => {
+  it("PINNED_BUILD, written in pinned.ts, equals pin.json (pinned.ts can't import the JSON under esbuild)", () => {
+    const pin = json(PIN);
+    expect(m.PINNED_BUILD).toEqual({
+      commit: pin.moroku_enrich_commit,
+      version: pin.engine_version,
+      dist_sha256: pin.dist_index_sha256,
+    });
+  });
+  it("pinned.ts loads under tsx (esbuild), as the demo stage's bundle and the record scripts load it", () => {
+    const out = execFileSync(
+      process.execPath,
+      [
+        "--import",
+        "tsx",
+        "--eval",
+        'import("./src/connectors/enrich/pinned.ts").then((m) => console.log(m.pinnedLocalEnrich().build.version))',
+      ],
+      { encoding: "utf8" },
+    ).trim();
+    expect(out).toBe("1.8.0");
+  }, 60_000);
   it("pinnedLocalEnrich carries the pin as its build, and the engine reports 1.8.0 / 1.4", async () => {
     expect(typeof m.pinnedLocalEnrich).toBe("function");
     const local = m.pinnedLocalEnrich?.();
