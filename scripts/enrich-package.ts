@@ -53,6 +53,22 @@ const engineDist = filesOf("packages/engine/dist");
 const taxonomyDist = filesOf("packages/taxonomy/dist");
 if (engineDist["index.js"] !== distSha)
   throw new Error(`dist/index.js is ${engineDist["index.js"]}, not the published ${distSha}`);
+/**
+ * The published dist tree SHA-256 (the Enrich side, 27 November 2026): GNU sha256sum binary-mode
+ * lines, "<hex> *packages/engine/dist/<name>.js\n", sorted by path, each LF-terminated, hashed.
+ */
+const treeOf = (files: Record<string, string>) =>
+  createHash("sha256")
+    .update(
+      Object.keys(files)
+        .map((f) => `packages/engine/dist/${f}`)
+        .sort()
+        .map((p) => `${files[p.slice("packages/engine/dist/".length)] ?? ""} *${p}\n`)
+        .join(""),
+    )
+    .digest("hex");
+if (treeOf(engineDist) !== treeSha)
+  throw new Error(`the dist tree is ${treeOf(engineDist)}, not the published ${treeSha}`);
 
 const bundled = await build({
   stdin: {

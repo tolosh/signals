@@ -58,8 +58,10 @@ moroku-enrich `8cdb0d926f7a9473051655fdeed5d69c1ceffaeb`, engine 1.8.0, taxonomy
 - It writes `vendor/moroku-enrich/pin.json`, with every dist file's hash.
 - `pinnedLocalEnrich()` (`src/connectors/enrich/pinned.ts`) runs it, and names it as the build on
   each record.
-- The published dist **tree** SHA-256 (`151430cb…`) is recorded as published. Its method is asked
-  of the Enrich side, since no obvious computation over the 12 files reproduces it.
+- The published dist **tree** SHA-256 (`151430cb…`) **verifies too**, by the Enrich side's method:
+  GNU `sha256sum` binary-mode lines (`<hex> *packages/engine/dist/<name>.js`), sorted by path, each
+  LF-terminated, then hashed. The packaging script refuses a mismatch, and the pin test
+  recomputes it from `pin.json`.
 - New fixtures, made on the pinned build with `--pin`, sit beside the 1.7.0 ones. Each records its
   moroku-enrich build (`enrich_build`):
   - `research/enrich/synthetic-v1-categories-engine-1.8.0.json`;

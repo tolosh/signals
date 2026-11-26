@@ -52,6 +52,17 @@ describe("the pin records the published ENR-28 build", () => {
     expect(Object.keys(pin.dist_files ?? {})).toHaveLength(12);
     expect(pin.dist_files?.["index.js"]).toBe(PUBLISHED.dist_index_sha256);
   });
+  it("the 12 dist files' hashes give the published dist tree SHA-256 (the Enrich side's method)", () => {
+    // GNU sha256sum binary-mode lines, "<hex> *packages/engine/dist/<name>.js\n", sorted by path,
+    // each LF-terminated, hashed (the Enrich side, 27 November 2026).
+    const files = (json(PIN).dist_files ?? {}) as Record<string, string>;
+    const body = Object.keys(files)
+      .map((f) => `packages/engine/dist/${f}`)
+      .sort()
+      .map((p) => `${files[p.slice("packages/engine/dist/".length)] ?? ""} *${p}\n`)
+      .join("");
+    expect(createHash("sha256").update(body).digest("hex")).toBe(PUBLISHED.dist_tree_sha256);
+  });
   it("the packaged bundle is in the repo, and its SHA-256 is the pin's", () => {
     const pin = json(PIN);
     const bundle = `vendor/moroku-enrich/${String(pin.bundle)}`;
