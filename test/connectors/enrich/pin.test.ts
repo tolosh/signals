@@ -79,7 +79,7 @@ describe("LocalEnrich runs the pinned build", () => {
     ]);
     expect(r?.engine_version).toBe("1.8.0");
     expect(r?.taxonomy_version).toBe("1.4");
-    expect((await local?.taxonomy())?.version).toBe("1.4");
+    expect((await local?.taxonomy())?.taxonomy_version).toBe("1.4");
   });
   it("ENR-28 is fixed in it: a BPAY bill payment is an expense, not a transfer", async () => {
     const local = m.pinnedLocalEnrich?.();
