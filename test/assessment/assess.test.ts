@@ -99,7 +99,7 @@ describe("SIG-82 part 1: one assessment, composed from the engines", () => {
     expect(r?.enrich.build).toEqual({
       commit: "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
       version: "1.8.0",
-      dist_sha256: "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421",
+      dist_sha256: "151430cb2c42aa316c6c2dce3bbf20f1fa7aed83737536fa9c3e09c7ae735284",
     });
     const txs = a.feed.accounts.reduce((n, acc) => n + acc.transactions.length, 0);
     expect(r?.enrich.transactions).toBe(txs);
