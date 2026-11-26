@@ -42,6 +42,8 @@ const RECORD_SCRIPTS = [
   "sig57-run.ts",
   // SIG-46: the gross-up's T2 runs.
   "sig46-run.ts",
+  // SIG-70: packages a published Enrich build by commit and hash (ruling 40719, 2).
+  "enrich-package.ts",
 ];
 /** The .mjs files are build and CI tools, not run scripts. */
 const OWN_EQUIVALENT: string[] = [];
