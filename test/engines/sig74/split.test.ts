@@ -69,9 +69,19 @@ const provider = (s: string) =>
     .join(" ");
 
 describe("T2: review 16's E6 strings show the real lender, [withheld] or a lender, never a fragment", () => {
-  const noFragment = (k: string, texts: string[]) => {
-    const frags = new Set(fragmentsOf(k));
-    return texts.flatMap(tokensOf).filter((t) => frags.has(t));
+  // Deviation D1 (Colin, 26 November 2026): as first written, this check counted any token equal
+  // to a fragment, so "credit card", which LIA prints for every card account, counted as the
+  // fragment CARD of CARDIOLOGY. It now counts against the same probe with the keyword unsplit,
+  // as T1 does.
+  const noFragment = (k: string, texts: string[], plainTexts: string[]) => {
+    const tally = (xs: string[]) => {
+      const m = new Map<string, number>();
+      for (const t of xs.flatMap(tokensOf)) m.set(t, (m.get(t) ?? 0) + 1);
+      return m;
+    };
+    const now = tally(texts);
+    const base = tally(plainTexts);
+    return fragmentsOf(k).filter((f) => (now.get(f) ?? 0) > (base.get(f) ?? 0));
   };
   it.each(E6)("%s before a lender shows the lender (NIMBLE)", (s, k) => {
     expect(lenderOf(provider(`${s} NIMBLE REPAY`), `${s} NIMBLE REPAY`)).toBe("NIMBLE");
@@ -79,12 +89,16 @@ describe("T2: review 16's E6 strings show the real lender, [withheld] or a lende
       repeat(13, 14, { description: `${s} NIMBLE REPAY`, amount: -45, category: "sacc_loan" }, 3),
       [],
     );
-    const shown = [
-      ...r.lia.liabilities.map((l) => l.provider),
-      r.lia.signals.find((x) => x.id === "LIA-03")?.reason ?? "",
+    const p = runProbe(
+      repeat(13, 14, { description: `${k} NIMBLE REPAY`, amount: -45, category: "sacc_loan" }, 3),
+      [],
+    );
+    const shown = (x: ProbeRun) => [
+      ...x.lia.liabilities.map((l) => l.provider),
+      x.lia.signals.find((y) => y.id === "LIA-03")?.reason ?? "",
     ];
     expect(r.lia.liabilities.map((l) => l.provider)).toEqual(["NIMBLE"]);
-    expect(noFragment(k, shown)).toEqual([]);
+    expect(noFragment(k, shown(r), shown(p))).toEqual([]);
   });
   it.each(E6)("%s alone shows a lender or [withheld]", (s, k) => {
     const r = runProbe(
@@ -95,9 +109,17 @@ describe("T2: review 16's E6 strings show the real lender, [withheld] or a lende
       }),
       [],
     );
+    const plainRun = runProbe(
+      repeat(6, 30, {
+        description: `${k} LOAN REPAYMENT 88123`,
+        amount: -310,
+        category: "loan_repayment",
+      }),
+      [],
+    );
     for (const p of r.lia.liabilities.map((l) => l.provider))
       expect(["a lender", "[withheld]"]).toContain(p);
-    expect(noFragment(k, strings(r.lia))).toEqual([]);
+    expect(noFragment(k, strings(r.lia), strings(plainRun.lia))).toEqual([]);
   });
   it.each(E6)("%s in a loan or card account's product name shows no fragment", (s, k) => {
     const r = runProbe(
@@ -108,8 +130,16 @@ describe("T2: review 16's E6 strings show the real lender, [withheld] or a lende
         { accountId: "acc-card", productCategory: "CRED_AND_CHRG_CARDS", productName: `${s} Visa` },
       ],
     );
+    const plainRun = runProbe(
+      [],
+      [],
+      [
+        { accountId: "acc-loan", productCategory: "PERS_LOANS", productName: `${k} Lending` },
+        { accountId: "acc-card", productCategory: "CRED_AND_CHRG_CARDS", productName: `${k} Visa` },
+      ],
+    );
     expect(r.lia.liabilities).toHaveLength(2);
-    expect(noFragment(k, strings(r.lia))).toEqual([]);
+    expect(noFragment(k, strings(r.lia), strings(plainRun.lia))).toEqual([]);
     expect(strings(r.lia).flatMap(keywordsIn)).toEqual([]);
   });
   it("a default-ignorable character that isn't Cf is removed before matching: I\u034fVF CLINIC", () => {
