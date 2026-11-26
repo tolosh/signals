@@ -8,3 +8,5 @@ research/aliases/lender-aliases-1.0.0.agent-original.json
 research/aliases/SOURCES.md
 vendor
 research/preregistrations/SIG-76-expected-states.json
+research/preregistrations/SIG-76-enrich-diff-1.7.0-to-1.8.0.csv
+research/preregistrations/SIG-76-enrich-diff-1.7.0-to-1.8.0.summary.json

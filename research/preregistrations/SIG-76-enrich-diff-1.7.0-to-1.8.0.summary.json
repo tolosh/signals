@@ -1,0 +1,47 @@
+{
+  "set": "synthetic-v2.3 seed 623 (SIG-76 scenario inputs, SHA-256 52e602576e49aabad9c22967d2d8b00876cc2f29ca3a27f17fcff908f558ac8c)",
+  "builds": {
+    "1.7.0": {
+      "commit": "406ff97",
+      "dist_index_sha256": "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421",
+      "changed_files_vs_1_8_0": {
+        "exclusions.js": "3c51cc5a2e11e8e27f18b174e7c6184169bfcbeed644c0dc3bfdee05c614adbd",
+        "rules.js": "febb690e009891a12dc149c69326e9bb7054d21e5016b819403f427293275be9",
+        "version.js": "d547d2f4e8458e7dc303e852b3b60f02ea9ff9d32b6b42fed20f3393b8acf9ea"
+      }
+    },
+    "1.8.0": {
+      "commit": "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
+      "dist_index_sha256": "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421",
+      "changed_files": {
+        "exclusions.js": "141bfb90ded4397b72b9b43ba3a05995bc0c313920db047e75cfa9940215e3b4",
+        "rules.js": "92b5ed79bcbb7b8e22f3c53bd84bc14e6ac1d143379ce87f16ac890bc971996b",
+        "version.js": "c1547c3d2fa63ce6cbf7b637dfa51b4aaceeebcff289c258b785a2d4a243c84c"
+      }
+    }
+  },
+  "per_scenario": {
+    "A": {
+      "transactions": 263,
+      "differing": 16,
+      "enr28_bpay": 16,
+      "other": 0
+    },
+    "B": {
+      "transactions": 165,
+      "differing": 0,
+      "enr28_bpay": 0,
+      "other": 0
+    },
+    "C": {
+      "transactions": 254,
+      "differing": 55,
+      "enr28_bpay": 55,
+      "other": 0
+    }
+  },
+  "total_differing": 71,
+  "total_enr28_bpay": 71,
+  "total_other": 0,
+  "other_rows": []
+}
