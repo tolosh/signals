@@ -30,6 +30,14 @@ async function t1Leaks(): Promise<string[]> {
   ].flatMap(([k = "", c = ""]) => leaksOf(k, applicantFor(k, c), applicantFor(k, null)));
 }
 
+/**
+ * T5 as run (comment 40710): as built, T1's probes leave the recorded CAR result (SIG-75), which
+ * also satisfied the mutant checks as first written ("not empty"). Deviation D3 (D28, Colin,
+ * 26 November 2026): the as-built check asserts the recorded result, and each mutant must change
+ * it, which is what "makes T1 fail" means once T1's as-run result isn't empty.
+ */
+const AS_BUILT = ["fragment CAR"];
+
 describe("T5: mutations", () => {
   afterEach(() => {
     vi.doUnmock(MASK);
@@ -37,8 +45,8 @@ describe("T5: mutations", () => {
     vi.resetModules();
   });
 
-  it("as built, T1's probes leave nothing", async () => {
-    expect(await t1Leaks()).toEqual([]);
+  it("as built, T1's probes leave only the recorded CAR result (as run, D3)", async () => {
+    expect(await t1Leaks()).toEqual(AS_BUILT);
   });
   it("without the default-ignorable stripping (Cf only), T1 fails", async () => {
     const actual = await load<MaskModule>(MASK);
@@ -52,7 +60,7 @@ describe("T5: mutations", () => {
     expect(typeof m?.clean).toBe("function");
     vi.resetModules();
     vi.doMock(MASK, () => ({ ...actual, maskText: m?.mask, cleanText: m?.clean }));
-    expect(await t1Leaks()).not.toEqual([]);
+    expect(await t1Leaks()).not.toEqual(AS_BUILT);
   });
   it("without the joined-form lender names (1.3.5's provider words), T1 fails", async () => {
     const actual = await load<LendersModule>(LENDERS);
@@ -60,6 +68,6 @@ describe("T5: mutations", () => {
     const d = actual.makeLenderDisplay?.({ joined: false }) ?? {};
     vi.resetModules();
     vi.doMock(LENDERS, () => ({ ...actual, ...d }));
-    expect(await t1Leaks()).not.toEqual([]);
+    expect(await t1Leaks()).not.toEqual(AS_BUILT);
   });
 });

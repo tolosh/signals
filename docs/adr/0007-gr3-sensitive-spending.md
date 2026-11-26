@@ -45,8 +45,9 @@ limits:**
 
 6. **A split can change how LIA reads a loan's type.** In "CAR<ZWSP>DIOLOGY XAVOCA PERSONAL LOAN",
    LIA's type rule sees the word CAR, so the loan is typed a car loan and "(car loan)" is shown.
-   The type is matching, which SIG-74 leaves unchanged; reading types on joined text is its own
-   ticket. SIG-74's T1 fails on this, as run, for CARDIOLOG and CARDIAC only.
+   The type is matching, which SIG-74 leaves unchanged; reading types on joined text is SIG-75
+   (Colin, 26 November 2026). SIG-74's T1 fails on this, as run, for CARDIOLOG and CARDIAC only, and
+   CI asserts that recorded result (D28).
 7. **A lender's name is the narrative's first word that isn't sensitive** (unchanged since 1.3.0),
    so a narrative starting "TO MYPAYNOW" names the lender "TO" (14 applicants in set v2.2). Found
    while building SIG-74, and left unchanged: SIG-74 changes no text that has no invisible

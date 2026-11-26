@@ -26,6 +26,15 @@ beforeAll(() => {
   for (const k of KEYWORDS) plain.set(k, applicantFor(k, null));
 }, 300_000);
 
+/**
+ * T1 as run (comment 40710): it fails on CARDIOLOG and CARDIAC only, in every splitter, through
+ * LIA's loan-type reading ("CAR<ZWSP>DIOLOGY" is typed a car loan, so "(car loan)" shows). Colin
+ * accepted the result as run on 26 November 2026, and the type reading is SIG-75. Deviation D2
+ * (D28): CI asserts that this recorded result reproduces exactly, so any other leak, or a change
+ * to these, fails. SIG-75 removes the exception.
+ */
+const T1_AS_RUN = ["CARDIOLOG: fragment CAR", "CARDIAC: fragment CAR"];
+
 describe("T1: a keyword split by an invisible character at any position leaves nothing", () => {
   it("the plain controls show no keyword", () => {
     const found = KEYWORDS.flatMap((k) =>
@@ -36,7 +45,7 @@ describe("T1: a keyword split by an invisible character at any position leaves n
     expect(found).toEqual([]);
   });
   it.each(SPLITTERS.map(([name, c]) => [name, c]))(
-    "split by %s: 0 keywords and 0 fragments of 2 or more letters in every output field",
+    "split by %s: only the recorded CAR result (as run, D2); otherwise 0 keywords and 0 fragments",
     (_name, c) => {
       const failures: string[] = [];
       for (const k of KEYWORDS) {
@@ -45,7 +54,7 @@ describe("T1: a keyword split by an invisible character at any position leaves n
         const leaks = leaksOf(k, applicantFor(k, c), base);
         if (leaks.length > 0) failures.push(`${k}: ${leaks.join(", ")}`);
       }
-      expect(failures).toEqual([]);
+      expect(failures).toEqual(T1_AS_RUN);
     },
     300_000,
   );
