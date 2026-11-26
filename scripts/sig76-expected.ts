@@ -103,8 +103,27 @@ const summary = (o: Awaited<ReturnType<typeof assessApplicant>>) => ({
   lia: o.lia.signals.map((s) => ({ id: s.id, state: s.state, value: s.value })),
 });
 const sha = (x: unknown) => createHash("sha256").update(JSON.stringify(x)).digest("hex");
+/**
+ * The output as committed: the Enrich response's rows (each holding the raw narrative, as
+ * merchant.normalised_from) are replaced by their count and SHA-256. Raw narratives belong in the
+ * assessment store, not in a committed file; output_sha256 is still taken over the whole output.
+ */
+const committed = (o: Awaited<ReturnType<typeof assessApplicant>>) => ({
+  ...o,
+  enrich: {
+    ...o.enrich,
+    response: {
+      engine_version: o.enrich.response.engine_version,
+      taxonomy_version: o.enrich.response.taxonomy_version,
+      results: o.enrich.response.results.length,
+      results_sha256: sha(o.enrich.response.results),
+    },
+  },
+});
 const record = {
   ticket: "SIG-76",
+  set: "synthetic-v2.3",
+  set_sha256: manifest.set_sha256,
   computed_by:
     "assessApplicant (src/assessment/assess.ts, composition 1.0.0; SIG-82 part 1), on the SIG-70 adapter's local path and the pinned Enrich build (vendor/moroku-enrich/pin.json)",
   order_run: order,
@@ -116,7 +135,7 @@ const record = {
         applicant_id: prereg.scenarios[k].applicant_id,
         output_sha256: sha(outputs[k]),
         summary: summary(outputs[k] as Awaited<ReturnType<typeof assessApplicant>>),
-        output: outputs[k],
+        output: committed(outputs[k] as Awaited<ReturnType<typeof assessApplicant>>),
       },
     ]),
   ),
