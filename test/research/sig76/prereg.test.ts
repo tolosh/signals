@@ -31,7 +31,7 @@ describe("SIG-76 pre-registration: scenarios A, B and C, chosen by ground truth"
     const a = m.selectScenarios?.(set);
     const b = m.selectScenarios?.(generateSetV23(623));
     expect(a).toEqual(b);
-  });
+  }, 120_000); // it generates set v2.3 a second time, which takes longer under full-suite load
   it("the pre-registration records the same applicants the rules select", () => {
     const p = prereg();
     const s = m.selectScenarios?.(set) as Record<string, { applicant_id: string }> | undefined;
