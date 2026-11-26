@@ -1,0 +1,83 @@
+{
+  "ticket": "SIG-76",
+  "title": "Integration acceptance for the 1 December demo: scenarios, seeds and negative paths",
+  "status": "design and seeds only (ruling 40720, 26 November 2026). The expected states are NOT computed: they wait for the Enrich engine build pinned after the ENR-28 fix (ruling 40719), whose moroku-enrich commit, version and dist SHA-256 go in enrich_build. If that build isn't pinned by Friday 27 November, Colin decides between the current build with ENR-28 disclosed and the seeded fallback. Committed before any candidate build; the architect freezes the expected results before the candidate is checked.",
+  "rulings": [
+    "D57 to D60 (Decision Record page 3234988050): the demo order; seeded synthetic applicants through the real engines on Enrich path local; a hosted demo stage on synthetic or sandbox data only; this ticket",
+    "SIG-70 40719: the expected states use the Enrich build pinned after the ENR-28 fix",
+    "SIG-76 40720: prepare the scenarios' design and seeds and the negative paths now; compute no expected state until the build is pinned"
+  ],
+  "data": {
+    "source": "synthetic",
+    "sets": ["synthetic-v2.3"],
+    "seed": 623,
+    "set_sha256": "69dcc096db8f0b11ea14848ad5e037e6b3d8bdc52a97a6cfe74613bd946898ba",
+    "set_v2_3_caveats": "ADR 0010: salaried pay is identical to the cent; no sensitive merchants (the probe below adds them); drift scored per applicant; no cross-applicant code statistics"
+  },
+  "selection": {
+    "module": "src/research/sig76/scenarios.ts (selectScenarios)",
+    "method": "ground truth only, never an engine's output; each rule takes the lowest applicant id that meets it",
+    "thresholds": {
+      "surplus_median": 3483.77,
+      "surplus_lower_quartile": 629.15
+    },
+    "bpay": "No scenario has a liability repaid by BPAY, so no scenario's liabilities depend on the ENR-28 fix (BPAY bill payments returned as transfers by Enrich 1.7.0). BPAY bill payments for utilities and the like may still appear, and are affected by ENR-28 until the fixed build is pinned."
+  },
+  "scenarios": {
+    "A": {
+      "applicant_id": "syn-v23-18936492246e52ae",
+      "story": "regular salary and affordable commitments",
+      "rule": "regular salary, affordable: a CDR feed of 6 months or more; tags salaried-fixed and dishonour-clean and none of the risk tags; the salary account shared; every liability declared; no liability repaid by BPAY; truth surplus at or above the set's median",
+      "candidates": 50,
+      "truth_summary": "salaried-fixed; one declared loan (MONEY3, direct debit); 12 months; truth surplus 3775.86 a month"
+    },
+    "B": {
+      "applicant_id": "syn-v23-9bd03ecbd72ba13e",
+      "story": "a hidden credit liability and affordability pressure",
+      "rule": "a hidden credit liability and affordability pressure: a CDR feed of 6 months or more; tag salaried and none of the drift or gambling tags; the salary account shared; an undisclosed personal or car loan; no liability repaid by BPAY; truth surplus at or below the set's lower quartile",
+      "candidates": 1,
+      "truth_summary": "salaried, irregular, with overtime; one undisclosed personal loan (COMMBANK PL, direct debit); 6 months; truth surplus 238.59 a month"
+    },
+    "C": {
+      "applicant_id": "syn-v23-13cfd6ef54467a35",
+      "story": "missing income or insufficient evidence",
+      "rule": "missing income or insufficient evidence: a CDR feed of 3 months or more, tag salaried, no liability repaid by BPAY, whose salary account is not shared (EQ-01 then fails, and the assessment is unverified)",
+      "candidates": 12,
+      "truth_summary": "salaried-fixed; salary account not shared; 12 months"
+    }
+  },
+  "negative_control": {
+    "scenario": "C",
+    "run_first": true,
+    "expect": "the assessment is unverified, or evidence incomplete, with no guessed income figure. If it isn't, stop (SIG-76 T2)"
+  },
+  "perturbation": {
+    "scenario": "A",
+    "change": "scenario A's most recent salary credit increased by $100.00, nothing else changed",
+    "expect": "the hosted result differs from scenario A's (SIG-76 T4: no hard-coded output)"
+  },
+  "negative_paths": {
+    "expired_invite": "an invite past its expiry: the applicant can't connect, and the lender sees it expired (T9)",
+    "revoked_grant": "a grant revoked after connection: no new data is read, and the state shows revoked (T9)",
+    "cross_tenant_read": "a tenant-B key reading tenant A's applicant and assessment gets 404 (T6, RLS)",
+    "billing_out_of_scope": "billing (SIG-67) is not built: the over-limit and insufficient-balance invites are shown as out of scope, not tested",
+    "sensitive_probe": "scenario A's applicant with added lines: a SACC narrative \"IV<ZWSP>F NIMBLE REPAY\" and card spend at \"CARDIOLOGY CLINIC\" with MCC 8011; no keyword or fragment shows anywhere, JSON, UI or PDF (T5)"
+  },
+  "procedure": [
+    "on the hosted demo stage, at the candidate commit: a lender signs in, creates an applicant and sends an invite",
+    "the applicant completes the labelled sandbox consent",
+    "transactions are ingested and categorised by local Enrich, path recorded",
+    "the assessment completes, and its JSON (summary, affordability, signals and evidence) is fetched, with the PDF and webhook if in scope",
+    "each scenario is repeated three times from a clean state",
+    "the run record goes under research/runs/ with the commit, environment, set hash and versions (definitions, thresholds, taxonomy, keyword list, LIA, INC, EQ)"
+  ],
+  "enrich_build": null,
+  "expected_states": null,
+  "expected_states_when": "computed by running the engines locally at the candidate commit, on the pinned Enrich build, for each scenario's roll-up, affordability ratios and key INC, LIA and EQ signals; frozen by the architect in a file with its SHA-256 recorded",
+  "out_of_scope": [
+    "Stripe billing",
+    "ABN sign-up",
+    "the real openfeed and live Enrich API paths",
+    "any real data"
+  ]
+}
