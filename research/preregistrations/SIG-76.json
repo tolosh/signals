@@ -128,7 +128,7 @@
   },
   "expected_states": {
     "file": "research/preregistrations/SIG-76-expected-states.json",
-    "file_sha256": "c0637f4cd4a8708e551eed86aa36bcf362dd02e4b85499d81c1c977c341ef947",
+    "file_sha256": "d6a5719af73cf079465146b6a5c000b31e4fec37cfe39302938f3f6c7ac9ebed",
     "computed_by": "assessApplicant (src/assessment/assess.ts, composition 1.0.0; SIG-82 part 1), on the SIG-70 adapter's local path and the pinned Enrich build (vendor/moroku-enrich/pin.json)",
     "script": "scripts/sig76-expected.ts (it calls assessApplicant; the negative control C ran first and came out unverified)",
     "output_sha256": {
@@ -136,7 +136,8 @@
       "B": "8ee488e12e4c7e11a09e14ccdeb0b30445cba4444d8e07e2d892057032ec5ce4",
       "C": "5adc66fe7eaee6647ef00ade09cf216e45bfe7f75398d83049bae27b06b9d771"
     },
-    "byte_for_byte": "T3 compares each hosted result with assessApplicant's output at the candidate commit; here, each scenario's whole output is pinned by its SHA-256"
+    "byte_for_byte": "T3 compares each hosted result with assessApplicant's output at the candidate commit; here, each scenario's whole output is pinned by its SHA-256",
+    "raw_narratives": "the Enrich response's rows are kept as their count and SHA-256 (they hold raw narratives); output_sha256 covers the whole output"
   },
   "expected_states_when": "computed by running the engines locally at the candidate commit, on the pinned Enrich build, for each scenario's roll-up, affordability ratios and key INC, LIA and EQ signals; frozen by the architect in a file with its SHA-256 recorded",
   "out_of_scope": [

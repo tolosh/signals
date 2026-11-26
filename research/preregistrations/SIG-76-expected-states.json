@@ -1,0 +1,4599 @@
+{
+  "ticket": "SIG-76",
+  "set": "synthetic-v2.3",
+  "set_sha256": "69dcc096db8f0b11ea14848ad5e037e6b3d8bdc52a97a6cfe74613bd946898ba",
+  "computed_by": "assessApplicant (src/assessment/assess.ts, composition 1.0.0; SIG-82 part 1), on the SIG-70 adapter's local path and the pinned Enrich build (vendor/moroku-enrich/pin.json)",
+  "order_run": [
+    "C",
+    "A",
+    "B"
+  ],
+  "negative_control": {
+    "scenario": "C",
+    "rollup_evidence": "unverified"
+  },
+  "scenarios": {
+    "A": {
+      "applicant_id": "syn-v23-18936492246e52ae",
+      "output_sha256": "d2622a48fb8a8f68f9bc26e314bf98fa04db9fcffaa5fd76f9d908a186e8e0b8",
+      "summary": {
+        "enrich": {
+          "path": "local",
+          "build": {
+            "commit": "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
+            "version": "1.8.0",
+            "dist_sha256": "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421"
+          },
+          "engine_version": "1.8.0",
+          "taxonomy_version": "1.4",
+          "transactions": 263
+        },
+        "rollup": {
+          "evidence": null,
+          "movers": []
+        },
+        "evidence_checks": [
+          {
+            "id": "EQ-01",
+            "result": "pass"
+          },
+          {
+            "id": "EQ-02",
+            "result": "pass"
+          },
+          {
+            "id": "EQ-03",
+            "result": "pass"
+          }
+        ],
+        "affordability": {
+          "status": "complete",
+          "serviceability": {
+            "monthly_income": 7344.87,
+            "monthly_expenses_gle": 1310.84,
+            "monthly_repayments": 443,
+            "proposed_repayment": 471,
+            "total_expenses_annual": 26698.08
+          },
+          "ratios": [
+            {
+              "key": "dsr",
+              "state": "green",
+              "value": 0.3
+            },
+            {
+              "key": "ndi",
+              "state": "green",
+              "value": 6.6
+            },
+            {
+              "key": "ara",
+              "state": null,
+              "value": 5591.03
+            },
+            {
+              "key": "lvr",
+              "state": "unverified"
+            },
+            {
+              "key": "benchmark_gle",
+              "state": "unverified"
+            },
+            {
+              "key": "lti",
+              "state": "green"
+            },
+            {
+              "key": "dti",
+              "state": "green"
+            }
+          ]
+        },
+        "inc": [
+          {
+            "id": "INC-01",
+            "state": "green",
+            "value": "Varies up to 0% cycle to cycle"
+          },
+          {
+            "id": "INC-02",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-03",
+            "state": "green",
+            "value": "0% variable"
+          },
+          {
+            "id": "INC-04",
+            "state": "green",
+            "value": "At least 11.5 months"
+          },
+          {
+            "id": "INC-05",
+            "state": "none_observed",
+            "value": "0 credits"
+          },
+          {
+            "id": "INC-06",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-07",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-08",
+            "state": "green",
+            "value": "1 stream"
+          },
+          {
+            "id": "INC-09",
+            "state": "green",
+            "value": "0 trough months"
+          },
+          {
+            "id": "INC-10",
+            "state": "green",
+            "value": "0% gig"
+          },
+          {
+            "id": "INC-11",
+            "state": "green",
+            "value": "Down 0% over 3 cycles"
+          },
+          {
+            "id": "INC-12",
+            "state": "green",
+            "value": "0 missed cycles"
+          },
+          {
+            "id": "INC-13",
+            "state": "green",
+            "value": "No change"
+          }
+        ],
+        "lia": [
+          {
+            "id": "LIA-01",
+            "state": "green",
+            "value": "1 found, all declared"
+          },
+          {
+            "id": "LIA-02",
+            "state": "none_observed",
+            "value": null
+          },
+          {
+            "id": "LIA-03",
+            "state": "none_observed",
+            "value": null
+          },
+          {
+            "id": "LIA-04",
+            "state": "none_observed",
+            "value": null
+          },
+          {
+            "id": "LIA-05",
+            "state": "none_observed",
+            "value": null
+          },
+          {
+            "id": "LIA-06",
+            "state": "unverified",
+            "value": null
+          }
+        ]
+      },
+      "output": {
+        "composition_version": "1.0.0",
+        "applicant_id": "syn-v23-18936492246e52ae",
+        "enrich": {
+          "path": "local",
+          "engine_version": "1.8.0",
+          "taxonomy_version": "1.4",
+          "taxonomy": {
+            "taxonomy_version": "1.4",
+            "classifications": [
+              "essential",
+              "discretionary",
+              "financial_commitment"
+            ],
+            "categories": [
+              {
+                "id": "mortgage",
+                "label": "Mortgage",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "rent",
+                "label": "Rent",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "loan_repayment",
+                "label": "Loan Repayment",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "groceries",
+                "label": "Groceries",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "utilities",
+                "label": "Utilities",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "vehicle_running",
+                "label": "Vehicle Running",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "transport",
+                "label": "Transport",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "insurance",
+                "label": "Insurance",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "strata",
+                "label": "Strata",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "education",
+                "label": "Education",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "subscriptions",
+                "label": "Subscriptions",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "dining_entertainment",
+                "label": "Dining & Entertainment",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "clothing",
+                "label": "Clothing",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "healthcare",
+                "label": "Healthcare",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "other_expenses",
+                "label": "Other Expenses",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "bnpl",
+                "label": "Buy Now Pay Later",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "general_retail",
+                "label": "General Retail",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "sacc_loan",
+                "label": "Small Amount Credit (SACC)",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "wage_advance",
+                "label": "Wage Advance",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "debt_collection",
+                "label": "Debt Collection",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "fines_penalties",
+                "label": "Fines & Penalties",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "gambling_wagering",
+                "label": "Gambling — Wagering",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "gambling_casino",
+                "label": "Gambling — Casino",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "gambling_lottery",
+                "label": "Gambling — Lottery",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "quasi_cash",
+                "label": "Quasi-Cash",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "transfer",
+                "label": "Transfer",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "uncategorised_credit",
+                "label": "Uncategorised Credit",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "income",
+                "label": "Income",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "savings_deposit",
+                "label": "Savings Deposit",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "savings_withdrawal",
+                "label": "Savings Withdrawal",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "crypto_exchange",
+                "label": "Crypto Exchange",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "crypto_atm",
+                "label": "Crypto ATM",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              }
+            ]
+          },
+          "build": {
+            "commit": "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
+            "version": "1.8.0",
+            "dist_sha256": "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421"
+          },
+          "transactions": 263,
+          "response": {
+            "engine_version": "1.8.0",
+            "taxonomy_version": "1.4",
+            "results": 263,
+            "results_sha256": "3559d491ae910ef5d3b252e15d75aa57b74696370ea993409cbd67585c40e599"
+          }
+        },
+        "evidence": {
+          "rollup": {
+            "state": null,
+            "green_allowed": true,
+            "reasons": []
+          },
+          "checks": [
+            {
+              "id": "EQ-01",
+              "name": "Income account present",
+              "result": "pass",
+              "detail": "A recurring income credit is in a shared account",
+              "resolve_with": [],
+              "review_required": false
+            },
+            {
+              "id": "EQ-02",
+              "name": "Unmatched own-account transfers",
+              "result": "pass",
+              "detail": "No transfers to or from accounts outside the grant",
+              "resolve_with": [],
+              "review_required": false
+            },
+            {
+              "id": "EQ-03",
+              "name": "Window covered",
+              "result": "pass",
+              "detail": "The sync returned 100% of the 6-month lookback window",
+              "resolve_with": [],
+              "review_required": false
+            }
+          ]
+        },
+        "inc": {
+          "version": "1.2.4",
+          "gr3_gate_version": "1.2.0",
+          "keyword_list_version": "1.1.0",
+          "signals": [
+            {
+              "id": "INC-01",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Income regularity",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "Varies up to 0% cycle to cycle",
+              "reason": "Pay from PAY REDGUM ARCHITECTS arrives fortnightly and varies by 0% at most",
+              "confidence": "high",
+              "evidence_count": 14,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 14
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-02",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Stated vs observed",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: needs gross-up. The resident tax-table gross-up (SIG-46) is not built yet (D24)",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "inferred",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-03",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Income mix",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "0% variable",
+              "reason": "0% of income is variable, gig or rental; variable income is shaded in the income table",
+              "confidence": "high",
+              "evidence_count": 26,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2025-11-14",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 26
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-04",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Employer tenure",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "At least 11.5 months",
+              "reason": "Paid by PAY REDGUM ARCHITECTS since 2025-11-14, the start of the history",
+              "confidence": "high",
+              "evidence_count": 1,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2025-11-14",
+                  "period_end": "2025-11-14",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 1
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-05",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Circular income",
+              "state": "none_observed",
+              "rollup_class": "standard",
+              "value": "0 credits",
+              "reason": "No pay-like credits from the applicant's own accounts were found",
+              "confidence": "high",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-06",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Occupation fit",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: the application has no occupation",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "declared",
+                "resolve_with": [
+                  "Add the applicant's occupation to the application"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-07",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Payer concentration",
+              "state": "unverified",
+              "rollup_class": "context",
+              "value": null,
+              "reason": "Not verified: the application does not say how many earn an income",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Confirm how many people in the household earn an income"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-08",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Diversification",
+              "state": "green",
+              "rollup_class": "context",
+              "value": "1 stream",
+              "reason": "1 independent income stream each contribute over 10%",
+              "confidence": "high",
+              "evidence_count": 26,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2025-11-14",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 26
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-09",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Seasonality",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "0 trough months",
+              "reason": "Every month is at or above 60% of the annual average (regular income only)",
+              "confidence": "high",
+              "evidence_count": 26,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2025-11-14",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 26
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 12
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-10",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Gig and platform income",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "0% gig",
+              "reason": "0% of income is from gig and platform payers. Gig payers are matched against the fixture list until Enrich curates them",
+              "confidence": "medium",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-11",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Falling pay at the same payer",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "Down 0% over 3 cycles",
+              "reason": "Pay per cycle from the same payer is not falling",
+              "confidence": "high",
+              "evidence_count": 4,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-09-18",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 4
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-12",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Interruptions",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "0 missed cycles",
+              "reason": "No missed pay cycles in the last 6 months",
+              "confidence": "high",
+              "evidence_count": 14,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 14
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-13",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Pay-cycle change",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "No change",
+              "reason": "No change in pay cycle or payer in the last 90 days",
+              "confidence": "high",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            }
+          ],
+          "income": [
+            {
+              "payer": "PAY REDGUM ARCHITECTS",
+              "cadence": "fortnightly",
+              "observed_amount": 7344.87,
+              "type": "salary",
+              "shading": 1,
+              "assessed_amount": 7344.87
+            }
+          ],
+          "net_monthly": 7344.87,
+          "assessed_monthly": 7344.87,
+          "trace": [
+            {
+              "step": "Income streams",
+              "value": 1
+            },
+            {
+              "step": "Observed net monthly income",
+              "value": 7344.87
+            },
+            {
+              "step": "Assessed monthly income, after shading",
+              "value": 7344.87
+            },
+            {
+              "step": "Excluded: own-account transfers",
+              "value": 0
+            },
+            {
+              "step": "Excluded: refunds",
+              "value": 0
+            },
+            {
+              "step": "Excluded: advances and loans",
+              "value": 0
+            },
+            {
+              "step": "Excluded: interest",
+              "value": 0
+            },
+            {
+              "step": "Excluded: repayments received",
+              "value": 0
+            },
+            {
+              "step": "Excluded: not a transaction account",
+              "value": 0
+            }
+          ]
+        },
+        "lia": {
+          "version": "1.3.6",
+          "gr3_gate_version": "1.2.0",
+          "lender_names_version": "1.2.0",
+          "keyword_list_version": "1.1.0",
+          "detector": {
+            "method_version": "1.0.0",
+            "min_occurrences": 3,
+            "amount_tolerance": 0.15
+          },
+          "signals": [
+            {
+              "id": "LIA-01",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Undisclosed liabilities",
+              "state": "green",
+              "rollup_class": "knockout",
+              "value": "1 found, all declared",
+              "reason": "Every liability found is in the application. Detection rests on lender names in the narratives (tested on synthetic, template-written data only). Only an exact provider name counts as declared; a liability of a declared type and repayment under another name is possibly declared, to confirm with the applicant",
+              "confidence": "medium",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "LIA-02",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Loan stacking",
+              "state": "none_observed",
+              "rollup_class": "refer",
+              "value": null,
+              "reason": "No disbursement from a lender was found",
+              "confidence": "high",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "LIA-03",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Payday and SACC",
+              "state": "none_observed",
+              "rollup_class": "refer",
+              "value": null,
+              "reason": "No payday or SACC repayment was found in 12 months",
+              "confidence": "high",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "LIA-04",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Wage advance",
+              "state": "none_observed",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "No wage advance was found",
+              "confidence": "high",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "LIA-05",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "BNPL",
+              "state": "none_observed",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "No BNPL repayment was found",
+              "confidence": "high",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "LIA-06",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Private loans",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Private-loan detection is not yet supported on categorised data",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "vojvgvdubcuhwe"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 76
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            }
+          ],
+          "liabilities": [
+            {
+              "family": "loan",
+              "provider": "MONEY3",
+              "sources": [
+                "outflow"
+              ],
+              "cadence": "fortnightly",
+              "occurrences": 13,
+              "median_amount": 213,
+              "monthly": 461.5,
+              "evidence": [
+                "dngckmpdbfnbvh",
+                "fonctxooghgvkm",
+                "isobuhqcazqfzd",
+                "ksoklbgkjwwizu",
+                "lfrjrskqvuiemz",
+                "lhskknynnphkvf",
+                "ohnpvhtrvxmido",
+                "opvifjwjkiefyu",
+                "tkmxomwzjywmbk",
+                "uezlzpuslmtlhx",
+                "xdqozvnagbujfy",
+                "xydbhokbwejvqk",
+                "yasutkosrcozjm"
+              ],
+              "account_ids": [
+                "vojvgvdubcuhwe"
+              ],
+              "declared": true
+            }
+          ]
+        },
+        "expenses": {
+          "gr3_gate_version": "1.2.0",
+          "committed_monthly": 603.31,
+          "basic_monthly": 707.53,
+          "discretionary_monthly": 159.05,
+          "living_monthly": 1310.84,
+          "months_covered": 6.05,
+          "one_offs": [],
+          "excluded": {
+            "own_account_and_savings": 6,
+            "debt_repayments": 13,
+            "other": 0
+          },
+          "unmapped": {}
+        },
+        "affordability": {
+          "affordability": {
+            "status": "complete",
+            "serviceability": {
+              "monthly_income": 7344.87,
+              "monthly_expenses_gle": 1310.84,
+              "monthly_repayments": 443,
+              "proposed_repayment": 471,
+              "total_expenses_annual": 26698.08
+            },
+            "ratios": [
+              {
+                "key": "dsr",
+                "label": "DSR",
+                "value": 0.3,
+                "state": "green"
+              },
+              {
+                "key": "ndi",
+                "label": "NDI",
+                "value": 6.6,
+                "state": "green"
+              },
+              {
+                "key": "ara",
+                "label": "ARA",
+                "value": 5591.03,
+                "unit": "aud",
+                "state": null
+              },
+              {
+                "key": "lvr",
+                "label": "LVR",
+                "state": "unverified"
+              },
+              {
+                "key": "benchmark_gle",
+                "label": "Benchmark / GLE",
+                "state": "unverified"
+              },
+              {
+                "key": "lti",
+                "label": "LTI",
+                "gross": 0.17,
+                "net": 0.23,
+                "state": "green"
+              },
+              {
+                "key": "dti",
+                "label": "DTI",
+                "gross": 0.17,
+                "net": 0.23,
+                "state": "green"
+              }
+            ],
+            "benchmark": {
+              "name": "none: the expense method reads no benchmark",
+              "version": 0,
+              "is_seed": false
+            }
+          },
+          "trace": [
+            {
+              "step": "income",
+              "value": 7344.87,
+              "inputs": {
+                "streams": [
+                  {
+                    "type": "salary",
+                    "monthly": 7344.87,
+                    "shading": 1
+                  }
+                ]
+              }
+            },
+            {
+              "step": "gle",
+              "value": 1310.84,
+              "inputs": {
+                "method": "observed",
+                "confirmed_monthly": null,
+                "benchmark_monthly": null,
+                "observed": 1310.84,
+                "rent_removed_monthly": 0,
+                "missing": [],
+                "gle": 1310.84,
+                "used": "observed",
+                "resolve_with": []
+              }
+            },
+            {
+              "step": "assessment_rate",
+              "value": 14.5,
+              "inputs": {
+                "product_rate_pct": 11.5,
+                "buffer_pct": 3,
+                "floor_rate_pct": 5.5
+              }
+            },
+            {
+              "step": "repayments",
+              "value": 443,
+              "inputs": {
+                "commitments": [
+                  {
+                    "type": "car_loan",
+                    "source": "declared",
+                    "monthly": 443
+                  }
+                ]
+              }
+            },
+            {
+              "step": "proposed_repayment",
+              "value": 471,
+              "inputs": {
+                "loan_amount": 20000,
+                "assessment_rate_pct": 14.5,
+                "term_months": 60,
+                "unrounded": 470.5656216171643
+              }
+            },
+            {
+              "step": "total_expenses",
+              "value": 26698.08,
+              "inputs": {
+                "gle": 1310.84,
+                "repayments": 443,
+                "proposed": 471
+              }
+            },
+            {
+              "step": "total_debt",
+              "value": 20000,
+              "inputs": {
+                "loan_amount": 20000,
+                "liabilities": 1
+              }
+            },
+            {
+              "step": "ara",
+              "value": 5591.03,
+              "inputs": {
+                "income": 7344.87,
+                "gle": 1310.84,
+                "repayments": 443
+              }
+            },
+            {
+              "step": "dsr",
+              "value": 0.30291073906005145,
+              "inputs": {
+                "gle": 1310.84,
+                "repayments": 443,
+                "proposed": 471,
+                "income": 7344.87
+              }
+            },
+            {
+              "step": "ndi",
+              "value": 6.601783369803063,
+              "inputs": {
+                "income": 7344.87,
+                "gle": 1310.84,
+                "repayments": 443,
+                "proposed": 471
+              }
+            },
+            {
+              "step": "lvr",
+              "value": null,
+              "inputs": {
+                "reason": "no security value"
+              }
+            },
+            {
+              "step": "benchmark_gle",
+              "value": null,
+              "inputs": {
+                "reason": "no benchmark"
+              }
+            },
+            {
+              "step": "lti_gross",
+              "value": 0.17289970088351747,
+              "inputs": {
+                "loan": 20000,
+                "gross": 115674
+              }
+            },
+            {
+              "step": "lti_net",
+              "value": 0.22691574754443122,
+              "inputs": {
+                "loan": 20000,
+                "annualNet": 88138.44
+              }
+            },
+            {
+              "step": "dti_gross",
+              "value": 0.17289970088351747,
+              "inputs": {
+                "totalDebt": 20000,
+                "gross": 115674
+              }
+            },
+            {
+              "step": "dti_net",
+              "value": 0.22691574754443122,
+              "inputs": {
+                "totalDebt": 20000,
+                "annualNet": 88138.44
+              }
+            }
+          ],
+          "versions": {
+            "thresholds_version": 1
+          }
+        },
+        "rollup": {
+          "evidence": null,
+          "movers": []
+        }
+      }
+    },
+    "B": {
+      "applicant_id": "syn-v23-9bd03ecbd72ba13e",
+      "output_sha256": "8ee488e12e4c7e11a09e14ccdeb0b30445cba4444d8e07e2d892057032ec5ce4",
+      "summary": {
+        "enrich": {
+          "path": "local",
+          "build": {
+            "commit": "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
+            "version": "1.8.0",
+            "dist_sha256": "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421"
+          },
+          "engine_version": "1.8.0",
+          "taxonomy_version": "1.4",
+          "transactions": 165
+        },
+        "rollup": {
+          "evidence": null,
+          "movers": [
+            {
+              "id": "INC-01",
+              "state": "amber"
+            }
+          ]
+        },
+        "evidence_checks": [
+          {
+            "id": "EQ-01",
+            "result": "pass"
+          },
+          {
+            "id": "EQ-02",
+            "result": "pass"
+          },
+          {
+            "id": "EQ-03",
+            "result": "pass"
+          }
+        ],
+        "affordability": {
+          "status": "complete",
+          "serviceability": {
+            "monthly_income": 3152.44,
+            "monthly_expenses_gle": 782.98,
+            "monthly_repayments": 0,
+            "proposed_repayment": 471,
+            "total_expenses_annual": 15047.76
+          },
+          "ratios": [
+            {
+              "key": "dsr",
+              "state": "green",
+              "value": 0.4
+            },
+            {
+              "key": "ndi",
+              "state": "green",
+              "value": 5.03
+            },
+            {
+              "key": "ara",
+              "state": null,
+              "value": 2369.46
+            },
+            {
+              "key": "lvr",
+              "state": "unverified"
+            },
+            {
+              "key": "benchmark_gle",
+              "state": "unverified"
+            },
+            {
+              "key": "lti",
+              "state": "green"
+            },
+            {
+              "key": "dti",
+              "state": "green"
+            }
+          ]
+        },
+        "inc": [
+          {
+            "id": "INC-01",
+            "state": "amber",
+            "value": "Varies up to 50% cycle to cycle"
+          },
+          {
+            "id": "INC-02",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-03",
+            "state": "green",
+            "value": "0% variable"
+          },
+          {
+            "id": "INC-04",
+            "state": "green",
+            "value": "At least 5.6 months"
+          },
+          {
+            "id": "INC-05",
+            "state": "none_observed",
+            "value": "0 credits"
+          },
+          {
+            "id": "INC-06",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-07",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-08",
+            "state": "green",
+            "value": "1 stream"
+          },
+          {
+            "id": "INC-09",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-10",
+            "state": "green",
+            "value": "0% gig"
+          },
+          {
+            "id": "INC-11",
+            "state": "green",
+            "value": "Down 0% over 3 cycles"
+          },
+          {
+            "id": "INC-12",
+            "state": "green",
+            "value": "0 missed cycles"
+          },
+          {
+            "id": "INC-13",
+            "state": "green",
+            "value": "No change"
+          }
+        ],
+        "lia": [
+          {
+            "id": "LIA-01",
+            "state": "none_observed",
+            "value": null
+          },
+          {
+            "id": "LIA-02",
+            "state": "none_observed",
+            "value": null
+          },
+          {
+            "id": "LIA-03",
+            "state": "none_observed",
+            "value": null
+          },
+          {
+            "id": "LIA-04",
+            "state": "none_observed",
+            "value": null
+          },
+          {
+            "id": "LIA-05",
+            "state": "none_observed",
+            "value": null
+          },
+          {
+            "id": "LIA-06",
+            "state": "unverified",
+            "value": null
+          }
+        ]
+      },
+      "output": {
+        "composition_version": "1.0.0",
+        "applicant_id": "syn-v23-9bd03ecbd72ba13e",
+        "enrich": {
+          "path": "local",
+          "engine_version": "1.8.0",
+          "taxonomy_version": "1.4",
+          "taxonomy": {
+            "taxonomy_version": "1.4",
+            "classifications": [
+              "essential",
+              "discretionary",
+              "financial_commitment"
+            ],
+            "categories": [
+              {
+                "id": "mortgage",
+                "label": "Mortgage",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "rent",
+                "label": "Rent",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "loan_repayment",
+                "label": "Loan Repayment",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "groceries",
+                "label": "Groceries",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "utilities",
+                "label": "Utilities",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "vehicle_running",
+                "label": "Vehicle Running",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "transport",
+                "label": "Transport",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "insurance",
+                "label": "Insurance",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "strata",
+                "label": "Strata",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "education",
+                "label": "Education",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "subscriptions",
+                "label": "Subscriptions",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "dining_entertainment",
+                "label": "Dining & Entertainment",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "clothing",
+                "label": "Clothing",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "healthcare",
+                "label": "Healthcare",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "other_expenses",
+                "label": "Other Expenses",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "bnpl",
+                "label": "Buy Now Pay Later",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "general_retail",
+                "label": "General Retail",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "sacc_loan",
+                "label": "Small Amount Credit (SACC)",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "wage_advance",
+                "label": "Wage Advance",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "debt_collection",
+                "label": "Debt Collection",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "fines_penalties",
+                "label": "Fines & Penalties",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "gambling_wagering",
+                "label": "Gambling — Wagering",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "gambling_casino",
+                "label": "Gambling — Casino",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "gambling_lottery",
+                "label": "Gambling — Lottery",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "quasi_cash",
+                "label": "Quasi-Cash",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "transfer",
+                "label": "Transfer",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "uncategorised_credit",
+                "label": "Uncategorised Credit",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "income",
+                "label": "Income",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "savings_deposit",
+                "label": "Savings Deposit",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "savings_withdrawal",
+                "label": "Savings Withdrawal",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "crypto_exchange",
+                "label": "Crypto Exchange",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "crypto_atm",
+                "label": "Crypto ATM",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              }
+            ]
+          },
+          "build": {
+            "commit": "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
+            "version": "1.8.0",
+            "dist_sha256": "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421"
+          },
+          "transactions": 165,
+          "response": {
+            "engine_version": "1.8.0",
+            "taxonomy_version": "1.4",
+            "results": 165,
+            "results_sha256": "4277699580b62951e3980049865cc6b34cf2ece64917413593238d2e72f53c7d"
+          }
+        },
+        "evidence": {
+          "rollup": {
+            "state": null,
+            "green_allowed": true,
+            "reasons": []
+          },
+          "checks": [
+            {
+              "id": "EQ-01",
+              "name": "Income account present",
+              "result": "pass",
+              "detail": "A recurring income credit is in a shared account",
+              "resolve_with": [],
+              "review_required": false
+            },
+            {
+              "id": "EQ-02",
+              "name": "Unmatched own-account transfers",
+              "result": "pass",
+              "detail": "No transfers to or from accounts outside the grant",
+              "resolve_with": [],
+              "review_required": false
+            },
+            {
+              "id": "EQ-03",
+              "name": "Window covered",
+              "result": "pass",
+              "detail": "The sync returned 98% of the 6-month lookback window",
+              "resolve_with": [],
+              "review_required": false
+            }
+          ]
+        },
+        "inc": {
+          "version": "1.2.4",
+          "gr3_gate_version": "1.2.0",
+          "keyword_list_version": "1.1.0",
+          "signals": [
+            {
+              "id": "INC-01",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Income regularity",
+              "state": "amber",
+              "rollup_class": "standard",
+              "value": "Varies up to 50% cycle to cycle",
+              "reason": "Pay from PAYROLL MERIDIAN ENGINEERING varies more than 20% from one cycle to the next",
+              "confidence": "high",
+              "evidence_count": 24,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-14",
+                  "period_end": "2026-10-29",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 24
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-02",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Stated vs observed",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: needs gross-up. The resident tax-table gross-up (SIG-46) is not built yet (D24)",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-04",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "inferred",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-03",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Income mix",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "0% variable",
+              "reason": "0% of income is variable, gig or rental; variable income is shaded in the income table",
+              "confidence": "high",
+              "evidence_count": 24,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-14",
+                  "period_end": "2026-10-29",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 24
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-04",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Employer tenure",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "At least 5.6 months",
+              "reason": "Paid by PAYROLL MERIDIAN ENGINEERING since 2026-05-14, the start of the history",
+              "confidence": "high",
+              "evidence_count": 1,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-14",
+                  "period_end": "2026-05-14",
+                  "account_ids": [
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 1
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-05",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Circular income",
+              "state": "none_observed",
+              "rollup_class": "standard",
+              "value": "0 credits",
+              "reason": "No pay-like credits from the applicant's own accounts were found",
+              "confidence": "high",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-04",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-06",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Occupation fit",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: the application has no occupation",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-04",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "declared",
+                "resolve_with": [
+                  "Add the applicant's occupation to the application"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-07",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Payer concentration",
+              "state": "unverified",
+              "rollup_class": "context",
+              "value": null,
+              "reason": "Not verified: the application does not say how many earn an income",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-04",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Confirm how many people in the household earn an income"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-08",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Diversification",
+              "state": "green",
+              "rollup_class": "context",
+              "value": "1 stream",
+              "reason": "1 independent income stream each contribute over 10%",
+              "confidence": "high",
+              "evidence_count": 24,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-14",
+                  "period_end": "2026-10-29",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 24
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-09",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Seasonality",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: this signal needs 12 months of history",
+              "confidence": "low",
+              "evidence_count": 24,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-14",
+                  "period_end": "2026-10-29",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 24
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 12
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Share 12 months of transaction history"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-10",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Gig and platform income",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "0% gig",
+              "reason": "0% of income is from gig and platform payers. Gig payers are matched against the fixture list until Enrich curates them",
+              "confidence": "medium",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-04",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-11",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Falling pay at the same payer",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "Down 0% over 3 cycles",
+              "reason": "Pay per cycle from the same payer is not falling",
+              "confidence": "high",
+              "evidence_count": 4,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-10-15",
+                  "period_end": "2026-10-29",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 4
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-12",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Interruptions",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "0 missed cycles",
+              "reason": "No missed pay cycles in the last 6 months",
+              "confidence": "high",
+              "evidence_count": 24,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-14",
+                  "period_end": "2026-10-29",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 24
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-13",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Pay-cycle change",
+              "state": "green",
+              "rollup_class": "standard",
+              "value": "No change",
+              "reason": "No change in pay cycle or payer in the last 90 days",
+              "confidence": "high",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-04",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            }
+          ],
+          "income": [
+            {
+              "payer": "PAYROLL MERIDIAN ENGINEERING",
+              "cadence": "fortnightly",
+              "observed_amount": 3152.44,
+              "type": "salary",
+              "shading": 1,
+              "assessed_amount": 3152.44
+            }
+          ],
+          "net_monthly": 3152.44,
+          "assessed_monthly": 3152.44,
+          "trace": [
+            {
+              "step": "Income streams",
+              "value": 1
+            },
+            {
+              "step": "Observed net monthly income",
+              "value": 3152.44
+            },
+            {
+              "step": "Assessed monthly income, after shading",
+              "value": 3152.44
+            },
+            {
+              "step": "Excluded: own-account transfers",
+              "value": 1
+            },
+            {
+              "step": "Excluded: refunds",
+              "value": 0
+            },
+            {
+              "step": "Excluded: advances and loans",
+              "value": 0
+            },
+            {
+              "step": "Excluded: interest",
+              "value": 0
+            },
+            {
+              "step": "Excluded: repayments received",
+              "value": 0
+            },
+            {
+              "step": "Excluded: not a transaction account",
+              "value": 0
+            }
+          ]
+        },
+        "lia": {
+          "version": "1.3.6",
+          "gr3_gate_version": "1.2.0",
+          "lender_names_version": "1.2.0",
+          "keyword_list_version": "1.1.0",
+          "detector": {
+            "method_version": "1.0.0",
+            "min_occurrences": 3,
+            "amount_tolerance": 0.15
+          },
+          "signals": [
+            {
+              "id": "LIA-01",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Undisclosed liabilities",
+              "state": "none_observed",
+              "rollup_class": "knockout",
+              "value": null,
+              "reason": "No loan or card account, and no recurring repayment to a lender, was found. Detection rests on lender names in the narratives (tested on synthetic, template-written data only). Only an exact provider name counts as declared; a liability of a declared type and repayment under another name is possibly declared, to confirm with the applicant",
+              "confidence": "medium",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-04",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "LIA-02",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Loan stacking",
+              "state": "none_observed",
+              "rollup_class": "refer",
+              "value": null,
+              "reason": "No disbursement from a lender was found",
+              "confidence": "high",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-04",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "LIA-03",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Payday and SACC",
+              "state": "none_observed",
+              "rollup_class": "refer",
+              "value": null,
+              "reason": "No payday or SACC repayment was found in 12 months",
+              "confidence": "high",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-04",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "LIA-04",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Wage advance",
+              "state": "none_observed",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "No wage advance was found",
+              "confidence": "high",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-04",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "LIA-05",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "BNPL",
+              "state": "none_observed",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "No BNPL repayment was found",
+              "confidence": "high",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-04",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "LIA-06",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Private loans",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Private-loan detection is not yet supported on categorised data",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-04",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "omeeabmrgiguir",
+                    "qpqnwiisbkisck"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": true,
+                  "unshared_own_account_transfers": 0,
+                  "institutions_without_shared_account": 0,
+                  "history_months_available": 5.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 60
+                },
+                "basis": "observed",
+                "resolve_with": [],
+                "review_required": false,
+                "review_reason": null
+              }
+            }
+          ],
+          "liabilities": []
+        },
+        "expenses": {
+          "gr3_gate_version": "1.2.0",
+          "committed_monthly": 100.41,
+          "basic_monthly": 682.57,
+          "discretionary_monthly": 4543.92,
+          "living_monthly": 782.98,
+          "months_covered": 5.95,
+          "one_offs": [],
+          "excluded": {
+            "own_account_and_savings": 1,
+            "debt_repayments": 0,
+            "other": 0
+          },
+          "unmapped": {}
+        },
+        "affordability": {
+          "affordability": {
+            "status": "complete",
+            "serviceability": {
+              "monthly_income": 3152.44,
+              "monthly_expenses_gle": 782.98,
+              "monthly_repayments": 0,
+              "proposed_repayment": 471,
+              "total_expenses_annual": 15047.76
+            },
+            "ratios": [
+              {
+                "key": "dsr",
+                "label": "DSR",
+                "value": 0.4,
+                "state": "green"
+              },
+              {
+                "key": "ndi",
+                "label": "NDI",
+                "value": 5.03,
+                "state": "green"
+              },
+              {
+                "key": "ara",
+                "label": "ARA",
+                "value": 2369.46,
+                "unit": "aud",
+                "state": null
+              },
+              {
+                "key": "lvr",
+                "label": "LVR",
+                "state": "unverified"
+              },
+              {
+                "key": "benchmark_gle",
+                "label": "Benchmark / GLE",
+                "state": "unverified"
+              },
+              {
+                "key": "lti",
+                "label": "LTI",
+                "gross": 0.23,
+                "net": 0.53,
+                "state": "green"
+              },
+              {
+                "key": "dti",
+                "label": "DTI",
+                "gross": 0.23,
+                "net": 0.53,
+                "state": "green"
+              }
+            ],
+            "benchmark": {
+              "name": "none: the expense method reads no benchmark",
+              "version": 0,
+              "is_seed": false
+            }
+          },
+          "trace": [
+            {
+              "step": "income",
+              "value": 3152.44,
+              "inputs": {
+                "streams": [
+                  {
+                    "type": "salary",
+                    "monthly": 3152.44,
+                    "shading": 1
+                  }
+                ]
+              }
+            },
+            {
+              "step": "gle",
+              "value": 782.98,
+              "inputs": {
+                "method": "observed",
+                "confirmed_monthly": null,
+                "benchmark_monthly": null,
+                "observed": 782.98,
+                "rent_removed_monthly": 0,
+                "missing": [],
+                "gle": 782.98,
+                "used": "observed",
+                "resolve_with": []
+              }
+            },
+            {
+              "step": "assessment_rate",
+              "value": 14.5,
+              "inputs": {
+                "product_rate_pct": 11.5,
+                "buffer_pct": 3,
+                "floor_rate_pct": 5.5
+              }
+            },
+            {
+              "step": "repayments",
+              "value": 0,
+              "inputs": {
+                "commitments": []
+              }
+            },
+            {
+              "step": "proposed_repayment",
+              "value": 471,
+              "inputs": {
+                "loan_amount": 20000,
+                "assessment_rate_pct": 14.5,
+                "term_months": 60,
+                "unrounded": 470.5656216171643
+              }
+            },
+            {
+              "step": "total_expenses",
+              "value": 15047.76,
+              "inputs": {
+                "gle": 782.98,
+                "repayments": 0,
+                "proposed": 471
+              }
+            },
+            {
+              "step": "total_debt",
+              "value": 20000,
+              "inputs": {
+                "loan_amount": 20000,
+                "liabilities": 0
+              }
+            },
+            {
+              "step": "ara",
+              "value": 2369.46,
+              "inputs": {
+                "income": 3152.44,
+                "gle": 782.98,
+                "repayments": 0
+              }
+            },
+            {
+              "step": "dsr",
+              "value": 0.39778076664425016,
+              "inputs": {
+                "gle": 782.98,
+                "repayments": 0,
+                "proposed": 471,
+                "income": 3152.44
+              }
+            },
+            {
+              "step": "ndi",
+              "value": 5.030700636942675,
+              "inputs": {
+                "income": 3152.44,
+                "gle": 782.98,
+                "repayments": 0,
+                "proposed": 471
+              }
+            },
+            {
+              "step": "lvr",
+              "value": null,
+              "inputs": {
+                "reason": "no security value"
+              }
+            },
+            {
+              "step": "benchmark_gle",
+              "value": null,
+              "inputs": {
+                "reason": "no benchmark"
+              }
+            },
+            {
+              "step": "lti_gross",
+              "value": 0.2335984675940526,
+              "inputs": {
+                "loan": 20000,
+                "gross": 85617
+              }
+            },
+            {
+              "step": "lti_net",
+              "value": 0.5286910033709339,
+              "inputs": {
+                "loan": 20000,
+                "annualNet": 37829.28
+              }
+            },
+            {
+              "step": "dti_gross",
+              "value": 0.2335984675940526,
+              "inputs": {
+                "totalDebt": 20000,
+                "gross": 85617
+              }
+            },
+            {
+              "step": "dti_net",
+              "value": 0.5286910033709339,
+              "inputs": {
+                "totalDebt": 20000,
+                "annualNet": 37829.28
+              }
+            }
+          ],
+          "versions": {
+            "thresholds_version": 1
+          }
+        },
+        "rollup": {
+          "evidence": null,
+          "movers": [
+            {
+              "id": "INC-01",
+              "state": "amber"
+            }
+          ]
+        }
+      }
+    },
+    "C": {
+      "applicant_id": "syn-v23-13cfd6ef54467a35",
+      "output_sha256": "5adc66fe7eaee6647ef00ade09cf216e45bfe7f75398d83049bae27b06b9d771",
+      "summary": {
+        "enrich": {
+          "path": "local",
+          "build": {
+            "commit": "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
+            "version": "1.8.0",
+            "dist_sha256": "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421"
+          },
+          "engine_version": "1.8.0",
+          "taxonomy_version": "1.4",
+          "transactions": 254
+        },
+        "rollup": {
+          "evidence": "unverified",
+          "movers": []
+        },
+        "evidence_checks": [
+          {
+            "id": "EQ-01",
+            "result": "fail"
+          },
+          {
+            "id": "EQ-02",
+            "result": "fail"
+          },
+          {
+            "id": "EQ-03",
+            "result": "pass"
+          }
+        ],
+        "affordability": {
+          "status": "unverified",
+          "serviceability": {
+            "monthly_income": 0,
+            "monthly_expenses_gle": 1424.49,
+            "monthly_repayments": 1150,
+            "proposed_repayment": 471,
+            "total_expenses_annual": 36545.88
+          },
+          "ratios": [
+            {
+              "key": "dsr",
+              "state": "unverified"
+            },
+            {
+              "key": "ndi",
+              "state": "unverified"
+            },
+            {
+              "key": "ara",
+              "state": "unverified"
+            },
+            {
+              "key": "lvr",
+              "state": "unverified"
+            },
+            {
+              "key": "benchmark_gle",
+              "state": "unverified"
+            },
+            {
+              "key": "lti",
+              "state": "unverified"
+            },
+            {
+              "key": "dti",
+              "state": "unverified"
+            }
+          ]
+        },
+        "inc": [
+          {
+            "id": "INC-01",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-02",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-03",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-04",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-05",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-06",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-07",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-08",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-09",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-10",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-11",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-12",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "INC-13",
+            "state": "unverified",
+            "value": null
+          }
+        ],
+        "lia": [
+          {
+            "id": "LIA-01",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "LIA-02",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "LIA-03",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "LIA-04",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "LIA-05",
+            "state": "unverified",
+            "value": null
+          },
+          {
+            "id": "LIA-06",
+            "state": "unverified",
+            "value": null
+          }
+        ]
+      },
+      "output": {
+        "composition_version": "1.0.0",
+        "applicant_id": "syn-v23-13cfd6ef54467a35",
+        "enrich": {
+          "path": "local",
+          "engine_version": "1.8.0",
+          "taxonomy_version": "1.4",
+          "taxonomy": {
+            "taxonomy_version": "1.4",
+            "classifications": [
+              "essential",
+              "discretionary",
+              "financial_commitment"
+            ],
+            "categories": [
+              {
+                "id": "mortgage",
+                "label": "Mortgage",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "rent",
+                "label": "Rent",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "loan_repayment",
+                "label": "Loan Repayment",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "groceries",
+                "label": "Groceries",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "utilities",
+                "label": "Utilities",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "vehicle_running",
+                "label": "Vehicle Running",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "transport",
+                "label": "Transport",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "insurance",
+                "label": "Insurance",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "strata",
+                "label": "Strata",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "education",
+                "label": "Education",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "subscriptions",
+                "label": "Subscriptions",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "dining_entertainment",
+                "label": "Dining & Entertainment",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "clothing",
+                "label": "Clothing",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "healthcare",
+                "label": "Healthcare",
+                "default_classification": "essential",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "other_expenses",
+                "label": "Other Expenses",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "bnpl",
+                "label": "Buy Now Pay Later",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "general_retail",
+                "label": "General Retail",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "sacc_loan",
+                "label": "Small Amount Credit (SACC)",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "wage_advance",
+                "label": "Wage Advance",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "debt_collection",
+                "label": "Debt Collection",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "fines_penalties",
+                "label": "Fines & Penalties",
+                "default_classification": "financial_commitment",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "gambling_wagering",
+                "label": "Gambling — Wagering",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "gambling_casino",
+                "label": "Gambling — Casino",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "gambling_lottery",
+                "label": "Gambling — Lottery",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "quasi_cash",
+                "label": "Quasi-Cash",
+                "default_classification": "discretionary",
+                "excluded": false,
+                "kind": "expense"
+              },
+              {
+                "id": "transfer",
+                "label": "Transfer",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "uncategorised_credit",
+                "label": "Uncategorised Credit",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "income",
+                "label": "Income",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "savings_deposit",
+                "label": "Savings Deposit",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "savings_withdrawal",
+                "label": "Savings Withdrawal",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "crypto_exchange",
+                "label": "Crypto Exchange",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              },
+              {
+                "id": "crypto_atm",
+                "label": "Crypto ATM",
+                "default_classification": "essential",
+                "excluded": true,
+                "kind": "non_expense"
+              }
+            ]
+          },
+          "build": {
+            "commit": "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
+            "version": "1.8.0",
+            "dist_sha256": "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421"
+          },
+          "transactions": 254,
+          "response": {
+            "engine_version": "1.8.0",
+            "taxonomy_version": "1.4",
+            "results": 254,
+            "results_sha256": "e315cb017190ea4680e697afbf3c68fad4764fedc04a6ab460080714ca13c342"
+          }
+        },
+        "evidence": {
+          "rollup": {
+            "state": "unverified",
+            "green_allowed": false,
+            "reasons": [
+              {
+                "signal_id": null,
+                "state": "unverified",
+                "reason": "No recurring salary or benefit credit is in a shared account"
+              },
+              {
+                "signal_id": null,
+                "state": null,
+                "reason": "Regular, material transfers with 1 account outside the grant"
+              }
+            ]
+          },
+          "checks": [
+            {
+              "id": "EQ-01",
+              "name": "Income account present",
+              "result": "fail",
+              "detail": "No recurring salary or benefit credit is in a shared account",
+              "resolve_with": [
+                "Connect the account your salary or benefit is paid into"
+              ],
+              "review_required": false
+            },
+            {
+              "id": "EQ-02",
+              "name": "Unmatched own-account transfers",
+              "result": "fail",
+              "detail": "Regular, material transfers with 1 account outside the grant",
+              "resolve_with": [
+                "Connect the account sending transfers ending 9887"
+              ],
+              "review_required": true
+            },
+            {
+              "id": "EQ-03",
+              "name": "Window covered",
+              "result": "pass",
+              "detail": "The sync returned 100% of the 6-month lookback window",
+              "resolve_with": [],
+              "review_required": false
+            }
+          ]
+        },
+        "inc": {
+          "version": "1.2.4",
+          "gr3_gate_version": "1.2.0",
+          "keyword_list_version": "1.1.0",
+          "signals": [
+            {
+              "id": "INC-01",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Income regularity",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-02",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Stated vs observed",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "inferred",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-03",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Income mix",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-04",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Employer tenure",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-05",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Circular income",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into",
+                  "Connect the account sending transfers ending 9887"
+                ],
+                "review_required": true,
+                "review_reason": "Transfers to accounts outside the grant could hide what this signal looks for"
+              }
+            },
+            {
+              "id": "INC-06",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Occupation fit",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "declared",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-07",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Payer concentration",
+              "state": "unverified",
+              "rollup_class": "context",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-08",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Diversification",
+              "state": "unverified",
+              "rollup_class": "context",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-09",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Seasonality",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 12
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-10",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Gig and platform income",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-11",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Falling pay at the same payer",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-12",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Interruptions",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            },
+            {
+              "id": "INC-13",
+              "family": 1,
+              "family_code": "INC",
+              "name": "Pay-cycle change",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 3
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into"
+                ],
+                "review_required": false,
+                "review_reason": null
+              }
+            }
+          ],
+          "income": [],
+          "net_monthly": 0,
+          "assessed_monthly": 0,
+          "trace": [
+            {
+              "step": "Income streams",
+              "value": 0
+            },
+            {
+              "step": "Observed net monthly income",
+              "value": 0
+            },
+            {
+              "step": "Assessed monthly income, after shading",
+              "value": 0
+            },
+            {
+              "step": "Excluded: own-account transfers",
+              "value": 26
+            },
+            {
+              "step": "Excluded: refunds",
+              "value": 0
+            },
+            {
+              "step": "Excluded: advances and loans",
+              "value": 1
+            },
+            {
+              "step": "Excluded: interest",
+              "value": 0
+            },
+            {
+              "step": "Excluded: repayments received",
+              "value": 0
+            },
+            {
+              "step": "Excluded: not a transaction account",
+              "value": 0
+            }
+          ]
+        },
+        "lia": {
+          "version": "1.3.6",
+          "gr3_gate_version": "1.2.0",
+          "lender_names_version": "1.2.0",
+          "keyword_list_version": "1.1.0",
+          "detector": {
+            "method_version": "1.0.0",
+            "min_occurrences": 3,
+            "amount_tolerance": 0.15
+          },
+          "signals": [
+            {
+              "id": "LIA-01",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Undisclosed liabilities",
+              "state": "unverified",
+              "rollup_class": "knockout",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into",
+                  "Connect the account sending transfers ending 9887"
+                ],
+                "review_required": true,
+                "review_reason": "Transfers to accounts outside the grant could hide what this signal looks for"
+              }
+            },
+            {
+              "id": "LIA-02",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Loan stacking",
+              "state": "unverified",
+              "rollup_class": "refer",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into",
+                  "Connect the account sending transfers ending 9887"
+                ],
+                "review_required": true,
+                "review_reason": "Transfers to accounts outside the grant could hide what this signal looks for"
+              }
+            },
+            {
+              "id": "LIA-03",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Payday and SACC",
+              "state": "unverified",
+              "rollup_class": "refer",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into",
+                  "Connect the account sending transfers ending 9887"
+                ],
+                "review_required": true,
+                "review_reason": "Transfers to accounts outside the grant could hide what this signal looks for"
+              }
+            },
+            {
+              "id": "LIA-04",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Wage advance",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into",
+                  "Connect the account sending transfers ending 9887"
+                ],
+                "review_required": true,
+                "review_reason": "Transfers to accounts outside the grant could hide what this signal looks for"
+              }
+            },
+            {
+              "id": "LIA-05",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "BNPL",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into",
+                  "Connect the account sending transfers ending 9887"
+                ],
+                "review_required": true,
+                "review_reason": "Transfers to accounts outside the grant could hide what this signal looks for"
+              }
+            },
+            {
+              "id": "LIA-06",
+              "family": 3,
+              "family_code": "LIA",
+              "name": "Private loans",
+              "state": "unverified",
+              "rollup_class": "standard",
+              "value": null,
+              "reason": "Not verified: No recurring salary or benefit credit is in a shared account",
+              "confidence": "low",
+              "evidence_count": 0,
+              "evidence_quality": {
+                "observed": {
+                  "period_start": "2026-05-01",
+                  "period_end": "2026-10-30",
+                  "account_ids": [
+                    "wlkrjfvnpisreg"
+                  ],
+                  "transaction_count": 0
+                },
+                "completeness": {
+                  "primary_income_account_shared": false,
+                  "unshared_own_account_transfers": 1,
+                  "institutions_without_shared_account": 1,
+                  "history_months_available": 11.9,
+                  "history_months_required": 6
+                },
+                "reliability": {
+                  "feed_type": "cdr",
+                  "enrich_confident_pct": null,
+                  "field_population_pct": 83
+                },
+                "basis": "observed",
+                "resolve_with": [
+                  "Connect the account your salary or benefit is paid into",
+                  "Connect the account sending transfers ending 9887"
+                ],
+                "review_required": true,
+                "review_reason": "Transfers to accounts outside the grant could hide what this signal looks for"
+              }
+            }
+          ],
+          "liabilities": []
+        },
+        "expenses": {
+          "gr3_gate_version": "1.2.0",
+          "committed_monthly": 178.92,
+          "basic_monthly": 1245.57,
+          "discretionary_monthly": 1192.69,
+          "living_monthly": 1424.49,
+          "months_covered": 6.05,
+          "one_offs": [],
+          "excluded": {
+            "own_account_and_savings": 13,
+            "debt_repayments": 0,
+            "other": 0
+          },
+          "unmapped": {}
+        },
+        "affordability": {
+          "affordability": {
+            "status": "unverified",
+            "serviceability": {
+              "monthly_income": 0,
+              "monthly_expenses_gle": 1424.49,
+              "monthly_repayments": 1150,
+              "proposed_repayment": 471,
+              "total_expenses_annual": 36545.88
+            },
+            "ratios": [
+              {
+                "key": "dsr",
+                "label": "DSR",
+                "state": "unverified"
+              },
+              {
+                "key": "ndi",
+                "label": "NDI",
+                "state": "unverified"
+              },
+              {
+                "key": "ara",
+                "label": "ARA",
+                "state": "unverified"
+              },
+              {
+                "key": "lvr",
+                "label": "LVR",
+                "state": "unverified"
+              },
+              {
+                "key": "benchmark_gle",
+                "label": "Benchmark / GLE",
+                "state": "unverified"
+              },
+              {
+                "key": "lti",
+                "label": "LTI",
+                "state": "unverified"
+              },
+              {
+                "key": "dti",
+                "label": "DTI",
+                "state": "unverified"
+              }
+            ],
+            "benchmark": {
+              "name": "none: the expense method reads no benchmark",
+              "version": 0,
+              "is_seed": false
+            }
+          },
+          "trace": [
+            {
+              "step": "income",
+              "value": 0,
+              "inputs": {
+                "streams": []
+              }
+            },
+            {
+              "step": "gle",
+              "value": 1424.49,
+              "inputs": {
+                "method": "observed",
+                "confirmed_monthly": null,
+                "benchmark_monthly": null,
+                "observed": 1424.49,
+                "rent_removed_monthly": 0,
+                "missing": [],
+                "gle": 1424.49,
+                "used": "observed",
+                "resolve_with": []
+              }
+            },
+            {
+              "step": "assessment_rate",
+              "value": 14.5,
+              "inputs": {
+                "product_rate_pct": 11.5,
+                "buffer_pct": 3,
+                "floor_rate_pct": 5.5
+              }
+            },
+            {
+              "step": "repayments",
+              "value": 1150,
+              "inputs": {
+                "commitments": [
+                  {
+                    "type": "credit_card",
+                    "source": "declared",
+                    "monthly": 700
+                  },
+                  {
+                    "type": "sacc",
+                    "source": "declared",
+                    "monthly": 450
+                  }
+                ]
+              }
+            },
+            {
+              "step": "proposed_repayment",
+              "value": 471,
+              "inputs": {
+                "loan_amount": 20000,
+                "assessment_rate_pct": 14.5,
+                "term_months": 60,
+                "unrounded": 470.5656216171643
+              }
+            },
+            {
+              "step": "total_expenses",
+              "value": 36545.88,
+              "inputs": {
+                "gle": 1424.49,
+                "repayments": 1150,
+                "proposed": 471
+              }
+            },
+            {
+              "step": "total_debt",
+              "value": 20000,
+              "inputs": {
+                "loan_amount": 20000,
+                "liabilities": 2
+              }
+            },
+            {
+              "step": "ara",
+              "value": null,
+              "inputs": {
+                "reason": "no income"
+              }
+            },
+            {
+              "step": "dsr",
+              "value": null,
+              "inputs": {
+                "reason": "no income"
+              }
+            },
+            {
+              "step": "ndi",
+              "value": null,
+              "inputs": {
+                "reason": "no income"
+              }
+            },
+            {
+              "step": "lvr",
+              "value": null,
+              "inputs": {
+                "reason": "no security value"
+              }
+            },
+            {
+              "step": "benchmark_gle",
+              "value": null,
+              "inputs": {
+                "reason": "no benchmark"
+              }
+            },
+            {
+              "step": "lti_gross",
+              "value": null,
+              "inputs": {
+                "reason": "needs gross-up"
+              }
+            },
+            {
+              "step": "lti_net",
+              "value": null,
+              "inputs": {
+                "reason": "no income"
+              }
+            },
+            {
+              "step": "dti_gross",
+              "value": null,
+              "inputs": {
+                "reason": "needs gross-up"
+              }
+            },
+            {
+              "step": "dti_net",
+              "value": null,
+              "inputs": {
+                "reason": "no income"
+              }
+            }
+          ],
+          "versions": {
+            "thresholds_version": 1
+          }
+        },
+        "rollup": {
+          "evidence": "unverified",
+          "movers": []
+        }
+      }
+    }
+  },
+  "command": "npx tsx scripts/sig76-expected.ts",
+  "arguments": {},
+  "engine_commit": "95f9bd163815129c4f53f4fda66b0c9cfd6d9c7e",
+  "tree": "clean"
+}
