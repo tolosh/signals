@@ -409,8 +409,5 @@ describe("hygiene: transaction descriptions are never logged", () => {
   });
 });
 
-describe("the pinned build (ruling 40719, 2)", () => {
-  it.todo(
-    "runtime categories equal research/enrich for the same pinned build: waits for the Enrich side's ENR-28 build (Colin, 26 November)",
-  );
-});
+// The pinned build (ruling 40719, 2), and runtime categories equal to its research/enrich
+// fixtures, are tested in pin.test.ts (Colin, 27 November 2026: the ENR-28 build, 1.8.0).

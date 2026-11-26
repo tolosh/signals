@@ -1,0 +1,44 @@
+{
+  "ticket": "SIG-70",
+  "ruling": "40719, 2: packaged by commit and hash, never imported from a sibling checkout at run time",
+  "published": "ENR-28 comment 40724 (27 November 2026)",
+  "moroku_enrich_commit": "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
+  "engine_version": "1.8.0",
+  "taxonomy_version": "1.4",
+  "dist_index_sha256": "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421",
+  "dist_tree_sha256_published": "151430cb2c42aa316c6c2dce3bbf20f1fa7aed83737536fa9c3e09c7ae735284",
+  "dist_files": {
+    "categories.js": "a3c31d4ffa93f50715ef3e5cf599691bd49fde7553fda05684582f046aa12edb",
+    "chain.js": "624c058794c3085e3f29e54dd676bce67ea3dfcbff525ed0ea672bf8b6f8554b",
+    "exclusions.js": "141bfb90ded4397b72b9b43ba3a05995bc0c313920db047e75cfa9940215e3b4",
+    "high-risk-flow.js": "e881519d269a143ef454feff41d509c55283c2236cd1d55c3ab8b82606821e86",
+    "income.js": "4672e51641a80a5abae9087f7ac7f7817720bc2631a287ece6f965136cf5d01d",
+    "index.js": "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421",
+    "mcc.js": "19b54f3c845f6797e64f098508ffd2512abf9a5b875d12d61b1e2c552c5a25b1",
+    "normaliser.js": "d3df363752a97cd84d52307d6c1ac5d4c2cc6c909addb235db5ed24701d9f210",
+    "rules.js": "92b5ed79bcbb7b8e22f3c53bd84bc14e6ac1d143379ce87f16ac890bc971996b",
+    "savings.js": "416f86005509e078ab5b3c34a24e1ddf6cf8f90f9b9474043e2476a0888576b7",
+    "types.js": "5bdb68c146a0095dd10f354d251b6637c7413545281a3a57859010e4c1f01de1",
+    "version.js": "c1547c3d2fa63ce6cbf7b637dfa51b4aaceeebcff289c258b785a2d4a243c84c"
+  },
+  "taxonomy_dist_files": {
+    "index.js": "bf0f5b289ec0db8003e540b12b191dbe1b83a13d4f8e6c98fdc00fc51b770f70"
+  },
+  "bundle": "engine-1.8.0-8cdb0d9.mjs",
+  "bundle_sha256": "f843b882d5d7b028e3c437f87870f82ee8f0d0e4eaee9b98efce6b43799bbdbd",
+  "bundler": {
+    "esbuild": "0.28.2",
+    "format": "esm",
+    "platform": "neutral"
+  },
+  "command": "npx tsx scripts/enrich-package.ts --repo C:/Users/tolos/Projects/Enrich/moroku-enrich --commit 8cdb0d926f7a9473051655fdeed5d69c1ceffaeb --dist-sha 134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421 --tree-sha 151430cb2c42aa316c6c2dce3bbf20f1fa7aed83737536fa9c3e09c7ae735284 --published ENR-28 comment 40724 (27 November 2026)",
+  "arguments": {
+    "repo": "C:/Users/tolos/Projects/Enrich/moroku-enrich",
+    "commit": "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
+    "dist-sha": "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421",
+    "tree-sha": "151430cb2c42aa316c6c2dce3bbf20f1fa7aed83737536fa9c3e09c7ae735284",
+    "published": "ENR-28 comment 40724 (27 November 2026)"
+  },
+  "engine_commit": "8e879d431fcf771b6e1987d2152558da2bb8d438",
+  "tree": "clean"
+}
