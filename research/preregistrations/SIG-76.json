@@ -1,7 +1,7 @@
 {
   "ticket": "SIG-76",
   "title": "Integration acceptance for the 1 December demo: scenarios, seeds and negative paths",
-  "status": "design and seeds only (ruling 40720, 26 November 2026). The expected states are NOT computed: they wait for the Enrich engine build pinned after the ENR-28 fix (ruling 40719), whose moroku-enrich commit, version and dist SHA-256 go in enrich_build. If that build isn't pinned by Friday 27 November, Colin decides between the current build with ENR-28 disclosed and the seeded fallback. Committed before any candidate build; the architect freezes the expected results before the candidate is checked.",
+  "status": "design, seeds, requests and expected states, committed before any candidate build (rulings 40720, 40730 and 40732). The expected states were computed on 27 November 2026 by assessApplicant (src/assessment/assess.ts, composition 1.0.0; SIG-82 part 1), on the SIG-70 adapter's local path and the pinned Enrich build in enrich_build. The architect freezes them before the candidate is checked. Nothing here is to be edited after the freeze; a change is a new pre-registration.",
   "rulings": [
     "D57 to D60 (Decision Record page 3234988050): the demo order; seeded synthetic applicants through the real engines on Enrich path local; a hosted demo stage on synthetic or sandbox data only; this ticket",
     "SIG-70 40719: the expected states use the Enrich build pinned after the ENR-28 fix",
@@ -116,13 +116,37 @@
     "each scenario is repeated three times from a clean state",
     "the run record goes under research/runs/ with the commit, environment, set hash and versions (definitions, thresholds, taxonomy, keyword list, LIA, INC, EQ)"
   ],
-  "enrich_build": null,
-  "expected_states": null,
+  "enrich_build": {
+    "moroku_enrich_commit": "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
+    "engine_version": "1.8.0",
+    "taxonomy_version": "1.4",
+    "dist_index_sha256": "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421",
+    "dist_tree_sha256": "151430cb2c42aa316c6c2dce3bbf20f1fa7aed83737536fa9c3e09c7ae735284",
+    "bundle": "engine-1.8.0-8cdb0d9.mjs",
+    "bundle_sha256": "f843b882d5d7b028e3c437f87870f82ee8f0d0e4eaee9b98efce6b43799bbdbd",
+    "published": "ENR-28 comment 40724 (27 November 2026)"
+  },
+  "expected_states": {
+    "file": "research/preregistrations/SIG-76-expected-states.json",
+    "file_sha256": "c0637f4cd4a8708e551eed86aa36bcf362dd02e4b85499d81c1c977c341ef947",
+    "computed_by": "assessApplicant (src/assessment/assess.ts, composition 1.0.0; SIG-82 part 1), on the SIG-70 adapter's local path and the pinned Enrich build (vendor/moroku-enrich/pin.json)",
+    "script": "scripts/sig76-expected.ts (it calls assessApplicant; the negative control C ran first and came out unverified)",
+    "output_sha256": {
+      "A": "d2622a48fb8a8f68f9bc26e314bf98fa04db9fcffaa5fd76f9d908a186e8e0b8",
+      "B": "8ee488e12e4c7e11a09e14ccdeb0b30445cba4444d8e07e2d892057032ec5ce4",
+      "C": "5adc66fe7eaee6647ef00ade09cf216e45bfe7f75398d83049bae27b06b9d771"
+    },
+    "byte_for_byte": "T3 compares each hosted result with assessApplicant's output at the candidate commit; here, each scenario's whole output is pinned by its SHA-256"
+  },
   "expected_states_when": "computed by running the engines locally at the candidate commit, on the pinned Enrich build, for each scenario's roll-up, affordability ratios and key INC, LIA and EQ signals; frozen by the architect in a file with its SHA-256 recorded",
   "out_of_scope": [
     "Stripe billing",
     "ABN sign-up",
     "the real openfeed and live Enrich API paths",
     "any real data"
+  ],
+  "findings_before_freeze": [
+    "Scenario B's undisclosed personal loan isn't detected. On the pinned build, Enrich categorises its repayments, \"COMMBANK PL REPAYMENT <reference>\" by direct debit, as other_expenses (source fallback), not loan_repayment, so LIA's detector, which reads liability categories, doesn't see it, and observed expenses counts it as living spending. B's expected states therefore show LIA-01 none_observed and no repayments. Recorded as computed, not tuned; for Colin (B was selected by ground truth before any engine ran).",
+    "Scenario B's observed income is $3,152.44 a month against a truth net of $5,641.63 (salaried, irregular, with overtime); INC-01 is amber. Recorded as computed."
   ]
 }
