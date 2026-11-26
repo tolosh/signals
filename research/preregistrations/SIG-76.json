@@ -124,17 +124,18 @@
     "dist_tree_sha256": "151430cb2c42aa316c6c2dce3bbf20f1fa7aed83737536fa9c3e09c7ae735284",
     "bundle": "engine-1.8.0-8cdb0d9.mjs",
     "bundle_sha256": "f843b882d5d7b028e3c437f87870f82ee8f0d0e4eaee9b98efce6b43799bbdbd",
-    "published": "ENR-28 comment 40724 (27 November 2026)"
+    "published": "ENR-28 comment 40724 (27 November 2026)",
+    "record_hash": "each assessment's Enrich record names the build by commit, version and the dist tree SHA-256 (dist/index.js is the same for 1.7.0 and 1.8.0)"
   },
   "expected_states": {
     "file": "research/preregistrations/SIG-76-expected-states.json",
-    "file_sha256": "d6a5719af73cf079465146b6a5c000b31e4fec37cfe39302938f3f6c7ac9ebed",
+    "file_sha256": "1406a54a1e14e90b4b77004b1170cc69ae88b49833f0d54f93acefa15f11da26",
     "computed_by": "assessApplicant (src/assessment/assess.ts, composition 1.0.0; SIG-82 part 1), on the SIG-70 adapter's local path and the pinned Enrich build (vendor/moroku-enrich/pin.json)",
     "script": "scripts/sig76-expected.ts (it calls assessApplicant; the negative control C ran first and came out unverified)",
     "output_sha256": {
-      "A": "d2622a48fb8a8f68f9bc26e314bf98fa04db9fcffaa5fd76f9d908a186e8e0b8",
-      "B": "8ee488e12e4c7e11a09e14ccdeb0b30445cba4444d8e07e2d892057032ec5ce4",
-      "C": "5adc66fe7eaee6647ef00ade09cf216e45bfe7f75398d83049bae27b06b9d771"
+      "A": "efbfee0f682f1a6ec3ffeefdbe643d97ecaf4e2d54d33837a41c89ea701e560c",
+      "B": "bba125972c08eded331226d222ae2bedb009d7c109eefd6be6500efb193f69b0",
+      "C": "3ca3b750426de28c1903347d9b0a6a83d5d06e6ebfffa37eec99d5580038ed8e"
     },
     "byte_for_byte": "T3 compares each hosted result with assessApplicant's output at the candidate commit; here, each scenario's whole output is pinned by its SHA-256",
     "raw_narratives": "the Enrich response's rows are kept as their count and SHA-256 (they hold raw narratives); output_sha256 covers the whole output"
@@ -149,5 +150,28 @@
   "findings_before_freeze": [
     "Scenario B's undisclosed personal loan isn't detected. On the pinned build, Enrich categorises its repayments, \"COMMBANK PL REPAYMENT <reference>\" by direct debit, as other_expenses (source fallback), not loan_repayment, so LIA's detector, which reads liability categories, doesn't see it, and observed expenses counts it as living spending. B's expected states therefore show LIA-01 none_observed and no repayments. Recorded as computed, not tuned; for Colin (B was selected by ground truth before any engine ran).",
     "Scenario B's observed income is $3,152.44 a month against a truth net of $5,641.63 (salaried, irregular, with overtime); INC-01 is amber. Recorded as computed."
-  ]
+  ],
+  "enrich_diff": {
+    "ruling": "40732: Enrich's list of rows that differ between 1.7.0 and 1.8.0 for the three scenarios' inputs, committed with the pre-registration",
+    "csv": "research/preregistrations/SIG-76-enrich-diff-1.7.0-to-1.8.0.csv",
+    "csv_sha256": "ce05027cb9657abe80c8c6d5bcde97c09aa10707e85e833c67438ffb72bbc5c7",
+    "summary": "research/preregistrations/SIG-76-enrich-diff-1.7.0-to-1.8.0.summary.json",
+    "summary_sha256": "b7632eaab42d58876698e0c001020d4fad309dff6f8a9dc595642d2dc2316f63",
+    "builds": {
+      "1.7.0": "moroku-enrich 406ff97",
+      "1.8.0": "moroku-enrich 8cdb0d9"
+    },
+    "differing": {
+      "A": 16,
+      "B": 0,
+      "C": 55,
+      "of": {
+        "A": 263,
+        "B": 165,
+        "C": 254
+      }
+    },
+    "cause": "every differing row is ENR-28 (a BPAY bill no longer a transfer); none of any other kind",
+    "checked_by_signals": "the 71 rows' 1.8.0 side equals Signals' pinned build exactly"
+  }
 }
