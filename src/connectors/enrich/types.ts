@@ -31,8 +31,11 @@ export type EnrichResponse = {
   taxonomy_version: string;
   results: EnrichResult[];
 };
-/** The taxonomy as the categoriser publishes it (GET /v1/taxonomy, or the engine's own). */
-export type Taxonomy = { version: string; [field: string]: unknown };
+/**
+ * The taxonomy as the categoriser publishes it: Enrich's TaxonomyDocument, the shape GET
+ * /v1/taxonomy serves and the engine's taxonomyDocument() returns.
+ */
+export type Taxonomy = { taxonomy_version: string; [field: string]: unknown };
 
 /** A pinned engine build: the moroku-enrich commit, the version and the dist's SHA-256. */
 export type EngineBuild = { commit: string; version: string; dist_sha256: string };

@@ -69,7 +69,7 @@ const recordOf = (
 ): EnrichRecord => ({
   path,
   engine_version: response.engine_version,
-  taxonomy_version: taxonomy.version,
+  taxonomy_version: taxonomy.taxonomy_version,
   taxonomy,
   build: by.path === "local" ? (by.build ?? null) : null,
   ...extra,
