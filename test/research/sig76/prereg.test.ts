@@ -91,3 +91,66 @@ describe("SIG-76 pre-registration: scenarios A, B and C, chosen by ground truth"
     expect(p.expected_states).toBeNull();
   });
 });
+
+// SIG-76 ruling 40776, 1: a fourth scenario, D (a detected undisclosed liability), chosen by ground
+// truth only from set v2.3, the lowest qualifying applicant id. Written before its rule and
+// selection, and before any candidate or expected result is computed.
+describe("SIG-76 scenario D (ruling 40776, 1): an undisclosed BNPL, SACC, wage advance or card", () => {
+  type L = { id: string; type: string; declared: boolean };
+  type V = {
+    id: string;
+    declared_as: string | null;
+    repayment_channel: string;
+    paid_from_shared: boolean;
+  };
+  type T = {
+    applicant_id: string;
+    tags: string[];
+    liabilities: { items: L[] };
+    v2: { liabilities: V[] };
+  };
+  const KINDS = ["bnpl", "sacc", "wage_advance", "credit_card"];
+  const DRIFT_OR_GAMBLING = [
+    "salaried-payer-drift",
+    "drift-over-time",
+    "drift-across-banks",
+    "gambling",
+  ];
+  const qualifies = (t: T) =>
+    t.tags.includes("salaried") &&
+    !t.tags.some((x) => DRIFT_OR_GAMBLING.includes(x)) &&
+    t.liabilities.items.some((l) => {
+      const v = t.v2.liabilities.find((x) => x.id === l.id);
+      return (
+        KINDS.includes(l.type) &&
+        !l.declared &&
+        v !== undefined &&
+        v.declared_as === null &&
+        (v.repayment_channel === "DIRECT_DEBIT" || v.repayment_channel === "PAYMENT") &&
+        v.paid_from_shared
+      );
+    });
+  it("the selection names D: the lowest qualifying id that isn't A, B or C, with its candidate count", () => {
+    const s = m.selectScenarios?.(set) as
+      Record<string, { applicant_id: string; candidates: number }> | undefined;
+    expect(s?.D).toBeDefined();
+    const abc = ["A", "B", "C"].map((k) => s?.[k]?.applicant_id);
+    const ids = (set as { truth: T }[])
+      .map((a) => a.truth)
+      .filter((t) => qualifies(t) && !abc.includes(t.applicant_id))
+      .map((t) => t.applicant_id)
+      .sort();
+    expect(ids.length).toBeGreaterThan(0);
+    expect(s?.D?.applicant_id).toBe(ids[0]);
+    expect(s?.D?.candidates).toBe(ids.length);
+  });
+  it("the pre-registration records D's applicant, rule, candidate count and the set hash", () => {
+    const p = prereg();
+    const s = m.selectScenarios?.(set) as
+      Record<string, { applicant_id: string; candidates: number; rule: string }> | undefined;
+    expect(p.scenarios?.D?.applicant_id).toBe(s?.D?.applicant_id);
+    expect(p.scenarios?.D?.candidates).toBe(s?.D?.candidates);
+    expect(p.scenarios?.D?.rule).toBe(s?.D?.rule);
+    expect(p.scenarios?.D?.set_sha256).toBe(p.data?.set_sha256);
+  });
+});
