@@ -6,7 +6,15 @@
 //   npx tsx scripts/sig76-expected.ts [--allow-dirty]
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { assessApplicant, type AssessmentInput } from "../src/assessment/assess.js";
+import {
+  ASSESSMENT_COMPOSITION_VERSION,
+  assessApplicant,
+  type AssessmentInput,
+} from "../src/assessment/assess.js";
+import { OBSERVED_EXPENSES_METHOD_VERSION } from "../src/engines/affordability/observed-expenses.js";
+import { EQ_METHOD_VERSION } from "../src/engines/evidence/checks.js";
+import { INC_VERSION } from "../src/engines/families/inc/index.js";
+import { LIA_VERSION } from "../src/engines/families/lia/index.js";
 import { generateSetV23 } from "../src/research/generator/v23/index.js";
 import {
   gitState,
@@ -23,7 +31,7 @@ requireCleanTree(git.status, args.allowDirty);
 const PREREG = "research/preregistrations/SIG-76.json";
 type Prereg = {
   data: { seed: number; set_sha256: string };
-  scenarios: Record<"A" | "B" | "C", { applicant_id: string }>;
+  scenarios: Record<"A" | "B" | "C" | "D", { applicant_id: string }>;
   requests: { request: AssessmentInput["request"] };
 };
 const prereg = JSON.parse(readFileSync(PREREG, "utf8")) as Prereg;
@@ -71,8 +79,9 @@ const inputOf = (id: string): AssessmentInput => {
   };
 };
 
-// The negative control first (SIG-76 T2): scenario C must be unverified.
-const order = ["C", "A", "B"] as const;
+// The negative control first (SIG-76 T2): scenario C must be unverified. Then A, B and D
+// (ruling 40776, 4).
+const order = ["C", "A", "B", "D"] as const;
 const outputs: Record<string, Awaited<ReturnType<typeof assessApplicant>>> = {};
 for (const k of order) {
   outputs[k] = await assessApplicant(inputOf(prereg.scenarios[k].applicant_id));
@@ -103,20 +112,45 @@ const summary = (o: Awaited<ReturnType<typeof assessApplicant>>) => ({
   lia: o.lia.signals.map((s) => ({ id: s.id, state: s.state, value: s.value })),
 });
 const sha = (x: unknown) => createHash("sha256").update(JSON.stringify(x)).digest("hex");
+/**
+ * The output as committed: the Enrich response's rows (each holding the raw narrative, as
+ * merchant.normalised_from) are replaced by their count and SHA-256. Raw narratives belong in the
+ * assessment store, not in a committed file; output_sha256 is still taken over the whole output.
+ */
+const committed = (o: Awaited<ReturnType<typeof assessApplicant>>) => ({
+  ...o,
+  enrich: {
+    ...o.enrich,
+    response: {
+      engine_version: o.enrich.response.engine_version,
+      taxonomy_version: o.enrich.response.taxonomy_version,
+      results: o.enrich.response.results.length,
+      results_sha256: sha(o.enrich.response.results),
+    },
+  },
+});
 const record = {
   ticket: "SIG-76",
-  computed_by:
-    "assessApplicant (src/assessment/assess.ts, composition 1.0.0; SIG-82 part 1), on the SIG-70 adapter's local path and the pinned Enrich build (vendor/moroku-enrich/pin.json)",
+  set: "synthetic-v2.3",
+  set_sha256: manifest.set_sha256,
+  computed_by: `assessApplicant (src/assessment/assess.ts, composition ${ASSESSMENT_COMPOSITION_VERSION}), on the SIG-70 adapter's local path and the pinned Enrich build (vendor/moroku-enrich/pin.json)`,
+  versions: {
+    composition: ASSESSMENT_COMPOSITION_VERSION,
+    lia: LIA_VERSION,
+    inc: INC_VERSION,
+    eq_method: EQ_METHOD_VERSION,
+    observed_expenses: OBSERVED_EXPENSES_METHOD_VERSION,
+  },
   order_run: order,
   negative_control: { scenario: "C", rollup_evidence: outputs.C?.rollup.evidence },
   scenarios: Object.fromEntries(
-    (["A", "B", "C"] as const).map((k) => [
+    (["A", "B", "C", "D"] as const).map((k) => [
       k,
       {
         applicant_id: prereg.scenarios[k].applicant_id,
         output_sha256: sha(outputs[k]),
         summary: summary(outputs[k] as Awaited<ReturnType<typeof assessApplicant>>),
-        output: outputs[k],
+        output: committed(outputs[k] as Awaited<ReturnType<typeof assessApplicant>>),
       },
     ]),
   ),

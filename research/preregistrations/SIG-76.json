@@ -1,12 +1,15 @@
 {
   "ticket": "SIG-76",
   "title": "Integration acceptance for the 1 December demo: scenarios, seeds and negative paths",
-  "status": "design and seeds only (ruling 40720, 26 November 2026). The expected states are NOT computed: they wait for the Enrich engine build pinned after the ENR-28 fix (ruling 40719), whose moroku-enrich commit, version and dist SHA-256 go in enrich_build. If that build isn't pinned by Friday 27 November, Colin decides between the current build with ENR-28 disclosed and the seeded fallback. Committed before any candidate build; the architect freezes the expected results before the candidate is checked.",
+  "status": "design, seeds and requests recorded; scenario D added (ruling 40776, 1) before anything is computed. The expected states are computed on main by scripts/sig76-expected.ts (assessApplicant, the demo stage's code) with LIA 1.3.6 (ruling 40772) on the pinned Enrich 1.8.0 build, C first, then A, B and D, and committed before any candidate build. The architect freezes them. Expected states computed earlier on #58 were withdrawn (ruling 40745, 2) and are not carried here",
   "rulings": [
     "D57 to D60 (Decision Record page 3234988050): the demo order; seeded synthetic applicants through the real engines on Enrich path local; a hosted demo stage on synthetic or sandbox data only; this ticket",
     "SIG-70 40719: the expected states use the Enrich build pinned after the ENR-28 fix",
     "SIG-76 40720: prepare the scenarios' design and seeds and the negative paths now; compute no expected state until the build is pinned",
-    "SIG-76 40776, 1 (27 November, 18:00): a fourth scenario, D (a detected undisclosed liability), by ground truth only from set v2.3, the lowest qualifying id; the rule, the selected id, the candidate count and the set hash are committed before any candidate or expected result is computed; no substitution, no tuning; D demonstrates the capability and is not evidence for H2"
+    "SIG-76 40776, 1 (27 November, 18:00): a fourth scenario, D (a detected undisclosed liability), by ground truth only from set v2.3, the lowest qualifying id; the rule, the selected id, the candidate count and the set hash are committed before any candidate or expected result is computed; no substitution, no tuning; D demonstrates the capability and is not evidence for H2",
+    "SIG-76 40745: the expense method is observed; the earlier expected states are withdrawn; B is not re-selected; commit Enrich's ruled differing-rows file (8a28b64e...f0cb02)",
+    "SIG-83 40772 (27 November): SIG-83 is out of the demo; the demo build runs LIA 1.3.6; B is shown as not detected",
+    "SIG-76 40776, 2 to 4: C is the negative control and runs first; A is shown as computed; the order of work"
   ],
   "data": {
     "source": "synthetic",
@@ -90,18 +93,19 @@
       "enrich": {
         "tenant_status": "none",
         "force_local": true,
-        "synthetic": true
+        "real_consented": false
       }
     },
     "sources": {
       "loan": "proposed by engineering and accepted by Colin: a personal loan of $20,000 over 60 months at 11.5%, the same for every scenario so the scenarios differ only in their data",
       "policy": "AF-T1's policy (test/fixtures/af-t1.json): buffer 3%, floor 5.5%, card commitment factor 0.03; shading is INC's default (src/engines/families/inc/config.ts, INC_DEFAULTS.shading)",
-      "expense_method": "observed (AF-E1, AF-E2): committed plus basic spending from the transactions, categorised on the pinned Enrich build. AF-E3's default needs confirmed expenses and a benchmark; the synthetic applications have no confirmed expenses and no seed benchmark rows exist, and X-2 never replaces a missing input, so every scenario would be unverified (Colin, 27 November)",
+      "expense_method": "observed (ruling 40745, 1, superseding 40738's AF-E3 default): observed (AF-E1, AF-E2): committed plus basic spending from the transactions, categorised on the pinned Enrich build. AF-E3's default needs confirmed expenses and a benchmark; the synthetic applications have no confirmed expenses and no seed benchmark rows exist, and X-2 never replaces a missing input, so every scenario would be unverified (Colin, 27 November)",
       "benchmark": "none: the observed method doesn't read one",
       "as_of_and_lookback": "set v2.3's as-of date (manifest) and the default 6-month lookback (D22)",
       "enrich": "no Enrich tenant; the local path, forced (D58); the feed is synthetic, so it never goes to the API (D42)",
       "application": "each applicant's own application from set v2.3 (stated gross income and declared liabilities), unchanged"
-    }
+    },
+    "enrich_mark": "renamed 27 November, before any expected state: SIG-70's follow-up (O4) replaced the request's `synthetic: true` with `real_consented: false` (SIG-82 40765, #62). The meaning is unchanged: the feed is synthetic, so it never reaches the API (D42)"
   },
   "negative_control": {
     "scenario": "C",
@@ -128,7 +132,15 @@
     "each scenario is repeated three times from a clean state",
     "the run record goes under research/runs/ with the commit, environment, set hash and versions (definitions, thresholds, taxonomy, keyword list, LIA, INC, EQ)"
   ],
-  "enrich_build": null,
+  "enrich_build": {
+    "moroku_enrich_commit": "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
+    "engine_version": "1.8.0",
+    "taxonomy_version": "1.4",
+    "dist_index_sha256": "134909daf5c246ae76104bd653dfdfc68814d112f14b2ebbb335cef92ce9e421",
+    "dist_tree_sha256": "151430cb2c42aa316c6c2dce3bbf20f1fa7aed83737536fa9c3e09c7ae735284",
+    "bundle_sha256": "f843b882d5d7b028e3c437f87870f82ee8f0d0e4eaee9b98efce6b43799bbdbd",
+    "source": "vendor/moroku-enrich/pin.json (SIG-70; ENR-28 40724); rulings 40730 and 40732"
+  },
   "expected_states": null,
   "expected_states_when": "computed by running the engines locally at the candidate commit, on the pinned Enrich build, for each scenario's roll-up, affordability ratios and key INC, LIA and EQ signals; frozen by the architect in a file with its SHA-256 recorded",
   "out_of_scope": [
