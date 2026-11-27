@@ -25,6 +25,7 @@ import {
 } from "./probes.js";
 import { BASELINE, loadReplaySet, replay, skeleton, type Replay } from "./replay.js";
 import { createHash } from "node:crypto";
+import { asV111 } from "../sig81/as-v111.js";
 
 type Masker = { mask: (text: string) => string };
 type MaskModule = {
@@ -373,7 +374,8 @@ describe("T5 and the observed-income replay: states, values and figures are byte
       expect(hash(probes.map((p) => p.income))).toBe(baseline.probes.income);
     });
     it("observed expenses, which shows no narrative text, is unchanged", () => {
-      expect(hash(probes.map((p) => p.expenses))).toBe(baseline.probes.expenses);
+      // SIG-81: observed expenses 1.2.0 in 1.1.1's shape, against the baseline taken at 1.1.1.
+      expect(hash(probes.map((p) => asV111(p.expenses)))).toBe(baseline.probes.expenses);
     });
     it("T6: a scan of every output field of every engine finds 0 keywords", () => {
       const found = probes.flatMap((p, i) =>

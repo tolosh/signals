@@ -7,6 +7,7 @@
 import { createHash } from "node:crypto";
 import { deriveIncome, deriveIncomeByPayerKey } from "../../../src/engines/affordability/income.js";
 import { deriveObservedExpenses } from "../../../src/engines/affordability/observed-expenses.js";
+import { asV111 } from "../sig81/as-v111.js";
 import { AS_OF_DATE } from "../../../src/research/generator/index.js";
 import { loadSet } from "../../../src/research/liabilities-score.js";
 
@@ -50,14 +51,18 @@ export function setV1Replay() {
       ...shown,
       streams: shown.streams.map((s, n) => ({ ...s, payer: keyed[n]?.payer ?? s.payer })),
     });
+    // SIG-81: observed expenses 1.2.0 in 1.1.1's shape (test/engines/sig81/as-v111.ts), so the
+    // 1.1.1 hash still proves the gate changes nothing.
     const e = strip(
-      deriveObservedExpenses({
-        feed,
-        categories: set.categories,
-        as_of: AS_OF_DATE,
-        lookback_months: 6,
-        one_off_threshold_aud: 5000,
-      }),
+      asV111(
+        deriveObservedExpenses({
+          feed,
+          categories: set.categories,
+          as_of: AS_OF_DATE,
+          lookback_months: 6,
+          one_off_threshold_aud: 5000,
+        }),
+      ),
     );
     versions.income.add(i.v);
     versions.expenses.add(e.v);

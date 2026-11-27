@@ -61,6 +61,8 @@ const CATEGORIES: Record<string, string> = Object.fromEntries(
   }),
 );
 const LENDER = [5, 6, 7, 8, 9, 10].map((m) => `lend-${m}`);
+/** The window's months: 1 May to 31 October 2026, 184 days, over 30.4375 (SIG-17's method). */
+const MONTHS = 184 / 30.4375;
 const derive = (extra: Record<string, unknown> = {}) =>
   deriveObservedExpenses({
     feed: FEED,
@@ -80,12 +82,11 @@ describe("the version", () => {
 describe("rule 1: other_expenses counts inside living expenses, as its own unverified line", () => {
   it("other_expenses is in living expenses and shown as unverified, not discretionary", () => {
     const o = derive();
-    const months = o.months_covered as number;
-    expect(months).toBeGreaterThan(0);
+    expect(o.months_covered).toBeCloseTo(MONTHS, 2);
     // 120 + 250 + 40 a month of other_expenses, with no LIA repayments given.
-    expect(o.unverified_monthly).toBeCloseTo((6 * 410) / months, 1);
+    expect(o.unverified_monthly).toBeCloseTo((6 * 410) / MONTHS, 1);
     expect(o.discretionary_monthly).toBe(0);
-    expect(o.basic_monthly).toBeCloseTo((6 * 300) / months, 1);
+    expect(o.basic_monthly).toBeCloseTo((6 * 300) / MONTHS, 1);
     expect(o.living_monthly).toBeCloseTo(
       o.committed_monthly + o.basic_monthly + o.unverified_monthly,
       2,
@@ -115,15 +116,14 @@ describe("rule 1: other_expenses counts inside living expenses, as its own unver
 describe("rule 2: a debit LIA counts as a repayment is never also a living expense", () => {
   it("an LIA repayment in other_expenses is excluded, counted as a debt repayment", () => {
     const o = derive({ liability_repayments: LENDER });
-    const months = o.months_covered as number;
-    expect(o.unverified_monthly).toBeCloseTo((6 * 160) / months, 1);
+    expect(o.unverified_monthly).toBeCloseTo((6 * 160) / MONTHS, 1);
     expect(o.excluded.debt_repayments).toBe(6);
     expect(o.lia_repayments_in_other_categories).toBe(6);
-    expect(o.living_monthly).toBeCloseTo(derive().living_monthly - (6 * 250) / months, 1);
+    expect(o.living_monthly).toBeCloseTo(derive().living_monthly - (6 * 250) / MONTHS, 1);
   });
   it("whatever its category: an LIA repayment Enrich called groceries is excluded too", () => {
     const o = derive({ liability_repayments: ["gro-5", "gro-6"] });
-    expect(o.basic_monthly).toBeCloseTo((4 * 300) / (o.months_covered as number), 1);
+    expect(o.basic_monthly).toBeCloseTo((4 * 300) / MONTHS, 1);
     expect(o.lia_repayments_in_other_categories).toBe(2);
   });
   it("a repayment already in a debt category is counted once, as before", () => {
@@ -164,6 +164,17 @@ const fixture = (p: string) =>
   (JSON.parse(readFileSync(p, "utf8")) as { categories: Record<string, string> }).categories;
 
 const replays: Record<string, ReturnType<typeof replayApplicant>[]> = {};
+const cats: Record<string, Record<string, string>> = {};
+/** SIG-17's excluded categories: a repayment in one was never spend, before or after. */
+const NOT_SPEND = new Set(
+  Object.values(
+    (
+      JSON.parse(readFileSync("research/preregistrations/SIG-17.json", "utf8")) as {
+        group_mapping: { excluded: Record<string, string[]> };
+      }
+    ).group_mapping.excluded,
+  ).flat(),
+);
 beforeAll(async () => {
   const v1 = population(seed("synthetic-v1")).map((s) =>
     generateApplicant(s, seed("synthetic-v1")),
@@ -174,6 +185,7 @@ beforeAll(async () => {
   const c22 = fixture("research/enrich/synthetic-v2.2-categories-no-biller-code-engine-1.8.0.json");
   const r23 = await pinnedLocalEnrich().categorise(debitsOf(v23, true));
   const c23 = Object.fromEntries(r23.results.map((r) => [r.transaction_id, r.category]));
+  Object.assign(cats, { "synthetic-v1": c1, "synthetic-v2.2": c22, "synthetic-v2.3": c23 });
   replays["synthetic-v1"] = v1.map((a) => replayApplicant(a, c1));
   replays["synthetic-v2.2"] = v22.map((a) => replayApplicant(a, c22));
   replays["synthetic-v2.3"] = v23.map((a) => replayApplicant(a, c23));
@@ -193,16 +205,22 @@ describe("the replay over sets v1, v2.2 and v2.3, as run", () => {
         off.push(`${r.applicant_id}: no unverified line`);
         continue;
       }
-      // Before SIG-83, LIA's repayments are all in debt categories, so committed and basic stay.
+      // Before SIG-83, LIA finds no repayment in a committed or basic category, so they stay.
       if (o.committed_monthly !== b.committed_monthly) off.push(`${r.applicant_id}: committed`);
       if (o.basic_monthly !== b.basic_monthly) off.push(`${r.applicant_id}: basic`);
       const sum = Math.round((o.committed_monthly + o.basic_monthly + o.unverified_monthly) * 100);
       if (Math.abs(Math.round(o.living_monthly * 100) - sum) > 1)
         off.push(`${r.applicant_id}: living`);
-      // The unverified line comes out of discretionary (less any other_expenses one-off).
+      // The unverified line comes out of discretionary, less any other_expenses one-off and any
+      // repayment LIA counts that Enrich put in another category (rule 2). Disclosed correction,
+      // after the first run: set v2.3 has such repayments (BPAY card repayments, which LIA reads
+      // by a biller named "... CREDIT CARD", in other_expenses), so the equality holds only where
+      // none of LIA's repayments is in a spend category; elsewhere the bound above holds.
       const moved = o.unverified_monthly + o.discretionary_monthly;
       if (moved > b.discretionary_monthly + 0.02) off.push(`${r.applicant_id}: discretionary`);
-      if (o.one_offs.length === b.one_offs && Math.abs(moved - b.discretionary_monthly) > 0.02)
+      const inSpend = r.lia_repayments.filter((id) => !NOT_SPEND.has(cats[set]?.[id] ?? "none"));
+      const exact = o.one_offs.length === b.one_offs && inSpend.length === 0;
+      if (exact && Math.abs(moved - b.discretionary_monthly) > 0.02)
         off.push(`${r.applicant_id}: unverified`);
     }
     expect(off).toEqual([]);

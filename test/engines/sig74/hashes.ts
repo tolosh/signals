@@ -9,6 +9,7 @@ import { assessInc } from "../../../src/engines/families/inc/index.js";
 import { assessLia } from "../../../src/engines/families/lia/index.js";
 import { loadReplaySet, skeleton, type ReplaySet } from "../sig64/replay.js";
 import { applicantFor, KEYWORDS, SPLITTERS } from "./corpus.js";
+import { asV111 } from "../sig81/as-v111.js";
 
 export const BASELINE_74 = "test/fixtures/sig74-baseline.json";
 
@@ -72,7 +73,8 @@ export function corpusHashes() {
       h.lia.update(skeleton(r.lia)).update("\n");
       h.inc.update(skeleton(r.inc)).update("\n");
       h.income.update(skeleton(r.income)).update("\n");
-      h.expenses.update(skeleton(r.expenses)).update("\n");
+      // SIG-81: observed expenses 1.2.0 in 1.1.1's shape, against the baseline taken at 1.1.1.
+      h.expenses.update(skeleton(asV111(r.expenses))).update("\n");
       count++;
     }
   return { count, ...Object.fromEntries(Object.entries(h).map(([k, v]) => [k, v.digest("hex")])) };
