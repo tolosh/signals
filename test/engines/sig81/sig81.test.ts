@@ -231,3 +231,43 @@ describe("the replay over sets v1, v2.2 and v2.3, as run", () => {
     expect(after?.outputs_sha256).toBe(sha);
   });
 });
+
+// Added after the independent check (its out-of-scope finding 1): every other category keeps
+// SIG-17's group, so only other_expenses moves. A category missing from the three sets would
+// otherwise move unseen, through the 1.1.1 view (as-v111.ts).
+describe("the mapping: only other_expenses moves from SIG-17's groups", () => {
+  const mapping = (
+    JSON.parse(readFileSync("research/preregistrations/SIG-17.json", "utf8")) as {
+      group_mapping: Record<"committed" | "basic" | "discretionary", string[]>;
+    }
+  ).group_mapping;
+  const one = (category: string) =>
+    deriveObservedExpenses({
+      feed: {
+        accounts: [
+          {
+            account: { accountId: "acc-1" },
+            transactions: [
+              tx("in-0", "2026-05-01", "4000.00", "SALARY"),
+              tx("x", "2026-06-15", "-100.00"),
+            ],
+          },
+        ],
+      },
+      categories: { "in-0": "income", x: category },
+      as_of: AS_OF,
+      lookback_months: 6,
+      one_off_threshold_aud: 5000,
+    }) as Mod;
+  const groupOf = (o: Mod) =>
+    (["committed", "basic", "unverified", "discretionary"] as const).filter(
+      (g) => o[`${g}_monthly`] > 0,
+    );
+  it.each(
+    (["committed", "basic", "discretionary"] as const).flatMap((g) =>
+      mapping[g].map((c) => [c, c === "other_expenses" ? "unverified" : g]),
+    ),
+  )("%s is %s", (category, group) => {
+    expect(groupOf(one(category))).toEqual([group]);
+  });
+});
