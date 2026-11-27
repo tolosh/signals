@@ -16,7 +16,7 @@ import { NOT_WIRED } from "../../src/api/assessment-port.js";
 import { demoConfigFrom, DEMO_ORIGINS } from "../../src/api/config.js";
 import { DEMO_PRODUCT, DEMO_WORKSPACES, SANDBOX_SCENARIOS } from "../../src/api/seed.js";
 import { DemoStore } from "../../src/api/store.js";
-import { MemoryStore } from "../../src/mock/persist.js";
+import { MemoryStore } from "../../src/api/dynamo.js";
 import { responseValidator } from "./contract.js";
 
 const COMMIT = "0123456789abcdef0123456789abcdef01234567";

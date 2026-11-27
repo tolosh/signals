@@ -9,8 +9,9 @@ const doc = loadContract();
 const rollup = schemaValidator(doc)("Rollup");
 
 describe("contract 1.9.0: the roll-up's optional state", () => {
-  it("is version 1.9.0", () => {
-    expect(doc.info.version).toBe("1.9.0");
+  it("is version 1.9.0 or later", () => {
+    const [major, minor] = doc.info.version.split(".").map(Number);
+    expect((major ?? 0) * 100 + (minor ?? 0)).toBeGreaterThanOrEqual(109);
   });
 
   it("accepts a roll-up with no state and the signals that move it", () => {

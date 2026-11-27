@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moroku Signals API
-  version: 1.9.0
+  version: 1.10.0
   description: >-
     Canonical contract between the Lovable front ends and the Signals backend. Behaviour is
     specified in Confluence (Build Specification section 3, Product Specification and Amendment 1).
@@ -1529,6 +1529,13 @@ components:
           type: string
           enum: [sent, opened, used, expired, cancelled]
         expires_at: { type: string, format: date-time }
+        portal_url:
+          type: [string, "null"]
+          format: uri
+          description: >-
+            The applicant's portal link (1.10.0; SIG-82). Set on the demo stage, which sends no
+            email or SMS: the lender copies the link to the applicant. Absent or null where the
+            invite is delivered by message.
     AssessmentStatus:
       type: string
       enum: [running, complete, data_incomplete]

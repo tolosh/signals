@@ -10,7 +10,10 @@ import { Template } from "aws-cdk-lib/assertions";
 import { describe, expect, it } from "vitest";
 import { SignalsDemoStack } from "../../infra/demo-stack.js";
 import { REAL_DATA_ROLES } from "../../infra/realdata-stack.js";
-import { apiEnrichInDemo, demoConfigFrom, ENRICH_HOSTS } from "../../src/api/config.js";
+import { apiEnrichInDemo, demoConfigFrom } from "../../src/api/config.js";
+
+/** Enrich's hostnames (SIG-82 T2). */
+const ENRICH_HOSTS = ["enrich.moroku.digital", "enrich-dev.moroku.digital"];
 
 const COMMIT = "0123456789abcdef0123456789abcdef01234567";
 const synth = (over: Partial<ConstructorParameters<typeof SignalsDemoStack>[2]> = {}) =>
@@ -123,4 +126,23 @@ describe("T4 (synth): the deployed commit can be read back", () => {
     expect(lambdaEnv().SUPABASE_URL).toBe("https://abcdefgh.supabase.co");
     expect(lambdaEnv().SUPABASE_PUBLISHABLE_KEY).toBe("sb_publishable_test");
   });
+});
+
+describe("T2 (bundle): the Lambda's code names no Enrich host and no mock fixture", () => {
+  it("bundles src/api/lambda.ts without an Enrich hostname or the mock's fixtures", async () => {
+    const { build } = await import("esbuild");
+    const out = await build({
+      entryPoints: ["src/api/lambda.ts"],
+      bundle: true,
+      platform: "node",
+      target: "node22",
+      format: "esm",
+      write: false,
+    });
+    const code = out.outputFiles[0]?.text ?? "";
+    expect(code.length).toBeGreaterThan(0);
+    expect(code).not.toMatch(/enrich[-_.a-z0-9]*\.moroku\.digital/i);
+    expect(code).not.toContain("af-t1-assessment.json");
+    expect(code).not.toContain("Harbour Mutual");
+  }, 60_000);
 });
