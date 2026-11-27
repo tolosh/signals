@@ -1,0 +1,120 @@
+{
+  "ticket": "SIG-83",
+  "run": "v1",
+  "preregistration": "research/preregistrations/SIG-83.json",
+  "preregistration_sha256": "fc2241ab3e6e3a0b35fb156b58a8654960873942519c6d0c6ee3d44efd1b7147",
+  "lia_version": "1.4.0",
+  "lender_names_version": "1.2.0",
+  "enrich_build": {
+    "commit": "8cdb0d926f7a9473051655fdeed5d69c1ceffaeb",
+    "version": "1.8.0",
+    "dist_sha256": "151430cb2c42aa316c6c2dce3bbf20f1fa7aed83737536fa9c3e09c7ae735284"
+  },
+  "set": {
+    "name": "synthetic-v1",
+    "set_sha256": "8f5cf973ec46b33bbeccd97e87dcde10edea22919ed9af9bc9469149b2e17ea9",
+    "rotated": false
+  },
+  "categories": {
+    "source": "research/enrich/synthetic-v1-categories-engine-1.8.0.json",
+    "sha256": "30b02e684c0d043b14c29eeae8983c992604203a4276622ac5ea226df163e1dd"
+  },
+  "scoring_alias_table": {
+    "file": "research/aliases/lender-aliases-1.0.0.json",
+    "sha256": "39853f2c8fe01555abef192fb5bc29e9e89cdd5d6b36ae609c51084e002bf9a5"
+  },
+  "as_of": "2026-10-31",
+  "command": "npx tsx scripts/sig83-run.ts --run v1",
+  "arguments": {
+    "run": "v1"
+  },
+  "engine_commit": "b1cb6601111ee747caa433d6472fa65310ff053f",
+  "tree": "clean",
+  "arms": {
+    "1.3.6": {
+      "arm": "1.3.6",
+      "applicants": 380,
+      "undisclosed_truth": 69,
+      "detected_undisclosed": 69,
+      "true_positives": 69,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1,
+      "recall": 1,
+      "true_positives_from_non_liability_categories": 20,
+      "recall_from_non_liability_categories": 0.2899,
+      "by_family": {
+        "credit_card": {
+          "truth": 20,
+          "tp": 20,
+          "fp": 0
+        },
+        "bnpl": {
+          "truth": 15,
+          "tp": 15,
+          "fp": 0
+        },
+        "sacc": {
+          "truth": 18,
+          "tp": 18,
+          "fp": 0
+        },
+        "wage_advance": {
+          "truth": 16,
+          "tp": 16,
+          "fp": 0
+        }
+      },
+      "false_positive_causes": {},
+      "per_applicant_sha256": "caef54327d8c87a580b8e13081842a2c119c146d2f4f0d5579946fdfba96bebe"
+    },
+    "1.4.0": {
+      "arm": "1.4.0",
+      "applicants": 380,
+      "undisclosed_truth": 69,
+      "detected_undisclosed": 69,
+      "true_positives": 69,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1,
+      "recall": 1,
+      "true_positives_from_non_liability_categories": 20,
+      "recall_from_non_liability_categories": 0.2899,
+      "by_family": {
+        "credit_card": {
+          "truth": 20,
+          "tp": 20,
+          "fp": 0
+        },
+        "bnpl": {
+          "truth": 15,
+          "tp": 15,
+          "fp": 0
+        },
+        "sacc": {
+          "truth": 18,
+          "tp": 18,
+          "fp": 0
+        },
+        "wage_advance": {
+          "truth": 16,
+          "tp": 16,
+          "fp": 0
+        }
+      },
+      "false_positive_causes": {},
+      "per_applicant_sha256": "caef54327d8c87a580b8e13081842a2c119c146d2f4f0d5579946fdfba96bebe"
+    }
+  },
+  "applicants_whose_liabilities_changed": [],
+  "lists": {
+    "1.3.6": {
+      "false_positives": [],
+      "false_negatives": []
+    },
+    "1.4.0": {
+      "false_positives": [],
+      "false_negatives": []
+    }
+  }
+}
