@@ -34,8 +34,30 @@ type SignalFixture = Json & { evidence_quality: Json };
 type AssessmentFixture = Json & { signals: SignalFixture[] };
 
 const AT = "2026-10-20T09:30:00+11:00";
+// SIG-82 (contract 1.11.0; Colin's ruling (a), 28 Nov 2026): the roll-up's complete list and count,
+// and the income's state, are required. AF-T1 already implies each: its two reasons are all of
+// them, and its income is observed (15,158 a month, affordability complete). Added here, not in the
+// JSON, which the affordability engine's tests compare with the engine's raw output.
+export const withContract111 = (a: AssessmentFixture): AssessmentFixture => {
+  const rollup = a.rollup as { top_reasons: unknown[] };
+  const affordability = a.affordability as { serviceability: Json };
+  return {
+    ...a,
+    rollup: {
+      ...rollup,
+      all_reasons: rollup.top_reasons,
+      reasons_total: rollup.top_reasons.length,
+    },
+    affordability: {
+      ...affordability,
+      serviceability: { ...affordability.serviceability, monthly_income_state: "observed" },
+    },
+  };
+};
 const afT1 = () =>
-  JSON.parse(readFileSync("test/fixtures/af-t1-assessment.json", "utf8")) as AssessmentFixture;
+  withContract111(
+    JSON.parse(readFileSync("test/fixtures/af-t1-assessment.json", "utf8")) as AssessmentFixture,
+  );
 
 const workspace = (over: Json = {}): Json => ({
   id: "wks_01",
@@ -126,6 +148,10 @@ const unverified = (): AssessmentFixture => {
       top_reasons: [
         { signal_id: null, state: "unverified", reason: "The salary account has not been shared" },
       ],
+      all_reasons: [
+        { signal_id: null, state: "unverified", reason: "The salary account has not been shared" },
+      ],
+      reasons_total: 1,
       reasons_to_say_yes: [],
     },
     evidence_checks: [
@@ -190,7 +216,13 @@ const incomplete = (): AssessmentFixture => ({
   applicant_id: "apl_assessed",
   status: "data_incomplete",
   status_reason: "The sync failed three times, so partial data was not evaluated",
-  rollup: { state: "unverified", top_reasons: [], reasons_to_say_yes: [] },
+  rollup: {
+    state: "unverified",
+    top_reasons: [],
+    all_reasons: [],
+    reasons_total: 0,
+    reasons_to_say_yes: [],
+  },
   evidence_checks: [],
   affordability: null,
   signals: [],
