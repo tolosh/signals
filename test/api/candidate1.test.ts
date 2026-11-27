@@ -212,6 +212,7 @@ describe("T3 through the hosted path: consent, assess, read back the hash", () =
         `/v1/app/assessments/${asm}`,
         `/v1/app/assessments/${asm}/affordability/trace`,
         `/v1/app/assessments/${asm}/signals/INC-01/evidence`,
+        `/v1/app/assessments/${asm}/report.pdf`,
         `/v1/app/applicants/${j.id}/assessments`,
       ])
         expect((await call("GET", p, { token: "token-b" })).status, p).toBe(404);
@@ -221,6 +222,11 @@ describe("T3 through the hosted path: consent, assess, read back the hash", () =
       });
       expect(ev.status).toBe(501);
       expect((ev.json?.error as { code: string }).code).toBe("evidence_not_built");
+      const pdf = await call("GET", `/v1/app/assessments/${asm}/report.pdf`, { token: "token-a" });
+      expect(pdf.status).toBe(501);
+      expect((pdf.json?.error as { message: string }).message).toMatch(
+        /not available in this demo/i,
+      );
       for (const b of [getA.body, trace.body, list.body]) {
         expect(b).not.toMatch(/"transactions"|"taxonomy"|approv|declin/i);
       }

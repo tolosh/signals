@@ -392,20 +392,20 @@ describe("the assessment endpoints: a labelled 501 in candidate 0", () => {
     expect((res.json as { items: unknown[] }).items).toEqual([]);
   });
 
-  it("the assessment, evidence and trace return 501; the PDF says it isn't in this demo", async () => {
+  // Review 23 (SIG-82 40821, "Also", candidate 1): the workspace is checked before an assessment
+  // route responds, so an ID that isn't this workspace's gets the same scoped 404 as T5, wired or
+  // not, the PDF included. A disclosed test edit: these returned 501 before the scope check.
+  it("an assessment ID that isn't this workspace's gets the scoped 404, before any 501", async () => {
     for (const path of [
       "/v1/app/assessments/asm_x",
       "/v1/app/assessments/asm_x/signals/INC-01/evidence",
       "/v1/app/assessments/asm_x/affordability/trace",
+      "/v1/app/assessments/asm_x/report.pdf",
     ]) {
       const res = await call("GET", path, { token: "token-a" });
-      expect(res.status, path).toBe(501);
+      expect(res.status, path).toBe(404);
+      expect((res.json as { error: { code: string } }).error.code, path).toBe("not_found");
     }
-    const pdf = await call("GET", "/v1/app/assessments/asm_x/report.pdf", { token: "token-a" });
-    expect(pdf.status).toBe(501);
-    expect((pdf.json as { error: { message: string } }).error.message).toMatch(
-      /not available in this demo/i,
-    );
   });
 });
 
