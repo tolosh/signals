@@ -1,5 +1,5 @@
-// SIG-82 (ruling 40775, 1; ADR 0014): the demo's persistence stand-in. It reuses the hosted mock's
-// DynamoDB store (src/mock/persist.ts: one on-demand table, partition key pk, sort key sk, values
+// SIG-82 (ruling 40775, 1; ADR 0014): the demo's persistence stand-in. It uses ./dynamo.ts, a copy
+// of the hosted mock's DynamoDB store (one on-demand table, partition key pk, sort key sk, values
 // split across items when long). Tenant isolation is structural: every workspace's records sit
 // under their own partition, ws#<workspace id>, and a request can only name the partition of the
 // workspace its verified sign-in maps to. Portal tokens sit under the partition portal, each

@@ -12,6 +12,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 const SLOW = 30_000;
 import { SignalsMockStack } from "../../infra/mock-stack.js";
+import { SignalsRealDataStack } from "../../infra/realdata-stack.js";
 
 describe("hosted mock", () => {
   beforeAll(() => {
@@ -63,12 +64,49 @@ describe("hosted mock", () => {
     SLOW,
   );
 
-  it("the table is in the mock stack only: no other infra file declares one", () => {
+  // SIG-82 (ruling 40775, 1; ADR 0014; D65, SIG-82 40818, 3): ONE named exception, the demo
+  // stage's own table, infra/demo-stack.ts (MorokuSignalsDemo).
+  it("the table is in the mock stack only, except infra/demo-stack.ts: no other infra file declares one", () => {
     const tables = readdirSync("infra")
       .filter((f) => f.endsWith(".ts"))
       .filter((f) => /aws-dynamodb/.test(readFileSync(`infra/${f}`, "utf8")));
-    expect(tables).toEqual(["mock-stack.ts"]);
+    expect(tables).toEqual(["demo-stack.ts", "mock-stack.ts"]);
   });
+
+  // D65 (40818, 3): the real-data stack, and every stack other than MorokuSignalsDemo, never uses
+  // or references the demo store: no stack file but the demo's imports it, and neither the
+  // real-data stack's nor the mock stack's template names its table, its variable or its code.
+  it(
+    "no stack other than MorokuSignalsDemo uses or references the demo store",
+    () => {
+      for (const f of readdirSync("infra").filter((x) => /\.(ts|mjs)$/.test(x))) {
+        if (f === "demo-stack.ts" || f === "app.ts" || f === "build-demo-lambda.mjs") continue;
+        expect(readFileSync(`infra/${f}`, "utf8"), f).not.toMatch(
+          /demo-stack|src\/api\/|DEMO_TABLE|DemoState/,
+        );
+      }
+      expect(readFileSync("infra/app.ts", "utf8")).not.toMatch(/src\/api\//);
+      const env = { account: "932027117528", region: "ap-southeast-2" };
+      const real = Template.fromStack(
+        new SignalsRealDataStack(new App(), "MorokuSignalsRealData-guard", {
+          env,
+          assetPath: "test/infra/empty-asset",
+        }),
+      ).toJSON();
+      const mock = Template.fromStack(
+        new SignalsMockStack(new App(), "MorokuSignalsMock-guard", {
+          env,
+          assetPath: "test/infra/empty-asset",
+        }),
+      ).toJSON();
+      expect(
+        Object.values(real.Resources ?? {}).map((r) => (r as { Type: string }).Type),
+      ).not.toContain("AWS::DynamoDB::Table");
+      for (const t of [real, mock])
+        expect(JSON.stringify(t)).not.toMatch(/DEMO_TABLE|DemoState|moroku-signals-demo/);
+    },
+    SLOW,
+  );
 
   it("the one-container cap stays withdrawn: no stack reserves concurrency", () => {
     const capped = readdirSync("infra")
