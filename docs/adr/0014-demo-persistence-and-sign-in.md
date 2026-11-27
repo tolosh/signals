@@ -58,3 +58,30 @@ tenant A). The real-data path (SIG-61) stays off.
   ADR adds the one named exception ruling 40775 (1) calls for. The guards are not edited by this PR;
   they fail on it until Colin rules on narrowing them to `src/api/dynamo.ts` and
   `infra/demo-stack.ts`.
+
+## Review 23 changes (SIG-82 40821; Lovable's answer, 40820)
+
+These supersede the sign-in description in decision 4.
+
+- **Signatures: ES256 only** (40820, 1). Any other signed algorithm is refused without a fetch. An
+  unknown key ID forces one reload of the key list, at most once a minute, and is then remembered
+  as unknown for a minute.
+- **The `/auth/v1/user` fallback is for HS256 tokens only,** and only while
+  `SUPABASE_HS256_FALLBACK` is `on`. The stack sets it from `-c hs256Fallback` (default `on`), and
+  `/health` reports it as `auth.hs256_fallback`. It never depends on the key list. Its answer is
+  cached for at most 60 seconds by the token's SHA-256, never past the token's `exp`. An HS256 token
+  without an `exp`, or past it, is refused without a call. **Once Lovable's switch to ES256 is
+  confirmed, deploy with `-c hs256Fallback=off`.**
+- **No other fallback.** If the key list can't be fetched, and no copy younger than an hour is held,
+  or `/auth/v1/user` answers 5xx or can't be reached, the API answers 503 `sign_in_unavailable`.
+- **Membership binding** (40820, 3). A demo member listed by email is bound to the `sub` first seen
+  with that email. The binding is recorded under the `member` partition (`binding#<email>`, with the
+  demo's 30-day TTL). A later sign-in with the same email and another `sub` gets 403. Members listed
+  by user ID are matched on `sub` alone. **Limit:** the store has no conditional write, so two
+  first sign-ins at the same instant could each see no binding. The later write wins.
+- **500s** carry a correlation ID in the message and in `x-correlation-id`. The log line holds the
+  ID, the method, the status and the error's class, never its message or anything the request
+  carried.
+- **Synthesis.** An `enrichPath` context, or an `ENRICH_PATH` value, other than `local` fails the
+  build (G4). A build that `build-info.json` records as dirty (`--allow-dirty`) refuses to
+  synthesise.

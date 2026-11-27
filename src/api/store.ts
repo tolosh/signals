@@ -1,5 +1,5 @@
-// SIG-82 (ruling 40775, 1; ADR 0014): the demo's persistence stand-in. It reuses the hosted mock's
-// DynamoDB store (src/mock/persist.ts: one on-demand table, partition key pk, sort key sk, values
+// SIG-82 (ruling 40775, 1; ADR 0014): the demo's persistence stand-in. It uses ./dynamo.ts, a copy
+// of the hosted mock's DynamoDB store (one on-demand table, partition key pk, sort key sk, values
 // split across items when long). Tenant isolation is structural: every workspace's records sit
 // under their own partition, ws#<workspace id>, and a request can only name the partition of the
 // workspace its verified sign-in maps to. Portal tokens sit under the partition portal, each
@@ -11,6 +11,8 @@ export const DEMO_TTL_SECONDS = 30 * 24 * 60 * 60;
 
 export const workspacePartition = (workspaceId: string) => `ws#${workspaceId}`;
 export const PORTAL_PARTITION = "portal";
+/** Demo members' email-to-sub bindings (40820, 3; review 23). */
+export const MEMBER_PARTITION = "member";
 
 export class DemoStore {
   constructor(

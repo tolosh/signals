@@ -145,6 +145,7 @@ describe("the shared-secret fallback: GET /auth/v1/user", () => {
     const verify = createSupabaseVerifier({
       url: URL_,
       publishableKey: KEY,
+      hs256Fallback: true, // review 23 (40821, G7): the fallback is off unless switched on
       fetch: f.fetch,
       now: () => NOW,
     });
@@ -163,6 +164,7 @@ describe("the shared-secret fallback: GET /auth/v1/user", () => {
     const verify = createSupabaseVerifier({
       url: URL_,
       publishableKey: KEY,
+      hs256Fallback: true, // review 23 (40821, G7): the fallback is off unless switched on
       fetch: f.fetch,
       now: () => NOW,
     });
@@ -180,6 +182,7 @@ describe("the shared-secret fallback: GET /auth/v1/user", () => {
     const verify = createSupabaseVerifier({
       url: URL_,
       publishableKey: KEY,
+      hs256Fallback: true, // review 23 (40821, G7): the fallback is off unless switched on
       fetch: f.fetch,
       now: () => NOW,
     });
@@ -197,7 +200,8 @@ describe("tokens are never logged", () => {
       now: () => NOW,
     });
     const t = good();
-    await verify(t);
+    // Review 23 (40821, G7): an unreachable key list now rejects with SignInUnavailable.
+    await verify(t).catch(() => null);
     const hash = createHash("sha256").update(t).digest("hex");
     for (const line of logs) {
       expect(line).not.toContain(t);

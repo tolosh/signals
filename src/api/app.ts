@@ -10,10 +10,12 @@
 //     seeded scenario the applicant picks and returns to /connect/:token/progress.
 // Every figure an assessment shows will come from the real engines; nothing here is a fixture.
 // Never logged: tokens, descriptions, references, account numbers, request bodies.
-import { randomBytes } from "node:crypto";
+// Review 23 (40821): a member matched by email is bound to the first sub seen (40820, 3); a sign-in
+// that can't be checked is a 503; a 500 carries a correlation ID, logged with no PII.
+import { randomBytes, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { parse } from "yaml";
-import { bearerOf, type Verifier } from "../auth/supabase.js";
+import { bearerOf, SignInUnavailable, type Verifier } from "../auth/supabase.js";
 import { NOT_WIRED_MESSAGE, type AssessmentPort } from "./assessment-port.js";
 import { DEFAULT_ORIGIN, DEMO_ORIGINS, type DemoConfig, type WorkspaceKey } from "./config.js";
 import { consentPage } from "./consent.js";
@@ -25,7 +27,7 @@ import {
   type DemoWorkspace,
   type ScenarioKey,
 } from "./seed.js";
-import { PORTAL_PARTITION, workspacePartition, type DemoStore } from "./store.js";
+import { MEMBER_PARTITION, PORTAL_PARTITION, workspacePartition, type DemoStore } from "./store.js";
 
 export type DemoRequest = {
   method: string;
@@ -84,6 +86,9 @@ const record = (x: unknown): Json =>
 const PRODUCTS = new Set(["personal", "home", "car", "business"]);
 const POSITION_LISTS = ["assets", "liabilities", "repayments", "income", "expenses"] as const;
 const page = (items: unknown[]) => ({ items, next_cursor: null });
+/** The contract's email format (ajv-formats' full mode), checked at input (review 23, G10). */
+const EMAIL =
+  /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i;
 
 export function createDemoApp(o: {
   config: DemoConfig;
@@ -132,10 +137,27 @@ export function createDemoApp(o: {
       `${what} is not available in this demo (SIG-82 demo stage, synthetic data only)`,
     );
 
-  const memberOf = (u: { sub: string; email: string | null }): WorkspaceKey | null =>
-    o.config.members[u.sub.toLowerCase()] ??
-    (u.email ? o.config.members[u.email.toLowerCase()] : undefined) ??
-    null;
+  /**
+   * The member's workspace. A member listed by user ID is matched on sub. A member listed by email
+   * is bound to the sub first seen with that email, and the binding is recorded; a later sign-in
+   * with the same email and another sub is refused (40820, 3).
+   */
+  async function memberOf(u: {
+    sub: string;
+    email: string | null;
+  }): Promise<WorkspaceKey | "bound_elsewhere" | null> {
+    const bySub = o.config.members[u.sub.toLowerCase()];
+    if (bySub) return bySub;
+    const email = u.email?.toLowerCase() ?? "";
+    const ws = email ? o.config.members[email] : undefined;
+    if (!ws) return null;
+    const bound = await store.get<{ sub: string }>(MEMBER_PARTITION, `binding#${email}`);
+    if (!bound) {
+      await store.put(MEMBER_PARTITION, `binding#${email}`, { sub: u.sub, bound_at: iso(now()) });
+      return ws;
+    }
+    return bound.sub === u.sub ? ws : "bound_elsewhere";
+  }
 
   const workspaceBody = (w: DemoWorkspace) => ({
     id: w.id,
@@ -256,10 +278,13 @@ export function createDemoApp(o: {
         const name = typeof body.name === "string" ? body.name.trim() : "";
         if (!name || !PRODUCTS.has(String(body.product_type)))
           return error(400, "invalid_parameter", "An applicant needs a name and a product_type");
+        const email = body.email ?? null;
+        if (email !== null && (typeof email !== "string" || !EMAIL.test(email)))
+          return error(400, "invalid_parameter", "The applicant's email is not a valid address");
         const a: Applicant = {
           id: `apl_${hex(8)}`,
           name,
-          email: typeof body.email === "string" ? body.email : null,
+          email,
           mobile: typeof body.mobile === "string" ? body.mobile : null,
           product_type: body.product_type,
           status: "invited",
@@ -362,15 +387,16 @@ export function createDemoApp(o: {
     const key = `${method} ${template}`;
     if (p.step === "withdrawn" && key !== "get /v1/portal/{token}")
       return error(409, "grant_revoked", "Consent was withdrawn; ask the lender for a new link");
+    const session = (step: PortalRecord["step"]) => ({
+      lender_name: w.name,
+      lender_logo_url: null,
+      shared_data: ["Account details", "Balances", "Transactions for the last 12 months"],
+      purpose: "To assess your loan application (demo stage: synthetic sandbox data only)",
+      step,
+    });
     switch (key) {
       case "get /v1/portal/{token}":
-        return json(200, {
-          lender_name: w.name,
-          lender_logo_url: null,
-          shared_data: ["Account details", "Balances", "Transactions for the last 12 months"],
-          purpose: "To assess your loan application (demo stage: synthetic sandbox data only)",
-          step: p.step,
-        });
+        return json(200, session(p.step));
       case "post /v1/portal/{token}/connect": {
         const back =
           req.headers.origin && DEMO_ORIGINS.includes(req.headers.origin)
@@ -420,7 +446,7 @@ export function createDemoApp(o: {
       case "post /v1/portal/{token}/withdraw":
         await savePortal(token, { ...p, step: "withdrawn" });
         await setApplicantStatus(p, "closed", { grant_revoked: true });
-        return json(200, { step: "withdrawn" });
+        return json(200, session("withdrawn"));
       case "get /v1/portal/{token}/requests":
         return json(200, { items: [] });
       default:
@@ -476,13 +502,19 @@ export function createDemoApp(o: {
     };
   }
 
-  return async (req: DemoRequest): Promise<DemoResponse> => {
+  async function handle(req: DemoRequest): Promise<DemoResponse> {
     origin = req.headers.origin;
     const method = req.method.toLowerCase();
     const path = req.path;
     if (method === "options") return { status: 204, headers: cors(origin), body: "" };
     if (path === "/health" && method === "get")
-      return json(200, await healthBody(o.config.commit, { assessmentWired: o.assessments.wired }));
+      return json(
+        200,
+        await healthBody(o.config.commit, {
+          assessmentWired: o.assessments.wired,
+          hs256Fallback: o.config.hs256Fallback,
+        }),
+      );
     const consentMatch = /^\/demo\/consent\/(tok_[a-z0-9]{32})$/.exec(path);
     if (consentMatch) return consent(method, consentMatch[1] as string, req);
     if (path.startsWith("/demo/consent/")) return consent(method, "", req);
@@ -513,12 +545,53 @@ export function createDemoApp(o: {
       return portal(method, route.template, params.token ?? "", body, req);
 
     const token = bearerOf(req.headers);
-    const user = token ? await o.verify(token) : null;
+    let user: { sub: string; email: string | null } | null;
+    try {
+      user = token ? await o.verify(token) : null;
+    } catch (e) {
+      if (e instanceof SignInUnavailable)
+        return error(503, "sign_in_unavailable", "Sign-in can't be checked right now; try again");
+      throw e;
+    }
     if (!user)
       return error(401, "unauthenticated", "Sign in again: the session could not be verified");
-    const ws = memberOf(user);
+    const ws = await memberOf(user);
+    if (ws === "bound_elsewhere")
+      return error(
+        403,
+        "not_a_demo_member",
+        "This email is already bound to another sign-in for the demo workspace",
+      );
     if (!ws)
       return error(403, "not_a_demo_member", "This account is not a member of a demo workspace");
     return app(DEMO_WORKSPACES[ws], user, method, route.template, params, body, req);
+  }
+
+  return async (req: DemoRequest): Promise<DemoResponse> => {
+    try {
+      return await handle(req);
+    } catch (e) {
+      // Logged: the correlation ID, the method, the status and the error's class. Never its
+      // message, the path, a body, a header or anything the request carried.
+      const id = randomUUID();
+      console.error(
+        JSON.stringify({
+          status: 500,
+          correlation_id: id,
+          method: req.method,
+          error: e instanceof Error ? e.constructor.name : "unknown",
+        }),
+      );
+      return json(
+        500,
+        {
+          error: {
+            code: "internal",
+            message: `Something went wrong on the demo stage (reference ${id})`,
+          },
+        },
+        { "x-correlation-id": id },
+      );
+    }
   };
 }

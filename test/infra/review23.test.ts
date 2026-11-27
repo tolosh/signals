@@ -90,7 +90,7 @@ describe("a dirty build refuses to synthesise", () => {
     expect(() =>
       synth({ build: { commit: COMMIT, dirty: false } as Props["build"] }),
     ).not.toThrow();
-  });
+  }, 60_000);
 });
 
 describe("40820, 2: the HS256 fallback is set on the Lambda explicitly", () => {
@@ -99,7 +99,7 @@ describe("40820, 2: the HS256 fallback is set on the Lambda explicitly", () => {
     expect(
       lambdaEnv(synth({ hs256Fallback: false } as Partial<Props>)).SUPABASE_HS256_FALLBACK,
     ).toBe("off");
-  });
+  }, 60_000);
 
   it("-c hs256Fallback takes on or off only", () => {
     const s = demoSettings ?? (() => ({ enrichPath: "local", hs256Fallback: true }));

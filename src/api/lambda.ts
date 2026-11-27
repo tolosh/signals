@@ -25,6 +25,7 @@ const verify: Verifier =
     ? createSupabaseVerifier({
         url: config.supabaseUrl,
         publishableKey: config.supabasePublishableKey,
+        hs256Fallback: config.hs256Fallback,
       })
     : () => Promise.resolve(null);
 const handle = createDemoApp({ config, store, verify, assessments: NOT_WIRED });
