@@ -16,6 +16,7 @@ import {
 
 /** Scripts that write run records or committed research outputs, and so must use the helpers. */
 const RECORD_SCRIPTS = [
+  "sig83-run.ts",
   "score.ts",
   "eq-distribution.ts",
   "af-rulings-run.ts",
