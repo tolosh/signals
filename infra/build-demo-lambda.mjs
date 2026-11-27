@@ -31,6 +31,13 @@ await build({
   },
 });
 cpSync("openapi.yaml", `${out}/openapi.yaml`);
+// Candidate 1: SIG-76's five scenario inputs, built as its in-process runs built them, each feed
+// in its seeded order (src/api/scenario-inputs.ts). Synthetic data only.
+execFileSync(
+  process.execPath,
+  ["--import", "tsx", "src/api/write-scenario-inputs.ts", `${out}/scenario-inputs.json`],
+  { stdio: "inherit" },
+);
 writeFileSync(
   `${out}/build-info.json`,
   JSON.stringify({ commit, dirty: Boolean(dirty), built_at: new Date().toISOString() }, null, 2) +

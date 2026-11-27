@@ -10,10 +10,11 @@
 //     seeded scenario the applicant picks and returns to /connect/:token/progress.
 // Every figure an assessment shows will come from the real engines; nothing here is a fixture.
 // Never logged: tokens, descriptions, references, account numbers, request bodies.
-import { randomBytes } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { parse } from "yaml";
 import { bearerOf, type Verifier } from "../auth/supabase.js";
+import type { Assessment } from "../assessment/assess.js";
 import { NOT_WIRED_MESSAGE, type AssessmentPort } from "./assessment-port.js";
 import { DEFAULT_ORIGIN, DEMO_ORIGINS, type DemoConfig, type WorkspaceKey } from "./config.js";
 import { consentPage } from "./consent.js";
@@ -78,6 +79,20 @@ type PortalRecord = {
 };
 
 const hex = (bytes: number) => randomBytes(bytes).toString("hex");
+const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
+/** Server-side only: the composition's whole output, embedded Enrich record included (40802, 1). */
+type StoredAssessment = {
+  id: string;
+  applicant_id: string;
+  version: number;
+  scenario: ScenarioKey;
+  set_applicant_id: string;
+  output_sha256: string;
+  created_at: string;
+  output: Assessment;
+};
+const MAPPING_PENDING =
+  "The assessment ran on the real engines and is stored, but how it is shown waits for Colin's ruling on the contract mapping (SIG-82 40805). Nothing is shown until then.";
 const iso = (ms: number) => new Date(ms).toISOString();
 const record = (x: unknown): Json =>
   x && typeof x === "object" && !Array.isArray(x) ? (x as Json) : {};
@@ -323,9 +338,39 @@ export function createDemoApp(o: {
         }
         case "get /v1/app/applicants/{id}/assessments":
           return json(200, page([]));
-        case "post /v1/app/applicants/{id}/assessments":
+        case "post /v1/app/applicants/{id}/assessments": {
           if (!o.assessments.wired) return error(501, "assessment_not_wired", NOT_WIRED_MESSAGE);
-          return notInDemo("Running an assessment");
+          const token = typeof a.portal_token === "string" ? a.portal_token : null;
+          const p = token ? await getPortal(token) : null;
+          if (!p || !p.scenario || (p.step !== "finances" && p.step !== "done"))
+            return error(409, "no_data_shared", "The applicant hasn't shared sandbox data yet");
+          const result = await o.assessments.assess({
+            workspace_id: w.id,
+            applicant_id: a.id,
+            scenario: p.scenario,
+          });
+          if (!result) return error(501, "assessment_not_wired", NOT_WIRED_MESSAGE);
+          const earlier = await store.list<StoredAssessment>(
+            workspacePartition(w.id),
+            "assessment#",
+          );
+          const version = [...earlier.values()].filter((x) => x.applicant_id === a.id).length + 1;
+          const asmId = `asm_${hex(8)}`;
+          const stored: StoredAssessment = {
+            id: asmId,
+            applicant_id: a.id,
+            version,
+            scenario: p.scenario,
+            set_applicant_id: result.set_applicant_id,
+            output_sha256: sha256(JSON.stringify(result.output)),
+            created_at: iso(now()),
+            output: result.output,
+          };
+          await store.put(workspacePartition(w.id), `assessment#${asmId}`, stored);
+          await saveApplicant(w.id, { ...a, status: "assessed", latest_assessment_id: asmId });
+          // Plumbing only: how the output maps to the contract waits for Colin's ruling (40805).
+          return json(202, { id: asmId, applicant_id: a.id, version, status: "complete" });
+        }
         case "get /v1/app/applicants/{id}/requests":
           return json(200, { items: [] });
         case "get /v1/app/applicants/{id}/timeline":
@@ -340,8 +385,12 @@ export function createDemoApp(o: {
         "not_available_in_demo",
         "The credit-file PDF is not available in this demo: no PDF generator exists yet",
       );
-    if (template.startsWith("/v1/app/assessments/{id}"))
-      return error(501, "assessment_not_wired", NOT_WIRED_MESSAGE);
+    if (template.startsWith("/v1/app/assessments/{id}")) {
+      if (!o.assessments.wired) return error(501, "assessment_not_wired", NOT_WIRED_MESSAGE);
+      const found = await store.get<StoredAssessment>(workspacePartition(w.id), `assessment#${id}`);
+      if (!found) return notFound();
+      return error(501, "assessment_mapping_pending", MAPPING_PENDING);
+    }
     return notInDemo();
   }
 
@@ -476,6 +525,32 @@ export function createDemoApp(o: {
     };
   }
 
+  /**
+   * SIG-76 T3: the stored output's SHA-256, for the acceptance to compare with the frozen states.
+   * Demo-only and outside the contract; signed in and scoped like /v1/app. The output itself never
+   * leaves the store.
+   */
+  async function outputHash(req: DemoRequest, asmId: string): Promise<DemoResponse> {
+    const t = bearerOf(req.headers);
+    const u = t ? await o.verify(t) : null;
+    if (!u)
+      return error(401, "unauthenticated", "Sign in again: the session could not be verified");
+    const k = memberOf(u);
+    if (!k)
+      return error(403, "not_a_demo_member", "This account is not a member of a demo workspace");
+    const found = await store.get<StoredAssessment>(
+      workspacePartition(DEMO_WORKSPACES[k].id),
+      `assessment#${asmId}`,
+    );
+    if (!found) return notFound();
+    return json(200, {
+      assessment_id: found.id,
+      scenario: found.scenario,
+      set_applicant_id: found.set_applicant_id,
+      output_sha256: found.output_sha256,
+    });
+  }
+
   return async (req: DemoRequest): Promise<DemoResponse> => {
     origin = req.headers.origin;
     const method = req.method.toLowerCase();
@@ -483,6 +558,8 @@ export function createDemoApp(o: {
     if (method === "options") return { status: 204, headers: cors(origin), body: "" };
     if (path === "/health" && method === "get")
       return json(200, await healthBody(o.config.commit, { assessmentWired: o.assessments.wired }));
+    const hashMatch = /^\/demo\/assessments\/(asm_[a-z0-9]{16})\/output-sha256$/.exec(path);
+    if (hashMatch && method === "get") return outputHash(req, hashMatch[1] as string);
     const consentMatch = /^\/demo\/consent\/(tok_[a-z0-9]{32})$/.exec(path);
     if (consentMatch) return consent(method, consentMatch[1] as string, req);
     if (path.startsWith("/demo/consent/")) return consent(method, "", req);

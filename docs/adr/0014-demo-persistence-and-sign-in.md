@@ -58,3 +58,16 @@ tenant A). The real-data path (SIG-61) stays off.
   ADR adds the one named exception ruling 40775 (1) calls for. The guards are not edited by this PR;
   they fail on it until Colin rules on narrowing them to `src/api/dynamo.ts` and
   `infra/demo-stack.ts`.
+
+## Candidate 1
+
+- The assessment port runs the real `assessApplicant` (composition 1.2.0) on the scenario the
+  applicant chose at the sandbox consent. The five inputs are built at build time exactly as
+  SIG-76's in-process runs built them (`src/api/scenario-inputs.ts`), each feed in its seeded order,
+  and shipped in the Lambda's asset (`scenario-inputs.json`). The hosted output's SHA-256 equals the
+  frozen `output_sha256` for C, A, B, D and D2 (SIG-76 T3; states file `19bab324…ece1`).
+- The whole output, embedded Enrich record included, is stored server-side only. A lender
+  response never carries it (SIG-82 40802, 1). The acceptance reads its hash at
+  `GET /demo/assessments/{id}/output-sha256`, which is signed in and scoped like `/v1/app`.
+- Until Colin rules on the contract mapping (SIG-82 40805), `GET /v1/app/assessments/{id}` returns a
+  labelled 501 (`assessment_mapping_pending`), and the run returns only its ID, version and status.

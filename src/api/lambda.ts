@@ -3,7 +3,9 @@
 import { DynamoStore, MemoryStore } from "./dynamo.js";
 import { createSupabaseVerifier, type Verifier } from "../auth/supabase.js";
 import { createDemoApp } from "./app.js";
-import { NOT_WIRED } from "./assessment-port.js";
+import { readFileSync } from "node:fs";
+import { wiredPort } from "./assessment-port.js";
+import type { ScenarioInputs } from "./scenario-inputs.js";
 import { demoConfigFrom } from "./config.js";
 import { DemoStore } from "./store.js";
 
@@ -27,7 +29,9 @@ const verify: Verifier =
         publishableKey: config.supabasePublishableKey,
       })
     : () => Promise.resolve(null);
-const handle = createDemoApp({ config, store, verify, assessments: NOT_WIRED });
+// Candidate 1: the real composition, on the five SIG-76 inputs the build wrote (seeded order).
+const inputs = JSON.parse(readFileSync("scenario-inputs.json", "utf8")) as ScenarioInputs;
+const handle = createDemoApp({ config, store, verify, assessments: wiredPort(inputs) });
 
 export const handler = async (event: HttpApiEvent) => {
   const started = Date.now();
