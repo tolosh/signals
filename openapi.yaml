@@ -1581,10 +1581,14 @@ components:
           description: >-
             The roll-up's reasons: the evidence-quality layer's reasons (signal_id null; one with
             state null is informational and doesn't block), and the amber or red signals in a
-            knockout, refer or standard class that move the roll-up (RU-1). May be empty. At most
-            three are listed: when there are more, the list is a selection, and which three is set
-            by the contract mapping (SIG-82 40805, for Colin's ruling). Every signal, listed here
-            or not, is in the assessment's signals with its own state.
+            knockout, refer or standard class that move the roll-up (RU-1). May be empty. The
+            server orders them in four tiers (D65, SIG-82 40818, 1): (1) evidence-quality reasons
+            with a state; (2) red movers; (3) amber movers; (4) evidence-quality reasons with state
+            null. Within a tier the composition's order is kept (evidence reasons in check order,
+            then movers, INC before LIA); nothing is re-sorted or rewritten. top_reasons is the
+            first three of that list, so no amber is listed while a red is left out. The UI orders
+            nothing itself. Every signal, listed here or not, is in the assessment's signals with
+            its own state.
           items: { $ref: "#/components/schemas/RollupReason" }
         reasons_to_say_yes:
           type: array
