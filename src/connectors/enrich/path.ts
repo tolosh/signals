@@ -1,7 +1,8 @@
 // SIG-70: path selection and the fallback (D42). An active Enrich tenant uses the API; a pending
 // tenant, none, or a failed call uses the pinned local engine, and the fallback is recorded, never
-// silent. Synthetic data never goes to the live API (D42): a synthetic feed is categorised locally
-// and the refusal recorded. For the 1 December demo every assessment is forced local (D58).
+// silent. Synthetic data never goes to the live API (D42), and the API fails closed (ruling 40740,
+// O4): only a feed positively marked as real, consented data (realConsented exactly true) can reach
+// it. Any other feed, the mark omitted included, is categorised locally and the refusal recorded. For the 1 December demo every assessment is forced local (D58).
 // Nothing here logs: a transaction's description never reaches a log.
 import type {
   Categoriser,
@@ -52,8 +53,11 @@ export type CategoriseRequest = {
   local: Categoriser;
   /** ApiEnrich under the lender's tenant; null until SIG-72 provides the credential. */
   api: Categoriser | null;
-  /** True for any synthetic feed: it never goes to the API (D42). */
-  synthetic: boolean;
+  /**
+   * True only for a feed of real, consented data. The API path refuses anything else: a feed with
+   * this omitted, false, or not exactly true never reaches the API client (fail closed, D42).
+   */
+  realConsented?: boolean;
   /** The demo's local-only rule (D58). */
   forceLocal?: boolean;
   timeoutMs?: number;
@@ -85,7 +89,7 @@ export async function categoriseForAssessment(r: CategoriseRequest): Promise<Enr
   };
   const wanted = r.forceLocal ? "local" : selectPath(r.tenant.status);
   if (wanted === "local") return local("local");
-  if (r.synthetic) return local("local", { api_refused: "synthetic" });
+  if (r.realConsented !== true) return local("local", { api_refused: "not_marked_real" });
   if (!r.api) return local("api_fallback_local", { fallback: { reason: "unavailable" } });
   const ms = r.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   try {

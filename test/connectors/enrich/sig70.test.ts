@@ -134,7 +134,7 @@ describe("T1: the path follows the lender's Enrich tenant, and is recorded", () 
         txs: TXS,
         local: local.makeLocalEnrich(engine, BUILD),
         api: standInApi("ok"),
-        synthetic: false,
+        realConsented: true,
       });
       expect(record.path).toBe(expected);
       expect(record.engine_version).toBeTruthy();
@@ -151,7 +151,7 @@ describe("T1: the path follows the lender's Enrich tenant, and is recorded", () 
       txs: TXS,
       local: local.makeLocalEnrich(standInEngine(), BUILD),
       api,
-      synthetic: false,
+      realConsented: true,
       forceLocal: true,
     });
     expect(record.path).toBe("local");
@@ -195,7 +195,7 @@ describe("T2: an API failure falls back to local, recorded, and the assessment c
       txs: TXS,
       local: local.makeLocalEnrich(standInEngine(), BUILD),
       api: standInApi(behaviour),
-      synthetic: false,
+      realConsented: true,
       timeoutMs: 20,
     });
     expect(record.path).toBe("api_fallback_local");
@@ -210,7 +210,7 @@ describe("T2: an API failure falls back to local, recorded, and the assessment c
       txs: TXS,
       local: local.makeLocalEnrich(standInEngine(), BUILD),
       api: null,
-      synthetic: false,
+      realConsented: true,
     });
     expect(record.path).toBe("api_fallback_local");
     expect(record.fallback).toEqual({ reason: "unavailable" });
@@ -227,7 +227,7 @@ describe("T3: the stored record replays the assessment byte-identically, without
       txs: TXS,
       local: local.makeLocalEnrich(engine, BUILD),
       api: null,
-      synthetic: false,
+      realConsented: true,
     });
     const calls = engine.calls.length;
     const stored = JSON.parse(JSON.stringify(record)) as unknown;
@@ -268,7 +268,7 @@ describe("T4: consumer rules at the adapter (engine-facing rules are their own t
       txs: TXS,
       local: local.makeLocalEnrich(standInEngine(), BUILD),
       api: null,
-      synthetic: false,
+      realConsented: true,
     });
     expect(record.taxonomy_version).toBe("9.9-standin");
     expect(record.taxonomy?.taxonomy_version).toBe("9.9-standin");
@@ -292,7 +292,7 @@ describe("T4: consumer rules at the adapter (engine-facing rules are their own t
       txs: TXS,
       local: local.makeLocalEnrich(standInEngine(), BUILD),
       api: null,
-      synthetic: false,
+      realConsented: true,
     });
     expect((replay.categoriesFrom(record) as Record<string, string>).t2).toBe("brand_new_category");
   });
@@ -303,7 +303,7 @@ describe("T4: consumer rules at the adapter (engine-facing rules are their own t
       txs: TXS,
       local: local.makeLocalEnrich(standInEngine(), BUILD),
       api: null,
-      synthetic: false,
+      realConsented: true,
     });
     for (const r of record.response.results as Record<string, unknown>[]) {
       expect(r).toHaveProperty("transaction_id");
@@ -322,7 +322,7 @@ const walk = (d: string): string[] =>
   });
 
 describe("T5: no synthetic data can reach the live API", () => {
-  it("a synthetic feed is never sent to the API, even for an active tenant", async () => {
+  it("a synthetic feed (not marked real) is never sent to the API, even for an active tenant", async () => {
     const { local, path } = await adapter();
     const api = standInApi("ok");
     const record = await path.categoriseForAssessment({
@@ -330,11 +330,10 @@ describe("T5: no synthetic data can reach the live API", () => {
       txs: TXS,
       local: local.makeLocalEnrich(standInEngine(), BUILD),
       api,
-      synthetic: true,
     });
     expect(api.calls).toHaveLength(0);
     expect(record.path).toBe("local");
-    expect(record.api_refused).toBe("synthetic");
+    expect(record.api_refused).toBe("not_marked_real");
   });
   it("static: nothing that reads the synthetic sets imports the live API client (src/connectors/enrich/api.ts)", () => {
     const files = [...walk("src"), ...walk("scripts")];
@@ -400,7 +399,7 @@ describe("hygiene: transaction descriptions are never logged", () => {
       txs: TXS,
       local: local.makeLocalEnrich(standInEngine(), BUILD),
       api: standInApi(503),
-      synthetic: false,
+      realConsented: true,
     });
     for (const s of spies) {
       expect(s).not.toHaveBeenCalled();

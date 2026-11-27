@@ -63,8 +63,12 @@ export type EnrichRecord = {
   build: EngineBuild | null;
   /** Why the API wasn't used, when it should have been. */
   fallback?: { reason: FallbackReason };
-  /** Set when an active tenant's API was refused: synthetic data never goes to it (D42). */
-  api_refused?: "synthetic";
+  /**
+   * Set when an active tenant's API was refused because the feed wasn't marked as real, consented
+   * data. Synthetic data never goes to the API (D42), and the API refuses by default (fail closed,
+   * SIG-70 ruling 40740, O4).
+   */
+  api_refused?: "not_marked_real";
   transactions: number;
   response: EnrichResponse;
 };
