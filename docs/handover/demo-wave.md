@@ -11,12 +11,12 @@ Written for SIG-82 (ruling 40735), and updated for the merge order of SIG-76 407
 
 ## Who owns the shared `infra/` files this wave
 
-| File | Owner this wave | Note |
-| --- | --- | --- |
-| `infra/app.ts` | SIG-82 | Adds the `MorokuSignalsDemo` stack beside `MorokuSignalsMock-dev`. No other ticket edits it this wave. |
-| `infra/mock-stack.ts` | nobody | Unchanged this wave. |
-| `infra/realdata-stack.ts`, `infra/realdata-lambda.ts` | SIG-61 | Unchanged this wave, and never added to `infra/app.ts` (see below). |
-| The demo stage's health handler and `test/infra/` | SIG-82 | SIG-82's infrastructure may run in its own worktree, but it touches only these paths and `infra/`. |
+| File                                                  | Owner this wave | Note                                                                                                   |
+| ----------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------ |
+| `infra/app.ts`                                        | SIG-82          | Adds the `MorokuSignalsDemo` stack beside `MorokuSignalsMock-dev`. No other ticket edits it this wave. |
+| `infra/mock-stack.ts`                                 | nobody          | Unchanged this wave.                                                                                   |
+| `infra/realdata-stack.ts`, `infra/realdata-lambda.ts` | SIG-61          | Unchanged this wave, and never added to `infra/app.ts` (see below).                                    |
+| The demo stage's health handler and `test/infra/`     | SIG-82          | SIG-82's infrastructure may run in its own worktree, but it touches only these paths and `infra/`.     |
 
 SIG-82's infrastructure doesn't touch `src/engines`, the Enrich adapter, the composition
 (`src/assessment`), `research/preregistrations` or `openapi.yaml`.
