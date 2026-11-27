@@ -1,17 +1,20 @@
 // SIG-70 (ruling 40719, 2): packages a published Enrich engine build into the Signals repo, by
 // moroku-enrich commit and hash, so Signals never imports the engine from a sibling checkout at run
 // time. It refuses unless the moroku-enrich checkout is at the named commit with packages/engine and
-// packages/taxonomy clean, and its built dist/index.js has the published SHA-256. It bundles the
+// packages/taxonomy clean, its built dist/index.js has the published SHA-256, and its taxonomy build
+// has the recorded SHA-256 (ruling 40740, O3: --taxonomy-sha). It bundles the
 // engine's dist with the taxonomy's (one ES module, paths relative to the checkout, so the bundle
 // doesn't depend on where the checkout is) and writes the bundle and vendor/moroku-enrich/pin.json.
+// pin.json describes the checkout and never records a local path (ruling 40740, O2).
 // Usage: npx tsx scripts/enrich-package.ts --repo <moroku-enrich> --commit <sha>
 //        --dist-sha <published dist/index.js SHA-256> --tree-sha <published dist tree SHA-256>
+//        --taxonomy-sha <recorded taxonomy dist/index.js SHA-256>
 //        --published <where it was published> [--out vendor/moroku-enrich] [--allow-dirty]
 // Never overwrites: a new build is a new bundle and a new pin.
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 import { build, version as esbuildVersion } from "esbuild";
 import {
   gitState,
@@ -33,6 +36,7 @@ const repo = need("repo");
 const commit = need("commit");
 const distSha = need("dist-sha");
 const treeSha = need("tree-sha");
+const taxonomySha = need("taxonomy-sha");
 const published = need("published");
 
 const g = (...a: string[]) => execFileSync("git", ["-C", repo, ...a], { encoding: "utf8" }).trim();
@@ -69,6 +73,21 @@ const treeOf = (files: Record<string, string>) =>
     .digest("hex");
 if (treeOf(engineDist) !== treeSha)
   throw new Error(`the dist tree is ${treeOf(engineDist)}, not the published ${treeSha}`);
+// The taxonomy build is one file, dist/index.js; another file, or another hash, is refused.
+if (Object.keys(taxonomyDist).join() !== "index.js" || taxonomyDist["index.js"] !== taxonomySha)
+  throw new Error(
+    `the taxonomy build is ${JSON.stringify(taxonomyDist)}, not the recorded index.js ${taxonomySha}`,
+  );
+
+/** The run's arguments as recorded: the checkout is described, and no local path is kept (O2). */
+const REPO = "<moroku-enrich checkout at moroku_enrich_commit>";
+const pathFree = (flag: string | undefined, v: string) =>
+  flag === "--repo" ? REPO : isAbsolute(v) ? "<a local directory>" : v;
+const described = {
+  ...args,
+  values: { ...args.values, repo: REPO },
+  argv: args.argv.map((v, i) => (v.startsWith("--") ? v : pathFree(args.argv[i - 1], v))),
+};
 
 const bundled = await build({
   stdin: {
@@ -109,11 +128,12 @@ const pin = {
   dist_index_sha256: distSha,
   dist_tree_sha256_published: treeSha,
   dist_files: engineDist,
+  taxonomy_dist_sha256: taxonomySha,
   taxonomy_dist_files: taxonomyDist,
   bundle: name,
   bundle_sha256: createHash("sha256").update(bundle).digest("hex"),
   bundler: { esbuild: esbuildVersion, format: "esm", platform: "neutral" },
-  ...provenance("scripts/enrich-package.ts", args, git),
+  ...provenance("scripts/enrich-package.ts", described, git),
 };
 writeNew(join(args.out, "pin.json"), `${JSON.stringify(pin, null, 2)}\n`);
 console.log(JSON.stringify({ bundle: name, bundle_sha256: pin.bundle_sha256 }));
