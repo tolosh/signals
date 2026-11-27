@@ -45,7 +45,12 @@ export type AssessmentRequest = {
   benchmark: (AffordabilityInput["benchmark"] & { monthly: number }) | null;
   as_of: string;
   lookback_months: number;
-  enrich: { tenant_status: TenantStatus; force_local: boolean; synthetic: boolean };
+  enrich: {
+    tenant_status: TenantStatus;
+    force_local: boolean;
+    /** True only for real, consented data (SIG-70 O4). Synthetic feeds pass false. */
+    real_consented: boolean;
+  };
 };
 export type Application = {
   stated_gross_annual?: number | null;
@@ -199,7 +204,7 @@ export async function assessApplicant(input: AssessmentInput) {
     txs,
     local: pinnedLocalEnrich(),
     api: null,
-    synthetic: r.enrich.synthetic,
+    realConsented: r.enrich.real_consented,
     forceLocal: r.enrich.force_local,
   });
   const categories = categoriesOfRecord(enrich);

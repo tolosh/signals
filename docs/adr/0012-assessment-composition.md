@@ -1,6 +1,7 @@
 # ADR 0012: composing one assessment from the engines (SIG-82, part 1)
 
-Status: built on Colin's answers of 27 November 2026: build the composition as SIG-82's first part,
+Status: approved as built, I1 to I7, with the five known limits below kept and disclosed (SIG-82
+ruling 40765, 27 November 2026). Built on Colin's answers of 27 November 2026: build the composition as SIG-82's first part,
 with the requests SIG-76 pre-registers (the proposed defaults, with the expense method `observed`).
 For review with SIG-82. Decision Record D3, D13, D22, D42, D58 and D59; SIG-70; SIG-76 ruling 40732.
 
@@ -19,7 +20,8 @@ must be computed by that same code (ruling 40732), not by a separate script.
 1. **Enrich.** Every transaction goes through the SIG-70 adapter (`categoriseForAssessment`) on the
    local path, with the pinned build (`pinnedLocalEnrich`: 1.8.0, moroku-enrich `8cdb0d9`). The API
    is never called: there is no client, the path is forced local for the demo (D58), and synthetic
-   data is refused on it (D42). The record is kept with the assessment, and the engines read the
+   data is refused on it (D42): the request marks a feed `real_consented` only for real, consented
+   data, and the adapter sends nothing else to the API (SIG-70 O4). The record is kept with the assessment, and the engines read the
    categories stored in it (`categoriesFrom`).
    - Credits are categorised too, not only debits, because the GR-3 gate and LIA read categories on
      credits. The research fixtures hold debits only.

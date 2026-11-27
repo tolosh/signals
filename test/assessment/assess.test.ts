@@ -43,7 +43,8 @@ const REQUEST = {
   benchmark: null,
   as_of: "2026-10-31",
   lookback_months: 6,
-  enrich: { tenant_status: "none", force_local: true, synthetic: true },
+  // SIG-82 (ruling 40765, 2): SIG-70's realConsented mark replaces `synthetic` (disclosed).
+  enrich: { tenant_status: "none", force_local: true, real_consented: false },
 } as const;
 
 type Raw = {
