@@ -1,0 +1,95 @@
+{
+  "ticket": "SIG-83",
+  "registered_at": "2026-11-27",
+  "status": "pre-registered in one commit with the control and the scorer, before the change to LIA and before any SIG-83 run or score; not to be edited after the first run",
+  "hypothesis": "n/a (build, apparatus for H2). LIA's detection gains a category-independent path: a regular repayment to a listed lender is detected whatever its Enrich category. Results are reported as run.",
+  "rulings": {
+    "SIG-83 description": "Colin, 27 November 2026: fix LIA's detection before SIG-76's expected states; don't re-select scenario B",
+    "40766": "Colin, 27 November 2026, on 40754: lender names from LENDER_NAMES 1.2.0 only (no alias table); the ROT13 negative control as proposed; matching, recurrence, exclusions and scorer as written in 40754; this pre-registration committed before any run"
+  },
+  "versions": {
+    "lia_before": "1.3.6",
+    "lia_after": "1.4.0",
+    "detector_before": "1.0.0 (SIG-18), unchanged and still what SIG-18's and SIG-57's code calls",
+    "detector_after": "1.1.0: 1.0.0's steps (a) to (c) unchanged, plus step (d) below, run only when LIA asks for it",
+    "lender_names": "1.2.0, unchanged"
+  },
+  "rule": {
+    "where": "step (d) of the detector, after 1.0.0's steps (a) to (c), on the same window feed LIA already passes it (the GR-3 gate applied, LIA's lookback)",
+    "candidates": [
+      "a debit (amount below 0) in a transaction and savings account, dated on or before the as-of date",
+      "whose narrative, or failing that whose biller name, names a lender on LENDER_NAMES 1.2.0, whatever its Enrich category",
+      "naming is as LIA's display matching (lenders.ts) names a listed lender: the longest listed name the text's words start with, tried as written, then with the product words skipped, then with the product and sensitive words skipped; a word of digits only is dropped first",
+      "the biller name is read the same way, and only when the narrative names no listed lender"
+    ],
+    "excluded": [
+      "a debit whose narrative has a BSB and account number (the detector's own-account rule, BSB_NUMBER)",
+      "a debit categorised transfer (this covers card repayments already typed as transfers)",
+      "a debit 1.0.0's step (b) already reads as a lender outflow (a liability category, or a biller naming a credit card); it stays with 1.0.0"
+    ],
+    "family": "credit_card when the narrative or biller name has the word CARD, else loan",
+    "provider": "the listed lender name, as listed",
+    "grouping": "candidates are grouped by family and listed lender name",
+    "recurrence": [
+      "the group's median amount is taken over all its debits; a debit is near when within 5% of that median",
+      "at least 3 near debits",
+      "sorted by date (then transaction ID), every interval between consecutive near debits is in one and the same band: weekly, 4 to 10 days (7 ± 3); fortnightly, 11 to 17 days (14 ± 3); or monthly, within 3 days of the same day of the next calendar month (clamped to the month's last day)"
+    ],
+    "output": "a group that recurs is a liability with source outflow, its cadence, occurrences, median amount and monthly amount (weekly × 52/12, fortnightly × 26/12, monthly × 1) and its near debits as evidence, exactly as 1.0.0 writes one",
+    "no_overlap": "a group whose family and lender already have a liability from steps (a) to (c) adds nothing; that liability is unchanged",
+    "declared": "as 1.0.0: declared when a declaration of the same family has that provider after normaliseProvider",
+    "fixed": "these cut-offs are fixed here and are not LIA's configurable min_occurrences or amount_tolerance, which keep their values for steps (a) to (c)"
+  },
+  "negative_control": {
+    "what": "every listed lender name (LENDER_NAMES 1.2.0, longest first, whole words, case-insensitive) in a debit's narrative and biller name is replaced by its ROT13 (letters shifted 13 places, case kept, digits and everything else unchanged). Amounts, dates, categories, IDs and declarations are unchanged",
+    "check": "after rotation no debit's narrative or biller name names a listed lender by the rule's matching, and no rotated name is itself on LENDER_NAMES; the run stops if either fails",
+    "code": "src/research/sig83/control.ts",
+    "run": "first, on set v2.2, both arms (1.3.6 and 1.4.0) on the rotated feed",
+    "passes_if": "on the rotated v2.2, 1.4.0's recall from non-liability categories is no higher than 1.3.6's, and 1.4.0's precision is no lower than 1.3.6's",
+    "if_it_fails": "stop and report; no other result stands"
+  },
+  "scorer": {
+    "code": "src/research/sig83/score.ts",
+    "basis": "SIG-57's scorer (src/research/sig57/score.ts): undisclosed liabilities against ground truth, matched one-to-one by family and identity; precision = true positives / found undisclosed, recall = true positives / undisclosed truth. Truth types map to families by SIG-57's TYPE_FAMILY; applicants with at least 3 months of history",
+    "identity": "for scoring only, a found provider and a truth provider are resolved to an identity through SIG-57's alias table 1.0.0, in both arms alike, as SIG-57 scored. The rule never reads the table (40766, 1)",
+    "found": "LIA's liabilities (assessLia), not the bare detector, with the detector's declared flag, so both arms are LIA as the composition runs it",
+    "recall_from_non_liability_categories": "true positives whose evidence has no debit in a liability category (loan_repayment, bnpl, sacc_loan, wage_advance), over undisclosed truth",
+    "also_reported": "by family; the liabilities found by step (d); false-positive causes as SIG-57 names them (FP1 declared not matched, FP2 not a liability, FP3 duplicate)",
+    "categories": "the pinned Enrich build (1.8.0, moroku-enrich 8cdb0d9, taxonomy 1.4): set v1 from research/enrich/synthetic-v1-categories-engine-1.8.0.json; set v2.2 from research/enrich/synthetic-v2.2-categories-no-biller-code-engine-1.8.0.json (no biller codes, SIG-57 A1); set v2.3 categorised at run time on the pinned build with biller codes, as SIG-81 and the demo do",
+    "as_of": "2026-10-31; LIA's defaults (lookback 6 months)"
+  },
+  "runs_in_order": [
+    "1. negative control, set v2.2 rotated, arms 1.3.6 and 1.4.0",
+    "2. set v2.2, the scoring set, arms 1.3.6 and 1.4.0",
+    "3. set v1, arms 1.3.6 and 1.4.0",
+    "4. set v2.3, the demo set, arms 1.3.6 and 1.4.0; reported, never used to choose anything"
+  ],
+  "records": "research/runs/sig83-<run>.json, one per run, through scripts/lib/run-record.js; IDs, families, identities and counts only, never a narrative",
+  "targets": {
+    "from_the_ticket": [
+      "no fall in precision or recall against LIA 1.3.6 on set v2.2",
+      "a gain in recall from debits in non-liability categories that repay a lender",
+      "set v1 stays at 1.00 and 1.00, and 1.4.0's liabilities on v1 are byte-identical to 1.3.6's"
+    ],
+    "fails_if": [
+      "precision on set v2.2 falls below LIA 1.3.6's",
+      "any set v1 result changes",
+      "the rule was changed after a score on set v2.2 or v2.3 was seen"
+    ]
+  },
+  "scenario_b": "set v2.3's syn-v23-9bd03ecbd72ba13e: recorded as computed. Its narrative names COMMBANK, which isn't on LENDER_NAMES 1.2.0, so under this rule it is expected not to be a candidate; whatever the run gives is recorded, and nothing is tuned for it",
+  "pre_registrations_recording_lia": {
+    "SIG-18": "records the detector 1.0.0; its result stands as run, and 1.0.0 is unchanged when step (d) is off",
+    "SIG-57": "scores the detector 1.0.0 and its alias arm; its result stands as run",
+    "SIG-76": "its expected states are computed through assessApplicant and are recomputed on LIA 1.4.0 if SIG-83 merges by the cut-off (Sat 28 Nov 18:00 AEDT)"
+  },
+  "tests": {
+    "T1": "a recurring direct debit to a listed lender, categorised other_expenses, is detected; with amounts beyond 5% or irregular dates it isn't",
+    "T2": "an own-account transfer naming the applicant's bank (BSB and account number) isn't detected, nor a debit categorised transfer",
+    "T3": "the negative control: rotation leaves no listed name, and the control run shows no gain over 1.3.6 (checked on the committed control record)",
+    "T4": "set v1: 1.4.0's liabilities are byte-identical to 1.3.6's; set v2.2's precision and recall against 1.3.6 are reproduced from the records (D28)",
+    "T5": "commit order: this file precedes the change and every SIG-83 run record",
+    "T6": "mutation: step (d) restricted to liability categories makes T1 fail"
+  },
+  "independent_check": "required before merge, with expectations frozen by the architect (40766)"
+}

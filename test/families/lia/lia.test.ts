@@ -202,7 +202,7 @@ describe("LIA-01 is built on SIG-18's detector, and says how far to trust it", (
   it("uses detector 1.0.0 at SIG-18's primary configuration, with its evidence", () => {
     const r = run({ lines: loan("SOCIETYONE") });
     expect(r.detector).toEqual({
-      method_version: "1.0.0",
+      method_version: "1.1.0", // SIG-83: detector 1.0.0 with step (d)
       min_occurrences: 3,
       amount_tolerance: 0.15,
     });
@@ -235,5 +235,5 @@ describe("LIA-01 is built on SIG-18's detector, and says how far to trust it", (
 describe("version", () => {
   // SIG-64 (ruling 40524): LIA 1.3.5, INC 1.2.3, observed income 1.0.2 and LENDER_NAMES 1.2.0 change output text only.
   it("is 1.3.6 (SIG-74, SIG-64; 1.3.4 from the SIG-42 rulings of 16 November)", () =>
-    expect(LIA_VERSION).toBe("1.3.6"));
+    expect(LIA_VERSION).toBe("1.4.0") /* SIG-83 */);
 });

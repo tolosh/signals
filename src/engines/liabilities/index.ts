@@ -4,7 +4,11 @@
 //   (b) lender outflows are found by Enrich category, or a BPAY biller naming a credit card;
 //   (c) a group of outflows to one provider is a liability when it recurs in amount and cadence.
 // A liability that matches no declared one of the same family and provider is undisclosed.
+//   (d) 1.1.0 (SIG-83, research/preregistrations/SIG-83.json): when asked (step_d), a regular
+//       repayment to a lender on LENDER_NAMES is found whatever its Enrich category. Off, the
+//       detector is 1.0.0 exactly, as SIG-18 and SIG-57 call it.
 // Pure: categories and declarations are inputs; no clock, no randomness, relative imports (D3).
+import { listedLenderOf } from "../lender-match.js";
 
 export type LiabilityTransaction = {
   accountId: string;
@@ -33,6 +37,11 @@ export type LiabilityInput = {
   min_occurrences: number;
   /** A debit recurs when within this fraction of the group's median amount. */
   amount_tolerance: number;
+  /**
+   * SIG-83's step (d), off when absent. "any" is the rule: a candidate in any category but
+   * transfer. "liability_only" reads only the liability categories, and is the mutation (T6).
+   */
+  step_d?: { categories: "any" | "liability_only" };
 };
 export type Family = "credit_card" | "loan" | "bnpl" | "sacc" | "wage_advance";
 export type Cadence = "weekly" | "fortnightly" | "monthly";
@@ -56,6 +65,8 @@ export type LiabilityResult = {
 };
 
 export const LIABILITY_METHOD_VERSION = "1.0.0";
+/** The detector with step (d) on (SIG-83). */
+export const LIABILITY_METHOD_VERSION_STEP_D = "1.1.0";
 
 const CREDIT_CATEGORIES: Record<string, Family> = {
   loan_repayment: "loan",
@@ -117,6 +128,42 @@ export const accountProvider = (productName: string) =>
 
 type Outflow = { id: string; accountId: string; day: number; amount: number };
 
+/** SIG-83's step (d) cut-offs, pre-registered; not LIA's configurable ones. */
+const STEP_D = { min_occurrences: 3, amount_tolerance: 0.05 } as const;
+const PER_MONTH: Record<Cadence, number> = { weekly: 52 / 12, fortnightly: 26 / 12, monthly: 1 };
+/** A day number's civil date (days from 1970-01-01, proleptic Gregorian; no clock read). */
+const civilOf = (day: number): [number, number, number] => {
+  const z = day + 719468;
+  const era = Math.floor(z / 146097);
+  const doe = z - era * 146097;
+  const yoe = Math.floor(
+    (doe - Math.floor(doe / 1460) + Math.floor(doe / 36524) - Math.floor(doe / 146096)) / 365,
+  );
+  const doy = doe - (365 * yoe + Math.floor(yoe / 4) - Math.floor(yoe / 100));
+  const mp = Math.floor((5 * doy + 2) / 153);
+  const d = doy - Math.floor((153 * mp + 2) / 5) + 1;
+  const m = mp < 10 ? mp + 3 : mp - 9;
+  return [yoe + era * 400 + (m <= 2 ? 1 : 0), m, d];
+};
+const leap = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+const monthDays = (y: number, m: number) =>
+  m === 2 ? (leap(y) ? 29 : 28) : [4, 6, 9, 11].includes(m) ? 30 : 31;
+/** The same day of the next calendar month, clamped to that month's last day. */
+const nextMonthDay = (day: number): number => {
+  const [y, m, d] = civilOf(day);
+  const days = monthDays(y, m);
+  const nd = Math.min(d, monthDays(m === 12 ? y + 1 : y, m === 12 ? 1 : m + 1));
+  return day + (days - d) + nd;
+};
+/** The band an interval falls in, or null. */
+const bandOf = (from: number, to: number): Cadence | null => {
+  const gap = to - from;
+  if (gap >= 4 && gap <= 10) return "weekly";
+  if (gap >= 11 && gap <= 17) return "fortnightly";
+  if (Math.abs(to - nextMonthDay(from)) <= 3) return "monthly";
+  return null;
+};
+
 export function detectLiabilities(input: LiabilityInput): LiabilityResult {
   const end = dayOf(input.as_of);
   const found = new Map<string, DetectedLiability>();
@@ -144,6 +191,8 @@ export function detectLiabilities(input: LiabilityInput): LiabilityResult {
 
   // (a) card and loan accounts in the grant.
   const groups = new Map<string, { family: Family; provider: string; outflows: Outflow[] }>();
+  // (d) candidates: debits step (b) doesn't read as lender outflows, by family and listed name.
+  const named = new Map<string, { family: Family; provider: string; outflows: Outflow[] }>();
   for (const { account, transactions } of input.feed.accounts) {
     const category = account.productCategory ?? "TRANS_AND_SAVINGS_ACCOUNTS";
     if (category === "CRED_AND_CHRG_CARDS" || category === "PERS_LOANS") {
@@ -167,6 +216,21 @@ export function detectLiabilities(input: LiabilityInput): LiabilityResult {
       if (!family && card) {
         family = "credit_card";
         provider = normaliseProvider(card[1] ?? "");
+      }
+      if (!family && input.step_d) {
+        const category = input.categories[t.transactionId] ?? "";
+        const allowed =
+          input.step_d.categories === "any"
+            ? category !== "transfer"
+            : CREDIT_CATEGORIES[category] !== undefined;
+        const lender = allowed ? (listedLenderOf(t.description) ?? listedLenderOf(biller)) : null;
+        if (lender) {
+          const f: Family = /\bCARD\b/i.test(`${t.description} ${biller}`) ? "credit_card" : "loan";
+          const k = key(f, lender);
+          const g = named.get(k) ?? { family: f, provider: lender, outflows: [] };
+          g.outflows.push({ id: t.transactionId, accountId: t.accountId, day, amount: -amount });
+          named.set(k, g);
+        }
       }
       if (!family || provider === "") continue;
       const k = key(family, provider);
@@ -194,6 +258,30 @@ export function detectLiabilities(input: LiabilityInput): LiabilityResult {
     d.occurrences = near.length;
     d.median_amount = round2(amount);
     d.monthly = round2(amount * band[3]);
+    d.evidence = near.map((o) => o.id).sort();
+    for (const o of near) if (!d.account_ids.includes(o.accountId)) d.account_ids.push(o.accountId);
+  }
+
+  // (d) SIG-83's recurrence: 3 or more debits within 5% of the group's median, every interval in
+  // one band (7 ± 3 days, 14 ± 3, or the same day of the next calendar month ± 3). A family and
+  // lender already found by (a) to (c) adds nothing.
+  for (const g of named.values()) {
+    if (found.has(key(g.family, g.provider))) continue;
+    const m = median(g.outflows.map((o) => o.amount));
+    const near = g.outflows
+      .filter((o) => Math.abs(o.amount - m) <= STEP_D.amount_tolerance * m + 1e-9)
+      .sort((a, b) => a.day - b.day || (a.id < b.id ? -1 : 1));
+    if (near.length < STEP_D.min_occurrences) continue;
+    const bands = near.slice(1).map((o, i) => bandOf((near[i] as Outflow).day, o.day));
+    const band = bands[0];
+    if (band === null || band === undefined || bands.some((b) => b !== band)) continue;
+    const d = entry(g.family, g.provider);
+    d.sources.push("outflow");
+    const amount = median(near.map((o) => o.amount));
+    d.cadence = band;
+    d.occurrences = near.length;
+    d.median_amount = round2(amount);
+    d.monthly = round2(amount * PER_MONTH[band]);
     d.evidence = near.map((o) => o.id).sort();
     for (const o of near) if (!d.account_ids.includes(o.accountId)) d.account_ids.push(o.accountId);
   }

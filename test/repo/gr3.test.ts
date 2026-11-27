@@ -613,7 +613,7 @@ describe("GR-3 gate version", () => {
     // records the gate version it ran, so their own versions stand (for the reviewer).
     expect(INC_VERSION).toBe("1.2.4");
     expect(INCOME_METHOD_VERSION).toBe("1.0.3");
-    expect(LIA_VERSION).toBe("1.3.6");
+    expect(LIA_VERSION).toBe("1.4.0"); /* SIG-83 */
     expect(OBSERVED_EXPENSES_METHOD_VERSION).toBe("1.1.1");
   });
 });

@@ -185,5 +185,5 @@ describe("Ruling 2: the candidate thresholds are workspace defaults a lender can
 
 describe("version", () => {
   // SIG-64 (ruling 40524): LIA 1.3.5, INC 1.2.3, observed income 1.0.2 and LENDER_NAMES 1.2.0 change output text only.
-  it("is 1.3.6", () => expect(LIA_VERSION).toBe("1.3.6"));
+  it("is 1.3.6", () => expect(LIA_VERSION).toBe("1.4.0") /* SIG-83 */);
 });

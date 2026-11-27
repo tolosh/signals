@@ -190,7 +190,7 @@ describe("T4: every LENDER_NAMES entry, and any CREDIT UNION, still shows unmask
 describe("versions (SIG-74 method, Versions; Colin, 26 November 2026)", () => {
   it("keyword list 1.1.0, LIA 1.3.6, INC 1.2.4, observed income 1.0.3", () => {
     expect(KEYWORD_LIST_VERSION).toBe("1.1.0");
-    expect(LIA_VERSION).toBe("1.3.6");
+    expect(LIA_VERSION).toBe("1.4.0"); /* SIG-83 */
     expect(INC_VERSION).toBe("1.2.4");
     expect(INCOME_METHOD_VERSION).toBe("1.0.3");
   });

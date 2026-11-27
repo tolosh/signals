@@ -90,6 +90,6 @@ describe("ruling 3: the lender list is matched before digits are stripped", () =
   it("the list is 1.2.0 and LIA is 1.3.6 (SIG-74)", () => {
     expect(LENDER_NAMES_VERSION).toBe("1.2.0");
     expect(lia([]).lender_names_version).toBe("1.2.0");
-    expect(LIA_VERSION).toBe("1.3.6");
+    expect(LIA_VERSION).toBe("1.4.0"); /* SIG-83 */
   });
 });

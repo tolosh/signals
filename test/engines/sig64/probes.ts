@@ -260,6 +260,8 @@ export function runProbe(
       lookback_months: 6,
       categories,
       application: { declared_liabilities: declared },
+      // SIG-83 (LIA 1.4.0): this baseline checks display changes against LIA 1.3.6's matching, so it runs step (d) off.
+      config: { category_independent: false },
     }),
     inc: assessInc({
       feed: feed as unknown as Feed,
