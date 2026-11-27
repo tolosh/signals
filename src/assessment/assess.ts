@@ -37,9 +37,10 @@ import type { EnrichRecord, EnrichTx, TenantStatus } from "../connectors/enrich/
 /**
  * 1.0.0 (SIG-82 part 1): the composition ADR 0012 records. 1.1.0 (SIG-81, rulings of 27 November,
  * 3): observed expenses read LIA's repayments, and affordability's observed basic expenses include
- * the unverified line (ADR 0013).
+ * the unverified line (ADR 0013). 1.2.0 (SIG-82; mandate 40777, ruling 40775, 2): the roll-up's
+ * state is set only when the evidence layer's state is unverified (RU-4), and absent otherwise.
  */
-export const ASSESSMENT_COMPOSITION_VERSION = "1.1.0";
+export const ASSESSMENT_COMPOSITION_VERSION = "1.2.0";
 
 /** The lender's request, as SIG-76's pre-registration records it. */
 export type AssessmentRequest = {
@@ -255,7 +256,10 @@ export async function assessApplicant(input: AssessmentInput) {
     lia,
     expenses,
     affordability,
+    // RU-4: an overall state exists only when the evidence makes the assessment unverified. No
+    // other overall state is invented before RU-4 to RU-7 are built (D13; ADR 0012, limit 5).
     rollup: {
+      ...(evidence.rollup.state === "unverified" ? { state: "unverified" as const } : {}),
       evidence: evidence.rollup.state,
       movers: rollupMovers([...inc.signals, ...lia.signals]),
     },
