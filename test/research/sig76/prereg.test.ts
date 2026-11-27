@@ -86,8 +86,8 @@ describe("SIG-76 pre-registration: scenarios A, B and C, chosen by ground truth"
     expect(p.perturbation?.scenario).toBe("A");
   });
   // Until 27 November this test asserted that no expected state was computed (ruling 40720). Rulings
-  // 40732 and 40776 order them computed on the pinned build, through assessApplicant, for A to D
-  // (disclosed test edit; the same replacement as on #58, extended to D).
+  // 40732 and 40776 order them computed on the pinned build, through assessApplicant, for A to D2
+  // (disclosed test edit; the same replacement as on #58, extended to D and D2).
   it("enrich_build is the pinned 1.8.0 build (vendor/moroku-enrich/pin.json)", () => {
     const p = prereg();
     const pin = JSON.parse(readFileSync("vendor/moroku-enrich/pin.json", "utf8")) as Mod;
@@ -122,7 +122,7 @@ describe("SIG-76 pre-registration: scenarios A, B and C, chosen by ground truth"
         }[];
       };
     };
-    for (const k of ["A", "B", "C", "D"]) {
+    for (const k of ["A", "B", "C", "D", "D2"]) {
       const id = p.scenarios[k].applicant_id as string;
       const a = (set as R[]).find((x) => x.truth.applicant_id === id) as R;
       const out = await assessApplicant({
@@ -147,7 +147,7 @@ describe("SIG-76 pre-registration: scenarios A, B and C, chosen by ground truth"
     expect(existsSync(String(prereg().expected_states?.file))).toBe(true);
     const e = JSON.parse(readFileSync(String(prereg().expected_states?.file), "utf8")) as Mod;
     expect(e.negative_control).toEqual({ scenario: "C", rollup_evidence: "unverified" });
-    expect(e.order_run).toEqual(["C", "A", "B", "D"]);
+    expect(e.order_run).toEqual(["C", "A", "B", "D", "D2"]);
   });
 });
 

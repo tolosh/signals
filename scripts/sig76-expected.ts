@@ -31,7 +31,7 @@ requireCleanTree(git.status, args.allowDirty);
 const PREREG = "research/preregistrations/SIG-76.json";
 type Prereg = {
   data: { seed: number; set_sha256: string };
-  scenarios: Record<"A" | "B" | "C" | "D", { applicant_id: string }>;
+  scenarios: Record<"A" | "B" | "C" | "D" | "D2", { applicant_id: string }>;
   requests: { request: AssessmentInput["request"] };
 };
 const prereg = JSON.parse(readFileSync(PREREG, "utf8")) as Prereg;
@@ -79,9 +79,9 @@ const inputOf = (id: string): AssessmentInput => {
   };
 };
 
-// The negative control first (SIG-76 T2): scenario C must be unverified. Then A, B and D
-// (ruling 40776, 4).
-const order = ["C", "A", "B", "D"] as const;
+// The negative control first (SIG-76 T2): scenario C must be unverified. Then A, B, D and D2
+// (rulings 40776, 4 and 40787, 4).
+const order = ["C", "A", "B", "D", "D2"] as const;
 const outputs: Record<string, Awaited<ReturnType<typeof assessApplicant>>> = {};
 for (const k of order) {
   outputs[k] = await assessApplicant(inputOf(prereg.scenarios[k].applicant_id));
@@ -144,7 +144,7 @@ const record = {
   order_run: order,
   negative_control: { scenario: "C", rollup_evidence: outputs.C?.rollup.evidence },
   scenarios: Object.fromEntries(
-    (["A", "B", "C", "D"] as const).map((k) => [
+    (["A", "B", "C", "D", "D2"] as const).map((k) => [
       k,
       {
         applicant_id: prereg.scenarios[k].applicant_id,
