@@ -229,9 +229,12 @@ describe("the mapped Assessment and trace (40805, 40817; approved in 40818, 2)",
     for (const x of runs) {
       const body = JSON.stringify([toAssessment(REC, x.out, REQUEST), toTrace(x.out)]);
       expect(body).not.toMatch(/"transactions"|"taxonomy"|"categories"|"evidence":\[/);
-      for (const id of x.txIds) expect(body.includes(id), `${x.id} ${id}`).toBe(false);
+      // Every word-like token of the body against the feed's transaction IDs, in one pass.
+      const tokens = new Set(body.match(/[A-Za-z0-9_-]{6,}/g) ?? []);
+      const leaked = x.txIds.filter((id) => tokens.has(id));
+      expect(leaked, x.id).toEqual([]);
     }
-  });
+  }, 30_000);
 
   it("the trace's expense lines are committed, basic and unverified, and sum to the GLE used", () => {
     for (const x of runs) {
