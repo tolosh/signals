@@ -213,3 +213,75 @@ describe("SIG-76 scenario D (ruling 40776, 1): an undisclosed BNPL, SACC, wage a
     expect(p.scenarios?.D?.set_sha256).toBe(p.data?.set_sha256);
   });
 });
+
+// SIG-76 ruling 40787, 2: scenario D2, D's rule plus "the applicant doesn't carry the
+// unseen-lenders truth tag", not A, B, C or D; set v2.3, ground truth only, the lowest id. Written
+// before D2's rule and selection, and before any engine output is computed.
+describe("SIG-76 scenario D2 (ruling 40787, 2): D's rule, without the unseen-lenders tag", () => {
+  type L = { id: string; type: string; declared: boolean };
+  type V = {
+    id: string;
+    declared_as: string | null;
+    repayment_channel: string;
+    paid_from_shared: boolean;
+  };
+  type T = {
+    applicant_id: string;
+    tags: string[];
+    liabilities: { items: L[] };
+    v2: { liabilities: V[] };
+  };
+  const KINDS = ["bnpl", "sacc", "wage_advance", "credit_card"];
+  const DRIFT_OR_GAMBLING = [
+    "salaried-payer-drift",
+    "drift-over-time",
+    "drift-across-banks",
+    "gambling",
+  ];
+  const qualifiesD = (t: T) =>
+    t.tags.includes("salaried") &&
+    !t.tags.some((x) => DRIFT_OR_GAMBLING.includes(x)) &&
+    t.liabilities.items.some((l) => {
+      const v = t.v2.liabilities.find((x) => x.id === l.id);
+      return (
+        KINDS.includes(l.type) &&
+        !l.declared &&
+        v !== undefined &&
+        v.declared_as === null &&
+        (v.repayment_channel === "DIRECT_DEBIT" || v.repayment_channel === "PAYMENT") &&
+        v.paid_from_shared
+      );
+    });
+  it("the selection names D2: the lowest id meeting D's rule without the unseen-lenders tag, not A to D", () => {
+    const s = m.selectScenarios?.(set) as
+      Record<string, { applicant_id: string; candidates: number }> | undefined;
+    expect(s?.D2).toBeDefined();
+    const taken = ["A", "B", "C", "D"].map((k) => s?.[k]?.applicant_id);
+    const ids = (set as { truth: T }[])
+      .map((a) => a.truth)
+      .filter(
+        (t) =>
+          qualifiesD(t) && !t.tags.includes("unseen-lenders") && !taken.includes(t.applicant_id),
+      )
+      .map((t) => t.applicant_id)
+      .sort();
+    expect(ids.length).toBeGreaterThan(0);
+    expect(s?.D2?.applicant_id).toBe(ids[0]);
+    expect(s?.D2?.candidates).toBe(ids.length);
+    expect(s?.D?.applicant_id).toBe("syn-v23-039cb4ba308a6197"); // D stays as committed (40787, 1)
+  });
+  it("the pre-registration records D2's applicant, rule, candidate count, set hash and amendment", () => {
+    const p = prereg();
+    const s = m.selectScenarios?.(set) as
+      Record<string, { applicant_id: string; candidates: number; rule: string }> | undefined;
+    expect(p.scenarios?.D2?.applicant_id).toBe(s?.D2?.applicant_id);
+    expect(p.scenarios?.D2?.candidates).toBe(s?.D2?.candidates);
+    expect(p.scenarios?.D2?.rule).toBe(s?.D2?.rule);
+    expect(p.scenarios?.D2?.set_sha256).toBe(p.data?.set_sha256);
+    const a = p.scenarios?.D2?.amendment as Record<string, unknown> | undefined;
+    expect(a?.date).toBe("2026-11-27");
+    expect(typeof a?.reason).toBe("string");
+    expect(a?.seen_before_rule).toMatch(/D's selection.*unseen-lenders/);
+    expect(a?.engine_output_computed).toBe(false);
+  });
+});
