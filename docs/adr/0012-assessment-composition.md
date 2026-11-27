@@ -58,6 +58,9 @@ must be computed by that same code (ruling 40732), not by a separate script.
 4. **The roll-up** is the evidence layer's state (RU-4: unverified when EQ-01 or EQ-03 fails) and
    the signals that move it (RU-1: amber or red in a knockout, refer or standard class). The full
    roll-up (RU-4 to RU-7, one overall state) is phase 2 (D13), and is not invented here.
+   From composition 1.2.0 (mandate 40777; ruling 40775, 2), `rollup.state` is set, to
+   `unverified`, only when the evidence layer's state is unverified (RU-4). Otherwise it is absent,
+   and the roll-up carries the evidence state and the signals that move it.
 5. **What is returned:**
    - the composition version and the Enrich record;
    - the evidence checks and roll-up;
