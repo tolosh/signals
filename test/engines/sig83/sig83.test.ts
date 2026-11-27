@@ -1,11 +1,16 @@
 // SIG-83: LIA's category-independent detection (research/preregistrations/SIG-83.json; ruling
 // 40766). Written before the change and pushed failing. T1 to T6 are the ticket's tests.
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { dayOf } from "../../../src/engines/evidence/dates.js";
 import { LIA_VERSION } from "../../../src/engines/families/lia/index.js";
 import { detectLiabilities } from "../../../src/engines/liabilities/index.js";
+import { generateApplicant, population, serialise } from "../../../src/research/generator/index.js";
+import { generateSetV22 } from "../../../src/research/generator/v22/index.js";
+import { loadAliases } from "../../../src/research/sig57/score.js";
+import { scoreArm, toApplicant, type RawApplicant } from "../../../src/research/sig83/score.js";
 import { checkRotation, rotateListed, rot13 } from "../../../src/research/sig83/control.js";
 import { AS_OF, build, run, type Line } from "../../families/lia/script.js";
 
@@ -116,13 +121,63 @@ const record = (r: string) => {
   return JSON.parse(readFileSync(path, "utf8")) as Rec;
 };
 
+/** Sets v1 and v2.2 as scripts/sig83-run.ts loads them, checked against their manifests. */
+function loadScored(name: "v1" | "v2.2") {
+  const m = JSON.parse(
+    readFileSync(`research/datasets/synthetic-${name}.manifest.json`, "utf8"),
+  ) as {
+    seed: number;
+    set_sha256: string;
+  };
+  const set =
+    name === "v1"
+      ? population(m.seed).map((sp) => generateApplicant(sp, m.seed))
+      : generateSetV22(m.seed);
+  const h = createHash("sha256");
+  for (const a of set) h.update(serialise(a as never)).update("\n");
+  expect(h.digest("hex")).toBe(m.set_sha256);
+  const file =
+    name === "v1"
+      ? "research/enrich/synthetic-v1-categories-engine-1.8.0.json"
+      : "research/enrich/synthetic-v2.2-categories-no-biller-code-engine-1.8.0.json";
+  const categories = (
+    JSON.parse(readFileSync(file, "utf8")) as { categories: Record<string, string> }
+  ).categories;
+  const applicants = (set as unknown as RawApplicant[])
+    .map(toApplicant)
+    .sort((x, y) => (x.id < y.id ? -1 : 1));
+  return { applicants, categories };
+}
+
 describe("T4: set v1 unchanged; v2.2 reported against 1.3.6", () => {
   it("set v1: 1.4.0's liabilities are byte-identical to 1.3.6's, at 1.00 and 1.00", () => {
     const r = record("v1");
     expect(r.lia_version).toBe("1.4.0");
     expect(r.applicants_whose_liabilities_changed).toEqual([]);
-    expect(r.arms["1.4.0"]).toEqual(r.arms["1.3.6"]);
+    // Every figure is equal; only the arm's label differs (corrected after the first run, disclosed).
+    const { arm: a0, ...before } = r.arms["1.3.6"] as Record<string, unknown>;
+    const { arm: a1, ...after } = r.arms["1.4.0"] as Record<string, unknown>;
+    expect([a0, a1]).toEqual(["1.3.6", "1.4.0"]);
+    expect(after).toEqual(before);
+    expect(before).toMatchObject({ precision: 1, recall: 1 });
   });
+  it.each(["v1", "v2.2"])(
+    "set %s's record reproduces (D28)",
+    (name) => {
+      const r = JSON.parse(readFileSync(`research/runs/sig83-${name}.json`, "utf8")) as {
+        arms: Record<string, { per_applicant_sha256: string; precision: number; recall: number }>;
+      };
+      const { applicants, categories } = loadScored(name as "v1" | "v2.2");
+      const index = loadAliases().index;
+      for (const arm of ["1.3.6", "1.4.0"] as const) {
+        const s = scoreArm({ applicants, categories, as_of: AS_OF, index, arm });
+        const sha = createHash("sha256").update(JSON.stringify(s.per_applicant)).digest("hex");
+        expect(sha, arm).toBe(r.arms[arm]?.per_applicant_sha256);
+        expect([s.precision, s.recall], arm).toEqual([r.arms[arm]?.precision, r.arms[arm]?.recall]);
+      }
+    },
+    300_000,
+  );
   it("set v2.2's record holds both arms' precision and recall, as run", () => {
     const r = record("v2.2");
     for (const arm of ["1.3.6", "1.4.0"]) {
