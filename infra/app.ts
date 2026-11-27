@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { App } from "aws-cdk-lib";
-import { SignalsDemoStack } from "./demo-stack.js";
+import { demoSettings, SignalsDemoStack } from "./demo-stack.js";
 import { SignalsMockStack } from "./mock-stack.js";
 
 const app = new App();
@@ -13,10 +13,21 @@ new SignalsMockStack(app, "MorokuSignalsMock-dev", { env, assetPath: "dist/mock-
 // recorded its commit; docs/handover/demo-wave.md has the deploy steps. The secure environment's
 // stack is never added to this file (handover note).
 if (app.node.tryGetContext("demo") === "true") {
+  // Review 23 (40821, G4): any Enrich path but local fails the build; nothing is overridden.
+  const settings = demoSettings(
+    {
+      enrichPath: app.node.tryGetContext("enrichPath") as unknown,
+      hs256Fallback: app.node.tryGetContext("hs256Fallback") as unknown,
+    },
+    process.env,
+  );
   const asset = "dist/demo-lambda";
   if (!existsSync(`${asset}/build-info.json`))
     throw new Error("Build the demo asset first: node infra/build-demo-lambda.mjs");
-  const build = JSON.parse(readFileSync(`${asset}/build-info.json`, "utf8")) as { commit: string };
+  const build = JSON.parse(readFileSync(`${asset}/build-info.json`, "utf8")) as {
+    commit: string;
+    dirty?: boolean;
+  };
   const ctx = (k: string) => {
     const v: unknown = app.node.tryGetContext(k);
     if (typeof v !== "string" || !v) throw new Error(`Pass -c ${k}=<value> to deploy the demo`);
@@ -29,6 +40,7 @@ if (app.node.tryGetContext("demo") === "true") {
     supabaseUrl: ctx("supabaseUrl"),
     supabasePublishableKey: ctx("supabasePublishableKey"),
     demoMembers: ctx("demoMembers"),
-    enrichPath: "local",
+    enrichPath: settings.enrichPath,
+    hs256Fallback: settings.hs256Fallback,
   });
 }

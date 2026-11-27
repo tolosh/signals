@@ -11,6 +11,8 @@ export const DEMO_TTL_SECONDS = 30 * 24 * 60 * 60;
 
 export const workspacePartition = (workspaceId: string) => `ws#${workspaceId}`;
 export const PORTAL_PARTITION = "portal";
+/** Demo members' email-to-sub bindings (40820, 3; review 23). */
+export const MEMBER_PARTITION = "member";
 
 export class DemoStore {
   constructor(
