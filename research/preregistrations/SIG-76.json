@@ -188,5 +188,11 @@
     "ABN sign-up",
     "the real openfeed and live Enrich API paths",
     "any real data"
-  ]
+  ],
+  "enrich_diff": {
+    "file": "research/preregistrations/enrich-1.7.0-vs-1.8.0-sig76-scenarios.csv",
+    "sha256": "8a28b64e709a194d53edf4c03dab1aaa77682cb79c4a0de3fa72f52ea1f0cb02",
+    "rows": 71,
+    "source": "Enrich's list of rows that differ between 1.7.0 (moroku-enrich 406ff97) and 1.8.0 (8cdb0d9) for scenarios A, B and C's inputs (SIG-76 40743; ruled in 40745, 4), resent by the Enrich thread via Colin on 27 November and committed after the expected states were computed and before the freeze (ruling 40787, 3). It is a record of the fix's effect, not an input: A 16 rows, B 0, C 55. It predates D and D2 and doesn't cover them"
+  }
 }
