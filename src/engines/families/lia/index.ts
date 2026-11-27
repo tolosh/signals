@@ -19,6 +19,9 @@
 // 1.3.6 (SIG-74; review 16, E6) changes output text only: a lender's narrative and an account's
 // product name are read with every invisible character removed, so a split keyword is masked
 // whole, never shown as a fragment (keyword list 1.1.0). Matching and counting are unchanged.
+// 1.4.0 (SIG-83, research/preregistrations/SIG-83.json; ruling 40766) changes detection: LIA-01
+// runs the detector with step (d) (detector 1.1.0), so a regular repayment to a lender on
+// LENDER_NAMES is found whatever its Enrich category. category_independent: false is 1.3.6.
 // Pure: categories and the application are inputs; no clock, no randomness, relative imports (D3).
 import { applyEvidence, assessEvidence, EQ_THRESHOLDS } from "../../evidence/index.js";
 import { dayOf, isoOf } from "../../evidence/dates.js";
@@ -32,12 +35,13 @@ import type { FeedType } from "../../signals/definitions.js";
 import {
   detectLiabilities,
   LIABILITY_METHOD_VERSION,
+  LIABILITY_METHOD_VERSION_STEP_D,
   normaliseProvider,
   type DeclaredLiability,
   type DetectedLiability,
 } from "../../liabilities/index.js";
 
-export const LIA_VERSION = "1.3.6";
+export const LIA_VERSION = "1.4.0";
 
 /** A shared-account feed with the fields both the evidence layer and the detector read. */
 export type LiaFeed = {
@@ -79,6 +83,8 @@ export type LiaConfig = {
   private_loans: "parked" | "detect";
   /** LIA-01's fallback: a declared repayment within this fraction matches (a candidate). */
   declared_amount_tolerance: number;
+  /** SIG-83 (1.4.0): the detector's category-independent step (d). false is LIA 1.3.6. */
+  category_independent: boolean;
 };
 export const LIA_DEFAULTS: Readonly<LiaConfig> = Object.freeze({
   min_occurrences: 3,
@@ -95,6 +101,7 @@ export const LIA_DEFAULTS: Readonly<LiaConfig> = Object.freeze({
   private_increasing: 0.25,
   private_loans: "parked",
   declared_amount_tolerance: 0.15,
+  category_independent: true,
 });
 
 /**
@@ -359,6 +366,7 @@ export function assessLia(input: LiaInput): LiaResult {
     as_of: input.as_of,
     min_occurrences: cfg.min_occurrences,
     amount_tolerance: cfg.amount_tolerance,
+    ...(cfg.category_independent ? { step_d: { categories: "any" as const } } : {}),
   });
   const caveat =
     "Detection rests on lender names in the narratives (tested on synthetic, template-written data only). Only an exact provider name counts as declared; a liability of a declared type and repayment under another name is possibly declared, to confirm with the applicant";
@@ -794,7 +802,9 @@ export function assessLia(input: LiaInput): LiaResult {
     lender_names_version: LENDER_NAMES_VERSION,
     keyword_list_version: KEYWORD_LIST_VERSION,
     detector: {
-      method_version: LIABILITY_METHOD_VERSION,
+      method_version: cfg.category_independent
+        ? LIABILITY_METHOD_VERSION_STEP_D
+        : LIABILITY_METHOD_VERSION,
       min_occurrences: cfg.min_occurrences,
       amount_tolerance: cfg.amount_tolerance,
     },

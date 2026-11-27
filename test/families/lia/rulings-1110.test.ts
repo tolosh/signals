@@ -140,6 +140,6 @@ describe("ruling 2: known multi-word lender names before the first-word rule", (
   it("LIA records the list's version, and is 1.3.6 (SIG-74)", () => {
     const r = lia([]);
     expect(r.lender_names_version).toBe(LENDER_NAMES_VERSION);
-    expect(LIA_VERSION).toBe("1.3.6");
+    expect(LIA_VERSION).toBe("1.4.0"); /* SIG-83 */
   });
 });

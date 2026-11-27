@@ -319,8 +319,8 @@ describe("lender names keep Unicode letters", () => {
 describe("versions", () => {
   // SIG-64 (ruling 40524): LIA 1.3.5, INC 1.2.3, observed income 1.0.2 and LENDER_NAMES 1.2.0 change output text only.
   it("LIA is 1.3.6 (SIG-74); the lender-name list is 1.2.0 (SIG-64)", () => {
-    expect(LIA_VERSION).toBe("1.3.6");
+    expect(LIA_VERSION).toBe("1.4.0"); /* SIG-83 */
     expect(LENDER_NAMES_VERSION).toBe("1.2.0");
-    expect(lia([]).version).toBe("1.3.6");
+    expect(lia([]).version).toBe("1.4.0"); /* SIG-83 */
   });
 });

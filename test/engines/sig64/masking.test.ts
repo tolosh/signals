@@ -351,7 +351,7 @@ describe("T5 and the observed-income replay: states, values and figures are byte
         "lia.gr3_gate_version=1.2.0",
         "lia.keyword_list_version=1.1.0",
         "lia.lender_names_version=1.2.0",
-        "lia.version=1.3.6",
+        "lia.version=1.4.0", // SIG-83
       ]);
     });
   });

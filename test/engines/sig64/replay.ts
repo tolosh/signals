@@ -105,6 +105,8 @@ const runLia = (s: ReplaySet, a: ReplayApplicant) =>
     application: {
       declared_liabilities: a.application.declared_liabilities ?? [],
     },
+    // SIG-83 (LIA 1.4.0): this baseline checks display changes against LIA 1.3.6's matching, so it runs step (d) off.
+    config: { category_independent: false },
   });
 const runInc = (s: ReplaySet, a: ReplayApplicant) =>
   assessInc({
