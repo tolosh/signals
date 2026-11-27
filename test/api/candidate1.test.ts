@@ -15,6 +15,7 @@ import { demoConfigFrom } from "../../src/api/config.js";
 import { MemoryStore } from "../../src/api/dynamo.js";
 import { buildScenarioInputs, type ScenarioInputs } from "../../src/api/scenario-inputs.js";
 import { DemoStore } from "../../src/api/store.js";
+import { responseValidator } from "./contract.js";
 
 const STATES = "research/preregistrations/SIG-76-expected-states.json";
 const FROZEN_SHA = "19bab324b0e5ec30985dde8d475c0a5b583a148d0c438f9cd4b1871fc915ece1";
@@ -22,6 +23,8 @@ type States = { scenarios: Record<string, { applicant_id: string; output_sha256:
 const states = JSON.parse(readFileSync(STATES, "utf8")) as States;
 const sha = (x: unknown) => createHash("sha256").update(JSON.stringify(x)).digest("hex");
 const KEYS = ["C", "A", "B", "D", "D2"] as const;
+// 40805, 2.2: C has 2 evidence reasons; B and D 1 mover; D2 3 movers; A none.
+const REASONS_TOTAL: Record<string, number> = { A: 0, B: 1, C: 2, D: 1, D2: 3 };
 
 let inputs: ScenarioInputs;
 beforeAll(() => {
@@ -162,9 +165,81 @@ describe("T3 through the hosted path: consent, assess, read back the hash", () =
         (await call("GET", `/demo/assessments/${asm}/output-sha256`, { token: "token-b" })).status,
       ).toBe(404);
       expect(run.body).not.toMatch(/"enrich"|"transactions"|"taxonomy"/);
+
+      // Contract 1.11.0 (D65, 40818): the mapped assessment, its trace and the applicant's list,
+      // each valid against the contract; tenant B gets 404 on each (T5).
+      const getA = await call("GET", `/v1/app/assessments/${asm}`, { token: "token-a" });
+      expect(getA.status).toBe(200);
+      expect(
+        responseValidator("/v1/app/assessments/{id}", "get", 200)(getA.json).errors,
+      ).toBeNull();
+      expect(getA.json).toMatchObject({
+        id: asm,
+        applicant_id: j.id,
+        version: 1,
+        status: "complete",
+      });
+      const rollup = getA.json?.rollup as { state?: string; reasons_total: number };
+      expect(rollup.state).toBe(k === "C" ? "unverified" : undefined);
+      expect(rollup.reasons_total).toBe(REASONS_TOTAL[k]);
+      const trace = await call("GET", `/v1/app/assessments/${asm}/affordability/trace`, {
+        token: "token-a",
+      });
+      expect(trace.status).toBe(200);
+      expect(
+        responseValidator("/v1/app/assessments/{id}/affordability/trace", "get", 200)(trace.json)
+          .errors,
+      ).toBeNull();
+      const list = await call("GET", `/v1/app/applicants/${j.id}/assessments`, {
+        token: "token-a",
+      });
+      expect(list.status).toBe(200);
+      expect(
+        responseValidator("/v1/app/applicants/{id}/assessments", "get", 200)(list.json).errors,
+      ).toBeNull();
+      expect(list.json?.items).toEqual([
+        {
+          id: asm,
+          applicant_id: j.id,
+          version: 1,
+          status: "complete",
+          rollup_state: k === "C" ? "unverified" : null,
+          data_as_of: getA.json?.data_as_of,
+          evidence_checks: getA.json?.evidence_checks,
+        },
+      ]);
+      for (const p of [
+        `/v1/app/assessments/${asm}`,
+        `/v1/app/assessments/${asm}/affordability/trace`,
+        `/v1/app/assessments/${asm}/signals/INC-01/evidence`,
+        `/v1/app/applicants/${j.id}/assessments`,
+      ])
+        expect((await call("GET", p, { token: "token-b" })).status, p).toBe(404);
+      // The masked evidence endpoint (40805, 2.7) isn't built yet: a labelled 501, never a sample.
+      const ev = await call("GET", `/v1/app/assessments/${asm}/signals/INC-01/evidence`, {
+        token: "token-a",
+      });
+      expect(ev.status).toBe(501);
+      expect((ev.json?.error as { code: string }).code).toBe("evidence_not_built");
+      for (const b of [getA.body, trace.body, list.body]) {
+        expect(b).not.toMatch(/"transactions"|"taxonomy"|approv|declin/i);
+      }
     },
     60_000,
   );
+
+  it("a rerun is version 2, listed newest first", async () => {
+    const call = callOn(make());
+    const j = await journey(call, "B");
+    await j.consent();
+    clock += SYNC_MS;
+    await call("GET", `/v1/portal/${j.token}`);
+    const one = await call("POST", `/v1/app/applicants/${j.id}/assessments`, { token: "token-a" });
+    const two = await call("POST", `/v1/app/applicants/${j.id}/assessments`, { token: "token-a" });
+    expect([one.json?.version, two.json?.version]).toEqual([1, 2]);
+    const list = await call("GET", `/v1/app/applicants/${j.id}/assessments`, { token: "token-a" });
+    expect((list.json?.items as { version: number }[]).map((x) => x.version)).toEqual([2, 1]);
+  }, 60_000);
 
   it("health says the assessment is wired", async () => {
     const call = callOn(make());
