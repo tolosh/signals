@@ -48,6 +48,8 @@ const RECORD_SCRIPTS = [
   "sig81-replay.ts",
   // SIG-76: the demo's expected states, computed with assessApplicant (rulings 40730, 40732).
   "sig76-expected.ts",
+  // SIG-76: the in-process acceptance rehearsal (engineering-commissioned, not the acceptance).
+  "sig76-rehearse.ts",
 ];
 /** The .mjs files are build and CI tools, not run scripts. */
 const OWN_EQUIVALENT: string[] = [];
