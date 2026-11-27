@@ -1,7 +1,7 @@
 {
   "ticket": "SIG-76",
   "title": "Integration acceptance for the 1 December demo: scenarios, seeds and negative paths",
-  "status": "design, seeds and requests recorded; scenario D added (ruling 40776, 1) before anything is computed. The expected states are computed on main by scripts/sig76-expected.ts (assessApplicant, the demo stage's code) with LIA 1.3.6 (ruling 40772) on the pinned Enrich 1.8.0 build, C first, then A, B and D, and committed before any candidate build. The architect freezes them. Expected states computed earlier on #58 were withdrawn (ruling 40745, 2) and are not carried here",
+  "status": "design, seeds and requests recorded; scenario D added (ruling 40776, 1) and D2 (ruling 40787, 2), both before anything is computed. The expected states are computed on main by scripts/sig76-expected.ts (assessApplicant, the demo stage's code) with LIA 1.3.6 (ruling 40772) on the pinned Enrich 1.8.0 build, C first, then A, B, D and D2, and committed before any candidate build. The architect freezes them. Expected states computed earlier on #58 were withdrawn (ruling 40745, 2) and are not carried here",
   "rulings": [
     "D57 to D60 (Decision Record page 3234988050): the demo order; seeded synthetic applicants through the real engines on Enrich path local; a hosted demo stage on synthetic or sandbox data only; this ticket",
     "SIG-70 40719: the expected states use the Enrich build pinned after the ENR-28 fix",
@@ -9,7 +9,8 @@
     "SIG-76 40776, 1 (27 November, 18:00): a fourth scenario, D (a detected undisclosed liability), by ground truth only from set v2.3, the lowest qualifying id; the rule, the selected id, the candidate count and the set hash are committed before any candidate or expected result is computed; no substitution, no tuning; D demonstrates the capability and is not evidence for H2",
     "SIG-76 40745: the expense method is observed; the earlier expected states are withdrawn; B is not re-selected; commit Enrich's ruled differing-rows file (8a28b64e...f0cb02)",
     "SIG-83 40772 (27 November): SIG-83 is out of the demo; the demo build runs LIA 1.3.6; B is shown as not detected",
-    "SIG-76 40776, 2 to 4: C is the negative control and runs first; A is shown as computed; the order of work"
+    "SIG-76 40776, 2 to 4: C is the negative control and runs first; A is shown as computed; the order of work",
+    "SIG-76 40787 (27 November, evening): D stays as committed (19fc1f3) and is shown as computed; D2 is added, D's rule without the unseen-lenders truth tag, pre-registered before anything is computed; the diff file isn't an input; compute on main d303279, C first, then A, B, D and D2"
   ],
   "data": {
     "source": "synthetic",
@@ -58,12 +59,31 @@
       "channel_mapping": "set v2.3's repayment_channel is DIRECT_DEBIT, BPAY or PAYMENT. The ruling's 'direct debit or card, not BPAY' is read as DIRECT_DEBIT or PAYMENT; PAYMENT is the generator's plain card or account payment, its only channel that is neither a direct debit nor BPAY",
       "truth_summary": "salaried, irregular, with a bonus; one undisclosed wage advance, repaid fortnightly by direct debit from a shared account (15 repayments), to a lender held out of the lender lists (truth tag unseen-lenders); 12 months; CDR feed; salary account shared; truth surplus 6321.84 a month",
       "disclosure": "D is an example of a liability type the engine is designed to find. On synthetic set v2.2, LIA 1.3.6 found 0.4498 of undisclosed liabilities (about 45%), with pinned Enrich 1.8.0 (SIG-83 run 2, baseline arm, b1cb660). That is synthetic performance, not real-world detection performance (ruling 40776, 1)",
-      "selected": "2026-11-27, by src/research/sig76/scenarios.ts (selectScenarios), before any candidate or expected result is computed"
+      "selected": "2026-11-27, by src/research/sig76/scenarios.ts (selectScenarios), before any candidate or expected result is computed",
+      "note_40787": "D stays as committed and is shown as computed. Its lender carries the set's unseen-lenders truth tag, so it is outside the engine's lender list by the set's design, and will most likely not be detected. Cause, owned by the architect: 40776's wording didn't exclude unseen lenders (ruling 40787, 1). The demo shows D as the limit on lenders the engine doesn't know"
+    },
+    "D2": {
+      "applicant_id": "syn-v23-0d555559098dbc71",
+      "story": "a detected undisclosed liability, from a lender the engine is designed to know",
+      "rule": "D's rule (ruling 40776, 1), and the applicant doesn't carry the unseen-lenders truth tag (ruling 40787, 2); not scenario A, B, C or D",
+      "candidates": 61,
+      "set_sha256": "69dcc096db8f0b11ea14848ad5e037e6b3d8bdc52a97a6cfe74613bd946898ba",
+      "truth_summary": "salaried, irregular, with a bonus; an undisclosed BNPL (AFTERPAY), repaid fortnightly by direct debit from a shared account (13 repayments), which meets D's rule; also an undisclosed credit card (ANZ) paid from an unshared account (no repayment in the feed; truth tag repaid-from-unshared) and a declared wage advance (BEFOREPAY, direct debit, shared); 6 months; CDR feed; salary account shared; truth surplus 935.79 a month",
+      "amendment": {
+        "date": "2026-11-27",
+        "reason": "ruling 40787, 2: D's rule (40776) was meant to capture a liability type the engine is designed to find, and its wording didn't exclude unseen lenders; D's selected applicant carries the unseen-lenders truth tag. D2 adds that exclusion. D is kept and shown as computed",
+        "seen_before_rule": "D's selection (syn-v23-039cb4ba308a6197) and its unseen-lenders truth tag were seen, in ground truth, before D2's rule was written",
+        "engine_output_computed": false,
+        "engine_output_note": "no engine output for any scenario had been computed when D2's rule was written; the expected states withdrawn by ruling 40745, 2 (A to C, on #58) predate D and D2 and are not carried here"
+      },
+      "disclosure": "D2 is an example of a liability type the engine is designed to find. On synthetic set v2.2, LIA 1.3.6 found 0.4498 of undisclosed liabilities (about 45%), with pinned Enrich 1.8.0 (SIG-83 run 2, baseline arm, b1cb660). That is synthetic performance, not real-world detection performance (ruling 40776, 1)",
+      "not_evidence": "D2 demonstrates the capability; it is not evidence for H2 (rulings 40776, 1 and 40787, 2)",
+      "selected": "2026-11-27, by src/research/sig76/scenarios.ts (selectScenarios), before any engine output is computed"
     }
   },
   "requests": {
     "recorded": "2026-11-27, before any expected state is computed (rulings 40730 and 40732; Colin's answers of 27 November: the proposed defaults, with the expense method observed)",
-    "same_for": ["A", "B", "C", "D"],
+    "same_for": ["A", "B", "C", "D", "D2"],
     "request": {
       "product_type": "personal",
       "loan": {

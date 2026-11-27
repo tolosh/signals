@@ -1,5 +1,6 @@
-// SIG-76: the 1 December demo's scenarios (A to C; D added by ruling 40776, 1), chosen from
-// synthetic set v2.3 by ground truth only (ruling 40720). No engine runs here, so the choice can't depend on any engine's output.
+// SIG-76: the 1 December demo's scenarios (A to C; D by ruling 40776, 1; D2 by 40787, 2),
+// chosen from synthetic set v2.3 by ground truth only (ruling 40720). No engine runs here, so the
+// choice can't depend on any engine's output.
 // Each rule takes the lowest applicant id that meets it, so the choice is a pure function of the
 // set. The expected states are computed later, with the pinned Enrich build (ruling 40719).
 
@@ -48,6 +49,7 @@ export const RULES = {
   B: "a hidden credit liability and affordability pressure: a CDR feed of 6 months or more; tag salaried and none of the drift or gambling tags; the salary account shared; an undisclosed personal or car loan; no liability repaid by BPAY; truth surplus at or below the set's lower quartile",
   C: "missing income or insufficient evidence: a CDR feed of 3 months or more, tag salaried, no liability repaid by BPAY, whose salary account is not shared (EQ-01 then fails, and the assessment is unverified)",
   D: "a detected undisclosed liability (ruling 40776, 1): tag salaried and none of the drift or gambling tags; at least one undisclosed BNPL, SACC, wage advance or credit card, repaid by direct debit or card (repayment_channel DIRECT_DEBIT or PAYMENT; not BPAY) from a shared account; not scenario A, B or C",
+  D2: "D's rule (ruling 40776, 1), and the applicant doesn't carry the unseen-lenders truth tag (ruling 40787, 2); not scenario A, B, C or D",
 } as const;
 
 /** Scenario D's liability types (ruling 40776, 1). */
@@ -129,7 +131,9 @@ export function selectScenarios(set: readonly unknown[]) {
       undisclosedDetectable(t) &&
       !chosen.includes(t.applicant_id),
   );
-  const pick = (k: "A" | "B" | "C" | "D", xs: Truth[]) => {
+  const dId = lowest(d)?.applicant_id;
+  const d2 = d.filter((t) => !t.tags.includes("unseen-lenders") && t.applicant_id !== dId);
+  const pick = (k: "A" | "B" | "C" | "D" | "D2", xs: Truth[]) => {
     const t = lowest(xs);
     if (!t) throw new Error(`no applicant in set v2.3 meets scenario ${k}'s rule`);
     return { applicant_id: t.applicant_id, rule: RULES[k], candidates: xs.length };
@@ -140,5 +144,6 @@ export function selectScenarios(set: readonly unknown[]) {
     B: pick("B", b),
     C: pick("C", c),
     D: pick("D", d),
+    D2: pick("D2", d2),
   };
 }
