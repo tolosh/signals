@@ -5,7 +5,8 @@
 //   1. Enrich categorises every transaction through the SIG-70 adapter: the local path, on the
 //      pinned build (D58), never the API for synthetic data (D42). The record is kept, and the
 //      engines read the categories stored in it.
-//   2. The evidence layer, INC, LIA and observed expenses run on the feed and those categories.
+//   2. The evidence layer, INC, LIA and observed expenses run on the feed and those categories;
+//      observed expenses read LIA's repayments (SIG-81).
 //   3. Their outputs are mapped onto the affordability engine's input (affordabilityInputOf).
 //   4. The roll-up is the evidence layer's state and the signals that move it (RU-1). The full
 //      roll-up (RU-4 to RU-7) is phase 2 (D13).
@@ -33,8 +34,12 @@ import { pinnedLocalEnrich } from "../connectors/enrich/pinned.js";
 import { categoriesFrom } from "../connectors/enrich/replay.js";
 import type { EnrichRecord, EnrichTx, TenantStatus } from "../connectors/enrich/types.js";
 
-/** 1.0.0 (SIG-82 part 1): the composition ADR 0012 records. */
-export const ASSESSMENT_COMPOSITION_VERSION = "1.0.0";
+/**
+ * 1.0.0 (SIG-82 part 1): the composition ADR 0012 records. 1.1.0 (SIG-81, rulings of 27 November,
+ * 3): observed expenses read LIA's repayments, and affordability's observed basic expenses include
+ * the unverified line (ADR 0013).
+ */
+export const ASSESSMENT_COMPOSITION_VERSION = "1.1.0";
 
 /** The lender's request, as SIG-76's pre-registration records it. */
 export type AssessmentRequest = {
@@ -115,16 +120,21 @@ const FOUND_TYPE: Record<string, LiabilityType> = {
   sacc: "sacc",
   wage_advance: "wage_advance",
 };
+const round2 = (x: number) => Math.round(x * 100) / 100;
 /** The types whose commitment is their 3-month average outflow (Product Specification 6.4). */
 const BY_OUTFLOW: ReadonlySet<LiabilityType> = new Set(["bnpl", "sacc", "wage_advance"]);
 
 type IncIncome = Pick<IncResult, "income">;
 type LiaFound = { liabilities: { family: string; monthly: number | null; declared: boolean }[] };
-type Expenses = Pick<ObservedExpenses, "committed_monthly" | "basic_monthly">;
+type Expenses = Pick<
+  ObservedExpenses,
+  "committed_monthly" | "basic_monthly" | "unverified_monthly"
+>;
 
 /**
  * The affordability engine's input (ADR 0012): INC's streams, monthly, by type; the application's
- * stated gross; observed committed and basic expenses, and the request's confirmed figure and
+ * stated gross; observed committed expenses, and basic expenses with the unverified line (SIG-81:
+ * other_expenses, essential and unverified, inside living expenses), and the request's confirmed figure and
  * benchmark if it gives them; every declared liability at its stated repayment, and every
  * liability LIA found that matches no declaration exactly, at its observed repayment.
  */
@@ -173,7 +183,7 @@ export function affordabilityInputOf(o: {
       confirmed_monthly: r.confirmed_expenses_monthly,
       benchmark_monthly: r.benchmark?.monthly ?? null,
       observed_committed_monthly: o.expenses.committed_monthly,
-      observed_basic_monthly: o.expenses.basic_monthly,
+      observed_basic_monthly: round2(o.expenses.basic_monthly + o.expenses.unverified_monthly),
     },
     liabilities: [...declared, ...found],
     benchmark: r.benchmark
@@ -222,12 +232,15 @@ export async function assessApplicant(input: AssessmentInput) {
     feed: input.feed as never,
     application: { declared_liabilities: a.declared_liabilities },
   });
+  // SIG-81: LIA's repayments (its liabilities' evidence) are debt repayments whatever their
+  // category, so never also living expenses.
   const expenses = deriveObservedExpenses({
     feed: input.feed as never,
     categories,
     as_of: r.as_of,
     lookback_months: r.lookback_months,
     one_off_threshold_aud: 5000,
+    liability_repayments: [...new Set(lia.liabilities.flatMap((l) => l.evidence))].sort(),
   });
   const affordability = computeAffordability(
     affordabilityInputOf({ application: a, request: r, inc, lia, expenses }),

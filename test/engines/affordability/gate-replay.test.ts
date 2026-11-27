@@ -24,8 +24,10 @@ describe("set v1 replay at GR-3 gate 1.2.0 (both versions pinned)", () => {
       "3b4d074881a59ce15672e5edb65c22e7408d478349b06b20c6080e38c9afc8c4",
     );
   });
-  it("observed expenses 1.1.1: every result carries gate 1.2.0, output as at gate 1.1.0", () => {
-    expect(OBSERVED_EXPENSES_METHOD_VERSION).toBe("1.1.1");
+  // SIG-81 (ruling 40741): observed expenses 1.2.0, read in 1.1.1's shape (as-v111.ts), keeps
+  // 1.1.1's hash: with no LIA repayments given, only other_expenses moves.
+  it("observed expenses 1.2.0 (as 1.1.1): every result carries gate 1.2.0, output as at gate 1.1.0", () => {
+    expect(OBSERVED_EXPENSES_METHOD_VERSION).toBe("1.2.0");
     expect(replay.expenses.versions).toEqual(["1.2.0"]);
     expect(replay.expenses.hash).toBe(
       "4eb62bd3e32a56b276301e7962fb174fc571ad1128d06baaed87cb827829be0e",

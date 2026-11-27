@@ -134,6 +134,8 @@ describe("SIG-82 part 1: one assessment, composed from the engines", () => {
       as_of: REQUEST.as_of,
       lookback_months: 6,
       one_off_threshold_aud: 5000,
+      // SIG-81 wired (rulings of 27 November, 3): observed expenses read LIA's evidence (disclosed).
+      liability_repayments: [...new Set(lia.liabilities.flatMap((l) => l.evidence))].sort(),
     });
     expect(r?.expenses).toEqual(expenses);
     expect(r?.affordability).toEqual(
@@ -179,7 +181,7 @@ describe("the mapping onto the affordability engine (ADR 0012)", () => {
       request: REQUEST,
       inc,
       lia: { liabilities: [] },
-      expenses: { committed_monthly: 1200, basic_monthly: 800 },
+      expenses: { committed_monthly: 1200, basic_monthly: 800, unverified_monthly: 0 }, // SIG-81 (disclosed)
     });
     expect(input?.income).toEqual({
       streams: [{ type: "salary", cadence: "monthly", amount: 5000 }],
@@ -200,7 +202,7 @@ describe("the mapping onto the affordability engine (ADR 0012)", () => {
       request: REQUEST,
       inc: { income: [] },
       lia: { liabilities: [] },
-      expenses: { committed_monthly: 0, basic_monthly: 0 },
+      expenses: { committed_monthly: 0, basic_monthly: 0, unverified_monthly: 0 }, // SIG-81 (disclosed)
     });
     expect(input?.income.stated_gross_annual).toBeNull();
   });
@@ -224,7 +226,7 @@ describe("the mapping onto the affordability engine (ADR 0012)", () => {
           { family: "credit_card", provider: "AMEX", monthly: null, declared: false },
         ],
       },
-      expenses: { committed_monthly: 0, basic_monthly: 0 },
+      expenses: { committed_monthly: 0, basic_monthly: 0, unverified_monthly: 0 }, // SIG-81 (disclosed)
     });
     expect(input?.liabilities).toEqual([
       { type: "car_loan", source: "declared", stated_repayment: 443 },

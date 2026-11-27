@@ -33,12 +33,14 @@ must be computed by that same code (ruling 40732), not by a separate script.
      occupation if given, the loan amount, and the proposed repayment at the assessment rate
      (product rate plus buffer, or the floor), in whole dollars;
    - LIA, with the declared liabilities;
-   - observed expenses, with one-offs above $5,000.
+   - observed expenses, with one-offs above $5,000, and LIA's repayments (its liabilities'
+     evidence) as debt repayments whatever their category (SIG-81, ADR 0013; composition 1.1.0).
 3. **The affordability engine's input** (`affordabilityInputOf`):
    - **Income:** INC's income rows, each as a monthly stream of its observed amount and its type.
      The affordability engine shades them with the policy's shading. Stated gross is the
      application's.
-   - **Expenses:** observed committed and basic from observed expenses; the request's confirmed
+   - **Expenses:** observed committed from observed expenses, and observed basic as its basic plus
+     its unverified line (`other_expenses`; SIG-81, ADR 0013, composition 1.1.0); the request's confirmed
      figure and benchmark, when it gives them (SIG-76's requests give neither, and use the
      `observed` method).
    - **Liabilities:**

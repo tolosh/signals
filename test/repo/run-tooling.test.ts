@@ -44,6 +44,8 @@ const RECORD_SCRIPTS = [
   "sig46-run.ts",
   // SIG-70: packages a published Enrich build by commit and hash (ruling 40719, 2).
   "enrich-package.ts",
+  // SIG-81: observed expenses replayed over sets v1, v2.2 and v2.3 (ruling 40741, 4).
+  "sig81-replay.ts",
 ];
 /** The .mjs files are build and CI tools, not run scripts. */
 const OWN_EQUIVALENT: string[] = [];
