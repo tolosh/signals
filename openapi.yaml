@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moroku Signals API
-  version: 1.8.0
+  version: 1.9.0
   description: >-
     Canonical contract between the Lovable front ends and the Signals backend. Behaviour is
     specified in Confluence (Build Specification section 3, Product Specification and Amendment 1).
@@ -1563,15 +1563,31 @@ components:
         reason: { type: string }
     Rollup:
       type: object
-      required: [state, top_reasons, reasons_to_say_yes]
+      description: >-
+        The roll-up (Product Specification 7.5). Always returned. Until RU-4 to RU-7 are built
+        (D13), the backend sets no overall state except unverified (1.9.0; SIG-82, ruling 40775,
+        2). When `state` is absent the UI shows "No overall rating yet" with the reasons below, and
+        computes no state of its own.
+      required: [top_reasons, reasons_to_say_yes]
       properties:
-        state: { $ref: "#/components/schemas/RollupState" }
+        state:
+          $ref: "#/components/schemas/RollupState"
+          description: >-
+            Present only when the evidence-quality layer makes the assessment unverified (RU-4),
+            and then it is unverified. Absent otherwise: no overall state is invented.
         top_reasons:
           type: array
           maxItems: 3
+          description: >-
+            The reasons that move the roll-up (RU-1): evidence-quality reasons (signal_id null),
+            and amber or red signals in a knockout, refer or standard class. May be empty. Every
+            signal, listed here or not, is in the assessment's signals with its own state.
           items: { $ref: "#/components/schemas/RollupReason" }
         reasons_to_say_yes:
           type: array
+          description: >-
+            Positive evidence (family 10, POS; D13). Always returned; empty until that family is
+            built.
           items: { $ref: "#/components/schemas/RollupReason" }
     RatioState:
       type: [string, "null"]
