@@ -1,0 +1,72 @@
+applicant_id,transaction_id,posting_date,description,amount,biller_code,biller_name,v1.7.0_category,v1.7.0_classification,v1.7.0_excluded,v1.7.0_confidence,v1.7.0_source,v1.8.0_category,v1.8.0_classification,v1.8.0_excluded,v1.8.0_confidence,v1.8.0_source,v1.8.0_flags
+syn-v23-13cfd6ef54467a35,wdhpwnkerdvoge,2025-11-03,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,lngfeshbkwvdlf,2025-11-07,BPAY TELSTRA LIMITED,-60,4664,TELSTRA LIMITED,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,ilfhjhmnrpqjut,2025-11-17,BPAY ENERGYAUSTRALIA,-120.27,19585217,ENERGYAUSTRALIA,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,tzmvpxgcmesjie,2025-11-17,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,wuhkkapplldexz,2025-12-01,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,wkjybukwasrovf,2025-12-08,BPAY TELSTRA LIMITED,-60,4664,TELSTRA LIMITED,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,hmfvqeozepgnxj,2025-12-15,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,lxpvykgnvuztdf,2025-12-17,BPAY ENERGYAUSTRALIA,-120.27,19585217,ENERGYAUSTRALIA,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,jcdepkfasjjngq,2025-12-29,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,aqrbxqwdiiaxox,2026-01-07,BPAY TELSTRA LIMITED,-60,4664,TELSTRA LIMITED,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,jivyzgdotjobob,2026-01-12,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,etcvvxpvqatumd,2026-01-19,BPAY ENERGYAUSTRALIA,-120.27,19585217,ENERGYAUSTRALIA,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,esyccxfynszgvv,2026-01-27,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,kthvkwblomcezy,2026-01-27,BPAY SHIRE RATES 975566,-452.63,59644,SHIRE RATES,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,iaxdeihhhfvwqg,2026-02-09,BPAY TELSTRA LIMITED,-60,4664,TELSTRA LIMITED,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,ildbpooccnggoc,2026-02-09,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,rwakqplhrtgffz,2026-02-17,BPAY ENERGYAUSTRALIA,-120.27,19585217,ENERGYAUSTRALIA,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,vwwviiadcdchil,2026-02-23,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,hhtsebvxlqydhr,2026-03-09,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,zoemjwdtvuzwyx,2026-03-09,BPAY TELSTRA LIMITED,-60,4664,TELSTRA LIMITED,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,dogqexvrwubvgy,2026-03-17,BPAY ENERGYAUSTRALIA,-120.27,19585217,ENERGYAUSTRALIA,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,knhupnvuknumzq,2026-03-23,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,idkpnzoktgeuan,2026-04-07,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,xnonvqehsvsvyr,2026-04-07,BPAY TELSTRA LIMITED,-60,4664,TELSTRA LIMITED,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,rfhyxrbqnilqod,2026-04-17,BPAY ENERGYAUSTRALIA,-120.27,19585217,ENERGYAUSTRALIA,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,oigelqteltwnww,2026-04-20,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,rlfrobhdvadfmy,2026-04-27,BPAY SHIRE RATES 975566,-438.89,59644,SHIRE RATES,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,zjrnhrppjhgble,2026-05-04,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,uhduozapgufena,2026-05-07,BPAY TELSTRA LIMITED,-60,4664,TELSTRA LIMITED,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,emgbmabdfftkwj,2026-05-18,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,ghlqxhymlbnxmn,2026-05-18,BPAY ENERGYAUSTRALIA,-120.27,19585217,ENERGYAUSTRALIA,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,uusecqlefaflyk,2026-06-01,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,ellkcureafgvsc,2026-06-08,BPAY TELSTRA LIMITED,-60,4664,TELSTRA LIMITED,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,xxddypothmunia,2026-06-15,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,odlmhwifcmewom,2026-06-17,BPAY ENERGYAUSTRALIA,-120.27,19585217,ENERGYAUSTRALIA,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,wqsvvbqmmikiqh,2026-06-29,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,nulpcyttbjrkyd,2026-07-07,BPAY TELSTRA LIMITED,-60,4664,TELSTRA LIMITED,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,srzlkukiypncxb,2026-07-13,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,dbuzrxscbmprdb,2026-07-17,BPAY ENERGYAUSTRALIA,-120.27,19585217,ENERGYAUSTRALIA,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,jkllnhphdqyeom,2026-07-27,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,migbeucuyeobpj,2026-07-27,BPAY SHIRE RATES 975566,-480.37,59644,SHIRE RATES,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,vtfimmgjmqbmvg,2026-08-07,BPAY TELSTRA LIMITED,-60,4664,TELSTRA LIMITED,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,ukaxeillmeefhr,2026-08-10,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,vyqejuffzcjrig,2026-08-17,BPAY ENERGYAUSTRALIA,-120.27,19585217,ENERGYAUSTRALIA,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,rztflhkskvsqne,2026-08-24,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,ayktlrziigucwe,2026-09-07,BPAY TELSTRA LIMITED,-60,4664,TELSTRA LIMITED,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,stkgdtqffencfx,2026-09-07,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,zorznfrrykkhbx,2026-09-17,BPAY ENERGYAUSTRALIA,-120.27,19585217,ENERGYAUSTRALIA,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,pbukapgfqvqhzg,2026-09-21,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,ytrvuekopwnfdg,2026-10-05,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,fboazbmvsuqeso,2026-10-07,BPAY TELSTRA LIMITED,-60,4664,TELSTRA LIMITED,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,uuaandejehddcn,2026-10-19,BPAY ENERGYAUSTRALIA,-120.27,19585217,ENERGYAUSTRALIA,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-13cfd6ef54467a35,vepkotlsywscfm,2026-10-19,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,dpbggpoeeokdhl,2026-10-26,BPAY SHIRE RATES 975566,-456.82,59644,SHIRE RATES,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-13cfd6ef54467a35,cgwmyzwtbmzhhf,2026-10-30,BPAY SNAP FITNESS,-18,9307074,SNAP FITNESS,transfer,essential,true,1,exclusion,other_expenses,essential,false,0.3,fallback,unverified
+syn-v23-18936492246e52ae,xafitkqluuhyih,2025-11-07,BPAY MEDIBANK PRIVATE LTD,-428,5545,MEDIBANK PRIVATE LTD,transfer,essential,true,1,exclusion,insurance,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,nlgbvjxjogvllt,2025-11-28,BPAY AGL SALES PTY LTD,-377.56,1055,AGL SALES PTY LTD,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,mdmwxsvjgkxazk,2025-12-08,BPAY MEDIBANK PRIVATE LTD,-428,5545,MEDIBANK PRIVATE LTD,transfer,essential,true,1,exclusion,insurance,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,imrkorfngoeuen,2026-01-07,BPAY MEDIBANK PRIVATE LTD,-428,5545,MEDIBANK PRIVATE LTD,transfer,essential,true,1,exclusion,insurance,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,bkjkbxelbinlmb,2026-02-09,BPAY MEDIBANK PRIVATE LTD,-428,5545,MEDIBANK PRIVATE LTD,transfer,essential,true,1,exclusion,insurance,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,tabfbdrbktkcwd,2026-03-02,BPAY AGL SALES PTY LTD,-377.56,1055,AGL SALES PTY LTD,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,eabyjktfbuwucu,2026-03-09,BPAY MEDIBANK PRIVATE LTD,-428,5545,MEDIBANK PRIVATE LTD,transfer,essential,true,1,exclusion,insurance,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,sgnflnmveekttx,2026-04-07,BPAY MEDIBANK PRIVATE LTD,-428,5545,MEDIBANK PRIVATE LTD,transfer,essential,true,1,exclusion,insurance,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,ymokdcdmrjuaeg,2026-05-07,BPAY MEDIBANK PRIVATE LTD,-428,5545,MEDIBANK PRIVATE LTD,transfer,essential,true,1,exclusion,insurance,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,ayqeciemkkxfih,2026-05-28,BPAY AGL SALES PTY LTD,-377.56,1055,AGL SALES PTY LTD,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,udifscgvblnbgx,2026-06-08,BPAY MEDIBANK PRIVATE LTD,-428,5545,MEDIBANK PRIVATE LTD,transfer,essential,true,1,exclusion,insurance,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,wqzwuniwdayphy,2026-07-07,BPAY MEDIBANK PRIVATE LTD,-428,5545,MEDIBANK PRIVATE LTD,transfer,essential,true,1,exclusion,insurance,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,mkruofmhkhfyit,2026-08-07,BPAY MEDIBANK PRIVATE LTD,-428,5545,MEDIBANK PRIVATE LTD,transfer,essential,true,1,exclusion,insurance,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,yzuwmpdgimztmo,2026-08-28,BPAY AGL SALES PTY LTD,-377.56,1055,AGL SALES PTY LTD,transfer,essential,true,1,exclusion,utilities,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,wifqpnbgrdipxa,2026-09-07,BPAY MEDIBANK PRIVATE LTD,-428,5545,MEDIBANK PRIVATE LTD,transfer,essential,true,1,exclusion,insurance,essential,false,0.7,rules,low_confidence
+syn-v23-18936492246e52ae,cjdursikxektev,2026-10-07,BPAY MEDIBANK PRIVATE LTD,-428,5545,MEDIBANK PRIVATE LTD,transfer,essential,true,1,exclusion,insurance,essential,false,0.7,rules,low_confidence
