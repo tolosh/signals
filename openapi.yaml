@@ -1586,9 +1586,12 @@ components:
           type: array
           maxItems: 3
           description: >-
-            The reasons that move the roll-up (RU-1): evidence-quality reasons (signal_id null),
-            and amber or red signals in a knockout, refer or standard class. May be empty. Every
-            signal, listed here or not, is in the assessment's signals with its own state.
+            The roll-up's reasons: the evidence-quality layer's reasons (signal_id null; one with
+            state null is informational and doesn't block), and the amber or red signals in a
+            knockout, refer or standard class that move the roll-up (RU-1). May be empty. At most
+            three are listed: when there are more, the list is a selection, and which three is set
+            by the contract mapping (SIG-82 40805, for Colin's ruling). Every signal, listed here
+            or not, is in the assessment's signals with its own state.
           items: { $ref: "#/components/schemas/RollupReason" }
         reasons_to_say_yes:
           type: array
