@@ -1,5 +1,5 @@
-// SIG-76: the 1 December demo's three scenarios, chosen from synthetic set v2.3 by ground truth
-// only (ruling 40720). No engine runs here, so the choice can't depend on any engine's output.
+// SIG-76: the 1 December demo's scenarios (A to C; D added by ruling 40776, 1), chosen from
+// synthetic set v2.3 by ground truth only (ruling 40720). No engine runs here, so the choice can't depend on any engine's output.
 // Each rule takes the lowest applicant id that meets it, so the choice is a pure function of the
 // set. The expected states are computed later, with the pinned Enrich build (ruling 40719).
 
@@ -10,8 +10,16 @@ type Truth = {
   history: { months: number };
   surplus_monthly: number;
   coverage: { salary_account_shared: boolean; unshared_transfer_accounts: number };
-  liabilities: { items: { type: string; declared: boolean }[] };
-  v2: { liabilities: { declared_as: string | null; repayment_channel: string; lender: string }[] };
+  liabilities: { items: { id: string; type: string; declared: boolean }[] };
+  v2: {
+    liabilities: {
+      id: string;
+      declared_as: string | null;
+      repayment_channel: string;
+      lender: string;
+      paid_from_shared: boolean;
+    }[];
+  };
 };
 type Applicant = { truth: Truth };
 
@@ -39,7 +47,11 @@ export const RULES = {
   A: "regular salary, affordable: a CDR feed of 6 months or more; tags salaried-fixed and dishonour-clean and none of the risk tags; the salary account shared; every liability declared; no liability repaid by BPAY; truth surplus at or above the set's median",
   B: "a hidden credit liability and affordability pressure: a CDR feed of 6 months or more; tag salaried and none of the drift or gambling tags; the salary account shared; an undisclosed personal or car loan; no liability repaid by BPAY; truth surplus at or below the set's lower quartile",
   C: "missing income or insufficient evidence: a CDR feed of 3 months or more, tag salaried, no liability repaid by BPAY, whose salary account is not shared (EQ-01 then fails, and the assessment is unverified)",
+  D: "a detected undisclosed liability (ruling 40776, 1): tag salaried and none of the drift or gambling tags; at least one undisclosed BNPL, SACC, wage advance or credit card, repaid by direct debit or card (repayment_channel DIRECT_DEBIT or PAYMENT; not BPAY) from a shared account; not scenario A, B or C",
 } as const;
+
+/** Scenario D's liability types (ruling 40776, 1). */
+const D_KINDS = ["bnpl", "sacc", "wage_advance", "credit_card"];
 
 /**
  * Why no scenario has a liability repaid by BPAY: Enrich 1.7.0 returns BPAY bill payments as
@@ -97,7 +109,27 @@ export function selectScenarios(set: readonly unknown[]) {
     (t) =>
       cdr(t, 3) && t.tags.includes("salaried") && noBpay(t) && !t.coverage.salary_account_shared,
   );
-  const pick = (k: "A" | "B" | "C", xs: Truth[]) => {
+  const chosen = [a, b, c].map((xs) => lowest(xs)?.applicant_id);
+  const undisclosedDetectable = (t: Truth) =>
+    t.liabilities.items.some((l) => {
+      const v = t.v2.liabilities.find((x) => x.id === l.id);
+      return (
+        D_KINDS.includes(l.type) &&
+        !l.declared &&
+        v !== undefined &&
+        v.declared_as === null &&
+        (v.repayment_channel === "DIRECT_DEBIT" || v.repayment_channel === "PAYMENT") &&
+        v.paid_from_shared
+      );
+    });
+  const d = truths.filter(
+    (t) =>
+      t.tags.includes("salaried") &&
+      !t.tags.some((x) => NOT_B.includes(x)) &&
+      undisclosedDetectable(t) &&
+      !chosen.includes(t.applicant_id),
+  );
+  const pick = (k: "A" | "B" | "C" | "D", xs: Truth[]) => {
     const t = lowest(xs);
     if (!t) throw new Error(`no applicant in set v2.3 meets scenario ${k}'s rule`);
     return { applicant_id: t.applicant_id, rule: RULES[k], candidates: xs.length };
@@ -107,5 +139,6 @@ export function selectScenarios(set: readonly unknown[]) {
     A: pick("A", a),
     B: pick("B", b),
     C: pick("C", c),
+    D: pick("D", d),
   };
 }
