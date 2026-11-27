@@ -391,16 +391,18 @@ export function createDemoApp(o: {
           return notInDemo();
       }
     }
-    if (template === "/v1/app/assessments/{id}/report.pdf")
-      return error(
-        501,
-        "not_available_in_demo",
-        "The credit-file PDF is not available in this demo: no PDF generator exists yet",
-      );
     if (template.startsWith("/v1/app/assessments/{id}")) {
-      if (!o.assessments.wired) return error(501, "assessment_not_wired", NOT_WIRED_MESSAGE);
+      // Review 23 (40821): the workspace first, so every assessment route gives the same scoped
+      // 404 (T5) for an ID that isn't this workspace's, before any 501.
       const found = await store.get<StoredAssessment>(workspacePartition(w.id), `assessment#${id}`);
       if (!found) return notFound();
+      if (!o.assessments.wired) return error(501, "assessment_not_wired", NOT_WIRED_MESSAGE);
+      if (template === "/v1/app/assessments/{id}/report.pdf")
+        return error(
+          501,
+          "not_available_in_demo",
+          "The credit-file PDF is not available in this demo: no PDF generator exists yet",
+        );
       // Contract 1.11.0 (D65, SIG-82 40818, 2): the mapping, read from the stored output.
       if (method === "get" && template === "/v1/app/assessments/{id}")
         return json(200, toAssessment(found, found.output, found.request));
