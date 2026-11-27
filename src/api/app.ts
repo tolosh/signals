@@ -16,6 +16,7 @@ import { parse } from "yaml";
 import { bearerOf, type Verifier } from "../auth/supabase.js";
 import type { Assessment } from "../assessment/assess.js";
 import { NOT_WIRED_MESSAGE, type AssessmentPort } from "./assessment-port.js";
+import { toAssessment, toSummary, toTrace, type AssessmentRequestPart } from "./mapping.js";
 import { DEFAULT_ORIGIN, DEMO_ORIGINS, type DemoConfig, type WorkspaceKey } from "./config.js";
 import { consentPage } from "./consent.js";
 import { healthBody } from "./health.js";
@@ -89,10 +90,12 @@ type StoredAssessment = {
   set_applicant_id: string;
   output_sha256: string;
   created_at: string;
+  /** The request's product type and as-of date, for the contract's product_type and data_as_of. */
+  request: AssessmentRequestPart;
   output: Assessment;
 };
-const MAPPING_PENDING =
-  "The assessment ran on the real engines and is stored, but how it is shown waits for Colin's ruling on the contract mapping (SIG-82 40805). Nothing is shown until then.";
+const EVIDENCE_NOT_BUILT =
+  "The evidence transactions for a signal aren't served yet: the masked evidence endpoint (SIG-82 40805, 2.7) isn't built. Nothing here returns a sample.";
 const iso = (ms: number) => new Date(ms).toISOString();
 const record = (x: unknown): Json =>
   x && typeof x === "object" && !Array.isArray(x) ? (x as Json) : {};
@@ -336,8 +339,17 @@ export function createDemoApp(o: {
           await saveApplicant(w.id, { ...a, portal_token: token, invites: [...a.invites, invite] });
           return json(201, invite);
         }
-        case "get /v1/app/applicants/{id}/assessments":
-          return json(200, page([]));
+        case "get /v1/app/applicants/{id}/assessments": {
+          if (!o.assessments.wired) return json(200, page([]));
+          const mine = [
+            ...(
+              await store.list<StoredAssessment>(workspacePartition(w.id), "assessment#")
+            ).values(),
+          ]
+            .filter((x) => x.applicant_id === a.id)
+            .sort((x, y) => y.version - x.version);
+          return json(200, page(mine.map((x) => toSummary(x, x.output, x.request))));
+        }
         case "post /v1/app/applicants/{id}/assessments": {
           if (!o.assessments.wired) return error(501, "assessment_not_wired", NOT_WIRED_MESSAGE);
           const token = typeof a.portal_token === "string" ? a.portal_token : null;
@@ -364,12 +376,12 @@ export function createDemoApp(o: {
             set_applicant_id: result.set_applicant_id,
             output_sha256: sha256(JSON.stringify(result.output)),
             created_at: iso(now()),
+            request: result.request,
             output: result.output,
           };
           await store.put(workspacePartition(w.id), `assessment#${asmId}`, stored);
           await saveApplicant(w.id, { ...a, status: "assessed", latest_assessment_id: asmId });
-          // Plumbing only: how the output maps to the contract waits for Colin's ruling (40805).
-          return json(202, { id: asmId, applicant_id: a.id, version, status: "complete" });
+          return json(202, toSummary(stored, result.output, result.request));
         }
         case "get /v1/app/applicants/{id}/requests":
           return json(200, { items: [] });
@@ -389,7 +401,13 @@ export function createDemoApp(o: {
       if (!o.assessments.wired) return error(501, "assessment_not_wired", NOT_WIRED_MESSAGE);
       const found = await store.get<StoredAssessment>(workspacePartition(w.id), `assessment#${id}`);
       if (!found) return notFound();
-      return error(501, "assessment_mapping_pending", MAPPING_PENDING);
+      // Contract 1.11.0 (D65, SIG-82 40818, 2): the mapping, read from the stored output.
+      if (method === "get" && template === "/v1/app/assessments/{id}")
+        return json(200, toAssessment(found, found.output, found.request));
+      if (method === "get" && template === "/v1/app/assessments/{id}/affordability/trace")
+        return json(200, toTrace(found.output));
+      if (template === "/v1/app/assessments/{id}/signals/{signalId}/evidence")
+        return error(501, "evidence_not_built", EVIDENCE_NOT_BUILT);
     }
     return notInDemo();
   }

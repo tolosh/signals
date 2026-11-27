@@ -35,10 +35,9 @@ type Raw = {
   };
 };
 
-export function buildScenarioInputs(
-  preregPath = "research/preregistrations/SIG-76.json",
-  manifestPath = "research/datasets/synthetic-v2.3.manifest.json",
-): ScenarioInputs {
+/** Set v2.3, regenerated from its manifest seed and checked against the pre-registration and the
+ * manifest's hash, with each applicant's input built as SIG-76's runs built it. */
+function loadSet(preregPath: string, manifestPath: string) {
   const prereg = JSON.parse(readFileSync(preregPath, "utf8")) as Prereg;
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as {
     seed: number;
@@ -51,28 +50,46 @@ export function buildScenarioInputs(
   for (const a of set) hash.update(serialise(a as never)).update("\n");
   if (hash.digest("hex") !== manifest.set_sha256)
     throw new Error("set v2.3 doesn't regenerate to its manifest hash");
+  const inputOf = (a: Raw): AssessmentInput => ({
+    applicant_id: a.truth.applicant_id,
+    feed_type: a.truth.feed_type,
+    application: a.application,
+    feed: {
+      accounts: a.feed.accounts.map((acc) => ({
+        account: acc.account,
+        ...(acc.detail ? { detail: acc.detail } : {}),
+        transactions: acc.transactions ?? acc.transactionList?.data.transactions ?? [],
+      })),
+    },
+    request: prereg.requests.request,
+  });
+  return { prereg, set, inputOf };
+}
 
-  const inputOf = (id: string): AssessmentInput => {
+export function buildScenarioInputs(
+  preregPath = "research/preregistrations/SIG-76.json",
+  manifestPath = "research/datasets/synthetic-v2.3.manifest.json",
+): ScenarioInputs {
+  const { prereg, set, inputOf } = loadSet(preregPath, manifestPath);
+  const byId = (id: string) => {
     const a = set.find((x) => x.truth.applicant_id === id);
     if (!a) throw new Error(`no applicant ${id} in set v2.3`);
-    return {
-      applicant_id: id,
-      feed_type: a.truth.feed_type,
-      application: a.application,
-      feed: {
-        accounts: a.feed.accounts.map((acc) => ({
-          account: acc.account,
-          ...(acc.detail ? { detail: acc.detail } : {}),
-          transactions: acc.transactions ?? acc.transactionList?.data.transactions ?? [],
-        })),
-      },
-      request: prereg.requests.request,
-    };
+    return inputOf(a);
   };
   // A JSON round trip, so the value is exactly what the asset file holds.
   return JSON.parse(
     JSON.stringify(
-      Object.fromEntries(KEYS.map((k) => [k, inputOf(prereg.scenarios[k].applicant_id)])),
+      Object.fromEntries(KEYS.map((k) => [k, byId(prereg.scenarios[k].applicant_id)])),
     ),
   ) as ScenarioInputs;
+}
+
+/** All 780 applicants' inputs, in the set's order, on the pre-registered request: what the
+ * mapping's tests run over (D65, SIG-82 40818, 1). Tests only; never in the Lambda's asset. */
+export function buildSetInputs(
+  preregPath = "research/preregistrations/SIG-76.json",
+  manifestPath = "research/datasets/synthetic-v2.3.manifest.json",
+): AssessmentInput[] {
+  const { set, inputOf } = loadSet(preregPath, manifestPath);
+  return JSON.parse(JSON.stringify(set.map(inputOf))) as AssessmentInput[];
 }

@@ -3,8 +3,8 @@
 // or a state. Candidate 0 had none wired (NOT_WIRED: a labelled 501, never a fixture; SIG-76 T4).
 // Candidate 1 wires the real assessApplicant (composition 1.2.0) on the scenario the applicant
 // chose at the sandbox consent, with that scenario's pre-registered input passed unchanged, so its
-// feed goes in its seeded order (SIG-76 T3). Mapping the output to the contract's Assessment waits
-// for Colin's ruling (SIG-82 40805).
+// feed goes in its seeded order (SIG-76 T3). The output is mapped to the contract's Assessment in
+// ./mapping.ts (contract 1.11.0; D65, SIG-82 40818).
 import { assessApplicant, type Assessment } from "../assessment/assess.js";
 import type { ScenarioInputs } from "./scenario-inputs.js";
 import type { ScenarioKey } from "./seed.js";
@@ -17,7 +17,11 @@ export type AssessRequest = {
 export type AssessmentPort = {
   readonly wired: boolean;
   /** Runs one assessment; null when this build has none wired. */
-  assess(r: AssessRequest): Promise<{ set_applicant_id: string; output: Assessment } | null>;
+  assess(r: AssessRequest): Promise<{
+    set_applicant_id: string;
+    request: { product_type: string; as_of: string };
+    output: Assessment;
+  } | null>;
 };
 
 export const NOT_WIRED: AssessmentPort = Object.freeze({
@@ -39,7 +43,12 @@ export function wiredPort(
       const input = inputs[r.scenario];
       // A fresh copy each run: the stored input is never handed to the engines to hold.
       const output = await assess(JSON.parse(JSON.stringify(input)) as typeof input);
-      return { set_applicant_id: input.applicant_id ?? "", output };
+      const { product_type, as_of } = input.request;
+      return {
+        set_applicant_id: input.applicant_id ?? "",
+        request: { product_type, as_of },
+        output,
+      };
     },
   });
 }

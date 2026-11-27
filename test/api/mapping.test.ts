@@ -20,6 +20,8 @@ import {
   versionsOf,
 } from "../../src/api/mapping.js";
 import { buildScenarioInputs, buildSetInputs } from "../../src/api/scenario-inputs.js";
+import { OBSERVED_EXPENSES_METHOD_VERSION } from "../../src/engines/affordability/observed-expenses.js";
+import { EQ_METHOD_VERSION } from "../../src/engines/evidence/checks.js";
 import { schemaValidator } from "./contract.js";
 
 type Reason = { signal_id: string | null; state: string | null; reason: string };
@@ -173,7 +175,8 @@ describe("the mapped Assessment and trace (40805, 40817; approved in 40818, 2)",
       const a = toAssessment(REC, x.out, REQUEST);
       expect(a.evidence_checks).toEqual(x.out.evidence.checks);
       expect(a.signals).toEqual([...x.out.inc.signals, ...x.out.lia.signals]);
-      const { monthly_income_state: _s, ...rest } = a.affordability.serviceability;
+      const rest: Record<string, unknown> = { ...a.affordability.serviceability };
+      delete rest.monthly_income_state;
       expect(rest).toEqual(x.out.affordability.affordability.serviceability);
       expect(a.affordability.ratios).toEqual(x.out.affordability.affordability.ratios);
       expect(a.status).toBe("complete");
@@ -217,8 +220,9 @@ describe("the mapped Assessment and trace (40805, 40817; approved in 40818, 2)",
       lender_names: o.lia.lender_names_version,
       thresholds: o.affordability.versions.thresholds_version,
     });
-    expect(typeof v.eq_method).toBe("string");
-    expect(typeof v.observed_expenses).toBe("string");
+    // Not in the output: the engines' own constants (disclosed).
+    expect(v.eq_method).toBe(EQ_METHOD_VERSION);
+    expect(v.observed_expenses).toBe(OBSERVED_EXPENSES_METHOD_VERSION);
   });
 
   it("no embedded Enrich record, transaction or taxonomy reaches a lender response", () => {

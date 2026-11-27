@@ -12,6 +12,8 @@ const affordability = schemaValidator("Affordability");
 const assessment = schemaValidator("Assessment");
 const trace = schemaValidator("AffordabilityTrace");
 
+const omit = (o: Record<string, unknown>, k: string) =>
+  Object.fromEntries(Object.entries(o).filter(([key]) => key !== k));
 const reason = (n: number) => ({ signal_id: `LIA-0${n}`, state: "amber", reason: `r${n}` });
 const okRollup = {
   top_reasons: [reason(1), reason(2), reason(3)],
@@ -42,7 +44,7 @@ const VERSIONS = {
   inc: "1.2.4",
   lia: "1.3.6",
   lia_detector: { method_version: "1.0.0", min_occurrences: 3, amount_tolerance: 0.15 },
-  eq_method: "1.0.0",
+  eq_method: 4,
   observed_expenses: "1.0.0",
   gr3_gate: "1.2.0",
   keyword_list: "1.1.0",
@@ -71,8 +73,8 @@ describe("contract 1.11.0", () => {
 
   it("the roll-up carries the complete ordered list and its count, both required", () => {
     expect(rollup(okRollup).valid).toBe(true);
-    const { all_reasons: _a, ...noAll } = okRollup;
-    const { reasons_total: _t, ...noTotal } = okRollup;
+    const noAll = omit(okRollup, "all_reasons");
+    const noTotal = omit(okRollup, "reasons_total");
     expect(rollup(noAll).valid).toBe(false);
     expect(rollup(noTotal).valid).toBe(false);
     expect(rollup({ ...okRollup, reasons_total: -1 }).valid).toBe(false);
@@ -87,7 +89,7 @@ describe("contract 1.11.0", () => {
 
   it("serviceability carries the income's state, required: observed or unverified", () => {
     expect(affordability(okAffordability).valid).toBe(true);
-    const { monthly_income_state: _s, ...noState } = serviceability;
+    const noState = omit(serviceability, "monthly_income_state");
     expect(affordability({ ...okAffordability, serviceability: noState }).valid).toBe(false);
     expect(
       affordability({

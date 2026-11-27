@@ -69,5 +69,45 @@ tenant A). The real-data path (SIG-61) stays off.
 - The whole output, embedded Enrich record included, is stored server-side only. A lender
   response never carries it (SIG-82 40802, 1). The acceptance reads its hash at
   `GET /demo/assessments/{id}/output-sha256`, which is signed in and scoped like `/v1/app`.
-- Until Colin rules on the contract mapping (SIG-82 40805), `GET /v1/app/assessments/{id}` returns a
-  labelled 501 (`assessment_mapping_pending`), and the run returns only its ID, version and status.
+- Before the mapping was ruled, `GET /v1/app/assessments/{id}` returned a labelled 501
+  (`assessment_mapping_pending`). D65 (SIG-82 40818) ruled it; see below.
+
+## The contract mapping (contract 1.11.0; D65, SIG-82 40818)
+
+`src/api/mapping.ts` maps the stored output to the contract when it is read: `GET
+/v1/app/assessments/{id}` (Assessment), `…/affordability/trace` (AffordabilityTrace), and the
+applicant's list and the run's 202 (AssessmentSummary). The mapping is the one proposed in SIG-82
+40805 and 40817 and approved as proposed (D65, 2): figures, states and reasons are copied, never
+reshaped or rewritten.
+
+- **The roll-up's reasons (D65, 1).** Ordered on the server in four tiers: (1) evidence-quality
+  reasons with a state; (2) red movers; (3) amber movers; (4) evidence-quality reasons with state
+  null. The composition's order is kept within a tier. `top_reasons` is the first three,
+  `all_reasons` the whole list, `reasons_total` its length. On set v2.3's 780 applicants: 306
+  reasons in tier 1, 278 in tier 2, 589 in tier 3, 35 in tier 4; 57 applicants have more than
+  three reasons, and none has more than three in tiers 1 and 2 together, so no red is left out of
+  `top_reasons`. The frozen five are unchanged (none has more than three).
+- **The income's state.** `serviceability.monthly_income_state` is `unverified` exactly when the
+  affordability engine's own trace records "no income" (56 of the 780), otherwise `observed`.
+  `monthly_income` keeps the engine's figure.
+- **Versions.** `Assessment.versions` is copied from the output. `eq_method` and
+  `observed_expenses` aren't in the output: they are the engines' own constants
+  (`EQ_METHOD_VERSION`, `OBSERVED_EXPENSES_METHOD_VERSION`), as `pins.definitions_version` is.
+- **The trace.** Income is INC's income rows; the expense lines are observed committed, basic and
+  unverified, which sum to the GLE used (only the observed method has lines; any other method is
+  refused, not shown with lines that don't add up); liabilities are the engine's `repayments`
+  commitments, each with its type's Product Specification 6.4 rule by name, as the engine's
+  `commitment()` applies it; the steps are the engine's own, a step it couldn't compute with a
+  null value.
+- **Never in a lender response:** the embedded Enrich record, transactions, taxonomy, INC's trace,
+  LIA's evidence IDs. A test checks that no transaction ID of the 780 feeds appears.
+
+**Disclosed gaps** (D65, 2; also for Lovable's About page):
+
+- not mapped: `expenses.discretionary_monthly`, `months_covered`, `one_offs`, `excluded`,
+  `lia_repayments_in_other_categories` and `unmapped`, and `evidence.rollup.green_allowed`;
+- there is no separate list of found liabilities (LIA-01's reason names them);
+- `reasons_to_say_yes` is always empty: family 10 (POS) isn't built;
+- the evidence endpoint (`…/signals/{signalId}/evidence`) returns a labelled 501,
+  `evidence_not_built`, until the masked evidence (40805, 2.7) is built and tested;
+- notes, overrides and the PDF are not available in this demo.

@@ -8,6 +8,10 @@ import { loadContract, schemaValidator } from "../contract/helpers.js";
 const doc = loadContract();
 const rollup = schemaValidator(doc)("Rollup");
 
+// 1.11.0 (D65, SIG-82 40818, 1) requires the complete list and its count too; a disclosed test
+// edit adds them, so each case still tests what it names.
+const LIST = (all: unknown[]) => ({ all_reasons: all, reasons_total: all.length });
+
 describe("contract 1.9.0: the roll-up's optional state", () => {
   it("is version 1.9.0 or later", () => {
     const [major, minor] = doc.info.version.split(".").map(Number);
@@ -17,6 +21,7 @@ describe("contract 1.9.0: the roll-up's optional state", () => {
   it("accepts a roll-up with no state and the signals that move it", () => {
     const r = rollup({
       top_reasons: [{ signal_id: "INC-01", state: "amber", reason: "Pay varies" }],
+      ...LIST([{ signal_id: "INC-01", state: "amber", reason: "Pay varies" }]),
       reasons_to_say_yes: [],
     });
     expect(r.errors).toBeNull();
@@ -27,6 +32,7 @@ describe("contract 1.9.0: the roll-up's optional state", () => {
     const r = rollup({
       state: "unverified",
       top_reasons: [{ signal_id: null, state: "unverified", reason: "No income account shared" }],
+      ...LIST([{ signal_id: null, state: "unverified", reason: "No income account shared" }]),
       reasons_to_say_yes: [],
     });
     expect(r.valid).toBe(true);
@@ -36,12 +42,12 @@ describe("contract 1.9.0: the roll-up's optional state", () => {
     expect(rollup({ reasons_to_say_yes: [] }).valid).toBe(false);
     expect(rollup({ top_reasons: [] }).valid).toBe(false);
     const four = Array.from({ length: 4 }, (_, i) => ({ signal_id: `X-0${i}`, reason: "r" }));
-    expect(rollup({ top_reasons: four, reasons_to_say_yes: [] }).valid).toBe(false);
+    expect(rollup({ top_reasons: four, ...LIST(four), reasons_to_say_yes: [] }).valid).toBe(false);
   });
 
   it("rejects a state outside RollupState", () => {
-    expect(rollup({ state: "excellent", top_reasons: [], reasons_to_say_yes: [] }).valid).toBe(
-      false,
-    );
+    expect(
+      rollup({ state: "excellent", top_reasons: [], ...LIST([]), reasons_to_say_yes: [] }).valid,
+    ).toBe(false);
   });
 });

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Moroku Signals API
-  version: 1.10.0
+  version: 1.11.0
   description: >-
     Canonical contract between the Lovable front ends and the Signals backend. Behaviour is
     specified in Confluence (Build Specification section 3, Product Specification and Amendment 1).
@@ -1548,7 +1548,9 @@ components:
         version: { type: integer, minimum: 1 }
         status: { $ref: "#/components/schemas/AssessmentStatus" }
         rollup_state:
-          description: Roll-up state (Product Specification 7.5); null while running
+          description: >-
+            Roll-up state (Product Specification 7.5); null while running, and null when the
+            roll-up has no overall state (1.9.0: Rollup.state absent)
           type: [string, "null"]
           enum: [green, amber, red_refer, red_knockout, unverified, null]
         data_as_of: { type: [string, "null"], format: date-time }
@@ -1575,7 +1577,7 @@ components:
         (D13), the backend sets no overall state except unverified (1.9.0; SIG-82, ruling 40775,
         2). When `state` is absent the UI shows "No overall rating yet" with the reasons below, and
         computes no state of its own.
-      required: [top_reasons, reasons_to_say_yes]
+      required: [top_reasons, all_reasons, reasons_total, reasons_to_say_yes]
       properties:
         state:
           $ref: "#/components/schemas/RollupState"
@@ -1597,6 +1599,18 @@ components:
             nothing itself. Every signal, listed here or not, is in the assessment's signals with
             its own state.
           items: { $ref: "#/components/schemas/RollupReason" }
+        all_reasons:
+          type: array
+          description: >-
+            The complete ordered list (1.11.0; D65, SIG-82 40818, 1): the same reasons as
+            top_reasons, in the same order, uncapped. The UI can show it in full.
+          items: { $ref: "#/components/schemas/RollupReason" }
+        reasons_total:
+          type: integer
+          minimum: 0
+          description: >-
+            The length of all_reasons (1.11.0; D65). When it is more than three, the UI says "and
+            N more" after top_reasons.
         reasons_to_say_yes:
           type: array
           description: >-
@@ -1631,6 +1645,7 @@ components:
           required:
             [
               monthly_income,
+              monthly_income_state,
               monthly_expenses_gle,
               monthly_repayments,
               proposed_repayment,
@@ -1638,6 +1653,14 @@ components:
             ]
           properties:
             monthly_income: { type: number }
+            monthly_income_state:
+              type: string
+              enum: [observed, unverified]
+              description: >-
+                1.11.0 (SIG-82 40805, 2.4; D65, 40818, 2). unverified exactly when the
+                affordability engine had no income (its own trace records "no income"); then the
+                UI shows "Income not verified" in place of monthly_income, which keeps the
+                engine's 0 unchanged, and never "$0 income".
             monthly_expenses_gle: { type: number }
             monthly_repayments: { type: number }
             proposed_repayment: { type: number }
@@ -1802,6 +1825,56 @@ components:
         signals:
           type: array
           items: { $ref: "#/components/schemas/Signal" }
+        versions:
+          type: object
+          description: >-
+            Optional (1.11.0; SIG-82 40817, 3; D65, 40818, 2): the versions of everything that
+            produced this assessment, copied from the composition's output. pins is unchanged.
+          required:
+            [
+              composition,
+              enrich,
+              inc,
+              lia,
+              lia_detector,
+              eq_method,
+              observed_expenses,
+              gr3_gate,
+              keyword_list,
+              lender_names,
+              thresholds,
+            ]
+          properties:
+            composition: { type: string }
+            enrich:
+              type: object
+              required: [engine_version, build]
+              properties:
+                engine_version: { type: string }
+                build:
+                  description: The pinned local build that categorised the data; null on the API path
+                  oneOf:
+                    - type: object
+                      required: [commit, version, dist_sha256]
+                      properties:
+                        commit: { type: string }
+                        version: { type: string }
+                        dist_sha256: { type: string }
+                    - type: "null"
+            inc: { type: string }
+            lia: { type: string }
+            lia_detector:
+              type: object
+              required: [method_version]
+              properties:
+                method_version: { type: string }
+            eq_method:
+              { type: integer, description: "The evidence-quality method (EQ_METHOD_VERSION)" }
+            observed_expenses: { type: string }
+            gr3_gate: { type: string }
+            keyword_list: { type: string }
+            lender_names: { type: string }
+            thresholds: { type: integer }
         pins:
           type: object
           required: [definitions_version, thresholds_version, taxonomy_version]
@@ -1860,7 +1933,11 @@ components:
               type: { type: string }
               source: { type: string, enum: [declared, found, inferred] }
               monthly_commitment: { type: number }
-              rule: { type: string }
+              rule:
+                type: string
+                description: >-
+                  The Product Specification 6.4 rule for the liability's type, by name, such as
+                  "3-month average outflow" (1.11.0; SIG-82 40805, 2.6)
         trace:
           type: array
           items:
@@ -1868,7 +1945,11 @@ components:
             required: [step, value]
             properties:
               step: { type: string }
-              value: { type: number }
+              value:
+                type: [number, "null"]
+                description: >-
+                  Null for a step the engine could not compute, such as a ratio with no income;
+                  inputs.reason says why (1.11.0)
               inputs: { type: object }
         overrides:
           type: array
