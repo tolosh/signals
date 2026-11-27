@@ -4,7 +4,7 @@
 //   - a verified Supabase sign-in on every /v1/app call, scoped to the demo workspace it maps to;
 //   - T5: tenant B gets 404 on tenant A's resources;
 //   - the assessment endpoints returning a labelled 501 (no fixture, SIG-76 T4);
-//   - CORS for the three Lovable origins only;
+//   - CORS for the four Lovable origins only;
 //   - demo workspaces A and B, seeded with credits and the AF-T1 policy (11.5%, 3% buffer, 5.5%
 //     floor, expense method observed);
 //   - a labelled HTTPS sandbox-consent page that returns to /connect/:token/progress, the step
@@ -24,6 +24,8 @@ const HOST = "abc123.execute-api.ap-southeast-2.amazonaws.com";
 const CUSTOM = "https://signals-launchpad.moroku.digital";
 const LOVABLE = "https://moroku-signals.lovable.app";
 const PREVIEW = "https://id-preview--7bb65be2-4f2d-46a9-97ef-1039aace98ee.lovable.app";
+// SIG-82 (40835): Lovable's editor preview, refused on candidate 0.
+const EDITOR = "https://7bb65be2-4f2d-46a9-97ef-1039aace98ee.lovableproject.com";
 const TOKENS: Record<string, { sub: string; email: string }> = {
   "token-a": { sub: "user-a", email: "a@demo.test" },
   "token-b": { sub: "user-b", email: "B@Demo.test" },
@@ -135,12 +137,26 @@ describe("health", () => {
   });
 });
 
-describe("CORS for the three Lovable origins only", () => {
+describe("CORS for the four Lovable origins only", () => {
+  // A disclosed test edit (40835): the expected list gains the editor's preview origin.
   it("lists exactly the demo's origins", () => {
-    expect([...DEMO_ORIGINS].sort()).toEqual([CUSTOM, LOVABLE, PREVIEW].sort());
+    expect([...DEMO_ORIGINS].sort()).toEqual([CUSTOM, LOVABLE, PREVIEW, EDITOR].sort());
   });
 
-  it.each([CUSTOM, LOVABLE, PREVIEW])("answers the preflight from %s", async (origin) => {
+  it("refuses look-alikes of the editor's preview origin (40835)", async () => {
+    for (const origin of [
+      "http://7bb65be2-4f2d-46a9-97ef-1039aace98ee.lovableproject.com",
+      "https://00000000-0000-0000-0000-000000000000.lovableproject.com",
+      "https://x.7bb65be2-4f2d-46a9-97ef-1039aace98ee.lovableproject.com",
+      "https://7bb65be2-4f2d-46a9-97ef-1039aace98ee.lovableproject.com.evil.example",
+      `${EDITOR}/`,
+    ]) {
+      const res = await call("OPTIONS", "/v1/app/me", { origin });
+      expect(res.headers["access-control-allow-origin"], origin).not.toBe(origin);
+    }
+  });
+
+  it.each([CUSTOM, LOVABLE, PREVIEW, EDITOR])("answers the preflight from %s", async (origin) => {
     const res = await call("OPTIONS", "/v1/app/me", { origin });
     expect(res.status).toBe(204);
     expect(res.headers["access-control-allow-origin"]).toBe(origin);

@@ -5,7 +5,7 @@
 //   - workspace scoping from that sign-in: a request reads and writes only its own workspace's
 //     partition, so another workspace's ID is simply not found (T5: 404);
 //   - the assessment endpoints behind the assessment port, a labelled 501 until it is wired;
-//   - CORS for the three Lovable origins only;
+//   - CORS for the four Lovable origins only (40835 added the editor's preview);
 //   - a labelled sandbox-consent page standing in for the bank's consent, which records the
 //     seeded scenario the applicant picks and returns to /connect/:token/progress.
 // Every figure an assessment shows will come from the real engines; nothing here is a fixture.

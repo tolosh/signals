@@ -3,11 +3,13 @@
 // here. No configuration value may name an Enrich host (T2). The Supabase project URL and
 // publishable key are public values (40779), so they are plain configuration, not secrets.
 
-/** The Lovable origins allowed to call the API (40782). Exact matches only. */
+/** The Lovable origins allowed to call the API (40782; the editor's preview origin, 40835). Exact
+ * matches only. */
 export const DEMO_ORIGINS: readonly string[] = Object.freeze([
   "https://signals-launchpad.moroku.digital",
   "https://moroku-signals.lovable.app",
   "https://id-preview--7bb65be2-4f2d-46a9-97ef-1039aace98ee.lovable.app",
+  "https://7bb65be2-4f2d-46a9-97ef-1039aace98ee.lovableproject.com",
 ]);
 /** The demo's own front-end origin, used when a request names no allowed origin. */
 export const DEFAULT_ORIGIN = "https://signals-launchpad.moroku.digital";
