@@ -161,7 +161,27 @@
     "bundle_sha256": "f843b882d5d7b028e3c437f87870f82ee8f0d0e4eaee9b98efce6b43799bbdbd",
     "source": "vendor/moroku-enrich/pin.json (SIG-70; ENR-28 40724); rulings 40730 and 40732"
   },
-  "expected_states": null,
+  "expected_states": {
+    "file": "research/preregistrations/SIG-76-expected-states.json",
+    "file_sha256": "19bab324b0e5ec30985dde8d475c0a5b583a148d0c438f9cd4b1871fc915ece1",
+    "output_sha256": {
+      "A": "6da0ec7470a44a796b160da00f55ad6f755a7c41d207e413d75c77ef1583d641",
+      "B": "aec64494b1f2f1063f6f0414231e165a2738004ee21f736de315855f3b7c65ca",
+      "C": "d2b59c4114d469b5222ced8bd7ed440548c4c09c537c6005d36eeee28d92a37a",
+      "D": "83c1f73f68594877f3f2577bec140ed86121519eb75d8aea86c4098481438a79",
+      "D2": "5e16ab8f2fded913574803b4e3dc09d3445022ca6fd947587da9339aa61a145b"
+    },
+    "computed": "2026-11-27, on main d303279 (review 21: fit; ruling 40787, 4), by scripts/sig76-expected.ts, C first (unverified, so the run continued), then A, B, D and D2",
+    "versions": {
+      "composition": "1.2.0",
+      "lia": "1.3.6",
+      "inc": "1.2.4",
+      "eq_method": 4,
+      "observed_expenses": "1.2.0"
+    },
+    "frozen": null,
+    "frozen_note": "not frozen by engineering; the architect freezes them (ruling 40787, 4)"
+  },
   "expected_states_when": "computed by running the engines locally at the candidate commit, on the pinned Enrich build, for each scenario's roll-up, affordability ratios and key INC, LIA and EQ signals; frozen by the architect in a file with its SHA-256 recorded",
   "out_of_scope": [
     "Stripe billing",
