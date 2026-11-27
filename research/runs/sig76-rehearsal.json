@@ -1,0 +1,102 @@
+{
+  "ticket": "SIG-76",
+  "kind": "rehearsal: in process, engineering-commissioned; not the acceptance",
+  "frozen_expected_states": {
+    "file": "research/preregistrations/SIG-76-expected-states.json",
+    "file_sha256": "19bab324b0e5ec30985dde8d475c0a5b583a148d0c438f9cd4b1871fc915ece1"
+  },
+  "set": "synthetic-v2.3",
+  "set_sha256": "69dcc096db8f0b11ea14848ad5e037e6b3d8bdc52a97a6cfe74613bd946898ba",
+  "seeded": {
+    "order": "seeded",
+    "order_run": [
+      "C",
+      "A",
+      "B",
+      "D",
+      "D2"
+    ],
+    "scenarios": {
+      "C": {
+        "applicant_id": "syn-v23-13cfd6ef54467a35",
+        "output_sha256": "d2b59c4114d469b5222ced8bd7ed440548c4c09c537c6005d36eeee28d92a37a",
+        "expected_sha256": "d2b59c4114d469b5222ced8bd7ed440548c4c09c537c6005d36eeee28d92a37a",
+        "matches": true
+      },
+      "A": {
+        "applicant_id": "syn-v23-18936492246e52ae",
+        "output_sha256": "6da0ec7470a44a796b160da00f55ad6f755a7c41d207e413d75c77ef1583d641",
+        "expected_sha256": "6da0ec7470a44a796b160da00f55ad6f755a7c41d207e413d75c77ef1583d641",
+        "matches": true
+      },
+      "B": {
+        "applicant_id": "syn-v23-9bd03ecbd72ba13e",
+        "output_sha256": "aec64494b1f2f1063f6f0414231e165a2738004ee21f736de315855f3b7c65ca",
+        "expected_sha256": "aec64494b1f2f1063f6f0414231e165a2738004ee21f736de315855f3b7c65ca",
+        "matches": true
+      },
+      "D": {
+        "applicant_id": "syn-v23-039cb4ba308a6197",
+        "output_sha256": "83c1f73f68594877f3f2577bec140ed86121519eb75d8aea86c4098481438a79",
+        "expected_sha256": "83c1f73f68594877f3f2577bec140ed86121519eb75d8aea86c4098481438a79",
+        "matches": true
+      },
+      "D2": {
+        "applicant_id": "syn-v23-0d555559098dbc71",
+        "output_sha256": "5e16ab8f2fded913574803b4e3dc09d3445022ca6fd947587da9339aa61a145b",
+        "expected_sha256": "5e16ab8f2fded913574803b4e3dc09d3445022ca6fd947587da9339aa61a145b",
+        "matches": true
+      }
+    },
+    "all_match": true
+  },
+  "shuffled_negative_check": {
+    "change": "every account's lines reversed; nothing else changed",
+    "order": "shuffled",
+    "order_run": [
+      "C",
+      "A",
+      "B",
+      "D",
+      "D2"
+    ],
+    "scenarios": {
+      "C": {
+        "applicant_id": "syn-v23-13cfd6ef54467a35",
+        "output_sha256": "5e07f2328fecf3bdc9feff080b2858e8bd7427574f4d6ac3e90c3e3b2c565d12",
+        "expected_sha256": "d2b59c4114d469b5222ced8bd7ed440548c4c09c537c6005d36eeee28d92a37a",
+        "matches": false
+      },
+      "A": {
+        "applicant_id": "syn-v23-18936492246e52ae",
+        "output_sha256": "7a144b08ddbd3249da699a4f7f6c6f55263b3637f11dad58fe998b98a8dc0238",
+        "expected_sha256": "6da0ec7470a44a796b160da00f55ad6f755a7c41d207e413d75c77ef1583d641",
+        "matches": false
+      },
+      "B": {
+        "applicant_id": "syn-v23-9bd03ecbd72ba13e",
+        "output_sha256": "dae787a7fb5f1de543cfeb13965b4161620068e5150c8be2d37272131dad7fdb",
+        "expected_sha256": "aec64494b1f2f1063f6f0414231e165a2738004ee21f736de315855f3b7c65ca",
+        "matches": false
+      },
+      "D": {
+        "applicant_id": "syn-v23-039cb4ba308a6197",
+        "output_sha256": "2cdf46d9722344fee6bb9564411bc8bd1b9d15aa1c3e4e338ec62fc1bfc892e4",
+        "expected_sha256": "83c1f73f68594877f3f2577bec140ed86121519eb75d8aea86c4098481438a79",
+        "matches": false
+      },
+      "D2": {
+        "applicant_id": "syn-v23-0d555559098dbc71",
+        "output_sha256": "d80335375355485d4fcbb9ae50623608114de23dbae9690d4f1b9b9f34ebf31b",
+        "expected_sha256": "5e16ab8f2fded913574803b4e3dc09d3445022ca6fd947587da9339aa61a145b",
+        "matches": false
+      }
+    },
+    "all_match": false
+  },
+  "passed": true,
+  "command": "npx tsx scripts/sig76-rehearse.ts",
+  "arguments": {},
+  "engine_commit": "33f8d3e45ebbcb8f3e57f95c6e48e1b59f12beb0",
+  "tree": "clean"
+}
