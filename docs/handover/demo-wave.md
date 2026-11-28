@@ -121,12 +121,12 @@ Its table holds synthetic data only and goes with the stack.
 
 ## As deployed: candidate 1 (28 Nov 2026, SIG-82 40840)
 
-Colin redeployed the stage at 12:11 AEDT with the `Moroku-Signals` IAM user (not the Enrich deploy
-user), following the steps above against the head review 24 checked (40839), not the merge commit
-`fdcfc45`. The commands, in order, are the steps above with the context 40840 records; 40840
-gives the context and the results, not a transcript, so Colin confirms these lines in review:
+Colin redeployed the stage at 12:11 AEDT, in PowerShell, against the head review 24 checked
+(40839), not the merge commit `fdcfc45`. The commands, as run:
 
-```sh
+```powershell
+$env:AWS_PROFILE = "Moroku-Signals"
+aws sts get-caller-identity
 git fetch origin
 git checkout --detach 7fe7fe93cc58551c4bc100fc81c57ba7d57c36f9
 git status
@@ -137,9 +137,15 @@ npm run lint
 npm test
 npm run build:mock
 node infra/build-demo-lambda.mjs
-npx cdk diff MorokuSignalsDemo -c demo=true -c supabaseUrl=https://omtfpvxlyviqiafcmkde.supabase.co -c supabasePublishableKey=sb_publishable_ZU2Bz7YTAyPWPhsdokuDWA_J2tbNRQz -c demoMembers=colin@moroku.com:A,colin@billycan.biz:B
-npx cdk deploy MorokuSignalsDemo -c demo=true -c supabaseUrl=https://omtfpvxlyviqiafcmkde.supabase.co -c supabasePublishableKey=sb_publishable_ZU2Bz7YTAyPWPhsdokuDWA_J2tbNRQz -c demoMembers=colin@moroku.com:A,colin@billycan.biz:B
+npx cdk diff MorokuSignalsDemo -c demo=true -c supabaseUrl=https://omtfpvxlyviqiafcmkde.supabase.co -c supabasePublishableKey=sb_publishable_ZU2Bz7YTAyPWPhsdokuDWA_J2tbNRQz -c demoMembers=<members>
+npx cdk deploy MorokuSignalsDemo -c demo=true -c supabaseUrl=https://omtfpvxlyviqiafcmkde.supabase.co -c supabasePublishableKey=sb_publishable_ZU2Bz7YTAyPWPhsdokuDWA_J2tbNRQz -c demoMembers=<members>
+curl.exe -s <DemoUrl>/health
 ```
+
+- **Check the identity first.** `aws sts get-caller-identity` must show account `932027117528`,
+  the `Moroku-Signals` user. If it doesn't, stop. That morning the shell was on the Enrich deploy
+  user at first.
+- The members are recorded on SIG-82 (40819, 40840).
 
 The context is the same as candidate 0's, with no `hs256Fallback`. What they showed:
 
