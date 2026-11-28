@@ -138,7 +138,27 @@ export function listPolicyVersions(product: string, base: Json) {
 const afT1Input = () =>
   (JSON.parse(readFileSync("test/fixtures/af-t1.json", "utf8")) as { input: AffordabilityInput })
     .input;
-const recompute = (input: AffordabilityInput) => computeAffordability(input).affordability;
+/** SIG-82 (contract 1.11.0; Colin's ruling (i), 28 Nov 2026): the income's state, by the stage's
+ * rule (src/api/mapping.ts monthlyIncomeState, which src/mock may not import: ADR 0005, D65):
+ * unverified exactly when the engine's dsr step has no value for "no income". */
+export function mockIncomeState(
+  trace: { step: string; value: unknown; inputs?: unknown }[],
+): "observed" | "unverified" {
+  const dsr = trace.find((s) => s.step === "dsr");
+  if (!dsr) throw new Error("the affordability trace has no dsr step");
+  const reason = (dsr.inputs as { reason?: unknown } | undefined)?.reason;
+  return dsr.value === null && reason === "no income" ? "unverified" : "observed";
+}
+const recompute = (input: AffordabilityInput) => {
+  const out = computeAffordability(input);
+  return {
+    ...out.affordability,
+    serviceability: {
+      ...out.affordability.serviceability,
+      monthly_income_state: mockIncomeState(out.trace),
+    },
+  };
+};
 /** The engine inputs behind each assessment version the mock can recompute. */
 const inputs = new Map<string, AffordabilityInput>();
 

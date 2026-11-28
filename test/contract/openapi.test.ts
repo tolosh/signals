@@ -2,6 +2,7 @@
 import { readFileSync } from "node:fs";
 import { Validator } from "@seriousme/openapi-schema-validator";
 import { describe, expect, it } from "vitest";
+import { withContract111 } from "../../src/mock/fixtures.js";
 import { loadContract, schemaValidator } from "./helpers.js";
 
 const doc = loadContract();
@@ -122,8 +123,18 @@ describe("T2 every listed endpoint is present, with schemas", () => {
 });
 
 describe("T3 AF-T1 assessment", () => {
-  it("validates against the Assessment schema", () => {
-    expect(schema("Assessment")(afT1()).errors ?? null).toBeNull();
+  // SIG-82 (contract 1.11.0; Colin's rulings (a) Required and Route 2, 28 Nov 2026): the published
+  // AF-T1 record stays as Build Specification 3.4 has it, so it is validated as served, with the
+  // three values it already implies added (src/mock/fixtures.ts). A disclosed test edit.
+  it("validates against the Assessment schema, as served (contract 1.11.0)", () => {
+    expect(schema("Assessment")(withContract111(afT1() as never)).errors ?? null).toBeNull();
+  });
+
+  it("the published record alone lacks only the 1.11.0 values", () => {
+    const missing = (schema("Assessment")(afT1()).errors ?? [])
+      .filter((e) => e.keyword === "required")
+      .map((e) => String((e.params as { missingProperty?: unknown }).missingProperty));
+    expect(missing.sort()).toEqual(["all_reasons", "monthly_income_state", "reasons_total"]);
   });
 
   it("negative control: a signal without evidence_quality is rejected (D12)", () => {

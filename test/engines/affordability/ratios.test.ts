@@ -6,6 +6,7 @@ import {
   DEFAULT_THRESHOLDS,
   type AffordabilityInput,
 } from "../../../src/engines/affordability/index.js";
+import { monthlyIncomeState } from "../../../src/api/mapping.js";
 import { loadContract, schemaValidator } from "../../contract/helpers.js";
 
 type Fixture = {
@@ -44,8 +45,22 @@ describe("T1 AF-T1 reproduces at displayed precision", () => {
     expect(run().affordability).toStrictEqual(published.affordability);
   });
 
-  it("validates against the contract's Affordability schema", () => {
-    const check = schemaValidator(loadContract())("Affordability")(run().affordability);
+  // SIG-82 (contract 1.11.0; Colin's ruling (a), 2026-11-28): serviceability.monthly_income_state
+  // is required, and the stage's mapping adds it (src/api/mapping.ts). The engine's raw output is
+  // unchanged, so the frozen SIG-76 states stand. This test validates the mapped affordability, as
+  // a lender receives it. Disclosed test edit: it validated the raw output before 1.11.0.
+  it("validates against the contract's Affordability schema, as the stage maps it", () => {
+    const out = run();
+    expect(out.affordability.serviceability).not.toHaveProperty("monthly_income_state");
+    const mapped = {
+      ...out.affordability,
+      serviceability: {
+        ...out.affordability.serviceability,
+        monthly_income_state: monthlyIncomeState({ affordability: out } as never),
+      },
+    };
+    expect(mapped.serviceability.monthly_income_state).toBe("observed");
+    const check = schemaValidator(loadContract())("Affordability")(mapped);
     expect(check.errors ?? null).toBeNull();
   });
 });

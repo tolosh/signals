@@ -3,7 +3,7 @@
 // so no Lambda container serves stale state. An in-memory table stands in for DynamoDB here;
 // wiping the mock's memory between requests stands in for a request reaching another container.
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   createPersistentHandler,
@@ -165,15 +165,36 @@ describe("the table is for the mock only", () => {
       const p = join(dir, f);
       return statSync(p).isDirectory() ? files(p) : [p];
     });
+  const posix = (f: string) => f.replaceAll("\\", "/");
 
   // SIG-61 narrowed the match from any @aws-sdk import to the DynamoDB clients, which is what this
   // rule names: the real-data store uses S3 and KMS (ADR 0008), never DynamoDB.
-  it("nothing outside src/mock imports the DynamoDB client or the mock's persistence", () => {
+  // SIG-82 (ruling 40775, 1; ADR 0014; D65, SIG-82 40818, 3): ONE named exception, the demo
+  // stage's copy of the store, src/api/dynamo.ts. Nothing else outside src/mock may import it.
+  it("nothing outside src/mock imports the DynamoDB client or the mock's persistence, except src/api/dynamo.ts", () => {
     const offenders = files("src")
-      .filter((f) => !f.replaceAll("\\", "/").startsWith("src/mock/"))
+      .map(posix)
+      .filter((f) => !f.startsWith("src/mock/"))
       .filter((f) =>
         /@aws-sdk\/(client|lib)-dynamodb|mock\/persist|mock\/state/.test(readFileSync(f, "utf8")),
       );
-    expect(offenders).toEqual([]);
+    expect(offenders).toEqual(["src/api/dynamo.ts"]);
+  });
+
+  // D65 (40818, 3): the exception reaches no further. Only the demo stage (src/api and its own
+  // stack, infra/demo-stack.ts) imports anything in src/api, so no other code, the real-data path
+  // above all, can reach the demo store.
+  it("only the demo stage imports src/api, so nothing else reaches the demo store", () => {
+    const DEMO = (f: string) => f.startsWith("src/api/") || f === "infra/demo-stack.ts";
+    const code = [...files("src"), ...files("infra")]
+      .map(posix)
+      .filter((f) => /\.(ts|mjs)$/.test(f));
+    const reachesApi = (f: string) =>
+      [...readFileSync(f, "utf8").matchAll(/(?:from|import)\s*\(?\s*"([^"]+)"/g)]
+        .map((m) => m[1]!)
+        .filter((i) => i.startsWith("."))
+        .map((i) => posix(join(dirname(f), i)))
+        .some((r) => r.startsWith("src/api/"));
+    expect(code.filter((f) => !DEMO(f) && reachesApi(f))).toEqual([]);
   });
 });

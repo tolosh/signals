@@ -7,6 +7,7 @@ import type { AddressInfo } from "node:net";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { withContract111 } from "../../src/mock/fixtures.js";
 import { createMockServer } from "../../src/mock/server.js";
 import { loadContract } from "../contract/helpers.js";
 
@@ -57,7 +58,11 @@ describe("T1 AF-T1 assessment", () => {
   it("GET /v1/app/assessments/asm_01 equals the fixture for the new Build Spec 3.4 version", async () => {
     const res = await get("/v1/app/assessments/asm_01");
     expect(res.status).toBe(200);
-    expect(await res.json()).toStrictEqual(readJson("test/fixtures/af-t1-assessment.json"));
+    // SIG-82 (contract 1.11.0; Colin's ruling, 28 Nov 2026): Build Specification 3.4's record with
+    // the three values 1.11.0 requires added, as served. A disclosed test edit.
+    expect(await res.json()).toStrictEqual(
+      withContract111(readJson("test/fixtures/af-t1-assessment.json") as never),
+    );
   });
 
   it("differs from the published 3.4 JSON only by the ruled fields (D12, D13, D19, D20)", async () => {
@@ -65,8 +70,15 @@ describe("T1 AF-T1 assessment", () => {
     const body = (await res.json()) as {
       signals: Record<string, unknown>[];
       evidence_checks?: unknown;
+      rollup: Record<string, unknown>;
+      affordability: { serviceability: Record<string, unknown> };
     };
     delete body.evidence_checks;
+    // SIG-82 (contract 1.11.0; Colin's Route 2, 28 Nov 2026): the three values 1.11.0 requires are
+    // not in Build Specification 3.4's record, so they are left out here. A disclosed test edit.
+    delete body.rollup.all_reasons;
+    delete body.rollup.reasons_total;
+    delete body.affordability.serviceability.monthly_income_state;
     for (const signal of body.signals) {
       delete signal.evidence_quality;
       delete signal.rollup_class;
