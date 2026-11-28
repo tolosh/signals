@@ -72,6 +72,11 @@ The stack is `MorokuSignalsDemo` (`infra/demo-stack.ts`; ADR 0014). It's synthes
 no real-data resource, no Enrich resource or host, Enrich forced `local`, `/health` reads the
 commit, tenant B gets 404.
 
+> **Warning: never pass `-c hs256Fallback`.** Sign-in is ES256 only (40822; ADR 0014). The
+> setting was removed in candidate 1, and any value of it now fails the synth, so a diff or deploy
+> command that still carries it stops. The same goes for `SUPABASE_HS256_FALLBACK` in the Lambda's
+> environment, which refuses to start.
+
 You need the AWS credentials you use for the mock (account `932027117528`, `ap-southeast-2`; the
 account is already CDK-bootstrapped), Node 22, and three values:
 
@@ -90,13 +95,19 @@ account is already CDK-bootstrapped), Node 22, and three values:
    `Built dist/demo-lambda at <SHA>`. It must be the head SHA. It refuses a dirty tree.
 5. **Diff, and read it before deploying:**
    `npx cdk diff MorokuSignalsDemo -c demo=true -c supabaseUrl=<URL> -c supabasePublishableKey=<key> -c demoMembers=<members>`.
-   Expect only new resources: one DynamoDB table, one Lambda with its role, policy and log group, and
-   one HTTP API with its integration, route, stage and invoke permission. Expect no KMS key, no
-   bucket, no secret, no SSM parameter, and no change to `MorokuSignalsMock-dev`.
+   - **First deploy:** expect only new resources: one DynamoDB table, one Lambda with its role,
+     policy and log group, and one HTTP API with its integration, route, stage and invoke
+     permission.
+   - **Redeploy** (the stack already exists): expect only two changes, the Lambda's code (its S3
+     key) and `DEMO_COMMIT` (the `DemoCommit` output) moving to the new head. Nothing is added or
+     removed. Anything else in the diff, in IAM especially, stops the deploy until it's explained.
+   - Either way, expect no KMS key, no bucket, no secret, no SSM parameter, and no change to
+     `MorokuSignalsMock-dev`.
 6. **Deploy only the demo stack:** the same command with `deploy` in place of `diff`.
 7. **Read back the commit.** Open `<DemoUrl>/health`. `DemoUrl` is the stack output. Check that
-   `commit` is the head SHA, `enrich.path` is `local` with `version` 1.8.0, and
-   `assessment_wired` is `false` for candidate 0.
+   `commit` is the head SHA and `enrich.path` is `local` with `version` 1.8.0. From candidate 1,
+   also check that `assessment_wired` is `true`, `contract_version` is `1.11.0` and `auth.alg` is
+   `ES256` (candidate 0 had `assessment_wired: false` and contract 1.10.0).
 8. **Point Lovable at the stage.** Follow the Lovable brief posted on SIG-82: set
    `VITE_API_BASE_URL` to `DemoUrl`, regenerate the types, then rebuild and publish. Sign in as
    tenant A: the dashboard shows "Demo Lender A (synthetic data)" with 100 credits.
@@ -107,3 +118,41 @@ account is already CDK-bootstrapped), Node 22, and three values:
 **To change the members later,** redeploy with a new `-c demoMembers=`. Nothing else changes.
 **To remove the stage,** run `npx cdk destroy MorokuSignalsDemo -c demo=true` with the same context.
 Its table holds synthetic data only and goes with the stack.
+
+## As deployed: candidate 1 (28 Nov 2026, SIG-82 40840)
+
+Colin redeployed the stage at 12:11 AEDT, in PowerShell, against the head review 24 checked
+(40839), not the merge commit `fdcfc45`. The commands, as run:
+
+```powershell
+$env:AWS_PROFILE = "Moroku-Signals"
+aws sts get-caller-identity
+git fetch origin
+git checkout --detach 7fe7fe93cc58551c4bc100fc81c57ba7d57c36f9
+git status
+git rev-parse HEAD
+npm ci
+npm run typecheck
+npm run lint
+npm test
+npm run build:mock
+node infra/build-demo-lambda.mjs
+npx cdk diff MorokuSignalsDemo -c demo=true -c supabaseUrl=https://omtfpvxlyviqiafcmkde.supabase.co -c supabasePublishableKey=sb_publishable_ZU2Bz7YTAyPWPhsdokuDWA_J2tbNRQz -c demoMembers=<members>
+npx cdk deploy MorokuSignalsDemo -c demo=true -c supabaseUrl=https://omtfpvxlyviqiafcmkde.supabase.co -c supabasePublishableKey=sb_publishable_ZU2Bz7YTAyPWPhsdokuDWA_J2tbNRQz -c demoMembers=<members>
+curl.exe -s <DemoUrl>/health
+```
+
+- **Check the identity first.** `aws sts get-caller-identity` must show account `932027117528`,
+  the `Moroku-Signals` user. If it doesn't, stop. That morning the shell was on the Enrich deploy
+  user at first.
+- The members are recorded on SIG-82 (40819, 40840).
+
+The context is the same as candidate 0's, with no `hs256Fallback`. What they showed:
+
+- the suite: 131 files, 1,907 passed, 0 failed, 1 to-do;
+- the build: `Built dist/demo-lambda at 7fe7fe9…`;
+- the diff: only the Lambda's code (S3 key `ce4b70db…` to `97f04570…`) and `DEMO_COMMIT`
+  (`c834c3e` to `7fe7fe9`);
+- the deploy: `UPDATE_COMPLETE`, with the `DemoUrl` unchanged;
+- `/health`: `commit` `7fe7fe9…`, contract 1.11.0, `assessment_wired: true`, `auth.alg` `ES256`,
+  Enrich `local` 1.8.0, matching review 24's R9.
