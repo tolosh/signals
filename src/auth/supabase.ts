@@ -1,24 +1,16 @@
-// SIG-82 (40779; Lovable's answer, 40820; review 23, 40821 G7): Supabase sign-ins, verified
-// server-side with the project's public values only.
-//   - ES256 only (40820, 1): the access token's signature against
+// SIG-82 (40779; Lovable's answer, 40820 and 40822; review 23, 40821 G7): Supabase sign-ins,
+// verified server-side with the project's public values only.
+//   - ES256 only (40822, 1): the access token's signature against
 //     <project URL>/auth/v1/.well-known/jwks.json, with its issuer (<project URL>/auth/v1),
-//     audience (authenticated), expiry and not-before. Any other signed algorithm is refused.
-//   - HS256, only while the fallback is switched on (until Lovable's ES256 switch is confirmed,
-//     40820, 2): the token is checked with GET <project URL>/auth/v1/user, sending the token and the
-//     publishable key. Nothing else ever goes to that endpoint, and it never depends on the key list.
-//     Its answer is cached briefly by a SHA-256 of the token, never the token, and never past the
-//     token's exp.
-//   - If the key list or /user can't be reached, the caller gets SignInUnavailable (the app answers
-//     503). It never falls back.
+//     audience (authenticated), expiry and not-before. Every other algorithm is refused without a
+//     call. There is no fallback of any kind: the shared-secret check is removed altogether.
+//   - A token whose issuer isn't <project URL>/auth/v1 raises IssuerMismatch before any fetch, so
+//     a stage configured with the wrong project says so (401 issuer_mismatch, 40822, 2).
+//   - If the key list can't be reached, the caller gets SignInUnavailable (the app answers 503).
 //   - An unknown key ID forces one reload of the key list, at most once a minute, and is then
 //     cached as unknown for a minute.
-// Nothing here logs: a token, its hash and its claims never reach a log. ADR 0014 records this.
-import {
-  createHash,
-  createPublicKey,
-  verify as verifySignature,
-  type JsonWebKey,
-} from "node:crypto";
+// Nothing here logs: a token and its claims never reach a log. ADR 0014 records this.
+import { createPublicKey, verify as verifySignature, type JsonWebKey } from "node:crypto";
 
 export type Verified = { sub: string; email: string | null };
 export type Verifier = (token: string) => Promise<Verified | null>;
@@ -31,13 +23,21 @@ export class SignInUnavailable extends Error {
   }
 }
 
+/** The token names another issuer than this stage's project (40822, 2): the app answers 401
+ * issuer_mismatch. It carries no value from the token or the configuration. */
+export class IssuerMismatch extends Error {
+  constructor() {
+    super("The sign-in's issuer is not this stage's project");
+    this.name = "IssuerMismatch";
+  }
+}
+
 type Jwk = JsonWebKey & { kid?: string; alg?: string };
 const KEYS_TTL_MS = 10 * 60 * 1000;
 /** A cached key list is used when a refresh fails, for at most this long. */
 const KEYS_STALE_MS = 60 * 60 * 1000;
 /** At most one forced reload a minute, and an unknown key ID is remembered for a minute. */
 const RELOAD_MIN_MS = 60 * 1000;
-const USER_TTL_MS = 60 * 1000;
 const SKEW_S = 30;
 
 /** The bearer token from the Authorization header, or null. */
@@ -60,8 +60,6 @@ const obj = (x: unknown): Record<string, unknown> =>
 export function createSupabaseVerifier(o: {
   url: string;
   publishableKey: string;
-  /** HS256 tokens go to /auth/v1/user while this is true (40820, 2). Off unless asked for. */
-  hs256Fallback?: boolean;
   fetch?: typeof fetch;
   now?: () => number;
 }): Verifier {
@@ -69,11 +67,9 @@ export function createSupabaseVerifier(o: {
   const issuer = `${base}/auth/v1`;
   const get = o.fetch ?? fetch;
   const now = o.now ?? Date.now;
-  const hs256Fallback = o.hs256Fallback === true;
   let keys: { at: number; list: Jwk[] } | null = null;
   let lastForced = -Infinity;
   const unknownKids = new Map<string, number>();
-  const users = new Map<string, { until: number; user: Verified | null }>();
 
   /** The key list, or SignInUnavailable if it can't be fetched and no recent copy is held. */
   async function loadKeys(force: boolean): Promise<Jwk[]> {
@@ -153,41 +149,12 @@ export function createSupabaseVerifier(o: {
       : null;
   }
 
-  async function byUserEndpoint(token: string, payload: string): Promise<Verified | null> {
-    // The exp is read unverified, only to bound the cache and skip a call: Supabase checks the
-    // token itself.
-    const exp = obj(decode(payload)).exp;
-    if (typeof exp !== "number" || exp * 1000 <= now()) return null;
-    const id = createHash("sha256").update(token).digest("hex");
-    const hit = users.get(id);
-    if (hit && hit.until > now()) return hit.user;
-    let res: Response;
-    let body: unknown = null;
-    try {
-      res = await get(`${issuer}/user`, {
-        headers: { authorization: `Bearer ${token}`, apikey: o.publishableKey },
-      });
-      if (res.status >= 500) throw new SignInUnavailable();
-      if (res.ok) body = await res.json();
-    } catch {
-      throw new SignInUnavailable();
-    }
-    const u = obj(body);
-    const user: Verified | null =
-      res.ok && typeof u.id === "string" && u.id
-        ? { sub: u.id, email: typeof u.email === "string" ? u.email : null }
-        : null;
-    users.set(id, { until: Math.min(now() + USER_TTL_MS, exp * 1000), user });
-    if (users.size > 1000) for (const [k, v] of users) if (v.until <= now()) users.delete(k);
-    return user;
-  }
-
   return async (token) => {
     const parts = token.split(".");
     if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) return null;
     const header = obj(decode(parts[0]));
-    if (header.alg === "ES256") return bySignature(parts, header);
-    if (header.alg === "HS256" && hs256Fallback) return byUserEndpoint(token, parts[1]);
-    return null;
+    if (header.alg !== "ES256") return null;
+    if (obj(decode(parts[1])).iss !== issuer) throw new IssuerMismatch();
+    return bySignature(parts, header);
   };
 }

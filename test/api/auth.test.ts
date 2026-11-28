@@ -1,11 +1,10 @@
 // SIG-82 (40779): Supabase sign-ins are verified server-side with the project's public values
 // only: the access token's signature against <project URL>/auth/v1/.well-known/jwks.json, with its
-// issuer, audience and expiry; or, if the project publishes no keys (a shared-secret project),
-// GET <project URL>/auth/v1/user with the token and the publishable key, cached briefly by a hash
-// of the token, never the token. No token is ever logged.
+// issuer, audience and expiry. ES256 only: the shared-secret fallback (GET /auth/v1/user) was
+// removed (40822, 1), and a wrong issuer raises IssuerMismatch (40822, 2). No token is ever logged.
 import { createHash, generateKeyPairSync, sign, type KeyObject } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { bearerOf, createSupabaseVerifier } from "../../src/auth/supabase.js";
+import { bearerOf, createSupabaseVerifier, IssuerMismatch } from "../../src/auth/supabase.js";
 
 const URL_ = "https://abcdefgh.supabase.co";
 const KEY = "sb_publishable_test";
@@ -96,7 +95,10 @@ describe("JWKS verification (preferred)", () => {
 
   it("rejects the wrong issuer, the wrong audience, an expired token and a not-yet-valid one", async () => {
     const { verify } = verifier();
-    expect(await verify(good({ iss: "https://evil.supabase.co/auth/v1" }))).toBeNull();
+    // 40822, 2 (a disclosed test edit): a wrong issuer is IssuerMismatch, not a plain rejection.
+    await expect(verify(good({ iss: "https://evil.supabase.co/auth/v1" }))).rejects.toBeInstanceOf(
+      IssuerMismatch,
+    );
     expect(await verify(good({ aud: "anon" }))).toBeNull();
     expect(await verify(good({ exp: NOW / 1000 - 1 }))).toBeNull();
     expect(await verify(good({ nbf: NOW / 1000 + 120 }))).toBeNull();
@@ -133,11 +135,10 @@ describe("JWKS verification (preferred)", () => {
   });
 });
 
-describe("the shared-secret fallback: GET /auth/v1/user", () => {
-  const hs = () =>
-    `${b64(JSON.stringify({ alg: "HS256", typ: "JWT" }))}.${b64(JSON.stringify({ sub: "user-h", exp: NOW / 1000 + 600 }))}.c2ln`;
-
-  it("checks the token with Supabase, sending the token and the publishable key", async () => {
+// 40822, 1 (a disclosed test edit): the shared-secret fallback was removed, so its three tests
+// (checks with /user, caches by hash, rejects a refused token) are replaced by this one.
+describe("no shared-secret fallback", () => {
+  it("refuses an HS256 token without calling /auth/v1/user or anything else", async () => {
     const f = fakeFetch({
       [JWKS_URL]: () => ({ status: 200, body: { keys: [] } }),
       [USER_URL]: () => ({ status: 200, body: { id: "user-h", email: "h@demo.test" } }),
@@ -145,48 +146,12 @@ describe("the shared-secret fallback: GET /auth/v1/user", () => {
     const verify = createSupabaseVerifier({
       url: URL_,
       publishableKey: KEY,
-      hs256Fallback: true, // review 23 (40821, G7): the fallback is off unless switched on
       fetch: f.fetch,
       now: () => NOW,
     });
-    const t = hs();
-    expect(await verify(t)).toEqual({ sub: "user-h", email: "h@demo.test" });
-    const call = f.calls.find((c) => c.url === USER_URL);
-    expect(call?.headers.authorization).toBe(`Bearer ${t}`);
-    expect(call?.headers.apikey).toBe(KEY);
-  });
-
-  it("caches the answer briefly, keyed by a hash of the token", async () => {
-    const f = fakeFetch({
-      [JWKS_URL]: () => ({ status: 200, body: { keys: [] } }),
-      [USER_URL]: () => ({ status: 200, body: { id: "user-h", email: "h@demo.test" } }),
-    });
-    const verify = createSupabaseVerifier({
-      url: URL_,
-      publishableKey: KEY,
-      hs256Fallback: true, // review 23 (40821, G7): the fallback is off unless switched on
-      fetch: f.fetch,
-      now: () => NOW,
-    });
-    const t = hs();
-    await verify(t);
-    await verify(t);
-    expect(f.calls.filter((c) => c.url === USER_URL)).toHaveLength(1);
-  });
-
-  it("rejects a token Supabase refuses", async () => {
-    const f = fakeFetch({
-      [JWKS_URL]: () => ({ status: 200, body: { keys: [] } }),
-      [USER_URL]: () => ({ status: 401, body: { msg: "invalid" } }),
-    });
-    const verify = createSupabaseVerifier({
-      url: URL_,
-      publishableKey: KEY,
-      hs256Fallback: true, // review 23 (40821, G7): the fallback is off unless switched on
-      fetch: f.fetch,
-      now: () => NOW,
-    });
-    expect(await verify(hs())).toBeNull();
+    const hs = `${b64(JSON.stringify({ alg: "HS256", typ: "JWT" }))}.${b64(JSON.stringify({ iss: `${URL_}/auth/v1`, sub: "user-h", exp: NOW / 1000 + 600 }))}.c2ln`;
+    expect(await verify(hs)).toBeNull();
+    expect(f.calls).toEqual([]);
   });
 });
 

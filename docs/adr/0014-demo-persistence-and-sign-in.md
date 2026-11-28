@@ -30,13 +30,12 @@ tenant A). The real-data path (SIG-61) stays off.
    (`-c demoMembers=<email or user id>:A,...`), not data. Billing is not real (40775).
 4. **Sign-in.** Every `/v1/app` call needs a Supabase access token, verified server-side with the
    project's public values only (40779):
-   - **preferred:** the signature (ES256 or RS256) against
+   - **the signature,** ES256 only (40822), against
      `<project URL>/auth/v1/.well-known/jwks.json`, cached 10 minutes and refreshed once on an
      unknown key ID; then the issuer (`<project URL>/auth/v1`), the audience (`authenticated`), the
      expiry and the not-before;
-   - **fallback,** used only when the project publishes no keys and the token is HS256:
-     `GET <project URL>/auth/v1/user` with the token and the publishable key, cached 60 seconds by
-     the token's SHA-256, never the token.
+   - **fallback:** none. The original `GET <project URL>/auth/v1/user` fallback for HS256 tokens
+     was removed altogether (40822, 1; see "Sign-in: ES256 only" below).
      The project URL and publishable key are public stack configuration, not secrets. Nothing logs a
      token, its hash or its claims; the Lambda logs only the method, status and time taken.
 5. **Enrich.** The Enrich path is forced to `local` in the stack and at start-up, ApiEnrich is never
@@ -120,14 +119,9 @@ These supersede the sign-in description in decision 4.
 - **Signatures: ES256 only** (40820, 1). Any other signed algorithm is refused without a fetch. An
   unknown key ID forces one reload of the key list, at most once a minute, and is then remembered
   as unknown for a minute.
-- **The `/auth/v1/user` fallback is for HS256 tokens only,** and only while
-  `SUPABASE_HS256_FALLBACK` is `on`. The stack sets it from `-c hs256Fallback` (default `on`), and
-  `/health` reports it as `auth.hs256_fallback`. It never depends on the key list. Its answer is
-  cached for at most 60 seconds by the token's SHA-256, never past the token's `exp`. An HS256 token
-  without an `exp`, or past it, is refused without a call. **Once Lovable's switch to ES256 is
-  confirmed, deploy with `-c hs256Fallback=off`.**
-- **No other fallback.** If the key list can't be fetched, and no copy younger than an hour is held,
-  or `/auth/v1/user` answers 5xx or can't be reached, the API answers 503 `sign_in_unavailable`.
+- **The `/auth/v1/user` fallback is removed** (40822, 1; see below).
+- **No fallback.** If the key list can't be fetched, and no copy younger than an hour is held, the
+  API answers 503 `sign_in_unavailable`.
 - **Membership binding** (40820, 3). A demo member listed by email is bound to the `sub` first seen
   with that email. The binding is recorded under the `member` partition (`binding#<email>`, with the
   demo's 30-day TTL). A later sign-in with the same email and another `sub` gets 403. Members listed
@@ -139,3 +133,19 @@ These supersede the sign-in description in decision 4.
 - **Synthesis.** An `enrichPath` context, or an `ENRICH_PATH` value, other than `local` fails the
   build (G4). A build that `build-info.json` records as dirty (`--allow-dirty`) refuses to
   synthesise.
+
+## Sign-in: ES256 only (40822, 1 and 2; 28 Nov 2026)
+
+Lovable confirmed that its tokens are signed ES256 (40822), and a real token confirmed the values
+(40823). These supersede review 23's fallback.
+
+- **ES256 only, with no fallback of any kind.** The `/auth/v1/user` check, its cache and its
+  setting are removed. An HS256 token, or any other algorithm, is refused without a call.
+- **The setting is refused, not ignored.** `SUPABASE_HS256_FALLBACK` with any value refuses to
+  start, and `-c hs256Fallback` with any value fails the build. The Lambda carries no such variable.
+- **`/health`** reports `auth: { alg: "ES256" }` in place of `auth.hs256_fallback`.
+- **Issuer mismatch** (40822, 2). A token whose `iss` isn't `<project URL>/auth/v1` gets 401
+  `issuer_mismatch`, decided from the token's claim before any fetch, since a stage set up with
+  the wrong project would also fetch the wrong key list. The message names no value. Every other
+  rejection is still 401 `unauthenticated`. A token with the right issuer still has to pass the
+  signature, audience, expiry and not-before checks.

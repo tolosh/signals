@@ -5,7 +5,7 @@
 //     with the same email but another sub is refused;
 //   - G7: a sign-in that can't be checked (the key list or /user unreachable) is a 503, not a 401;
 //   - a 500 carries a correlation ID, logged with no PII;
-//   - /health says whether the HS256 fallback is on.
+//   - (/health's fallback flag was removed with the fallback, 40822.)
 import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createDemoApp, type DemoRequest } from "../../src/api/app.js";
@@ -216,19 +216,5 @@ describe("a 500 carries a correlation ID, logged with no PII", () => {
   });
 });
 
-describe("/health says whether the HS256 fallback is on", () => {
-  it("off unless configured on; any other value refuses to start", async () => {
-    const off = await call(appOn(rows), "GET", "/health");
-    expect((off.json?.auth as { hs256_fallback?: boolean } | undefined)?.hs256_fallback).toBe(
-      false,
-    );
-    const on = await call(
-      appOn(rows, undefined, env({ SUPABASE_HS256_FALLBACK: "on" })),
-      "GET",
-      "/health",
-    );
-    expect((on.json?.auth as { hs256_fallback?: boolean } | undefined)?.hs256_fallback).toBe(true);
-    expect(demoConfigFrom(env({ SUPABASE_HS256_FALLBACK: "off" })).hs256Fallback).toBe(false);
-    expect(() => demoConfigFrom(env({ SUPABASE_HS256_FALLBACK: "yes" }))).toThrow(/HS256/);
-  });
-});
+// 40822, 1 (a disclosed test edit): the fallback and its setting were removed; /health's auth
+// block and the setting's refusal are tested in test/api/es256-only.test.ts.

@@ -29,8 +29,6 @@ export type DemoConfig = {
   commit: string;
   supabaseUrl: string | null;
   supabasePublishableKey: string | null;
-  /** HS256 tokens go to /auth/v1/user (40820, 2): on until Lovable's ES256 switch is confirmed. */
-  hs256Fallback: boolean;
   /** Demo members by lower-case email or Supabase user id. */
   members: Readonly<Record<string, WorkspaceKey>>;
 };
@@ -65,16 +63,16 @@ export function demoConfigFrom(env: Readonly<Record<string, string | undefined>>
   const supabaseUrl = env.SUPABASE_URL?.replace(/\/+$/, "") || null;
   if (supabaseUrl && !/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(supabaseUrl))
     throw new Error("SUPABASE_URL must be the project's https://<ref>.supabase.co URL");
-  const fallback = env.SUPABASE_HS256_FALLBACK;
-  if (fallback !== undefined && fallback !== "on" && fallback !== "off")
-    throw new Error("SUPABASE_HS256_FALLBACK must be on or off (40820, 2)");
+  // 40822, 1: sign-in is ES256 only, with no fallback. The old setting refuses to start, so a
+  // stale deploy can't believe it still has one.
+  if ("SUPABASE_HS256_FALLBACK" in env)
+    throw new Error("SUPABASE_HS256_FALLBACK was removed: sign-in is ES256 only (40822)");
   return {
     stage: "demo",
     enrichPath: "local",
     commit: env.DEMO_COMMIT ?? "unknown",
     supabaseUrl,
     supabasePublishableKey: env.SUPABASE_PUBLISHABLE_KEY || null,
-    hs256Fallback: fallback === "on",
     members: Object.freeze(parseMembers(env.DEMO_MEMBERS)),
   };
 }

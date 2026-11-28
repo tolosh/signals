@@ -27,7 +27,6 @@ const verify: Verifier =
     ? createSupabaseVerifier({
         url: config.supabaseUrl,
         publishableKey: config.supabasePublishableKey,
-        hs256Fallback: config.hs256Fallback,
       })
     : () => Promise.resolve(null);
 // Candidate 1: the real composition, on the five SIG-76 inputs the build wrote (seeded order).

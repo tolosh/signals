@@ -97,13 +97,13 @@ describe("40822, 1: ES256 only; the /auth/v1/user fallback is removed", () => {
     }
   });
 
-  it("no source file references the /user endpoint or an HS256 fallback", () => {
+  // The setting's name stays in the code that refuses it (config and demoSettings, tested below
+  // and in test/infra/es256-only.test.ts), so this scan looks for the endpoint itself.
+  it("no source file references the /user endpoint", () => {
     const hits = ["src/auth", "src/api", "infra"]
       .flatMap(files)
       .filter((f) => /\.(ts|mjs)$/.test(f))
-      .filter((f) =>
-        /auth\/v1\/user|\/user[`"]|hs256Fallback|HS256_FALLBACK/i.test(readFileSync(f, "utf8")),
-      );
+      .filter((f) => /auth\/v1\/user|\/user[`"]|byUserEndpoint/i.test(readFileSync(f, "utf8")));
     expect(hits).toEqual([]);
   });
 

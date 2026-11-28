@@ -18,10 +18,7 @@ const contract = () =>
     parse(readFileSync("openapi.yaml", "utf8")) as { info: { version: string } }
   ).info.version);
 
-export async function healthBody(
-  commit: string,
-  o: { assessmentWired?: boolean; hs256Fallback?: boolean } = {},
-) {
+export async function healthBody(commit: string, o: { assessmentWired?: boolean } = {}) {
   const taxonomy = await pinnedLocalEnrich().taxonomy();
   return {
     status: "ok" as const,
@@ -47,7 +44,7 @@ export async function healthBody(
       thresholds: DEFAULT_THRESHOLDS.version,
     },
     assessment_wired: o.assessmentWired ?? false,
-    // Review 23 (40821): whether HS256 tokens still go to /auth/v1/user (40820, 2).
-    auth: { hs256_fallback: o.hs256Fallback ?? false },
+    // 40822, 1: sign-in is verified ES256 only, with no fallback.
+    auth: { alg: "ES256" },
   };
 }

@@ -83,14 +83,8 @@ describe("G7: the /auth/v1/user fallback is for HS256 tokens only, while it is s
     expect(typeof SignInUnavailable).toBe("function");
   });
 
-  it("an HS256 token goes to /user, even though the project publishes keys", async () => {
-    const { verify, calls } = make(
-      { [JWKS_URL]: () => ({ status: 200, body: JWKS }), [USER_URL]: USER_OK },
-      { hs256Fallback: true },
-    );
-    expect(await verify(hs256())).toEqual({ sub: "user-h", email: "h@demo.test" });
-    expect(calls).toEqual([USER_URL]);
-  });
+  // 40822, 1 (a disclosed test edit): the fallback was removed, so "an HS256 token goes to /user"
+  // and "when /user itself fails" are dropped; test/api/es256-only.test.ts covers the removal.
 
   it("with the fallback off, or not asked for, an HS256 token is refused without any call", async () => {
     for (const o of [{ hs256Fallback: false }, {}]) {
@@ -123,17 +117,6 @@ describe("G7: the /auth/v1/user fallback is for HS256 tokens only, while it is s
     expect(await verify(rs256())).toBeNull();
     expect(calls).toEqual([]);
   });
-
-  it("when /user itself fails (5xx or network), SignInUnavailable, and nothing is cached", async () => {
-    let n = 0;
-    const { verify, calls } = make(
-      { [USER_URL]: () => (n++ === 0 ? { status: 503, body: {} } : "network") },
-      { hs256Fallback: true },
-    );
-    await expect(verify(hs256())).rejects.toBeInstanceOf(SignInUnavailable ?? Error);
-    await expect(verify(hs256())).rejects.toBeInstanceOf(SignInUnavailable ?? Error);
-    expect(calls.filter((c) => c === USER_URL)).toHaveLength(2);
-  });
 });
 
 describe("unknown key IDs: cached negatively, and forced reloads rate-limited", () => {
@@ -153,17 +136,7 @@ describe("unknown key IDs: cached negatively, and forced reloads rate-limited", 
 });
 
 describe("a fallback answer is never cached past the token's exp", () => {
-  it("cached before exp, refused after it without a call", async () => {
-    const { verify, calls } = make({ [USER_URL]: USER_OK }, { hs256Fallback: true });
-    const t = hs256({ sub: "user-h", exp: NOW / 1000 + 20 });
-    expect(await verify(t)).not.toBeNull();
-    clock = NOW + 15_000;
-    expect(await verify(t)).not.toBeNull();
-    expect(calls).toHaveLength(1);
-    clock = NOW + 25_000;
-    expect(await verify(t)).toBeNull();
-    expect(calls).toHaveLength(1);
-  });
+  // 40822, 1 (a disclosed test edit): the fallback's cache was removed with it.
 
   it("an HS256 token with no exp, or one already past it, is refused without a call", async () => {
     const { verify, calls } = make({ [USER_URL]: USER_OK }, { hs256Fallback: true });

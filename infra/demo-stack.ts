@@ -21,12 +21,13 @@ import { parseMembers, refuseEnrichHost } from "../src/api/config.js";
  * Review 23 (40821, G4; 40820, 2): the demo's settings from `cdk synth` context and the shell.
  *   - The Enrich path: an enrichPath context, or an ENRICH_PATH value, other than local fails the
  *     build. Nothing is overridden.
- *   - hs256Fallback: on (the default, until Lovable's ES256 switch is confirmed) or off.
+ *   - hs256Fallback no longer exists (40822, 1: ES256 only): passing it, with any value, fails
+ *     the build rather than being ignored.
  */
 export function demoSettings(
   context: Readonly<Record<string, unknown>>,
   env: Readonly<Record<string, string | undefined>>,
-): { enrichPath: "local"; hs256Fallback: boolean } {
+): { enrichPath: "local" } {
   const fromContext = context.enrichPath;
   if (fromContext !== undefined && fromContext !== "local")
     throw new Error(
@@ -36,10 +37,9 @@ export function demoSettings(
     throw new Error(
       "The demo stage's Enrich path is forced to local (D58): ENRICH_PATH must be local or unset",
     );
-  const fallback = context.hs256Fallback ?? "on";
-  if (fallback !== "on" && fallback !== "off")
-    throw new Error("-c hs256Fallback must be on or off (40820, 2)");
-  return { enrichPath: "local", hs256Fallback: fallback === "on" };
+  if ("hs256Fallback" in context && context.hs256Fallback !== undefined)
+    throw new Error("-c hs256Fallback was removed: sign-in is ES256 only (40822)");
+  return { enrichPath: "local" };
 }
 
 export type DemoStackProps = StackProps & {
@@ -52,8 +52,6 @@ export type DemoStackProps = StackProps & {
   demoMembers: string;
   /** Always local (D58). Anything else refuses to synthesise. */
   enrichPath: "local";
-  /** HS256 tokens go to /auth/v1/user (40820, 2). True until Lovable's ES256 switch is confirmed. */
-  hs256Fallback?: boolean;
 };
 
 export class SignalsDemoStack extends Stack {
@@ -97,7 +95,6 @@ export class SignalsDemoStack extends Stack {
         SUPABASE_URL: props.supabaseUrl,
         SUPABASE_PUBLISHABLE_KEY: props.supabasePublishableKey,
         DEMO_MEMBERS: props.demoMembers,
-        SUPABASE_HS256_FALLBACK: props.hs256Fallback === false ? "off" : "on",
       },
       logGroup: new LogGroup(this, "DemoLogs", {
         retention: RetentionDays.TWO_WEEKS,

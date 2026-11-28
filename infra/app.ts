@@ -41,6 +41,5 @@ if (app.node.tryGetContext("demo") === "true") {
     supabasePublishableKey: ctx("supabasePublishableKey"),
     demoMembers: ctx("demoMembers"),
     enrichPath: settings.enrichPath,
-    hs256Fallback: settings.hs256Fallback,
   });
 }

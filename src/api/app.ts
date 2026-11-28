@@ -15,7 +15,7 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { parse } from "yaml";
-import { bearerOf, SignInUnavailable, type Verifier } from "../auth/supabase.js";
+import { bearerOf, IssuerMismatch, SignInUnavailable, type Verifier } from "../auth/supabase.js";
 import type { Assessment } from "../assessment/assess.js";
 import { NOT_WIRED_MESSAGE, type AssessmentPort } from "./assessment-port.js";
 import { toAssessment, toSummary, toTrace, type AssessmentRequestPart } from "./mapping.js";
@@ -594,6 +594,15 @@ export function createDemoApp(o: {
             "Sign-in can't be checked right now; try again",
           ),
         };
+      // 40822, 2: the stage is configured with another project than the token's.
+      if (e instanceof IssuerMismatch)
+        return {
+          refused: error(
+            401,
+            "issuer_mismatch",
+            "Sign-in issuer mismatch: this sign-in is not from the demo's project",
+          ),
+        };
       throw e;
     }
     if (!user)
@@ -647,13 +656,7 @@ export function createDemoApp(o: {
     const path = req.path;
     if (method === "options") return { status: 204, headers: cors(origin), body: "" };
     if (path === "/health" && method === "get")
-      return json(
-        200,
-        await healthBody(o.config.commit, {
-          assessmentWired: o.assessments.wired,
-          hs256Fallback: o.config.hs256Fallback,
-        }),
-      );
+      return json(200, await healthBody(o.config.commit, { assessmentWired: o.assessments.wired }));
     const hashMatch = /^\/demo\/assessments\/(asm_[a-z0-9]{16})\/output-sha256$/.exec(path);
     if (hashMatch && method === "get") return outputHash(req, hashMatch[1] as string);
     const consentMatch = /^\/demo\/consent\/(tok_[a-z0-9]{32})$/.exec(path);
